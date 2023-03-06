@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32929.385
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orcs Plus", "Orcs Plus\Orcs Plus.csproj", "{84C134C2-9D0D-4B85-82D3-95B231180BED}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{84C134C2-9D0D-4B85-82D3-95B231180BED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84C134C2-9D0D-4B85-82D3-95B231180BED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84C134C2-9D0D-4B85-82D3-95B231180BED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84C134C2-9D0D-4B85-82D3-95B231180BED}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9F538174-8D21-4D84-ACE6-CF89B3257534}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,7 @@
+{
+	"displayedName": "Orcs Plus",
+	"prefix": "orcsplus",
+	"description": "Work in progress, but will eventually be an overhaul for Orcs, including orc-specific religions, new agents, new challenges, and more.",
+	"versionsSupported":["0.12"],
+	"modCredit": "ILikeGoodFood"
+}

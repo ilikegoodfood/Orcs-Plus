@@ -1,0 +1,17 @@
+ch_orcRaidingGoldGain: 0.5
+ch_orcRazeGoldGain: 0.66
+ch_orcs_organisethehorde_aiProfile: 30
+ch_orcs_organisethehorde_complexity: 15
+ch_orcs_organisethehorde_parameterValue1: 100
+ch_orcs_organisethehorde_parameterValue10: 100
+ch_orcs_organisethehorde_parameterValue2: 8
+ch_orcs_organisethehorde_parameterValue3: 3
+ch_orcs_organisethehorde_parameterValue5: 50
+ch_orcs_organisethehorde_parameterValue6: 100
+ch_orcs_organisethehorde_parameterValue7: 100
+ch_orcs_organisethehorde_parameterValue8: 25
+ch_orcs_organisethehorde_parameterValue9: 100
+ch_orcs_retreattothehills_aiMenace: -20
+ch_orcs_retreattothehills_aiProfile: 30
+minor_orcMilitaryScaling: 0.35
+orc_maxCampDefence: 100
