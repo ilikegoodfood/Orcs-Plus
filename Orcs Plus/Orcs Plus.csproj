@@ -60,7 +60,7 @@
     <Compile Include="ComLibHooks.cs" />
     <Compile Include="HarmonyPatches.cs" />
     <Compile Include="HolyOrder_OrcsPlus_Orcs.cs" />
-    <Compile Include="H_OrcsPlus_DrumsOfWar.cs" />
+    <Compile Include="H_OrcsPlus_Intolerance.cs" />
     <Compile Include="ModCore.cs" />
     <Compile Include="ModData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

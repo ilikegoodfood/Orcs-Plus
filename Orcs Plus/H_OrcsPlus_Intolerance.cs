@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Orcs_Plus
 {
-    public class H_OrcsPlus_DrumsOfWar : HolyTenet
+    public class H_OrcsPlus_Intolerance : HolyTenet
     {
-        public H_OrcsPlus_DrumsOfWar(HolyOrder_OrcsPlus_Orcs ord)
+        public H_OrcsPlus_Intolerance(HolyOrder_OrcsPlus_Orcs ord)
             : base(ord)
         {
 
@@ -17,12 +17,12 @@ namespace Orcs_Plus
 
         public override string getName()
         {
-            return "Drums of War";
+            return "Intolerance";
         }
 
         public override string getDesc()
         {
-            return "Members of this orc culture will attack all outsiders who enter their domain, and will consider all peoples valid targets for raiding and war. When under human influence, they will tolerate humans, both within their lands, and as neighbours. When under elder inlfuence, they will tolerate its agents and the dark empire.";
+            return "Orcs or notoriously intolerant of outsiders, opportunistically attacking anyone who comes too close. With some influence, they can be discouraged from attacking others.";
         }
 
         public override int getMaxPositiveInfluence()

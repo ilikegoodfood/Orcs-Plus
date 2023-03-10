@@ -1,4 +1,5 @@
 ﻿using Assets.Code;
+using Assets.Code.Modding;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -37,6 +38,11 @@ namespace Orcs_Plus
             Harmony.DEBUG = true;
             Harmony harmony = new Harmony("ILikeGoodFood.SOFG.OrcsPlus");
 
+            if (Harmony.HasAnyPatches(harmony.Id))
+            {
+                return;
+            }
+
             // Patches for Challenges that specialise orc camps
             harmony.Patch(original: AccessTools.Method(type: typeof(Ch_Orcs_BuildFortress), name: nameof(Ch_Orcs_BuildFortress.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildFortress_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(type: typeof(Ch_Orcs_BuildFortress), name: nameof(Ch_Orcs_BuildFortress.complete), parameters: new Type[] { typeof(UA) } ), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildFortress_complete_Postfix)));
@@ -69,6 +75,9 @@ namespace Orcs_Plus
             // Patches for UAEN_OrcUpstart
             harmony.Patch(original: AccessTools.Constructor(typeof(UAEN_OrcUpstart), new Type[] { typeof(Location), typeof(SocialGroup), typeof(Person) }), postfix: new HarmonyMethod(patchType, nameof(UAEN_OrcUpstart_ctor_Postfix)));
 
+            // Patches for UA
+            harmony.Patch(original: AccessTools.Method(typeof(UA), nameof(UA.getAttackUtility)), postfix: new HarmonyMethod(patchType, nameof(UA_getAttackUtility_Postfix)));
+
             // Patches for I_HordeBanner
             harmony.Patch(original: AccessTools.Constructor(typeof(I_HordeBanner), new Type[] { typeof(Map), typeof(SG_Orc), typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(I_HordeBanner_ctor_Postfix)));
 
@@ -78,6 +87,9 @@ namespace Orcs_Plus
 
             // Patches for Task_RazeLocation
             harmony.Patch(original: AccessTools.Method(typeof(Task_RazeLocation), nameof(Task_RazeLocation.turnTick)), transpiler: new HarmonyMethod(patchType, nameof(Task_RazeLocation_turnTick_Transpiler)));
+
+            // Template Patch
+            // harmony.Patch(original: AccessTools.Method(typeof(), nameof(), new Type[] { typeof() }), postfix: new HarmonyMethod(patchType, nameof()));
         }
 
         private static void Ch_Orcs_BuildFortress_getDesc_Postfix(ref string __result)
@@ -302,21 +314,12 @@ namespace Orcs_Plus
         {
             foreach (Location neighbour in ch.location.getNeighbours())
             {
-                if (neighbour.soc != null && neighbour.soc is Society && neighbour.settlement != null)
+                if (neighbour.soc is Society)
                 {
                     SettlementHuman settlementHuman = neighbour.settlement as SettlementHuman;
                     if (settlementHuman != null)
                     {
-                        Pr_Devastation devastation = null;
-                        foreach (Property pr in settlementHuman.location.properties)
-                        {
-                            devastation = pr as Pr_Devastation;
-                            if (devastation != null)
-                            {
-                                break;
-                            }
-                        }
-
+                        Pr_Devastation devastation = settlementHuman.location.properties.OfType<Pr_Devastation>().FirstOrDefault();
                         if (devastation == null || devastation.charge < 150 || settlementHuman.ruler?.getGold() > 5)
                         {
                             return true;
@@ -381,16 +384,7 @@ namespace Orcs_Plus
                         }
 
                         //Console.WriteLine("OrcsPlus: Settlement is human settlement.");
-                        foreach (Property property in settlementHuman.location.properties)
-                        {
-                            devastation = property as Pr_Devastation;
-                            if (devastation != null)
-                            {
-                                //Console.WriteLine("OrcsPlus: Neighbour has devastation.");
-                                break;
-                            }
-                        }
-
+                        devastation = settlementHuman.location.properties.OfType<Pr_Devastation>().FirstOrDefault();
                         if (devastation == null || devastation.charge < 150)
                         {
                             //Console.WriteLine("OrcsPlus: Devastation is less thna 150.");
@@ -446,16 +440,7 @@ namespace Orcs_Plus
                 return;
             }
 
-            foreach (Property property in settlementHuman.location.properties)
-            {
-                devastation = property as Pr_Devastation;
-                if (devastation != null)
-                {
-                    //Console.WriteLine("OrcsPlus: Neighbour has devastation.");
-                    break;
-                }
-            }
-
+            devastation = settlementHuman.location.properties.OfType<Pr_Devastation>().FirstOrDefault();
             if (devastation == null || devastation.charge < 150)
             {
                 Property.addToPropertySingleShot("Orc Raid", Property.standardProperties.DEVASTATION, 100, targetLocation);
@@ -564,8 +549,8 @@ namespace Orcs_Plus
                     if (industry == null)
                     {
                         industry = new Pr_OrcishIndustry(targetLocation);
-                        targetLocation.properties.Add(industry);
                         industry.charge = 30.0;
+                        targetLocation.properties.Add(industry);
                     }
 
                     industry.charge /= 2.0;
@@ -674,33 +659,195 @@ namespace Orcs_Plus
                 __instance.person.stat_command = 3;
             }
 
-            I_HordeBanner banner = null;
-            Rti_OrcsPlus_RecruitWarband recruit = null;
-            foreach (Item item in __instance.person.items)
-            {
-                banner = item as I_HordeBanner;
-                if (banner != null)
-                {
-                    break;
-                }
-            }
-
+            I_HordeBanner banner = __instance.person.items.OfType<I_HordeBanner>().FirstOrDefault();
             if (banner != null)
             {
-                foreach (Ritual rt in banner.rituals)
+                Rti_OrcsPlus_RecruitWarband recruit = banner.rituals.OfType<Rti_OrcsPlus_RecruitWarband>().FirstOrDefault();
+                recruit?.complete(__instance);
+            }
+        }
+
+        private static double UA_getAttackUtility_Postfix(double utility, UA __instance, Unit other, List<ReasonMsg> reasons, bool includeDangerousFoe)
+        {
+            if (__instance is UAEN_OrcUpstart)
+            {
+                return UAEN_OrcUpstart_getAttackUtility(utility, __instance as UAEN_OrcUpstart, other, reasons, includeDangerousFoe);
+            }
+
+            return utility;
+        }
+
+        private static double UAEN_OrcUpstart_getAttackUtility(double utility, UAEN_OrcUpstart upstart, Unit other, List<ReasonMsg> reasonMsgs, bool includeDangerousFoe)
+        {
+            UA target = other as UA;
+            SG_Orc orcs = upstart.society as SG_Orc;
+            if (target != null && orcs != null && target.society != orcs)
+            {
+                utility = 0.0;
+                HolyOrder_OrcsPlus_Orcs orcCulture = null;
+                if (ModCore.data.orcSGCultureMap.ContainsKey(orcs) && ModCore.data.orcSGCultureMap[orcs] != null)
                 {
-                    recruit = rt as Rti_OrcsPlus_RecruitWarband;
-                    if (recruit != null)
+                    orcCulture = ModCore.data.orcSGCultureMap[orcs];
+                }
+                if (orcCulture != null && target.society != orcCulture)
+                {
+                    H_OrcsPlus_Intolerance intolerance = orcCulture.tenets.OfType<H_OrcsPlus_Intolerance>().FirstOrDefault();
+                    if (intolerance != null)
                     {
-                        break;
+                        bool otherIsTarget = false;
+                        if (target.society != null)
+                        {
+                            if (target.society != orcs && target.society != orcCulture)
+                            {
+                                if (intolerance.status == 0)
+                                {
+                                    otherIsTarget = true;
+                                }
+                                else if (intolerance.status > 0)
+                                {
+                                    if (target.society.isDark() || target.isCommandable())
+                                    {
+                                        otherIsTarget = true;
+                                    }
+                                }
+                                else if (intolerance.status < 0)
+                                {
+                                    if (!target.society.isDark() && !target.isCommandable())
+                                    {
+                                        otherIsTarget = true;
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (!(target.isCommandable() && intolerance.status < 0))
+                            {
+                                otherIsTarget = true;
+                            }
+                            else
+                            {
+                                reasonMsgs?.Add(new ReasonMsg("Invalid Target", -10000.0));
+                                utility -= 10000.0;
+                            }
+                        }
+
+                        if (otherIsTarget)
+                        {
+                            if (target.location.soc == orcs || (target.society != null && orcs.getRel(target.society).state == DipRel.dipState.war && (target.location.soc == null || orcs.getRel(target.location.soc).state == DipRel.dipState.war)))
+                            {
+                                double val;
+                                if (target.location.soc != orcs)
+                                {
+                                    val = -25;
+                                    reasonMsgs?.Add(new ReasonMsg("Target is outside of Territory", val));
+                                    utility += val;
+                                }
+
+                                utility += upstart.person.getTagUtility(new int[]
+                                {
+                                Tags.COMBAT,
+                                Tags.CRUEL,
+                                Tags.DANGER
+                                }, new int[0], reasonMsgs);
+                                utility += upstart.person.getTagUtility(target.getNegativeTags(), target.getPositiveTags(), reasonMsgs);
+
+                                val = 20;
+                                reasonMsgs?.Add(new ReasonMsg("Eager for Combat", val));
+                                utility += val;
+
+                                val = upstart.map.getStepDist(target.location, upstart.location);
+                                reasonMsgs?.Add(new ReasonMsg("Distance", -val));
+                                utility -= val;
+
+                                if (includeDangerousFoe)
+                                {
+                                    val = 0.0;
+                                    double dangerUtility = target.getDangerEstimate() - upstart.getDangerEstimate();
+                                    if (dangerUtility > 0.0)
+                                    {
+                                        val -= upstart.map.param.utility_ua_attackDangerReluctanceOffset;
+                                    }
+                                    dangerUtility += 2;
+                                    if (dangerUtility > 0.0)
+                                    {
+                                        val += upstart.map.param.utility_ua_attackDangerReluctanceMultiplier;
+                                    }
+                                    reasonMsgs?.Add(new ReasonMsg("Dangerous Foe", val));
+                                    utility += val;
+                                }
+
+                                if (target.society != null && orcs.getRel(target.society).state == DipRel.dipState.war)
+                                {
+                                    val = 50.0;
+                                    reasonMsgs?.Add(new ReasonMsg("At war", val));
+                                    utility += val;
+                                }
+
+                                foreach (HolyTenet holyTenet in orcCulture.tenets)
+                                {
+                                    utility += holyTenet.addUtilityAttack(upstart, target, reasonMsgs);
+                                }
+                                foreach (ModKernel modKernel in upstart.map.mods)
+                                {
+                                    utility = modKernel.unitAgentAIAttack(upstart.map, upstart, target, reasonMsgs, utility);
+                                }
+                            }
+                            else
+                            {
+                                if (target.society != null && orcs.getRel(target.society).state == DipRel.dipState.war)
+                                {
+                                    reasonMsgs?.Add(new ReasonMsg("Tresspassing", -10000.0));
+                                    utility -= 10000.0;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            reasonMsgs?.Add(new ReasonMsg("Invalid Target", -10000.0));
+                            utility -= 10000.0;
+                        }
+                    }
+                    else
+                    {
+                        reasonMsgs?.Add(new ReasonMsg("ERROR: Failed to find Intolerence Tenet", -10000.0));
+                        utility -= 10000.0;
                     }
                 }
-
-                if (recruit != null)
+                else
                 {
-                    recruit.complete(__instance);
+                    if (orcCulture == null)
+                    {
+                        reasonMsgs?.Add(new ReasonMsg("ERROR: Failed to find Orc Culture", -10000.0));
+                        utility -= 10000.0;
+                    }
+                    else
+                    {
+                        reasonMsgs?.Add(new ReasonMsg("Target is of own Orc Culture (Holy Order)", -10000.0));
+                        utility -= 10000.0;
+                    }
                 }
             }
+            else
+            {
+                if (target == null)
+                {
+                    reasonMsgs?.Add(new ReasonMsg("Target is not Agent", -10000.0));
+                    utility -= 10000.0;
+                }
+                else if (orcs == null)
+                {
+                    reasonMsgs?.Add(new ReasonMsg("Orc Upstart is not of Orc Social Group", -10000.0));
+                    utility -= 10000.0;
+                }
+                else
+                {
+                    reasonMsgs?.Add(new ReasonMsg("Target is of own culture", -10000.0));
+                    utility -= 10000.0;
+                }
+            }
+
+            return utility;
         }
 
         private static void I_HordeBanner_ctor_Postfix(I_HordeBanner __instance, Location l)
@@ -725,16 +872,7 @@ namespace Orcs_Plus
                     return;
                 }
 
-                Pr_OrcDefences defences = null;
-                foreach (Property property in __instance.location.properties)
-                {
-                    if (property is Pr_OrcDefences)
-                    {
-                        defences = property as Pr_OrcDefences;
-                        break;
-                    }
-                }
-
+                Pr_OrcDefences defences = __instance.location.properties.OfType<Pr_OrcDefences>().FirstOrDefault();
                 if (defences == null)
                 {
                     defences = new Pr_OrcDefences(__instance.location);
@@ -779,22 +917,12 @@ namespace Orcs_Plus
 
             if (set is Set_OrcCamp)
             {
-                Pr_Death death = null;
-
-                foreach (Property p in set.location.properties)
-                {
-                    death = p as Pr_Death;
-
-                    if (death != null)
-                    {
-                        break;
-                    }
-                }
-
+                Pr_Death death = u.location.properties.OfType<Pr_Death>().FirstOrDefault();
                 if (death == null)
                 {
                     death = new Pr_Death(u.location);
                     death.charge = 0;
+                    u.location.properties.Add(death);
                 }
 
                 Property.addToProperty("Militray Action", Property.standardProperties.DEATH, 2.0, set.location);

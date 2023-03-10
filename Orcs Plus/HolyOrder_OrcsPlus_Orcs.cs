@@ -30,7 +30,7 @@ namespace Orcs_Plus
 
         public double plunderValue;
 
-        public H_OrcsPlus_DrumsOfWar tenet_drumsOfWar;
+        public H_OrcsPlus_Intolerance tenet_drumsOfWar;
 
         public HolyOrder_OrcsPlus_Orcs(Map m, Location l, SG_Orc o) : base(m, l)
         {
@@ -56,7 +56,7 @@ namespace Orcs_Plus
             // Add required base HolyTenets to new list.
             tenet_alignment = new H_Alignment(this);
             tenets.Add(tenet_alignment);
-            tenet_drumsOfWar = new H_OrcsPlus_DrumsOfWar(this);
+            tenet_drumsOfWar = new H_OrcsPlus_Intolerance(this);
             tenets.Add(tenet_drumsOfWar);
             tenet_dogmatic = new H_Dogmantic(this);
             tenets.Add(tenet_dogmatic);
