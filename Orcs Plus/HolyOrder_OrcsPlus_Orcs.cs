@@ -14,19 +14,21 @@ namespace Orcs_Plus
 
         public bool Infiltrated;
 
-        public List<Set_OrcCamp> camps;
+        public List<Set_OrcCamp> camps = new List<Set_OrcCamp>();
 
         public List<Set_OrcCamp> specializedCamps = new List<Set_OrcCamp>();
 
-        public List<Sub_Temple> temples;
+        public List<Sub_Temple> temples = new List<Sub_Temple>();
 
-        public List<Unit> units;
+        public List<Unit> units = new List<Unit>();
 
-        public List<UA> agents;
+        public List<UA> agents = new List<UA>();
 
-        public List<UAA> acolytes;
+        public List<UAA> acolytes = new List<UAA>();
 
-        public List<Pr_OrcPlunder> plunder;
+        public int acolyteSpawnCounter = 0;
+
+        public List<Pr_OrcPlunder> plunder = new List<Pr_OrcPlunder>();
 
         public double plunderValue;
 
@@ -38,7 +40,6 @@ namespace Orcs_Plus
             capital = l.index;
 
             generateName(l);
-            RefreshLocalCaches();
             CreateSeat();
 
             genderExclusive = -1;
@@ -100,64 +101,6 @@ namespace Orcs_Plus
             // Set map colour, favouring redish colours.
             color = new Color((float)(Eleven.random.NextDouble() * 0.75 + 0.25), (float)(Eleven.random.NextDouble() * 0.75 + 0.25), (float)(Eleven.random.NextDouble() * 0.25));
             color2 = new Color((float)(Eleven.random.NextDouble() * 0.75 + 0.25), (float)(Eleven.random.NextDouble() * 0.75 + 0.25), (float)(Eleven.random.NextDouble() * 0.25));
-        }
-
-        public void RefreshLocalCaches()
-        {
-            camps = null;
-            if (ModCore.comLibCache.settlementsBySocialGroupByType.ContainsKey(orcSociety) && ModCore.comLibCache.settlementsBySocialGroupByType[orcSociety] != null && ModCore.comLibCache.settlementsBySocialGroupByType[orcSociety].ContainsKey(typeof(Set_OrcCamp)) && ModCore.comLibCache.settlementsBySocialGroupByType[orcSociety][typeof(Set_OrcCamp)] != null)
-            {
-                camps = ModCore.comLibCache.settlementsBySocialGroupByType[orcSociety][typeof(Set_OrcCamp)] as List<Set_OrcCamp>;
-            }
-
-            specializedCamps.Clear();
-            if (ModCore.comLibCache.orcCampBySocialGroupBySpecialism.ContainsKey(orcSociety) && ModCore.comLibCache.orcCampBySocialGroupBySpecialism[orcSociety] != null)
-            {
-                List<Set_OrcCamp>[] campsBySpecialism = ModCore.comLibCache.orcCampBySocialGroupBySpecialism[orcSociety];
-                for (int i = 1; i < campsBySpecialism.Count(); i++)
-                {
-                    if (campsBySpecialism[i] != null && campsBySpecialism[i].Count > 0)
-                    {
-                        specializedCamps.AddRange(campsBySpecialism[i]);
-                    }
-                }
-            }
-
-            temples = null;
-            if (ModCore.comLibCache.subsettlementsBySocialGroupByType.ContainsKey(orcSociety) && ModCore.comLibCache.subsettlementsBySocialGroupByType[orcSociety] != null && ModCore.comLibCache.subsettlementsBySocialGroupByType[orcSociety].ContainsKey(typeof(Sub_Temple)) && ModCore.comLibCache.subsettlementsBySocialGroupByType[orcSociety][typeof(Sub_Temple)] != null)
-            {
-                temples = ModCore.comLibCache.subsettlementsBySocialGroupByType[orcSociety][typeof(Sub_Temple)] as List<Sub_Temple>;
-            }
-
-            units = null;
-            if (ModCore.comLibCache.unitsBySocialGroupByType.ContainsKey(orcSociety) && ModCore.comLibCache.unitsBySocialGroupByType[orcSociety] != null && ModCore.comLibCache.unitsBySocialGroupByType[orcSociety].ContainsKey(typeof(Unit)) && ModCore.comLibCache.unitsBySocialGroupByType[orcSociety][typeof(Unit)] != null)
-            {
-                units = ModCore.comLibCache.unitsBySocialGroupByType[orcSociety][typeof(Unit)] as List<Unit>;
-            }
-
-            agents = null;
-            if (ModCore.comLibCache.unitsBySocialGroupByType.ContainsKey(orcSociety) && ModCore.comLibCache.unitsBySocialGroupByType[orcSociety] != null && ModCore.comLibCache.unitsBySocialGroupByType[orcSociety].ContainsKey(typeof(UA)) && ModCore.comLibCache.unitsBySocialGroupByType[orcSociety][typeof(UA)] != null)
-            {
-                agents = ModCore.comLibCache.unitsBySocialGroupByType[orcSociety][typeof(UA)] as List<UA>;
-            }
-
-            acolytes = null;
-            if (ModCore.comLibCache.unitsBySocialGroupByType.ContainsKey(this) && ModCore.comLibCache.unitsBySocialGroupByType[this] != null && ModCore.comLibCache.unitsBySocialGroupByType[this].ContainsKey(typeof(UAA)) && ModCore.comLibCache.unitsBySocialGroupByType[this][typeof(UAA)] != null)
-            {
-                acolytes = ModCore.comLibCache.unitsBySocialGroupByType[this][typeof(UAA)] as List<UAA>;
-            }
-
-            plunder = null;
-            plunderValue = 0;
-            if (ModCore.comLibCache.propertiesBySocialGroupByType.ContainsKey(orcSociety) && ModCore.comLibCache.propertiesBySocialGroupByType[orcSociety] != null && ModCore.comLibCache.propertiesBySocialGroupByType[orcSociety].ContainsKey(typeof(Pr_OrcPlunder)) && ModCore.comLibCache.propertiesBySocialGroupByType[orcSociety][typeof(Pr_OrcPlunder)] != null)
-            {
-                plunder = ModCore.comLibCache.propertiesBySocialGroupByType[orcSociety][typeof(Pr_OrcPlunder)] as List<Pr_OrcPlunder>;
-
-                foreach (Pr_OrcPlunder p in plunder)
-                {
-                    plunderValue += p.gold;
-                }
-            }
         }
 
         public override bool checkIsGone()
@@ -270,25 +213,77 @@ namespace Orcs_Plus
 
         new public void updateData()
         {
+            camps.Clear();
+            specializedCamps.Clear();
+            temples.Clear();
+            units.Clear();
+            agents.Clear();
+            acolytes.Clear();
+            plunder.Clear();
+            plunderValue = 0;
+
+            ModCore.data.getOrcCamps(map, this, out camps, out specializedCamps);
+
+            if (seat == null || seat.settlement == null || seat.settlement.location?.settlement != seat.settlement || !seat.settlement.subs.Contains(seat))
+            {
+                seat = null;
+                CreateSeat();
+            }
+
+            List<Set_OrcCamp> allCamps = new List<Set_OrcCamp>();
+            allCamps.AddRange(camps);
+            allCamps.AddRange(specializedCamps);
+
+            foreach (Set_OrcCamp camp in allCamps)
+            {
+                Sub_Temple temple = camp.subs.OfType<Sub_Temple>().FirstOrDefault();
+                if (temple != null)
+                {
+                    temples.Add(temple);
+                }
+
+                Pr_OrcPlunder plunderProperty = camp.location.properties.OfType<Pr_OrcPlunder>().FirstOrDefault();
+                if (plunderProperty != null)
+                {
+                    plunder.Add(plunderProperty);
+                    plunderValue += plunderProperty.getGold();
+                }
+            }
+
+            foreach (Unit unit in map.units)
+            {
+                if (unit.society != null && (unit.society == orcSociety || unit.society == this))
+                {
+                    UA ua = unit as UA;
+
+                    if (ua == null)
+                    {
+                        units.Add(unit);
+                    }
+                    else
+                    {
+                        UAA uaa = ua as UAA;
+
+                        if (uaa == null)
+                        {
+                            agents.Add(ua);
+                        }
+                        else
+                        {
+                            acolytes.Add(uaa);
+                        }
+                    }
+                }
+            }
+
             nAcolytes = 0;
             nWorshippers = 0;
             nWorshippingRulers = 0;
             nTemples = 0;
+
             // Counts orc settlements of orcCulture.
-            if (camps != null)
-            {
-                nWorshippers += camps.Count;
-            }
-
-            if (temples != null)
-            {
-                nTemples = temples.Count;
-            }
-
-            if (seat != null)
-            {
-                nTemples++;
-            }
+            nWorshippers += allCamps.Count;
+            nTemples = temples.Count;
 
             if (units != null)
             {
@@ -360,7 +355,7 @@ namespace Orcs_Plus
                 inf += mod.adjustHolyInfluenceDark(this, inf, msgs);
             }
 
-            msgs?.Add(new ReasonMsg("Elder powers gain influence with orc cultures by defeating them in combat, aiding them, or harming their foes", 0));
+            msgs?.Add(new ReasonMsg("Gain influence with orc cultures by defeating them in combat, aiding them, or harming their foes", 0));
 
             return inf;
         }
@@ -380,26 +375,14 @@ namespace Orcs_Plus
                 inf += mod.adjustHolyInfluenceGood(this, inf, msgs);
             }
 
-            msgs?.Add(new ReasonMsg("Humans gain influence with orc cultures by defeating them in combat", 0));
+            msgs?.Add(new ReasonMsg("Gain influence with orc cultures by defeating them in combat", 0));
 
             return inf;
         }
 
         public override void turnTick()
         {
-            RefreshLocalCaches();
-
-            if (seat != null && !seat.settlement.subs.Contains(seat))
-            {
-                seat = null;
-            }
-
-            if (seat != null && seat.settlement.location.settlement != seat.settlement)
-            {
-                seat = null;
-            }
-
-            CreateSeat();
+            updateData();
 
             bool playerCanInfluenceFlag = influenceElder >= influenceElderReq;
             updateData();
@@ -421,141 +404,24 @@ namespace Orcs_Plus
                 settlementCount = camps.Count;
             }
 
-            costAcolyte = 200 * Math.Max(0, acolyteCount - 1);
+            if (acolyteCount < map.param.holy_maxAcolytes && acolyteSpawnCounter == 0)
+            {
+                costAcolyte = acolyteCount * (40 + Eleven.random.Next(11) + Eleven.random.Next(11));
+            }
             costPreach = (int)(10.0 * Math.Pow(Math.Max(0, settlementCount - 5), 0.75));
             costTemple = 50 * (templeCount + 1);
 
-            int cash = processIncome(null);
-            int expenses = 0;
-            double expenditureDemand = 2 + priorityTemples.status;
-            int expenditureTemples = (int)((double)priorityTemples.status / expenditureDemand * (double)cash);
-            cash -= expenditureTemples;
-            expenses += expenditureTemples;
-
-            cashForPreaching = 0;
-            cashForTemples += expenditureTemples;
-            // Determine the exact amount of OrcPlunder being used this turn.
-            if (cashForAcolytes > costAcolyte * 2)
+            if (acolyteCount < map.param.holy_maxAcolytes)
             {
-                expenses -= cashForAcolytes - (costAcolyte * 2);
-                cashForAcolytes = costAcolyte * 2;
-            }
-            else if (cashForAcolytes == costAcolyte * 2)
-            {
-                cashForAcolytes = costAcolyte * 2;
-            }
-            else if (cashForAcolytes + cash > costAcolyte * 2)
-            {
-                expenses += (costAcolyte * 2) - cashForAcolytes;
-                cashForAcolytes = costAcolyte * 2;
-            }
-            else
-            {
-                cashForAcolytes += cash;
-                expenses += cash;
-            }
-
-            // Remove Orc plunder until the amount has been matched.
-            List<Pr_OrcPlunder> drainedPlunders = new List<Pr_OrcPlunder>();
-            while (expenses > 0)
-            {
-                int iteration = 0;
-                int index = Eleven.random.Next(plunder.Count());
-                double gold = plunder[index].getGold();
-
-                if (gold <= 0)
+                acolyteSpawnCounter++;
+                if (acolyteSpawnCounter > costAcolyte)
                 {
-                    plunder[index].gold = 0;
-                    if (!drainedPlunders.Contains(plunder[index]))
-                    {
-                        drainedPlunders.Add(plunder[index]);
-                    }
-                    continue;
-                }
-
-                if (gold >= expenses)
-                {
-                    plunder[index].addGold(-expenses);
-                    expenses = 0;
-                }
-                else
-                {
-                    plunder[index].addGold(-(int)gold);
-                    expenses -= (int)gold;
-                }
-
-                iteration++;
-                if (iteration > 50)
-                {
-                    break;
+                    createAcolyte();
+                    acolyteSpawnCounter = 0;
                 }
             }
 
-            if (drainedPlunders.Count > 0)
-            {
-                foreach (Pr_OrcPlunder drainedPunder in drainedPlunders)
-                {
-                    Item[] items = drainedPunder.getItems();
-                    bool plunderEmpty = true;
-
-                    foreach (Item item in items)
-                    {
-                        if (item != null)
-                        {
-                            plunderEmpty = false;
-                        }
-                    }
-
-                    if (plunderEmpty)
-                    {
-                        drainedPunder.location.properties.Remove(drainedPunder);
-                    }
-                }
-            }
-
-            if (acolyteCount < map.param.holy_maxAcolytes && cashForAcolytes >= costAcolyte)
-            {
-                cashForAcolytes -= costAcolyte;
-                createAcolyte();
-            }
-
-            if (cashForAcolytes > costAcolyte * 2)
-            {
-                expenses -= cashForAcolytes - (costAcolyte * 2);
-                cashForAcolytes = costAcolyte * 2;
-            }
-
-            if (cashForPreaching > costPreach * 2)
-            {
-                expenses -= cashForPreaching - (costPreach * 2);
-                cashForPreaching = costPreach * 2;
-            }
-
-            if (cashForTemples > costTemple * 2)
-            {
-                expenses -= cashForTemples - (costTemple * 2);
-                cashForTemples = costTemple * 2;
-            }
-
-            if (expenses < 0 && seat != null)
-            {
-                Pr_OrcPlunder capitalPlunder = null;
-                foreach (Property p in seat.settlement.location.properties)
-                {
-                    if (p is Pr_OrcPlunder)
-                    {
-                        capitalPlunder = (Pr_OrcPlunder)p;
-                        break;
-                    }
-                }
-
-                if (capitalPlunder == null)
-                {
-                    capitalPlunder = new Pr_OrcPlunder(seat.settlement.location);
-                    seat.settlement.location.properties.Add(capitalPlunder);
-                }
-                capitalPlunder.addGold(-expenses);
-            }
+            processIncome(null);
 
             if (map.burnInComplete)
             {
@@ -586,71 +452,23 @@ namespace Orcs_Plus
 
         new public void createAcolyte()
         {
-            int num = 0;
             Location location = null;
-            foreach (Location location2 in map.locations)
+            List<Settlement> spawnLocations = new List<Settlement>();
+            spawnLocations?.AddRange(camps);
+            spawnLocations?.AddRange(specializedCamps);
+            spawnLocations?.AddRange(specializedCamps);
+
+            if (spawnLocations.Count > 0)
             {
-                SettlementHuman settlementHuman = location2.settlement as SettlementHuman;
-                if (settlementHuman != null && settlementHuman.order == this)
-                {
-                    foreach (Subsettlement sub in settlementHuman.subs)
-                    {
-                        Sub_Temple sub_Temple = sub as Sub_Temple;
-                        int num2;
-                        if (sub_Temple == null || sub_Temple.order != this)
-                        {
-                            Sub_HolyOrderCapital sub_HolyOrderCapital = sub as Sub_HolyOrderCapital;
-                            num2 = ((sub_HolyOrderCapital != null && sub_HolyOrderCapital.order == this) ? 1 : 0);
-                        }
-                        else
-                        {
-                            num2 = 1;
-                        }
-
-                        if (num2 != 0)
-                        {
-                            num++;
-                            if (Eleven.random.Next(num) == 0)
-                            {
-                                location = location2;
-                            }
-                        }
-                    }
-                }
-
-                if (!(location2.settlement is Set_MinorOther))
-                {
-                    continue;
-                }
-
-                foreach (Subsettlement sub2 in location2.settlement.subs)
-                {
-                    Sub_Temple sub_Temple2 = sub2 as Sub_Temple;
-                    int num3;
-                    if (sub_Temple2 == null || sub_Temple2.order != this)
-                    {
-                        Sub_HolyOrderCapital sub_HolyOrderCapital2 = sub2 as Sub_HolyOrderCapital;
-                        num3 = ((sub_HolyOrderCapital2 != null && sub_HolyOrderCapital2.order == this) ? 1 : 0);
-                    }
-                    else
-                    {
-                        num3 = 1;
-                    }
-
-                    if (num3 != 0)
-                    {
-                        num++;
-                        if (Eleven.random.Next(num) == 0)
-                        {
-                            location = location2;
-                        }
-                    }
-                }
+                location = spawnLocations[Eleven.random.Next(spawnLocations.Count)].location;
             }
 
             if (location == null)
             {
-                location = map.locations[0];
+                if (seat != null)
+                {
+                    location = map.locations[capital];
+                }
             }
 
             if (location != null)
@@ -659,6 +477,46 @@ namespace Orcs_Plus
                 location.units.Add(item);
                 map.units.Add(item);
                 updateData();
+            }
+        }
+
+        public new void receiveFunding(Person other, int delta)
+        {
+            if (seat != null)
+            {
+                Pr_OrcPlunder capitalPlunder = seat.settlement.location.properties.OfType<Pr_OrcPlunder>().FirstOrDefault();
+
+                if (capitalPlunder == null)
+                {
+                    capitalPlunder = new Pr_OrcPlunder(seat.settlement.location);
+                    seat.settlement.location.properties.Add(capitalPlunder);
+                }
+
+                capitalPlunder.addGold(delta);
+            }
+            else
+            {
+                List<Set_OrcCamp> allCamps = new List<Set_OrcCamp>();
+                allCamps.AddRange(camps);
+                allCamps.AddRange(specializedCamps);
+                allCamps.AddRange(specializedCamps);
+
+                if (allCamps.Count == 0)
+                {
+                    Console.WriteLine("CommunityLib: ERROR: Tried to give gold to dead orc culture.");
+                    return;
+                }
+
+                Set_OrcCamp targetCamp = allCamps[Eleven.random.Next(allCamps.Count)];
+                Pr_OrcPlunder targetPlunder = targetCamp.location.properties.OfType<Pr_OrcPlunder>().FirstOrDefault();
+                
+                if (targetPlunder == null)
+                {
+                    targetPlunder = new Pr_OrcPlunder(seat.settlement.location);
+                    targetCamp.location.properties.Add(new Pr_OrcPlunder(seat.settlement.location));
+                }
+
+                targetPlunder.addGold(delta);
             }
         }
 

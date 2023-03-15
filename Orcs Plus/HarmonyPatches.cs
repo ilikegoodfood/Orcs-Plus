@@ -1,6 +1,7 @@
 ﻿using Assets.Code;
 using Assets.Code.Modding;
 using HarmonyLib;
+using LivingWilds;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +36,7 @@ namespace Orcs_Plus
 
         private static void Patching()
         {
-            Harmony.DEBUG = true;
+            Harmony.DEBUG = false;
             Harmony harmony = new Harmony("ILikeGoodFood.SOFG.OrcsPlus");
 
             if (Harmony.HasAnyPatches(harmony.Id))
@@ -507,6 +508,7 @@ namespace Orcs_Plus
         {
             SG_Orc orcSociety = ch.location.soc as SG_Orc;
             List<UM_OrcArmy> armies = null;
+
             if (orcSociety == null || !(ch.location.settlement is Set_OrcCamp) || !ch.location.settlement.isInfiltrated)
             {
                 return;
@@ -559,9 +561,13 @@ namespace Orcs_Plus
                 }
             }
 
-            if (ModCore.comLibCache.unitsBySocialGroupByType.ContainsKey(orcSociety) && (ModCore.comLibCache.unitsBySocialGroupByType[orcSociety]?.ContainsKey(typeof(UM_OrcArmy)) ?? false))
+            foreach (Unit unit in ch.map.units)
             {
-                armies = ModCore.comLibCache.unitsBySocialGroupByType[orcSociety][typeof(UM_OrcArmy)] as List<UM_OrcArmy>;
+                UM_OrcArmy army = unit as UM_OrcArmy;
+                if (army != null && army.society == orcSociety)
+                {
+                    armies.Add(army);
+                }
             }
 
             if (armies != null)
@@ -677,8 +683,9 @@ namespace Orcs_Plus
             return utility;
         }
 
-        private static double UAEN_OrcUpstart_getAttackUtility(double utility, UAEN_OrcUpstart upstart, Unit other, List<ReasonMsg> reasonMsgs, bool includeDangerousFoe)
+        public static double UAEN_OrcUpstart_getAttackUtility(double utility, UAEN_OrcUpstart upstart, Unit other, List<ReasonMsg> reasonMsgs, bool includeDangerousFoe)
         {
+            utility = 0.0;
             UA target = other as UA;
             SG_Orc orcs = upstart.society as SG_Orc;
             if (target != null && orcs != null && target.society != orcs)
@@ -699,24 +706,52 @@ namespace Orcs_Plus
                         {
                             if (target.society != orcs && target.society != orcCulture)
                             {
-                                if (intolerance.status == 0)
+                                if (upstart.map.locations[target.homeLocation].soc != orcs || upstart.map.locations[target.homeLocation].soc != orcCulture)
                                 {
-                                    otherIsTarget = true;
-                                }
-                                else if (intolerance.status > 0)
-                                {
-                                    if (target.society.isDark() || target.isCommandable())
+                                    if (intolerance.status == 0)
                                     {
                                         otherIsTarget = true;
                                     }
-                                }
-                                else if (intolerance.status < 0)
-                                {
-                                    if (!target.society.isDark() && !target.isCommandable())
+                                    else if (intolerance.status > 0)
                                     {
-                                        otherIsTarget = true;
+                                        if (upstart.society.getRel(target.society).state == DipRel.dipState.war || target.society.isDark() || target.isCommandable())
+                                        {
+                                            otherIsTarget = true;
+                                        }
+                                        else
+                                        {
+                                            reasonMsgs?.Add(new ReasonMsg("Orcs of a human-tolerant culture will not attack agents of good societies", -10000.0));
+                                            utility -= 10000.0;
+                                        }
+                                    }
+                                    else if (intolerance.status < 0)
+                                    {
+                                        if (upstart.society.getRel(target.society).state == DipRel.dipState.war || target.society is SG_Orc || target.society is HolyOrder_OrcsPlus_Orcs || !target.society.isDark() || !target.isCommandable())
+                                        {
+                                            otherIsTarget = true;
+                                        }
+                                        else
+                                        {
+                                            reasonMsgs?.Add(new ReasonMsg("Orcs of an elder-tolerant culture will not attack the elder's agents or societies", -10000.0));
+                                            utility -= 10000.0;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        reasonMsgs?.Add(new ReasonMsg("ERROR: Invalid Intolerance Tenet Status", -10000.0));
+                                        utility -= 10000.0;
                                     }
                                 }
+                                else
+                                {
+                                    reasonMsgs?.Add(new ReasonMsg("Orcs will only attack outsiders", -10000.0));
+                                    utility -= 10000.0;
+                                }
+                            }
+                            else
+                            {
+                                reasonMsgs?.Add(new ReasonMsg("Target is of own culture", -10000.0));
+                                utility -= 10000.0;
                             }
                         }
                         else
@@ -727,20 +762,37 @@ namespace Orcs_Plus
                             }
                             else
                             {
-                                reasonMsgs?.Add(new ReasonMsg("Invalid Target", -10000.0));
+                                reasonMsgs?.Add(new ReasonMsg("Orcs of an elder-tolerant culture will not attack the elder's agents", -10000.0));
                                 utility -= 10000.0;
                             }
                         }
 
                         if (otherIsTarget)
                         {
+                            foreach (Item item in target.person.items)
+                            {
+                                I_HordeBanner banner = item as I_HordeBanner;
+                                if (banner?.orcs == orcs && !(target.society != null && upstart.society.getRel(target.society).state == DipRel.dipState.war))
+                                {
+                                    reasonMsgs?.Add(new ReasonMsg("Orcs will not attack banner bearer", -10000.0));
+                                    utility -= 10000.0;
+                                    return utility;
+                                }
+                            }
+
                             if (target.location.soc == orcs || (target.society != null && orcs.getRel(target.society).state == DipRel.dipState.war && (target.location.soc == null || orcs.getRel(target.location.soc).state == DipRel.dipState.war)))
                             {
                                 double val;
                                 if (target.location.soc != orcs)
                                 {
                                     val = -25;
-                                    reasonMsgs?.Add(new ReasonMsg("Target is outside of Territory", val));
+                                    reasonMsgs?.Add(new ReasonMsg("Target is outside of " + orcs.getName() + "'s territory", val));
+                                    utility += val;
+                                }
+                                else if (target.task is Task_PerformChallenge)
+                                {
+                                    val = 20;
+                                    reasonMsgs?.Add(new ReasonMsg("Agent is interfereing with " + orcs.getName() + "'s territory", val));
                                     utility += val;
                                 }
 
@@ -755,6 +807,28 @@ namespace Orcs_Plus
                                 val = 20;
                                 reasonMsgs?.Add(new ReasonMsg("Eager for Combat", val));
                                 utility += val;
+
+                                if (target is UAEN_Vampire)
+                                {
+                                    val = -30;
+                                    reasonMsgs?.Add(new ReasonMsg("Fear of Vampires", val));
+                                    utility += val;
+                                }
+
+                                if (ModCore.modLivingWilds)
+                                {
+                                    Assembly asm = Assembly.Load("LivingWilds");
+                                    if (asm != null)
+                                    {
+                                        Type t = asm.GetType("LivingWilds.UAEN_Nature_Critter");
+                                        if (t != null && target.GetType().IsSubclassOf(t))
+                                        {
+                                            val = -30;
+                                            reasonMsgs?.Add(new ReasonMsg("Nature", val));
+                                            utility += val;
+                                        }
+                                    }
+                                }
 
                                 val = upstart.map.getStepDist(target.location, upstart.location);
                                 reasonMsgs?.Add(new ReasonMsg("Distance", -val));
@@ -780,7 +854,7 @@ namespace Orcs_Plus
                                 if (target.society != null && orcs.getRel(target.society).state == DipRel.dipState.war)
                                 {
                                     val = 50.0;
-                                    reasonMsgs?.Add(new ReasonMsg("At war", val));
+                                    reasonMsgs?.Add(new ReasonMsg("At War", val));
                                     utility += val;
                                 }
 
@@ -797,7 +871,12 @@ namespace Orcs_Plus
                             {
                                 if (target.society != null && orcs.getRel(target.society).state == DipRel.dipState.war)
                                 {
-                                    reasonMsgs?.Add(new ReasonMsg("Tresspassing", -10000.0));
+                                    reasonMsgs?.Add(new ReasonMsg("Tresspassing in territory of " + target.location.soc.getName(), -10000.0));
+                                    utility -= 10000.0;
+                                }
+                                else
+                                {
+                                    reasonMsgs?.Add(new ReasonMsg("Target is outside of " + orcs.getName() + "'s territory", -10000.0));
                                     utility -= 10000.0;
                                 }
                             }
@@ -858,6 +937,7 @@ namespace Orcs_Plus
         private static void Set_OrcCamp_ctor_Postfix(Set_OrcCamp __instance)
         {
             __instance.customChallenges.Add(new Ch_OrcsPlus_GatherHorde(__instance.location));
+            __instance.customChallenges.Add(new Ch_OrcsPlus_FundHorde(__instance.location, __instance));
         }
 
         private static void Set_OrcCamp_turnTick_Postfix(Set_OrcCamp __instance)
@@ -942,11 +1022,7 @@ namespace Orcs_Plus
 
             if (set != null && u.isCommandable())
             {
-                List<SG_Orc> orcSocieties = null;
-                if (ModCore.comLibCache.socialGroupsByType.ContainsKey(typeof(SG_Orc)) && ModCore.comLibCache.socialGroupsByType[typeof(SG_Orc)]?.Count > 0)
-                {
-                    orcSocieties = ModCore.comLibCache.socialGroupsByType[typeof(SG_Orc)] as List<SG_Orc>;
-                }
+                List<SG_Orc> orcSocieties = ModCore.data.getOrcSocieties(u.map);
 
                 if (orcSocieties?.Count > 0 && u.society != null)
                 {

@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Orcs_Plus
 {
@@ -128,6 +126,142 @@ namespace Orcs_Plus
                     enemyComs = battle.attComs;
                 }
             }
+        }
+
+        public List<SG_Orc> getOrcSocieties(Map map)
+        {
+            List<SG_Orc> result = new List<SG_Orc>();
+
+            foreach (SocialGroup sg in map.socialGroups)
+            {
+                SG_Orc orcs = sg as SG_Orc;
+
+                if (orcs != null)
+                {
+                    result.Add(orcs);
+                }
+            }
+            return result;
+        }
+
+        public List<HolyOrder_OrcsPlus_Orcs> getOrcCultures(Map map)
+        {
+            List<HolyOrder_OrcsPlus_Orcs> result = new List<HolyOrder_OrcsPlus_Orcs>();
+            foreach (SocialGroup sg in map.socialGroups)
+            {
+                HolyOrder_OrcsPlus_Orcs orcCulture = sg as HolyOrder_OrcsPlus_Orcs;
+
+                if (orcCulture != null)
+                {
+                    result.Add(orcCulture);
+                }
+            }
+            return result;
+        }
+
+        public void getOrcSocietiesAndCultures(Map map, out List<SG_Orc> orcSocieties, out List<HolyOrder_OrcsPlus_Orcs> orcCultures)
+        {
+            orcSocieties = new List<SG_Orc>();
+            orcCultures = new List<HolyOrder_OrcsPlus_Orcs>();
+            foreach (SocialGroup sg in map.socialGroups)
+            {
+                SG_Orc orcs = sg as SG_Orc;
+                HolyOrder_OrcsPlus_Orcs orcCulture = sg as HolyOrder_OrcsPlus_Orcs;
+
+                if (orcs != null)
+                {
+                    orcSocieties.Add(orcs);
+                }
+                else if (orcCulture != null)
+                {
+                    orcCultures.Add(orcCulture);
+                }
+            }
+            return;
+        }
+
+        public void getOrcCamps(Map map, SG_Orc orcSociety, out List<Set_OrcCamp> orcCamps, out List<Set_OrcCamp> specializedOrcCamps)
+        {
+            orcCamps = new List<Set_OrcCamp>();
+            specializedOrcCamps = new List<Set_OrcCamp>();
+
+            foreach (Location loc in map.locations)
+            {
+                if (loc.settlement != null && loc.soc == orcSociety)
+                {
+                    Set_OrcCamp camp = loc.settlement as Set_OrcCamp;
+                    if (camp != null)
+                    {
+                        if (camp.specialism == 0)
+                        {
+                            orcCamps.Add(camp);
+                        }
+                        else
+                        {
+                            specializedOrcCamps.Add(camp);
+                        }
+                    }
+                }
+            }
+            return;
+        }
+
+        public void getOrcCamps(Map map, HolyOrder_OrcsPlus_Orcs orcCulture, out List<Set_OrcCamp> orcCamps, out List<Set_OrcCamp> specializedOrcCamps)
+        {
+            SG_Orc orcSociety = orcCulture?.orcSociety;
+            orcCamps = new List<Set_OrcCamp>();
+            specializedOrcCamps = new List<Set_OrcCamp>();
+
+            foreach (Location loc in map.locations)
+            {
+                if (loc.settlement != null && loc.soc == orcSociety)
+                {
+                    Set_OrcCamp camp = loc.settlement as Set_OrcCamp;
+                    if (camp != null)
+                    {
+                        if (camp.specialism == 0)
+                        {
+                            orcCamps.Add(camp);
+                        }
+                        else
+                        {
+                            specializedOrcCamps.Add(camp);
+                        }
+                    }
+                }
+            }
+            return;
+        }
+
+        public List<UM_OrcArmy> getOrcArmies(Map map, SG_Orc orcSociety)
+        {
+            List<UM_OrcArmy> result = new List<UM_OrcArmy>();
+
+            foreach (Unit unit in map.units)
+            {
+                if (unit is UM_OrcArmy army && (orcSociety == null || army.society == orcSociety))
+                {
+                    result.Add(army);
+                }
+            }
+
+            return result;
+        }
+
+        public List<UM_OrcArmy> getOrcArmies(Map map, HolyOrder_OrcsPlus_Orcs orcCulture)
+        {
+            SG_Orc orcSociety = orcCulture?.orcSociety;
+            List<UM_OrcArmy> result = new List<UM_OrcArmy>();
+
+            foreach (Unit unit in map.units)
+            {
+                if (unit is UM_OrcArmy army && (orcSociety == null || army.society == orcSociety))
+                {
+                    result.Add(army);
+                }
+            }
+
+            return result;
         }
     }
 }

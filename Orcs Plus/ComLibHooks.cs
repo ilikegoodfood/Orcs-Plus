@@ -101,11 +101,7 @@ namespace Orcs_Plus
                         mod.TryAddInfluenceGain(orcs, new ReasonMsg("Destroyed orc army in batle", ModCore.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                     }
 
-                    List<SG_Orc> orcSocieties = null;
-                    if (ModCore.comLibCache.socialGroupsByType.ContainsKey(typeof(SG_Orc)) && ModCore.comLibCache.socialGroupsByType[typeof(SG_Orc)]?.Count > 0)
-                    {
-                        orcSocieties = ModCore.comLibCache.socialGroupsByType[typeof(SG_Orc)] as List<SG_Orc>;
-                    }
+                    List<SG_Orc> orcSocieties = ModCore.data.getOrcSocieties(map);
 
                     if (orcSocieties?.Count > 0 && u.society != null)
                     {
@@ -149,11 +145,7 @@ namespace Orcs_Plus
                     mod.TryAddInfluenceGain(orcs, new ReasonMsg("Smote orc army", ModCore.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                 }
 
-                List<SG_Orc> orcSocieties = null;
-                if (ModCore.comLibCache.socialGroupsByType.ContainsKey(typeof(SG_Orc)) && ModCore.comLibCache.socialGroupsByType[typeof(SG_Orc)]?.Count > 0)
-                {
-                    orcSocieties = ModCore.comLibCache.socialGroupsByType[typeof(SG_Orc)] as List<SG_Orc>;
-                }
+                List<SG_Orc> orcSocieties = ModCore.data.getOrcSocieties(map);
 
                 if (orcSocieties?.Count > 0 && u.society != null)
                 {
@@ -187,11 +179,7 @@ namespace Orcs_Plus
                             mod.TryAddInfluenceGain(orcs, new ReasonMsg("Volcanic eruption (geomancy) destroyed orc army", ModCore.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                         }
 
-                        List<SG_Orc> orcSocieties = null;
-                        if (ModCore.comLibCache.socialGroupsByType.ContainsKey(typeof(SG_Orc)) && ModCore.comLibCache.socialGroupsByType[typeof(SG_Orc)]?.Count > 0)
-                        {
-                            orcSocieties = ModCore.comLibCache.socialGroupsByType[typeof(SG_Orc)] as List<SG_Orc>;
-                        }
+                        List<SG_Orc> orcSocieties = ModCore.data.getOrcSocieties(map);
 
                         if (orcSocieties?.Count > 0 && u.society != null)
                         {
@@ -234,11 +222,7 @@ namespace Orcs_Plus
                         mod.TryAddInfluenceGain(orcs, new ReasonMsg("Awakening destroyed orc army", ModCore.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                     }
 
-                    List<SG_Orc> orcSocieties = null;
-                    if (ModCore.comLibCache.socialGroupsByType.ContainsKey(typeof(SG_Orc)) && ModCore.comLibCache.socialGroupsByType[typeof(SG_Orc)]?.Count > 0)
-                    {
-                        orcSocieties = ModCore.comLibCache.socialGroupsByType[typeof(SG_Orc)] as List<SG_Orc>;
-                    }
+                    List<SG_Orc> orcSocieties = ModCore.data.getOrcSocieties(map);
 
                     if (orcSocieties?.Count > 0 && u.society != null)
                     {
@@ -344,7 +328,7 @@ namespace Orcs_Plus
                 }
 
                 msgs.Insert(0, new ReasonMsg("Agents", orcCulture.agents?.Count ?? 0.0));
-                msgs.Add(new ReasonMsg("Camps", orcCulture.camps?.Count ?? 0.0));
+                msgs.Add(new ReasonMsg("Camps", (orcCulture.camps?.Count ?? 0.0) + (orcCulture.specializedCamps?.Count ?? 0.0)));
                 msgs.Add(new ReasonMsg("of which Specialised", orcCulture.specializedCamps?.Count ?? 0.0));
             }
         }
@@ -375,11 +359,7 @@ namespace Orcs_Plus
                             mod.TryAddInfluenceGain(orcs, new ReasonMsg("Razed orc camp", ModCore.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                         }
 
-                        List<SG_Orc> orcSocieties = null;
-                        if (ModCore.comLibCache.socialGroupsByType.ContainsKey(typeof(SG_Orc)) && ModCore.comLibCache.socialGroupsByType[typeof(SG_Orc)]?.Count > 0)
-                        {
-                            orcSocieties = ModCore.comLibCache.socialGroupsByType[typeof(SG_Orc)] as List<SG_Orc>;
-                        }
+                        List<SG_Orc> orcSocieties = ModCore.data.getOrcSocieties(map);
 
                         if (orcSocieties?.Count > 0 && set.location?.soc != null)
                         {
@@ -411,11 +391,7 @@ namespace Orcs_Plus
                             mod.TryAddInfluenceGain(orcs, new ReasonMsg("Volcanic eruption (geomancy) razed orc camp", ModCore.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                         }
 
-                        List<SG_Orc> orcSocieties = null;
-                        if (ModCore.comLibCache.socialGroupsByType.ContainsKey(typeof(SG_Orc)) && ModCore.comLibCache.socialGroupsByType[typeof(SG_Orc)]?.Count > 0)
-                        {
-                            orcSocieties = ModCore.comLibCache.socialGroupsByType[typeof(SG_Orc)] as List<SG_Orc>;
-                        }
+                        List<SG_Orc> orcSocieties = ModCore.data.getOrcSocieties(map);
 
                         if (orcSocieties?.Count > 0 && set.location?.soc != null)
                         {
@@ -449,11 +425,7 @@ namespace Orcs_Plus
                     mod.TryAddInfluenceGain(orcs, new ReasonMsg("Smote orc camp", ModCore.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                 }
 
-                List<SG_Orc> orcSocieties = null;
-                if (ModCore.comLibCache.socialGroupsByType.ContainsKey(typeof(SG_Orc)) && ModCore.comLibCache.socialGroupsByType[typeof(SG_Orc)]?.Count > 0)
-                {
-                    orcSocieties = ModCore.comLibCache.socialGroupsByType[typeof(SG_Orc)] as List<SG_Orc>;
-                }
+                List<SG_Orc> orcSocieties = ModCore.data.getOrcSocieties(map);
 
                 if (orcSocieties?.Count > 0 && set.location?.soc != null)
                 {
@@ -478,11 +450,7 @@ namespace Orcs_Plus
                     mod.TryAddInfluenceGain(orcs, new ReasonMsg("Awakening razed orc camp", ModCore.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                 }
 
-                List<SG_Orc> orcSocieties = null;
-                if (ModCore.comLibCache.socialGroupsByType.ContainsKey(typeof(SG_Orc)) && ModCore.comLibCache.socialGroupsByType[typeof(SG_Orc)]?.Count > 0)
-                {
-                    orcSocieties = ModCore.comLibCache.socialGroupsByType[typeof(SG_Orc)] as List<SG_Orc>;
-                }
+                List<SG_Orc> orcSocieties = ModCore.data.getOrcSocieties(map);
 
                 if (orcSocieties?.Count > 0 && set.location?.soc != null)
                 {

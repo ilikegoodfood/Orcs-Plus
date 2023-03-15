@@ -6,24 +6,29 @@ using Assets.Code.Modding;
 using CommunityLib;
 using HarmonyLib;
 using UnityEngine;
-using static UnityEngine.Scripting.GarbageCollector;
 
 namespace Orcs_Plus
 {
-    public class ModCore : Assets.Code.Modding.ModKernel
+    public class ModCore : ModKernel
     {
         public static CommunityLib.ModCore comLib;
 
-        public static CommunityLib.Cache comLibCache;
-
         public static ComLibHooks comLibHooks;
 
+        public static ModCore core;
+
         public static ModData data;
+
+        public static AgentAIs agentAI;
+
+        public static bool modLivingWilds = false;
 
         private static bool patched = false;
 
         public override void onModsInitiallyLoaded()
         {
+            core = this;
+
             if (!patched)
             {
                 patched = true;
@@ -39,20 +44,28 @@ namespace Orcs_Plus
                 {
                     case "CommunityLib":
                         ModCore.comLib = core as CommunityLib.ModCore;
-                        comLib?.RegisterHooks(comLibHooks);
+                        break;
+                    case "LivingWilds":
+                        modLivingWilds = true;
                         break;
                     default:
                         break;
                 }
             }
 
+            if (comLib == null)
+            {
+                throw new Exception("OrcsPlus: This mod REQUIRES the Community Library mod to be installed and enabled in order to operate.");
+            }
+
             data = new ModData();
+            agentAI = new AgentAIs(map);
         }
 
         public override void afterMapGenBeforeHistorical(Map map)
         {
-            comLibCache = comLib?.GetCache();
             comLibHooks = new ComLibHooks(this, map);
+            comLib?.RegisterHooks(comLibHooks);
         }
 
         public override void afterLoading(Map map)
@@ -63,7 +76,6 @@ namespace Orcs_Plus
                 {
                     case "CommunityLib":
                         ModCore.comLib = core as CommunityLib.ModCore;
-                        comLibCache = comLib?.GetCache();
                         comLib?.RegisterHooks(comLibHooks);
                         break;
                     default:
@@ -82,7 +94,7 @@ namespace Orcs_Plus
                 data = new ModData();
             }
 
-            UpdateOrcSGCultureMap();
+            UpdateOrcSGCultureMap(map);
         }
 
         public override void onTurnStart(Map map)
@@ -95,7 +107,7 @@ namespace Orcs_Plus
             data.isPlayerTurn = true;
 
             //Console.WriteLine("OrcsPlus: Start Populate Challenges Singleton");
-            UpdateOrcSGCultureMap();
+            UpdateOrcSGCultureMap(map);
             
             foreach (KeyValuePair<SG_Orc, HolyOrder_OrcsPlus_Orcs> pair in data.orcSGCultureMap)
             {
@@ -106,23 +118,13 @@ namespace Orcs_Plus
             }
         }
 
-        private void UpdateOrcSGCultureMap()
+        private void UpdateOrcSGCultureMap(Map map)
         {
-            List<SG_Orc> orcSocialGroups = null;
-            List<HolyOrder_OrcsPlus_Orcs> orcCultures = null;
+            data.getOrcSocietiesAndCultures(map, out List<SG_Orc> orcSocieties, out List<HolyOrder_OrcsPlus_Orcs> orcCultures);
 
-            if (comLibCache.socialGroupsByType.ContainsKey(typeof(SG_Orc)) && comLibCache.socialGroupsByType[typeof(SG_Orc)]?.Count > 0)
+            if (orcSocieties?.Count > 0)
             {
-                orcSocialGroups = comLibCache.socialGroupsByType[typeof(SG_Orc)] as List<SG_Orc>;
-            }
-            if (comLibCache.socialGroupsByTypeExclusive.ContainsKey(typeof(HolyOrder_OrcsPlus_Orcs)) && comLibCache.socialGroupsByTypeExclusive[typeof(HolyOrder_OrcsPlus_Orcs)]?.Count > 0)
-            {
-                orcCultures = comLibCache.socialGroupsByTypeExclusive[typeof(HolyOrder_OrcsPlus_Orcs)] as List<HolyOrder_OrcsPlus_Orcs>;
-            }
-
-            if (orcSocialGroups?.Count > 0)
-            {
-                foreach (SG_Orc orcSociety in orcSocialGroups)
+                foreach (SG_Orc orcSociety in orcSocieties)
                 {
                     if (orcSociety.isGone())
                     {
@@ -166,25 +168,7 @@ namespace Orcs_Plus
 
         public void CreateOrcHolyOrder(Map map, SG_Orc orcSociety)
         {
-            List<Set_OrcCamp> orcCamps = null;
-            List<Set_OrcCamp> specializedOrcCamps = new List<Set_OrcCamp>();
-
-            //Console.WriteLine("OrcsPlus: Gathering data required to create new orc culture (holy order).");
-            if (comLibCache.settlementsBySocialGroupByType.ContainsKey(orcSociety) && (comLibCache.settlementsBySocialGroupByType[orcSociety]?.ContainsKey(typeof(Set_OrcCamp)) ?? false) && comLibCache.settlementsBySocialGroupByType[orcSociety][typeof(Set_OrcCamp)]?.Count > 0)
-            {
-                orcCamps = comLibCache.settlementsBySocialGroupByType[orcSociety][typeof(Set_OrcCamp)] as List<Set_OrcCamp>;
-            }
-
-            if (comLibCache.orcCampBySocialGroupBySpecialism.ContainsKey(orcSociety) && comLibCache.orcCampBySocialGroupBySpecialism[orcSociety] != null)
-            {
-                for (int i = 1; i < comLibCache.orcCampBySocialGroupBySpecialism[orcSociety].Length; i++)
-                {
-                    if (comLibCache.orcCampBySocialGroupBySpecialism[orcSociety][i]?.Count > 0)
-                    {
-                        specializedOrcCamps.AddRange(comLibCache.orcCampBySocialGroupBySpecialism[orcSociety][i]);
-                    }
-                }
-            }
+            data.getOrcCamps(map, orcSociety, out List<Set_OrcCamp> orcCamps, out List<Set_OrcCamp> specializedOrcCamps);
 
             if (orcCamps != null)
             {
@@ -263,10 +247,7 @@ namespace Orcs_Plus
 
         public override int adjustHolyInfluenceGood(HolyOrder order, int inf, List<ReasonMsg> msgs)
         {
-            HolyOrder_OrcsPlus_Orcs orcCulture = order as HolyOrder_OrcsPlus_Orcs;
-
-            List<ReasonMsg> influenceGain;
-            if (orcCulture == null || !data.influenceGainHuman.TryGetValue(orcCulture, out influenceGain) || influenceGain?.Count == 0)
+            if (!(order is HolyOrder_OrcsPlus_Orcs orcCulture) || !data.influenceGainHuman.TryGetValue(orcCulture, out List<ReasonMsg> influenceGain) || influenceGain?.Count == 0)
             {
                 return inf;
             }
@@ -317,21 +298,14 @@ namespace Orcs_Plus
 
         public bool TryAddInfluenceGain(SG_Orc orcSociety, ReasonMsg msg, bool isElder = false)
         {
-            HolyOrder_OrcsPlus_Orcs orcCulture = null;
-
             if (orcSociety?.isGone() ?? true || msg?.value == 0)
             {
                 return false;
             }
 
-            if (data.orcSGCultureMap.ContainsKey(orcSociety) && data.orcSGCultureMap[orcSociety] != null)
+            if (data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_OrcsPlus_Orcs orcCulture) && orcCulture != null)
             {
                 orcCulture = data.orcSGCultureMap[orcSociety];
-            }
-
-            if (orcCulture == null)
-            {
-                return false;
             }
 
             if (isElder)
@@ -358,8 +332,7 @@ namespace Orcs_Plus
 
         private void AddInfluenceGainElder(HolyOrder_OrcsPlus_Orcs orcCulture, ReasonMsg msg)
         {
-            List<ReasonMsg> influenceGain;
-            if (!data.influenceGainElder.TryGetValue(orcCulture, out influenceGain))
+            if (!data.influenceGainElder.TryGetValue(orcCulture, out List<ReasonMsg> influenceGain))
             {
                 influenceGain = new List<ReasonMsg> ();
                 data.influenceGainElder.Add(orcCulture, influenceGain);
@@ -385,8 +358,7 @@ namespace Orcs_Plus
 
         private void AddInfluenceGainHuman(HolyOrder_OrcsPlus_Orcs orcCulture, ReasonMsg msg)
         {
-            List<ReasonMsg> influenceGain;
-            if (!data.influenceGainHuman.TryGetValue(orcCulture, out influenceGain))
+            if (!data.influenceGainHuman.TryGetValue(orcCulture, out List<ReasonMsg> influenceGain))
             {
                 influenceGain = new List<ReasonMsg> ();
                 data.influenceGainHuman.Add(orcCulture, influenceGain);
@@ -467,7 +439,7 @@ namespace Orcs_Plus
             Ch_SkirmishAttacking skirmishAtt = null;
             Ch_SkirmishDefending skirmishDef = null;
 
-            if (challenge!= null)
+            if (challenge != null)
             {
                 skirmishAtt = challenge as Ch_SkirmishAttacking;
                 skirmishDef = challenge as Ch_SkirmishDefending;
@@ -484,7 +456,7 @@ namespace Orcs_Plus
 
             if (uKiller != null)
             {
-                if (v == "Killed in battle by " + uKiller.getName())
+                if (v == "Killed in battle with " + uKiller.getName())
                 {
                     if (uKiller.isCommandable())
                     {
@@ -498,11 +470,7 @@ namespace Orcs_Plus
                             TryAddInfluenceGain(orcs, new ReasonMsg("Killed orc agent in battle", data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
                         }
 
-                        List<SG_Orc> orcSocieties = null;
-                        if (comLibCache.socialGroupsByType.ContainsKey(typeof(SG_Orc)) && comLibCache.socialGroupsByType[typeof(SG_Orc)]?.Count > 0)
-                        {
-                            orcSocieties = comLibCache.socialGroupsByType[typeof(SG_Orc)] as List<SG_Orc>;
-                        }
+                        List<SG_Orc> orcSocieties = data.getOrcSocieties(person.map);
 
                         if (orcSocieties?.Count > 0 && uPerson.society != null)
                         {
@@ -547,11 +515,7 @@ namespace Orcs_Plus
                             TryAddInfluenceGain(orcs, new ReasonMsg("Intercepted and killed orc agent", data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
                         }
 
-                        List<SG_Orc> orcSocieties = null;
-                        if (comLibCache.socialGroupsByType.ContainsKey(typeof(SG_Orc)) && comLibCache.socialGroupsByType[typeof(SG_Orc)]?.Count > 0)
-                        {
-                            orcSocieties = comLibCache.socialGroupsByType[typeof(SG_Orc)] as List<SG_Orc>;
-                        }
+                        List<SG_Orc> orcSocieties = data.getOrcSocieties(person.map);
 
                         if (orcSocieties?.Count > 0 && uPerson.society != null)
                         {
@@ -596,11 +560,7 @@ namespace Orcs_Plus
                             TryAddInfluenceGain(orcs, new ReasonMsg("Volcanic eruption (geomancy) killed orc agent", data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
                         }
 
-                        List<SG_Orc> orcSocieties = null;
-                        if (comLibCache.socialGroupsByType.ContainsKey(typeof(SG_Orc)) && comLibCache.socialGroupsByType[typeof(SG_Orc)]?.Count > 0)
-                        {
-                            orcSocieties = comLibCache.socialGroupsByType[typeof(SG_Orc)] as List<SG_Orc>;
-                        }
+                        List<SG_Orc> orcSocieties = data.getOrcSocieties(person.map);
 
                         if (orcSocieties?.Count > 0 && uPerson.society != null)
                         {
@@ -644,11 +604,7 @@ namespace Orcs_Plus
                     TryAddInfluenceGain(orcs, new ReasonMsg("Smote orc agent", ModCore.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                 }
 
-                List<SG_Orc> orcSocieties = null;
-                if (ModCore.comLibCache.socialGroupsByType.ContainsKey(typeof(SG_Orc)) && ModCore.comLibCache.socialGroupsByType[typeof(SG_Orc)]?.Count > 0)
-                {
-                    orcSocieties = ModCore.comLibCache.socialGroupsByType[typeof(SG_Orc)] as List<SG_Orc>;
-                }
+                List<SG_Orc> orcSocieties = data.getOrcSocieties(person.map);
 
                 if (orcSocieties?.Count > 0 && uPerson.society != null)
                 {
@@ -738,11 +694,7 @@ namespace Orcs_Plus
                             TryAddInfluenceGain(orcs, new ReasonMsg("Killed orc agent skirmishing a battle", data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
                         }
 
-                        List<SG_Orc> orcSocieties = null;
-                        if (comLibCache.socialGroupsByType.ContainsKey(typeof(SG_Orc)) && comLibCache.socialGroupsByType[typeof(SG_Orc)]?.Count > 0)
-                        {
-                            orcSocieties = comLibCache.socialGroupsByType[typeof(SG_Orc)] as List<SG_Orc>;
-                        }
+                        List<SG_Orc> orcSocieties = data.getOrcSocieties(person.map);
 
                         if (orcSocieties?.Count > 0)
                         {
@@ -788,11 +740,7 @@ namespace Orcs_Plus
                     TryAddInfluenceGain(orcs, new ReasonMsg("Awakening killed orc agent", data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
                 }
 
-                List<SG_Orc> orcSocieties = null;
-                if (comLibCache.socialGroupsByType.ContainsKey(typeof(SG_Orc)) && comLibCache.socialGroupsByType[typeof(SG_Orc)]?.Count > 0)
-                {
-                    orcSocieties = comLibCache.socialGroupsByType[typeof(SG_Orc)] as List<SG_Orc>;
-                }
+                List<SG_Orc> orcSocieties = data.getOrcSocieties(person.map);
 
                 if (orcSocieties?.Count > 0 && uPerson.society != null)
                 {

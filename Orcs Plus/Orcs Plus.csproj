@@ -42,6 +42,10 @@
       <HintPath>..\..\CommunityLib\CommunityLib\bin\Debug\CommunityLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="LivingWilds">
+      <HintPath>D:\Program Files (x86)\Steam\steamapps\workshop\content\1741640\2932110698\LivingWilds.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -56,11 +60,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AgentAIs.cs" />
+    <Compile Include="Ch_OrcsPlus_FundHorde.cs" />
     <Compile Include="Ch_OrcsPlus_GatherHorde.cs" />
     <Compile Include="ComLibHooks.cs" />
     <Compile Include="HarmonyPatches.cs" />
     <Compile Include="HolyOrder_OrcsPlus_Orcs.cs" />
     <Compile Include="H_OrcsPlus_Intolerance.cs" />
+    <Compile Include="ItemToOrcCulture.cs" />
     <Compile Include="ModCore.cs" />
     <Compile Include="ModData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

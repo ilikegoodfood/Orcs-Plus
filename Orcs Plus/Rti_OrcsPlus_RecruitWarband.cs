@@ -1,10 +1,6 @@
 ﻿using Assets.Code;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Orcs_Plus
@@ -13,10 +9,13 @@ namespace Orcs_Plus
     {
         public I_HordeBanner banner;
 
+        public Minion exemplar;
+
         public Rti_OrcsPlus_RecruitWarband (Location loc, I_HordeBanner banner)
             : base (loc)
         {
             this.banner = banner;
+            exemplar = new M_Goblin(loc.map);
         }
 
         public override string getName()
@@ -156,9 +155,20 @@ namespace Orcs_Plus
             return;
         }
 
+        public double getMinionUtility(UA ua, Minion m)
+        {
+            int val = m.getMaxHP() + m.getMaxDefence() + m.getAttack();
+            return (double)(val * this.map.param.utility_UA_recruitPerPoint);
+        }
+
         public override int[] buildPositiveTags()
         {
-            return new int[0];
+            if (exemplar == null)
+            {
+                return new int[0];
+            }
+
+            return exemplar.getTags();
         }
 
         public override int[] buildNegativeTags()

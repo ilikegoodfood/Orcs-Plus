@@ -39,11 +39,13 @@ namespace Orcs_Plus
             }
 
             SG_Orc orcs = location.soc as SG_Orc;
-            int stepCount = 0;
 
             if (orcs != null)
             {
-                foreach (UM_OrcArmy army in ModCore.comLibCache.unitsBySocialGroupByType[orcs][typeof(UM_OrcArmy)])
+                List<UM_OrcArmy> armies = ModCore.data.getOrcArmies(map, orcs);
+                int stepCount = 0;
+
+                foreach (UM_OrcArmy army in armies)
                 {
                     if (map.locations[army.homeLocation].settlement.isInfiltrated && !(army.task is Task_InBattle))
                     {
@@ -128,17 +130,12 @@ namespace Orcs_Plus
                     if (banner != null && orcs == banner.orcs)
                     {
                         //Console.WriteLine("OrcsPlus: " + uA.getName() + " has orcish banner belonging to this orc social group.");
-                        List<UM_OrcArmy> orcArmies = null;
-                        if (ModCore.comLibCache.unitsBySocialGroupByType.ContainsKey(orcs) && ModCore.comLibCache.unitsBySocialGroupByType[orcs] != null && ModCore.comLibCache.unitsBySocialGroupByType[orcs].ContainsKey(typeof(UM_OrcArmy)) && ModCore.comLibCache.unitsBySocialGroupByType[orcs][typeof(UM_OrcArmy)] != null && ModCore.comLibCache.unitsBySocialGroupByType[orcs][typeof(UM_OrcArmy)].Count > 0)
-                        {
-                            //Console.WriteLine("OrcsPlus: Gathering orc armies belonging to this social group.");
-                            orcArmies = ModCore.comLibCache.unitsBySocialGroupByType[orcs][typeof(UM_OrcArmy)] as List<UM_OrcArmy>;
-                        }
+                        List<UM_OrcArmy> armies = ModCore.data.getOrcArmies(map, orcs);
 
-                        if (orcArmies != null)
+                        if (armies != null)
                         {
                             //Console.WriteLine("OrcsPlus: Orc armies found.");
-                            foreach (UM_OrcArmy army in orcArmies)
+                            foreach (UM_OrcArmy army in armies)
                             {
                                 //Console.WriteLine("OrcsPlus: Iterating orc armies belonging to this social group.");
                                 Settlement armyBase = map.locations[army.homeLocation].settlement;
