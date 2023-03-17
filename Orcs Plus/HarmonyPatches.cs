@@ -1,5 +1,8 @@
 ﻿using Assets.Code;
 using Assets.Code.Modding;
+using CommunityLib;
+using DuloGames.UI;
+using FullSerializer;
 using HarmonyLib;
 using LivingWilds;
 using System;
@@ -7,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using static UnityEngine.GraphicsBuffer;
 
 namespace Orcs_Plus
 {
@@ -76,6 +80,9 @@ namespace Orcs_Plus
             // Patches for UAEN_OrcUpstart
             harmony.Patch(original: AccessTools.Constructor(typeof(UAEN_OrcUpstart), new Type[] { typeof(Location), typeof(SocialGroup), typeof(Person) }), postfix: new HarmonyMethod(patchType, nameof(UAEN_OrcUpstart_ctor_Postfix)));
 
+            // Patches for Unit
+            harmony.Patch(original: AccessTools.Method(typeof(Unit), nameof(Unit.hostileTo), new Type[] { typeof(Unit), typeof(bool) }), postfix: new HarmonyMethod(patchType, nameof(Unit_hostileTo_Postfix)));
+
             // Patches for UA
             harmony.Patch(original: AccessTools.Method(typeof(UA), nameof(UA.getAttackUtility)), postfix: new HarmonyMethod(patchType, nameof(UA_getAttackUtility_Postfix)));
 
@@ -88,6 +95,15 @@ namespace Orcs_Plus
 
             // Patches for Task_RazeLocation
             harmony.Patch(original: AccessTools.Method(typeof(Task_RazeLocation), nameof(Task_RazeLocation.turnTick)), transpiler: new HarmonyMethod(patchType, nameof(Task_RazeLocation_turnTick_Transpiler)));
+
+            // Patches for UM_OrcArmy
+            harmony.Patch(original: AccessTools.Method(typeof(UM_OrcArmy), nameof(UM_OrcArmy.turnTickInner), new Type[] { typeof(Map) }), postfix: new HarmonyMethod(patchType, nameof(UM_OrcArmy_turnTickInner_Postfix)));
+
+            // Patches for Ch_Orcs_StealPlunder
+            harmony.Patch(original: AccessTools.Method(typeof(UA), nameof(UA.getChallengeUtility), new Type[] { typeof(Challenge), typeof(List<ReasonMsg>) }), postfix: new HarmonyMethod(patchType, nameof(UA_getChallengeUtility_Postfix)));
+
+            // COMMUNITY LIBRARY PATCHES
+            harmony.Patch(original: AccessTools.Method(typeof(AIChallenge), nameof(AIChallenge.checkChallengeUtility), new Type[] { typeof(Challenge), typeof(UA), typeof(List<ReasonMsg>), typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(AIChallenge_checkChallengeUtility_Postfix)));
 
             // Template Patch
             // harmony.Patch(original: AccessTools.Method(typeof(), nameof(), new Type[] { typeof() }), postfix: new HarmonyMethod(patchType, nameof()));
@@ -673,6 +689,89 @@ namespace Orcs_Plus
             }
         }
 
+        private static bool Unit_hostileTo_Postfix(bool result, Unit __instance, Unit other, bool allowRecursion)
+        {
+            if (__instance is UM_OrcArmy orcArmy && other is UA && !result)
+            {
+                SG_Orc orcSociety = __instance.society as SG_Orc;
+                if (orcSociety != null && ModCore.data.orcSGCultureMap.ContainsKey(orcSociety))
+                {
+                    HolyOrder_OrcsPlus_Orcs orcCulture = ModCore.data.orcSGCultureMap[orcSociety];
+
+                    if (orcCulture == null || other.society == orcSociety || other.society == orcCulture)
+                    {
+                        return result;
+                    }
+
+                    if (other.homeLocation != -1 && (other.map.locations[other.homeLocation].soc == orcSociety || other.map.locations[other.homeLocation].soc == orcCulture))
+                    {
+                        return result;
+                    }
+
+                    if (ModCore.modLivingWilds)
+                    {
+                        Assembly asm = Assembly.Load("LivingWilds");
+                        if (asm != null)
+                        {
+                            Type t = asm.GetType("LivingWilds.UAEN_Nature_Critter");
+                            if (t != null && other.GetType().IsSubclassOf(t))
+                            {
+                                return result;
+                            }
+                        }
+                    }
+
+                    H_OrcsPlus_Intolerance tolerance = orcCulture.tenets.OfType<H_OrcsPlus_Intolerance>().FirstOrDefault();
+                    if (tolerance != null)
+                    {
+                        if (other.society is SG_Orc || other.society is HolyOrder_OrcsPlus_Orcs)
+                        {
+                            result = true;
+                        }
+                        else if (tolerance.status < 0)
+                        {
+                            if ((other.society == null || !other.society.isDark()) && !other.isCommandable())
+                            {
+                                result = true;
+                            }
+                        }
+                        else if (tolerance.status > 0)
+                        {
+                            if (other.isCommandable() && orcArmy.parent.shadow < 0.5 && orcArmy.parent.infiltration < 1.0)
+                            {
+                                result = true;
+                            }
+                            else if (other.society == null)
+                            {
+                                result = true;
+                            }
+                            else if (orcArmy.parent.shadow < 0.5 && other.society.isDark())
+                            {
+                                result = true;
+                            }
+                        }
+                        else
+                        {
+                            if ((other.society == null || !other.society.isDark()) && !other.isCommandable())
+                            {
+                                result = true;
+                            }
+                            else if (other.isCommandable() && orcArmy.parent.shadow < 0.5 && orcArmy.parent.infiltration < 1.0)
+                            {
+                                result = true;
+                            }
+                            else if (orcArmy.parent.shadow < 0.5 && other.society.isDark())
+                            {
+                                result = true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
         private static double UA_getAttackUtility_Postfix(double utility, UA __instance, Unit other, List<ReasonMsg> reasons, bool includeDangerousFoe)
         {
             if (__instance is UAEN_OrcUpstart)
@@ -1040,6 +1139,286 @@ namespace Orcs_Plus
                     }
                 }
             }
+        }
+
+        private static void UM_OrcArmy_turnTickInner_Postfix(UM_OrcArmy __instance)
+        {
+            if (__instance.task == null)
+            {
+                List<UA> targetAgents = new List<UA>();
+                if (__instance.society != null && __instance.parent != null && __instance.parent.location.settlement == __instance.parent && __instance.parent.location.soc == __instance.society && __instance.location == __instance.parent.location && __instance.task == null)
+                {
+                    if (ModCore.data.orcSGCultureMap.TryGetValue(__instance.society as SG_Orc, out HolyOrder_OrcsPlus_Orcs orcCulture))
+                    {
+                        H_OrcsPlus_Intolerance tolerance = orcCulture.tenets.OfType<H_OrcsPlus_Intolerance>().FirstOrDefault();
+                        if (tolerance != null)
+                        {
+                            foreach (Unit unit in __instance.parent.location.units)
+                            {
+                                if (unit.society == __instance.society || unit.society == orcCulture)
+                                {
+                                    continue;
+                                }
+
+                                if (unit.homeLocation != -1 && (__instance.map.locations[unit.homeLocation].soc == __instance.society || __instance.map.locations[unit.homeLocation].soc == orcCulture))
+                                {
+                                    continue;
+                                }
+
+                                if (ModCore.modLivingWilds)
+                                {
+                                    Assembly asm = Assembly.Load("LivingWilds");
+                                    if (asm != null)
+                                    {
+                                        Type t = asm.GetType("LivingWilds.UAEN_Nature_Critter");
+                                        if (t != null && unit.GetType().IsSubclassOf(t))
+                                        {
+                                            continue;
+                                        }
+                                    }
+                                }
+
+                                if (unit is UA agent && agent.task is Task_PerformChallenge)
+                                {
+
+                                    if (agent.society is SG_Orc || agent.society is HolyOrder_OrcsPlus_Orcs)
+                                    {
+                                        targetAgents.Add(agent);
+                                    }
+                                    else if (tolerance.status < 0)
+                                    {
+                                        if ((agent.society == null || !agent.society.isDark()) && !agent.isCommandable())
+                                        {
+                                            targetAgents.Add(agent);
+                                        }
+                                    }
+                                    else if (tolerance.status > 0)
+                                    {
+                                        if (agent.isCommandable() && __instance.parent.shadow < 0.5 && __instance.parent.infiltration < 1.0)
+                                        {
+                                            targetAgents.Add(agent);
+                                        }
+                                        else if (agent.society == null)
+                                        {
+                                            targetAgents.Add(agent);
+                                        }
+                                        else if (__instance.parent.shadow < 0.5 && agent.society.isDark())
+                                        {
+                                            targetAgents.Add(agent);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if ((agent.society == null || !agent.society.isDark()) && !agent.isCommandable())
+                                        {
+                                            targetAgents.Add(agent);
+                                        }
+                                        else if (agent.isCommandable() && __instance.parent.shadow < 0.5 && __instance.parent.infiltration < 1.0)
+                                        {
+                                            targetAgents.Add(agent);
+                                        }
+                                        else if (__instance.parent.shadow < 0.5 && agent.society.isDark())
+                                        {
+                                            targetAgents.Add(agent);
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (targetAgents.Count > 0)
+                            {
+                                foreach (UA agent in targetAgents)
+                                {
+                                    agent.hp--;
+                                    if (agent.hp <= 0)
+                                    {
+                                        if (agent.isCommandable() || agent.person.isWatched())
+                                        {
+                                            __instance.map.addUnifiedMessage(__instance, agent, "Army Kills Agent", string.Concat(new string[]
+                                            {
+                                                __instance.getName(),
+                                                " has inflicted 1 HP damage and thus killed ",
+                                                agent.getName(),
+                                                ", as they attempt to perform this challenge.\n\nWhile an orc army is at rest, they patrol constantly, attacking any outsiders operating in their home camp, unless they are tolerant towards them, or, in the case of dark agents, including player controlled agents, the army's home camp is >50% shadow. (You CANNOT see this on the map by the red spikes on the army icon when the agent is selected). Note: 100% infiltration will allow your agents to continue to operate normally"
+                                            }), UnifiedMessage.messageType.ARMY_BLOCKS, false);
+                                        }
+                                        agent.die(__instance.map, "Killed by " + __instance.getName(), __instance.person);
+                                    }
+                                    else
+                                    {
+                                        if (agent.isCommandable() || agent.person.isWatched())
+                                        {
+                                            __instance.map.addUnifiedMessage(__instance, agent, "Army Intercepts", string.Concat(new string[]
+                                            {
+                                                __instance.getName(),
+                                                " has blocked ",
+                                                agent.getName(),
+                                                ", as they are perform this challenge in an orc camp that is not tolerant of them. They have taken 1HP adamge while escaping, and will continue to do so until they leave the location.\n\nWhile an orc army is at rest, they patrol constantly, attacking any outsiders operating in their home camp, unless they are tolerant towards them, or, in the case of dark agents, including player controlled agents, the army's home camp is >50% shadow. (You CANNOT see this on the map by the red spikes on the army icon when the agent is selected). Note: 100% infiltration will allow your agents to continue to operate normally"
+                                            }), UnifiedMessage.messageType.ARMY_BLOCKS, false);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private static double UA_getChallengeUtility_Postfix(double utility, UA __instance, Challenge c, List<ReasonMsg> reasons)
+        {
+            bool willIntercept = false;
+
+            if (c.location.settlement is Set_OrcCamp camp && camp.army != null && camp.army.location == camp.location && camp.location.soc is SG_Orc orcSociety)
+            {
+                if (orcSociety != null && ModCore.data.orcSGCultureMap.ContainsKey(orcSociety))
+                {
+                    HolyOrder_OrcsPlus_Orcs orcCulture = ModCore.data.orcSGCultureMap[orcSociety];
+
+                    if (orcCulture == null || __instance.society == orcSociety || __instance.society == orcCulture)
+                    {
+                        return utility;
+                    }
+
+                    if ( __instance.homeLocation != -1 && (__instance.map.locations[__instance.homeLocation].soc == orcSociety || __instance.map.locations[__instance.homeLocation].soc == orcCulture))
+                    {
+                        return utility;
+                    }
+
+                    H_OrcsPlus_Intolerance tolerance = orcCulture.tenets.OfType<H_OrcsPlus_Intolerance>().FirstOrDefault();
+                    if (tolerance != null)
+                    {
+                        if (__instance.society is SG_Orc || __instance.society is HolyOrder_OrcsPlus_Orcs)
+                        {
+                            willIntercept = true;
+                        }
+                        else if (tolerance.status < 0)
+                        {
+                            if ((__instance.society == null || !__instance.society.isDark()) && !__instance.isCommandable())
+                            {
+                                willIntercept = true;
+                            }
+                        }
+                        else if (tolerance.status > 0)
+                        {
+                            if (__instance.isCommandable() && camp.shadow < 0.5 && camp.infiltration < 1.0)
+                            {
+                                willIntercept = true;
+                            }
+                            else if (__instance.society == null)
+                            {
+                                willIntercept = true;
+                            }
+                            else if (camp.shadow < 0.5 && __instance.society.isDark())
+                            {
+                                willIntercept = true;
+                            }
+                        }
+                        else
+                        {
+                            if ((__instance.society == null || !__instance.society.isDark()) && !__instance.isCommandable())
+                            {
+                                willIntercept = true;
+                            }
+                            else if (__instance.isCommandable() && camp.shadow < 0.5 && camp.infiltration < 1.0)
+                            {
+                                willIntercept = true;
+                            }
+                            else if (camp.shadow < 0.5 && __instance.society.isDark())
+                            {
+                                willIntercept = true;
+                            }
+                        }
+                    }
+                }
+
+                if (willIntercept)
+                {
+                    double val = -125;
+                    reasons?.Add(new ReasonMsg("Army Blocking me", val));
+                    utility += val;
+                }
+            }
+
+            return utility;
+        }
+
+        private static double AIChallenge_checkChallengeUtility_Postfix(double utility, Challenge challenge, UA ua, List<ReasonMsg> reasonMsgs, Location location)
+        {
+            bool willIntercept = false;
+
+            if (location.settlement is Set_OrcCamp camp && camp.army != null && camp.army.location == camp.location && camp.location.soc is SG_Orc orcSociety)
+            {
+                if (orcSociety != null && ModCore.data.orcSGCultureMap.ContainsKey(orcSociety))
+                {
+                    HolyOrder_OrcsPlus_Orcs orcCulture = ModCore.data.orcSGCultureMap[orcSociety];
+
+                    if (orcCulture == null || ua.society == orcSociety || ua.society == orcCulture)
+                    {
+                        return utility;
+                    }
+
+                    if (ua.homeLocation != -1 && (ua.map.locations[ua.homeLocation].soc == orcSociety || ua.map.locations[ua.homeLocation].soc == orcCulture))
+                    {
+                        return utility;
+                    }
+
+                    H_OrcsPlus_Intolerance tolerance = orcCulture.tenets.OfType<H_OrcsPlus_Intolerance>().FirstOrDefault();
+                    if (tolerance != null)
+                    {
+                        if (ua.society is SG_Orc || ua.society is HolyOrder_OrcsPlus_Orcs)
+                        {
+                            willIntercept = true;
+                        }
+                        else if (tolerance.status < 0)
+                        {
+                            if ((ua.society == null || !ua.society.isDark()) && !ua.isCommandable())
+                            {
+                                willIntercept = true;
+                            }
+                        }
+                        else if (tolerance.status > 0)
+                        {
+                            if (ua.isCommandable() && camp.shadow < 0.5 && camp.infiltration < 1.0)
+                            {
+                                willIntercept = true;
+                            }
+                            else if (ua.society == null)
+                            {
+                                willIntercept = true;
+                            }
+                            else if (camp.shadow < 0.5 && ua.society.isDark())
+                            {
+                                willIntercept = true;
+                            }
+                        }
+                        else
+                        {
+                            if ((ua.society == null || !ua.society.isDark()) && !ua.isCommandable())
+                            {
+                                willIntercept = true;
+                            }
+                            else if (ua.isCommandable() && camp.shadow < 0.5 && camp.infiltration < 1.0)
+                            {
+                                willIntercept = true;
+                            }
+                            else if (camp.shadow < 0.5 && ua.society.isDark())
+                            {
+                                willIntercept = true;
+                            }
+                        }
+                    }
+                }
+
+                if (willIntercept)
+                {
+                    double val = -125;
+                    reasonMsgs?.Add(new ReasonMsg("Army Blocking me", val));
+                    utility += val;
+                }
+            }
+
+            return utility;
         }
     }
 }

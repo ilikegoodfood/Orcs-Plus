@@ -1,6 +1,8 @@
 ﻿using Assets.Code;
+using FullSerializer;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Orcs_Plus
@@ -166,9 +168,9 @@ namespace Orcs_Plus
                 }
             }
             val = getOrcCulture()?.plunderValue ?? 0.0;
-            reasons?.Add(new ReasonMsg("Existing Funding", val));
-            result += val;
-            
+            reasons?.Add(new ReasonMsg("Existing Funding", -val));
+            result -= val;
+
             return result;
         }
 

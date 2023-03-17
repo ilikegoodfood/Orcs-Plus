@@ -28,7 +28,7 @@ namespace Orcs_Plus
 
         private void populateOrcUpstarts()
         {
-            if (comLibAI.TryGetAgentType(typeof(UAEN_OrcUpstart), out List<AIChallenge> aiChallenges))
+            if (comLibAI.TryGetAgentType(typeof(UAEN_OrcUpstart)))
             {
                 AIChallenge challenge = new AIChallenge(typeof(Rti_OrcsPlus_RecruitWarband), 0.0);
                 challenge.delegates_ValidFor.Add(delegate_ValidFor_RecruitWarband);
