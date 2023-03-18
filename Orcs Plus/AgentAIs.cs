@@ -19,10 +19,6 @@ namespace Orcs_Plus
             this.map = map;
             comLibAI = ModCore.comLib.GetAgentAI();
 
-            AgentAI.debug.outputUtility_ChosenAction = true;
-            AgentAI.debug.outputValidity_ValidChallenges = true;
-            AgentAI.debug.outputUtility_ValidChallenges = true;
-
             populateOrcUpstarts();
         }
 
@@ -42,7 +38,7 @@ namespace Orcs_Plus
             }
         }
 
-        private static bool delegate_ValidFor_RecruitWarband(Challenge challenge, UA ua, Location location)
+        private static bool delegate_ValidFor_RecruitWarband(AgentAI.ChallengeData challengeData, UA ua)
         {
             bool hasFullMinions = ua.getStatCommandLimit() - ua.getCurrentlyUsedCommand() <= 0;
             Set_OrcCamp camp = ua.location.settlement as Set_OrcCamp;
@@ -72,12 +68,12 @@ namespace Orcs_Plus
 
             I_HordeBanner banner = ua.person.items.OfType<I_HordeBanner>().FirstOrDefault();
 
-            return !hasFullMinions && location.soc != null && banner != null && location.soc == banner.orcs && location.settlement is Set_OrcCamp;
+            return !hasFullMinions && challengeData.location.soc != null && banner != null && challengeData.location.soc == banner.orcs && challengeData.location.settlement is Set_OrcCamp;
         }
 
-        private static double delegate_Utility_RecruitWarband(Challenge challenge, UA ua, Location location, double utility, List<ReasonMsg> reasonMsgs)
+        private static double delegate_Utility_RecruitWarband(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
         {
-            Rti_OrcsPlus_RecruitWarband recruitWarband = challenge as Rti_OrcsPlus_RecruitWarband;
+            Rti_OrcsPlus_RecruitWarband recruitWarband = challengeData.challenge as Rti_OrcsPlus_RecruitWarband;
             int availableCommand = ua.getStatCommandLimit() - ua.getCurrentlyUsedCommand();
             int availableSlots = 0;
 
@@ -110,7 +106,7 @@ namespace Orcs_Plus
             return utility;
         }
 
-        private static bool delegate_ValidFor_FundHorde(Challenge challenge, UA ua, Location location)
+        private static bool delegate_ValidFor_FundHorde(AgentAI.ChallengeData challengeDatae, UA ua)
         {
             if (ua.person.gold > 200)
             {
@@ -120,7 +116,7 @@ namespace Orcs_Plus
             return false;
         }
 
-        private static double delegate_Utility_FundHorde(Challenge challenge, UA ua, Location location, double utility, List<ReasonMsg> reasonMsgs)
+        private static double delegate_Utility_FundHorde(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
         {
             double val = ua.person.gold - 200;
             reasonMsgs.Add(new ReasonMsg("Stash Gold", val));
