@@ -71,6 +71,7 @@ namespace Orcs_Plus
 
         public override void afterLoading(Map map)
         {
+            core = this;
             foreach (ModKernel core in map.mods)
             {
                 switch (core.GetType().Namespace)
@@ -150,7 +151,7 @@ namespace Orcs_Plus
                 }
             }
 
-            //Console.WriteLine("OrcsPlus: orcSGCultureMap updated");
+            Console.WriteLine("OrcsPlus: orcSGCultureMap updated");
         }
 
         public override void onTurnEnd(Map map)

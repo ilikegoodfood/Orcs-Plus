@@ -140,7 +140,7 @@ namespace Orcs_Plus
 
         public override bool valid()
         {
-            return camp.location.settlement == camp && camp.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.ContainsKey(orcSociety);
+            return camp.location.settlement == camp && camp.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.ContainsKey(orcSociety) && ModCore.core.data.orcSGCultureMap[orcSociety] != null;
         }
 
         public override int getSimplificationLevel()
