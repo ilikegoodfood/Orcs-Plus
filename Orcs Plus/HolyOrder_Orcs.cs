@@ -8,11 +8,11 @@ using static SortedDictionaryProvider;
 
 namespace Orcs_Plus
 {
-    public class HolyOrder_OrcsPlus_Orcs : HolyOrder
+    public class HolyOrder_Orcs : HolyOrder
     {
         public SG_Orc orcSociety;
 
-        public bool Infiltrated;
+        public House houseOrc;
 
         public List<Set_OrcCamp> camps = new List<Set_OrcCamp>();
 
@@ -32,17 +32,21 @@ namespace Orcs_Plus
 
         public double plunderValue;
 
-        public H_OrcsPlus_Intolerance tenet_drumsOfWar;
+        public H_Intolerance tenet_intolerance;
 
-        public HolyOrder_OrcsPlus_Orcs(Map m, Location l, SG_Orc o) : base(m, l)
+        public HolyOrder_Orcs(Map m, Location l, SG_Orc o) : base(m, l)
         {
+            //Console.WriteLine("OrcsPlus: HolyOrder_Orcs Ctor");
             orcSociety = o;
             capital = l.index;
 
             generateName(l);
+            updateData();
             CreateSeat();
 
-            genderExclusive = -1;
+            houseOrc = new House(map);
+
+            genderExclusive = 1 - Eleven.random.Next(3);
             priorityPreach.status = 0;
             priorityTemples.status = 0;
             elderInflueenceBias = 0.8;
@@ -57,8 +61,8 @@ namespace Orcs_Plus
             // Add required base HolyTenets to new list.
             tenet_alignment = new H_Alignment(this);
             tenets.Add(tenet_alignment);
-            tenet_drumsOfWar = new H_OrcsPlus_Intolerance(this);
-            tenets.Add(tenet_drumsOfWar);
+            tenet_intolerance = new H_Intolerance(this);
+            tenets.Add(tenet_intolerance);
             tenet_dogmatic = new H_Dogmantic(this);
             tenets.Add(tenet_dogmatic);
 
@@ -213,6 +217,7 @@ namespace Orcs_Plus
 
         new public void updateData()
         {
+            //Console.WriteLine("OrcsPlus: Update HolyOrder_Orcs data");
             camps.Clear();
             specializedCamps.Clear();
             temples.Clear();
@@ -222,14 +227,7 @@ namespace Orcs_Plus
             plunder.Clear();
             plunderValue = 0;
 
-            ModCore.data.getOrcCamps(map, this, out camps, out specializedCamps);
-
-            if (seat == null || seat.settlement == null || seat.settlement.location?.settlement != seat.settlement || !seat.settlement.subs.Contains(seat))
-            {
-                seat = null;
-                CreateSeat();
-            }
-
+            ModCore.core.data.getOrcCamps(map, this, out camps, out specializedCamps);
             List<Set_OrcCamp> allCamps = new List<Set_OrcCamp>();
             allCamps.AddRange(camps);
             allCamps.AddRange(specializedCamps);
@@ -301,6 +299,7 @@ namespace Orcs_Plus
 
         public void CreateSeat()
         {
+            //Console.WriteLine("OrcsPlus: Create HolOrder_Orcs Seat");
             if (seat == null)
             {
                 Set_OrcCamp capitalCamp = map.locations[capital].settlement as Set_OrcCamp;
@@ -312,8 +311,6 @@ namespace Orcs_Plus
                     {
                         if (camps.Count == 0)
                         {
-                            orcSociety.checkIsGone();
-                            checkIsGone();
                             return;
                         }
 
@@ -340,9 +337,12 @@ namespace Orcs_Plus
                     }
                 }
 
-                seat = new Sub_OrcsPlus_OrcCultureCapital(capitalCamp, this);
-                capitalCamp.subs.Add(seat);
-
+                if (capitalCamp != null)
+                {
+                    seat = new Sub_OrcCultureCapital(capitalCamp, this);
+                    capitalCamp.subs.Add(seat);
+                    temples.Add(seat);
+                }
             }
         }
 
@@ -384,8 +384,13 @@ namespace Orcs_Plus
         {
             updateData();
 
+            if (seat == null || seat.settlement == null || seat.settlement.location?.settlement != seat.settlement || !seat.settlement.subs.Contains(seat))
+            {
+                seat = null;
+                CreateSeat();
+            }
+
             bool playerCanInfluenceFlag = influenceElder >= influenceElderReq;
-            updateData();
 
             int acolyteCount = 0;
             if (acolytes != null)
@@ -473,7 +478,7 @@ namespace Orcs_Plus
 
             if (location != null)
             {
-                UAA item = new UAA(location, this);
+                UAA_OrcElder item = new UAA_OrcElder(location, this, new Person(this, houseOrc));
                 location.units.Add(item);
                 map.units.Add(item);
                 updateData();
@@ -517,6 +522,60 @@ namespace Orcs_Plus
                 }
 
                 targetPlunder.addGold(delta);
+                updateData();
+            }
+        }
+
+        public bool spendGold(double gold)
+        {
+            updateData();
+            
+            List<Pr_OrcPlunder> emptyPlunder = new List<Pr_OrcPlunder>();
+
+            if (gold > plunderValue)
+            {
+                return false;
+            }
+
+            foreach (Pr_OrcPlunder p in plunder)
+            {
+                int pGold = (int)Math.Floor(Math.Min(gold, p.getGold()));
+                p.addGold(-pGold);
+                if (p.getGold() <= 0)
+                {
+                    bool isEmpty = true;
+                    foreach (Item item in p.items)
+                    {
+                        if (p != null)
+                        {
+                            isEmpty = false;
+                            break;
+                        }
+
+                        if (isEmpty)
+                        {
+                            emptyPlunder.Add(p);
+                        }
+                    }
+                }
+
+                gold -= pGold;
+            }
+
+            foreach (Pr_OrcPlunder p in emptyPlunder)
+            {
+                p.location.properties.Remove(p);
+            }
+
+            updateData();
+
+            if (gold <= 0.0)
+            {
+                return true;
+            }
+            else
+            {
+                return true;
             }
         }
 

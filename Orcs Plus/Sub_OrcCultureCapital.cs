@@ -8,15 +8,16 @@ using UnityEngine;
 
 namespace Orcs_Plus
 {
-    internal class Sub_OrcsPlus_OrcCultureCapital : Sub_HolyOrderCapital
+    public class Sub_OrcCultureCapital : Sub_HolyOrderCapital
     {
-        public Sub_OrcsPlus_OrcCultureCapital(Settlement set, HolyOrder_OrcsPlus_Orcs order)
+        public Sub_OrcCultureCapital(Settlement set, HolyOrder_Orcs order)
             : base(set, order)
         {
             // Remove unwanted challenges added by parent types.
             challenges.Clear();
 
             this.order = order;
+            challenges.Add(new Ch_H_ReprimandUpstart(this, this.settlement.location));
 
             // Notify the holy order that this temple exists.
             order.newTempleCreated(this);
@@ -46,7 +47,7 @@ namespace Orcs_Plus
 
         public override Sprite getIcon()
         {
-            return settlement.map.world.iconStore.orcDefences;
+            return EventManager.getImg("OrcsPlus.Icon_GreatHall.png");
         }
 
         public override void turnTick()

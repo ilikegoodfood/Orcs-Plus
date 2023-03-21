@@ -9,9 +9,9 @@ using UnityEngine;
 
 namespace Orcs_Plus
 {
-    internal class Ch_OrcsPlus_GatherHorde : Challenge
+    internal class Ch_GatherHorde : Challenge
     {
-        public Ch_OrcsPlus_GatherHorde(Location loc) : base(loc)
+        public Ch_GatherHorde(Location loc) : base(loc)
         {
             
         }
@@ -42,7 +42,7 @@ namespace Orcs_Plus
 
             if (orcs != null)
             {
-                List<UM_OrcArmy> armies = ModCore.data.getOrcArmies(map, orcs);
+                List<UM_OrcArmy> armies = ModCore.core.data.getOrcArmies(map, orcs);
                 int stepCount = 0;
 
                 foreach (UM_OrcArmy army in armies)
@@ -55,7 +55,7 @@ namespace Orcs_Plus
                             stepCount = distance;
                         }
 
-                        army.task = new Task_OrcsPlus_GatherAtLocation(location, stepCount + 11);
+                        army.task = new Task_GatherAtLocation(location, stepCount + 11);
                     }
                 }
             }
@@ -130,7 +130,7 @@ namespace Orcs_Plus
                     if (banner != null && orcs == banner.orcs)
                     {
                         //Console.WriteLine("OrcsPlus: " + uA.getName() + " has orcish banner belonging to this orc social group.");
-                        List<UM_OrcArmy> armies = ModCore.data.getOrcArmies(map, orcs);
+                        List<UM_OrcArmy> armies = ModCore.core.data.getOrcArmies(map, orcs);
 
                         if (armies != null)
                         {

@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Orcs_Plus
 {
-    public class H_OrcsPlus_Intolerance : HolyTenet
+    public class H_Intolerance : HolyTenet
     {
-        public H_OrcsPlus_Intolerance(HolyOrder_OrcsPlus_Orcs ord)
+        public H_Intolerance(HolyOrder_Orcs ord)
             : base(ord)
         {
 

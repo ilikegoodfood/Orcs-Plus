@@ -90,6 +90,9 @@ namespace Orcs_Plus
             // Patches for I_HordeBanner
             harmony.Patch(original: AccessTools.Constructor(typeof(I_HordeBanner), new Type[] { typeof(Map), typeof(SG_Orc), typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(I_HordeBanner_ctor_Postfix)));
 
+            // Patches for SG_Orc
+            harmony.Patch(original: AccessTools.Constructor(typeof(SG_Orc), new Type[] { typeof(Map), typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(SG_Orc_ctor_Postfox)));
+
             // Patches for Set_OrcCamp
             harmony.Patch(original: AccessTools.Constructor(typeof(Set_OrcCamp), new Type[] { typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(Set_OrcCamp_ctor_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Set_OrcCamp), nameof(Set_OrcCamp.turnTick)), postfix: new HarmonyMethod(patchType, nameof(Set_OrcCamp_turnTick_Postfix)));
@@ -112,7 +115,7 @@ namespace Orcs_Plus
 
         private static void Ch_Orcs_BuildFortress_getDesc_Postfix(ref string __result)
         {
-            __result += " You gain " + ModCore.data.influenceGain[ModData.influenceGainAction.BuildFortress] + " influence with the orc culture by completing this challenge.";
+            __result += " You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildFortress] + " influence with the orc culture by completing this challenge.";
         }
 
         private static void Ch_Orcs_BuildFortress_complete_Postfix(Ch_Orcs_BuildFortress __instance, UA u)
@@ -123,22 +126,22 @@ namespace Orcs_Plus
             }
 
             SG_Orc orcs = u.location.soc as SG_Orc;
-            HolyOrder_OrcsPlus_Orcs orcCulture = null;
+            HolyOrder_Orcs orcCulture = null;
 
-            if (orcs != null && ModCore.data.orcSGCultureMap.ContainsKey(orcs) && ModCore.data.orcSGCultureMap[orcs] != null)
+            if (orcs != null && ModCore.core.data.orcSGCultureMap.ContainsKey(orcs) && ModCore.core.data.orcSGCultureMap[orcs] != null)
             {
-                orcCulture = ModCore.data.orcSGCultureMap[orcs];
+                orcCulture = ModCore.core.data.orcSGCultureMap[orcs];
             }
 
             if (orcCulture != null)
             {
-                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
+                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
             }
         }
 
         private static void Ch_Orcs_BuildMages_getDesc_Postfix(ref string __result)
         {
-            __result += " You gain " + ModCore.data.influenceGain[ModData.influenceGainAction.BuildMages] + " influence with the orc culture by completing this challenge.";
+            __result += " You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildMages] + " influence with the orc culture by completing this challenge.";
         }
 
         private static void Ch_Orcs_BuildMages_complete_Postfix(Ch_Orcs_BuildMages __instance, UA u)
@@ -149,22 +152,22 @@ namespace Orcs_Plus
             }
 
             SG_Orc orcs = u.location.soc as SG_Orc;
-            HolyOrder_OrcsPlus_Orcs orcCulture = null;
+            HolyOrder_Orcs orcCulture = null;
 
-            if (orcs != null && ModCore.data.orcSGCultureMap.ContainsKey(orcs) && ModCore.data.orcSGCultureMap[orcs] != null)
+            if (orcs != null && ModCore.core.data.orcSGCultureMap.ContainsKey(orcs) && ModCore.core.data.orcSGCultureMap[orcs] != null)
             {
-                orcCulture = ModCore.data.orcSGCultureMap[orcs];
+                orcCulture = ModCore.core.data.orcSGCultureMap[orcs];
             }
 
             if (orcCulture != null)
             {
-                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
+                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
             }
         }
 
         private static void Ch_Orcs_BuildMenagerie_getDesc_Postfix(ref string __result)
         {
-            __result += " You gain " + ModCore.data.influenceGain[ModData.influenceGainAction.BuildMenagerie] + " influence with the orc culture by completing this challenge.";
+            __result += " You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildMenagerie] + " influence with the orc culture by completing this challenge.";
         }
 
         private static void Ch_Orcs_BuildMenagerie_complete_Postfix(Ch_Orcs_BuildMenagerie __instance, UA u)
@@ -175,22 +178,22 @@ namespace Orcs_Plus
             }
 
             SG_Orc orcs = u.location.soc as SG_Orc;
-            HolyOrder_OrcsPlus_Orcs orcCulture = null;
+            HolyOrder_Orcs orcCulture = null;
 
-            if (orcs != null && ModCore.data.orcSGCultureMap.ContainsKey(orcs) && ModCore.data.orcSGCultureMap[orcs] != null)
+            if (orcs != null && ModCore.core.data.orcSGCultureMap.ContainsKey(orcs) && ModCore.core.data.orcSGCultureMap[orcs] != null)
             {
-                orcCulture = ModCore.data.orcSGCultureMap[orcs];
+                orcCulture = ModCore.core.data.orcSGCultureMap[orcs];
             }
 
             if (orcCulture != null)
             {
-                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.data.influenceGain[ModData.influenceGainAction.BuildMenagerie]), true);
+                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildMenagerie]), true);
             }
         }
 
         private static void Ch_Orcs_BuildShipyard_getDesc_Postfix(ref string __result)
         {
-            __result += " You gain " + ModCore.data.influenceGain[ModData.influenceGainAction.BuildShipyard] + " influence with the orc culture by completing this challenge.";
+            __result += " You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildShipyard] + " influence with the orc culture by completing this challenge.";
         }
 
         private static void Ch_Orcs_BuildShipyard_complete_Postfix(Ch_Orcs_BuildShipyard __instance, UA u)
@@ -201,22 +204,22 @@ namespace Orcs_Plus
             }
 
             SG_Orc orcs = u.location.soc as SG_Orc;
-            HolyOrder_OrcsPlus_Orcs orcCulture = null;
+            HolyOrder_Orcs orcCulture = null;
 
-            if (orcs != null && ModCore.data.orcSGCultureMap.ContainsKey(orcs) && ModCore.data.orcSGCultureMap[orcs] != null)
+            if (orcs != null && ModCore.core.data.orcSGCultureMap.ContainsKey(orcs) && ModCore.core.data.orcSGCultureMap[orcs] != null)
             {
-                orcCulture = ModCore.data.orcSGCultureMap[orcs];
+                orcCulture = ModCore.core.data.orcSGCultureMap[orcs];
             }
 
             if (orcCulture != null)
             {
-                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
+                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
             }
         }
 
         private static void Rt_Orcs_CommandeerShips_getDesc_Postfix(ref string __result)
         {
-            __result += " You gain " + ModCore.data.influenceGain[ModData.influenceGainAction.CommandeerShips] + " influence with the orc culture by completing this challenge.";
+            __result += " You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.CommandeerShips] + " influence with the orc culture by completing this challenge.";
         }
 
         private static IEnumerable<CodeInstruction> Rt_Orcs_CommandeerShips_complete_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
@@ -251,45 +254,45 @@ namespace Orcs_Plus
             }
 
             SG_Orc orcSociety = targetShipyard.location?.soc as SG_Orc;
-            HolyOrder_OrcsPlus_Orcs orcCulture = null;
+            HolyOrder_Orcs orcCulture = null;
 
-            if (orcSociety != null && ModCore.data.orcSGCultureMap.ContainsKey(orcSociety) && ModCore.data.orcSGCultureMap[orcSociety] != null)
+            if (orcSociety != null && ModCore.core.data.orcSGCultureMap.ContainsKey(orcSociety) && ModCore.core.data.orcSGCultureMap[orcSociety] != null)
             {
-                orcCulture = ModCore.data.orcSGCultureMap[orcSociety];
+                orcCulture = ModCore.core.data.orcSGCultureMap[orcSociety];
             }
 
             if (orcCulture != null)
             {
-                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(rt.getName(), ModCore.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
+                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(rt.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
             }
         }
 
         private static void Ch_Orcs_DevastateOrcishIndustry_getDesc_Postfix(ref string __result)
         {
-            __result += " If completed by a human agent, they gain " + ModCore.data.influenceGain[ModData.influenceGainAction.DevastateIndustry] + " influence with the orc culture.";
+            __result += " If completed by a human agent, they gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.DevastateIndustry] + " influence with the orc culture.";
         }
 
         private static void Ch_Orcs_DevastateOrcishIndustry_complete_Postfix(Ch_Orcs_DevastateOrcishIndustry __instance, UA u)
         {
             if (!u.isCommandable() && !u.society.isDark())
             {
-                HolyOrder_OrcsPlus_Orcs orcCulture = null;
+                HolyOrder_Orcs orcCulture = null;
 
-                if (__instance.orcs != null && ModCore.data.orcSGCultureMap.ContainsKey(__instance.orcs) && ModCore.data.orcSGCultureMap[__instance.orcs] != null)
+                if (__instance.orcs != null && ModCore.core.data.orcSGCultureMap.ContainsKey(__instance.orcs) && ModCore.core.data.orcSGCultureMap[__instance.orcs] != null)
                 {
-                    orcCulture = ModCore.data.orcSGCultureMap[__instance.orcs];
+                    orcCulture = ModCore.core.data.orcSGCultureMap[__instance.orcs];
                 }
 
                 if (orcCulture != null)
                 {
-                    mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.data.influenceGain[ModData.influenceGainAction.DevastateIndustry]));
+                    mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.DevastateIndustry]));
                 }
             }
         }
 
         private static void Ch_Orcs_Expand_getDesc_Postfix(ref string __result)
         {
-            __result += " You gain " + ModCore.data.influenceGain[ModData.influenceGainAction.Expand] + " influence with the orc culture by completing this challenge.";
+            __result += " You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand] + " influence with the orc culture by completing this challenge.";
         }
 
         private static void Ch_Orcs_Expand_complete_Postfix(Ch_Orcs_Expand __instance, UA u)
@@ -300,22 +303,22 @@ namespace Orcs_Plus
             }
 
             SG_Orc orcs = u.location.soc as SG_Orc;
-            HolyOrder_OrcsPlus_Orcs orcCulture = null;
+            HolyOrder_Orcs orcCulture = null;
 
-            if (orcs != null && ModCore.data.orcSGCultureMap.ContainsKey(orcs) && ModCore.data.orcSGCultureMap[orcs] != null)
+            if (orcs != null && ModCore.core.data.orcSGCultureMap.ContainsKey(orcs) && ModCore.core.data.orcSGCultureMap[orcs] != null)
             {
-                orcCulture = ModCore.data.orcSGCultureMap[orcs];
+                orcCulture = ModCore.core.data.orcSGCultureMap[orcs];
             }
 
             if (orcCulture != null)
             {
-                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.data.influenceGain[ModData.influenceGainAction.Expand]), true);
+                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand]), true);
             }
         }
 
         private static void Ch_OrcRaiding_getDesc_Postfix(Ch_OrcRaiding __instance, ref string __result)
         {
-            __result = "Raids the most prosperous neighbouring human settlement, causing <b>devastation</b>, which harms prosperity and food production, and taking " + (int)(100.0 * __instance.map.param.ch_orcRaidingGoldGain) + "% of the settlment's gold reserves. Raiding will not completely destroy a settlement. If the settlement's devastation is too high, the raiding will only return with gold. You gain " + ModCore.data.influenceGain[ModData.influenceGainAction.Raiding] + " influence with the orc culture by completing this challenge.";
+            __result = "Raids the most prosperous neighbouring human settlement, causing <b>devastation</b>, which harms prosperity and food production, and taking " + (int)(100.0 * __instance.map.param.ch_orcRaidingGoldGain) + "% of the settlment's gold reserves. Raiding will not completely destroy a settlement. If the settlement's devastation is too high, the raiding will only return with gold. You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.Raiding] + " influence with the orc culture by completing this challenge.";
         }
 
         private static IEnumerable<CodeInstruction> Ch_OrcRaiding_valid_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
@@ -491,15 +494,15 @@ namespace Orcs_Plus
             if (orcSociety != null)
             {
                 orcSociety.menace += map.param.ch_orcishRaidingMenaceGain;
-                HolyOrder_OrcsPlus_Orcs orcCulture = null;
-                if (u.isCommandable() && ModCore.data.orcSGCultureMap.ContainsKey(orcSociety) && ModCore.data.orcSGCultureMap[orcSociety] != null)
+                HolyOrder_Orcs orcCulture = null;
+                if (u.isCommandable() && ModCore.core.data.orcSGCultureMap.ContainsKey(orcSociety) && ModCore.core.data.orcSGCultureMap[orcSociety] != null)
                 {
-                    orcCulture = ModCore.data.orcSGCultureMap[orcSociety];
+                    orcCulture = ModCore.core.data.orcSGCultureMap[orcSociety];
                 }
 
                 if (orcCulture != null)
                 {
-                    mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(ch.getName(), ModCore.data.influenceGain[ModData.influenceGainAction.Raiding]), true);
+                    mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(ch.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Raiding]), true);
                 }
             }
 
@@ -508,7 +511,7 @@ namespace Orcs_Plus
 
         private static void Ch_Orcs_RetreatToTheHills_getDesc_Postfix(ref string __result)
         {
-            __result = "Causes half of all orc industry in this orc camp, and neighbouring orc camps, to be turned into defensive positions. Good at quickly reducing threat to avoid war, or surviving one against a powerful foe. Reduces societal menace by " + ModCore.data.menaceGain[ModData.menaceGainAction.Retreat] + ".";
+            __result = "Causes half of all orc industry in this orc camp, and neighbouring orc camps, to be turned into defensive positions. Good at quickly reducing threat to avoid war, or surviving one against a powerful foe.";
         }
 
         private static IEnumerable<CodeInstruction> Ch_Orcs_RetreatToTheHills_complete_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
@@ -532,50 +535,36 @@ namespace Orcs_Plus
             }
 
             List<Location> targetLocations = new List<Location> { ch.location };
-            targetLocations.AddRange(ch.location.getNeighbours());
+            foreach (Location location in ch.location.getNeighbours())
+            {
+                if (location.settlement != null && location.settlement is Set_OrcCamp && location.soc == orcSociety)
+                {
+                    targetLocations.Add(location);
+                }
+            }
 
             foreach (Location targetLocation in targetLocations)
             {
                 Set_OrcCamp targetCamp = targetLocation.settlement as Set_OrcCamp;
-                if (targetCamp != null && targetLocation.soc == orcSociety)
+                Pr_OrcishIndustry industry = targetLocation.properties.OfType<Pr_OrcishIndustry>().FirstOrDefault();
+                Pr_OrcDefences defences = targetLocation.properties.OfType<Pr_OrcDefences>().FirstOrDefault();
+
+                if (defences == null)
                 {
-                    Pr_OrcishIndustry industry = null;
-                    Pr_OrcDefences defences = null;
-                    foreach (Property property in targetLocation.properties)
-                    {
-                        if (property is Pr_OrcishIndustry)
-                        {
-                            industry = property as Pr_OrcishIndustry;
-                        }
-
-                        if (property is Pr_OrcDefences)
-                        {
-                            defences = property as Pr_OrcDefences;
-                        }
-
-                        if (industry != null && defences != null)
-                        {
-                            break;
-                        }
-                    }
-
-                    if (defences == null)
-                    {
-                        defences = new Pr_OrcDefences(targetLocation);
-                        targetLocation.properties.Add(defences);
-                    }
-
-                    if (industry == null)
-                    {
-                        industry = new Pr_OrcishIndustry(targetLocation);
-                        industry.charge = 30.0;
-                        targetLocation.properties.Add(industry);
-                    }
-
-                    industry.charge /= 2.0;
-                    defences.charge += industry.charge * ModCore.data.orcDefenceFactor;
-                    targetCamp.defences += industry.charge;
+                    defences = new Pr_OrcDefences(targetLocation);
+                    targetLocation.properties.Add(defences);
                 }
+
+                if (industry == null)
+                {
+                    industry = new Pr_OrcishIndustry(targetLocation);
+                    industry.charge = 30.0;
+                    targetLocation.properties.Add(industry);
+                }
+
+                industry.charge /= 2.0;
+                defences.charge += industry.charge * ModCore.core.data.orcDefenceFactor;
+                targetCamp.defences += industry.charge;
             }
 
             foreach (Unit unit in ch.map.units)
@@ -595,7 +584,7 @@ namespace Orcs_Plus
                 }
             }
 
-            orcSociety.menace += ModCore.data.menaceGain[ModData.menaceGainAction.Retreat];
+            //orcSociety.menace += ModCore.core.data.menaceGain[ModData.menaceGainAction.Retreat];
         }
 
         private static void Ch_Subjugate_Orcs_getDesc_Postfix(Ch_Subjugate_Orcs __instance, ref string __result)
@@ -609,11 +598,11 @@ namespace Orcs_Plus
 
             if (orcCamp.specialism == 0)
             {
-                __result += " You gain " + ModCore.data.influenceGain[ModData.influenceGainAction.Subjugate] + " influence with the orc culture by completing this challenge.";
+                __result += " You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.Subjugate] + " influence with the orc culture by completing this challenge.";
                 return;
             }
 
-            __result += " You gain " + (ModCore.data.influenceGain[ModData.influenceGainAction.Subjugate] * 2) + " influence with the orc culture by completing this challenge.";
+            __result += " You gain " + (ModCore.core.data.influenceGain[ModData.influenceGainAction.Subjugate] * 2) + " influence with the orc culture by completing this challenge.";
         }
 
         private static void Ch_Subjugate_Orcs_complete_Postfix(Ch_Subjugate_Orcs __instance, UA u)
@@ -631,27 +620,27 @@ namespace Orcs_Plus
                 return;
             }
 
-            HolyOrder_OrcsPlus_Orcs orcCulture = null;
-            if (orcs != null && ModCore.data.orcSGCultureMap.ContainsKey(orcs) && ModCore.data.orcSGCultureMap[orcs] != null)
+            HolyOrder_Orcs orcCulture = null;
+            if (orcs != null && ModCore.core.data.orcSGCultureMap.ContainsKey(orcs) && ModCore.core.data.orcSGCultureMap[orcs] != null)
             {
-                orcCulture = ModCore.data.orcSGCultureMap[orcs];
+                orcCulture = ModCore.core.data.orcSGCultureMap[orcs];
             }
 
             if (orcCulture != null)
             {
                 if (orcCamp.specialism == 0)
                 {
-                    mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.data.influenceGain[ModData.influenceGainAction.Subjugate]), true);
+                    mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Subjugate]), true);
                     return;
                 }
 
-                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.data.influenceGain[ModData.influenceGainAction.Subjugate] * 2), true);
+                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Subjugate] * 2), true);
             }
         }
 
         private static void Rt_Orcs_ClaimTerritory_getDesc_Postfix(ref string __result)
         {
-            __result += " You gain " + ModCore.data.influenceGain[ModData.influenceGainAction.Expand] + " influence with the orc culture by completing this challenge.";
+            __result += " You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand] + " influence with the orc culture by completing this challenge.";
         }
 
         private static void Rt_Orcs_ClaimTerritory_complete_Postfix(Ch_Orcs_BuildFortress __instance, UA u)
@@ -662,16 +651,16 @@ namespace Orcs_Plus
             }
 
             SG_Orc orcs = u.location.soc as SG_Orc;
-            HolyOrder_OrcsPlus_Orcs orcCulture = null;
+            HolyOrder_Orcs orcCulture = null;
 
-            if (orcs != null && ModCore.data.orcSGCultureMap.ContainsKey(orcs) && ModCore.data.orcSGCultureMap[orcs] != null)
+            if (orcs != null && ModCore.core.data.orcSGCultureMap.ContainsKey(orcs) && ModCore.core.data.orcSGCultureMap[orcs] != null)
             {
-                orcCulture = ModCore.data.orcSGCultureMap[orcs];
+                orcCulture = ModCore.core.data.orcSGCultureMap[orcs];
             }
 
             if (orcCulture != null)
             {
-                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.data.influenceGain[ModData.influenceGainAction.Expand]), true);
+                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand]), true);
             }
         }
 
@@ -682,10 +671,12 @@ namespace Orcs_Plus
                 __instance.person.stat_command = 3;
             }
 
+            __instance.rituals.Add(new Rt_Orcs_Confinement(__instance.location));
+
             I_HordeBanner banner = __instance.person.items.OfType<I_HordeBanner>().FirstOrDefault();
             if (banner != null)
             {
-                Rti_OrcsPlus_RecruitWarband recruit = banner.rituals.OfType<Rti_OrcsPlus_RecruitWarband>().FirstOrDefault();
+                Rti_RecruitWarband recruit = banner.rituals.OfType<Rti_RecruitWarband>().FirstOrDefault();
                 recruit?.complete(__instance);
             }
         }
@@ -695,11 +686,11 @@ namespace Orcs_Plus
             if (__instance is UM_OrcArmy orcArmy && other is UA && !result)
             {
                 SG_Orc orcSociety = __instance.society as SG_Orc;
-                if (orcSociety != null && ModCore.data.orcSGCultureMap.ContainsKey(orcSociety))
+                if (orcSociety != null && ModCore.core.data.orcSGCultureMap.ContainsKey(orcSociety) && ModCore.core.data.orcSGCultureMap[orcSociety] != null)
                 {
-                    HolyOrder_OrcsPlus_Orcs orcCulture = ModCore.data.orcSGCultureMap[orcSociety];
+                    HolyOrder_Orcs orcCulture = ModCore.core.data.orcSGCultureMap[orcSociety];
 
-                    if (orcCulture == null || other.society == orcSociety || other.society == orcCulture)
+                    if (other.society == orcSociety || other.society == orcCulture)
                     {
                         return result;
                     }
@@ -722,10 +713,10 @@ namespace Orcs_Plus
                         }
                     }
 
-                    H_OrcsPlus_Intolerance tolerance = orcCulture.tenets.OfType<H_OrcsPlus_Intolerance>().FirstOrDefault();
+                    H_Intolerance tolerance = orcCulture.tenets.OfType<H_Intolerance>().FirstOrDefault();
                     if (tolerance != null)
                     {
-                        if (other.society is SG_Orc || other.society is HolyOrder_OrcsPlus_Orcs)
+                        if (other.society is SG_Orc || other.society is HolyOrder_Orcs)
                         {
                             result = true;
                         }
@@ -789,14 +780,14 @@ namespace Orcs_Plus
             if (other is UA target && upstart.society is SG_Orc orcSociety && target.society != orcSociety)
             {
                 utility = 0.0;
-                HolyOrder_OrcsPlus_Orcs orcCulture = null;
-                if (ModCore.data.orcSGCultureMap.ContainsKey(orcSociety) && ModCore.data.orcSGCultureMap[orcSociety] != null)
+                HolyOrder_Orcs orcCulture = null;
+                if (ModCore.core.data.orcSGCultureMap.ContainsKey(orcSociety) && ModCore.core.data.orcSGCultureMap[orcSociety] != null)
                 {
-                    orcCulture = ModCore.data.orcSGCultureMap[orcSociety];
+                    orcCulture = ModCore.core.data.orcSGCultureMap[orcSociety];
                 }
                 if (orcCulture != null && target.society != orcCulture)
                 {
-                    H_OrcsPlus_Intolerance intolerance = orcCulture.tenets.OfType<H_OrcsPlus_Intolerance>().FirstOrDefault();
+                    H_Intolerance intolerance = orcCulture.tenets.OfType<H_Intolerance>().FirstOrDefault();
                     if (intolerance != null)
                     {
                         bool otherIsTarget = false;
@@ -824,7 +815,7 @@ namespace Orcs_Plus
                                     }
                                     else if (intolerance.status < 0)
                                     {
-                                        if (upstart.society.getRel(target.society).state == DipRel.dipState.war || target.society is SG_Orc || target.society is HolyOrder_OrcsPlus_Orcs || !target.society.isDark() || !target.isCommandable())
+                                        if (upstart.society.getRel(target.society).state == DipRel.dipState.war || target.society is SG_Orc || target.society is HolyOrder_Orcs || !target.society.isDark() || !target.isCommandable())
                                         {
                                             otherIsTarget = true;
                                         }
@@ -1046,10 +1037,10 @@ namespace Orcs_Plus
 
             if (upstart.society is SG_Orc orcSociety)
             {
-                HolyOrder_OrcsPlus_Orcs orcCulture = null;
-                if (ModCore.data.orcSGCultureMap.ContainsKey(orcSociety) && ModCore.data.orcSGCultureMap[orcSociety] != null)
+                HolyOrder_Orcs orcCulture = null;
+                if (ModCore.core.data.orcSGCultureMap.ContainsKey(orcSociety) && ModCore.core.data.orcSGCultureMap[orcSociety] != null)
                 {
-                    orcCulture = ModCore.data.orcSGCultureMap[orcSociety];
+                    orcCulture = ModCore.core.data.orcSGCultureMap[orcSociety];
                 }
 
                 foreach (Unit unit in upstart.map.units)
@@ -1094,13 +1085,26 @@ namespace Orcs_Plus
 
         private static void I_HordeBanner_ctor_Postfix(I_HordeBanner __instance, Location l)
         {
-            __instance.rituals.Add(new Rti_OrcsPlus_RecruitWarband(l, __instance));
+            __instance.rituals.Add(new Rti_RecruitWarband(l, __instance));
+        }
+
+        private static void SG_Orc_ctor_Postfox(SG_Orc __instance)
+        {
+            if (!ModCore.core.data.orcSGCultureMap.ContainsKey(__instance))
+            {
+                ModCore.core.data.orcSGCultureMap.Add(__instance, null);
+            }
+
+            if (ModCore.core.data.orcSGCultureMap[__instance] == null)
+            {
+                ModCore.core.data.orcSGCultureMap[__instance] = new HolyOrder_Orcs(__instance.map, __instance.map.locations[__instance.capital], __instance);
+            }
         }
 
         private static void Set_OrcCamp_ctor_Postfix(Set_OrcCamp __instance)
         {
-            __instance.customChallenges.Add(new Ch_OrcsPlus_GatherHorde(__instance.location));
-            __instance.customChallenges.Add(new Ch_OrcsPlus_FundHorde(__instance.location, __instance));
+            __instance.customChallenges.Add(new Ch_GatherHorde(__instance.location));
+            __instance.customChallenges.Add(new Ch_FundHorde(__instance.location, __instance));
         }
 
         private static void Set_OrcCamp_turnTick_Postfix(Set_OrcCamp __instance)
@@ -1174,18 +1178,18 @@ namespace Orcs_Plus
                 {
                     if (u.isCommandable())
                     {
-                        mod.TryAddInfluenceGain(orcs, new ReasonMsg("Razing Orc Camp", ModCore.data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
+                        mod.TryAddInfluenceGain(orcs, new ReasonMsg("Razing Orc Camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
                     }
                     else if (!u.society.isDark())
                     {
-                        mod.TryAddInfluenceGain(orcs, new ReasonMsg("Razing Orc Camp", ModCore.data.influenceGain[ModData.influenceGainAction.RazingLocation]));
+                        mod.TryAddInfluenceGain(orcs, new ReasonMsg("Razing Orc Camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]));
                     }
                 }
             }
 
             if (set != null && u.isCommandable())
             {
-                List<SG_Orc> orcSocieties = ModCore.data.getOrcSocieties(u.map);
+                List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(u.map);
 
                 if (orcSocieties?.Count > 0 && u.society != null)
                 {
@@ -1198,7 +1202,7 @@ namespace Orcs_Plus
 
                         if (orcSociety.getRel(u.society)?.state == DipRel.dipState.war)
                         {
-                            mod.TryAddInfluenceGain(orcs, new ReasonMsg("Razing Emeny Settlement", ModCore.data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
+                            mod.TryAddInfluenceGain(orcs, new ReasonMsg("Razing Emeny Settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
                         }
                     }
                 }
@@ -1212,9 +1216,9 @@ namespace Orcs_Plus
                 List<UA> targetAgents = new List<UA>();
                 if (__instance.society != null && __instance.parent != null && __instance.parent.location.settlement == __instance.parent && __instance.parent.location.soc == __instance.society && __instance.location == __instance.parent.location && __instance.task == null)
                 {
-                    if (ModCore.data.orcSGCultureMap.TryGetValue(__instance.society as SG_Orc, out HolyOrder_OrcsPlus_Orcs orcCulture))
+                    if (ModCore.core.data.orcSGCultureMap.TryGetValue(__instance.society as SG_Orc, out HolyOrder_Orcs orcCulture))
                     {
-                        H_OrcsPlus_Intolerance tolerance = orcCulture.tenets.OfType<H_OrcsPlus_Intolerance>().FirstOrDefault();
+                        H_Intolerance tolerance = orcCulture.tenets.OfType<H_Intolerance>().FirstOrDefault();
                         if (tolerance != null)
                         {
                             foreach (Unit unit in __instance.parent.location.units)
@@ -1245,7 +1249,7 @@ namespace Orcs_Plus
                                 if (unit is UA agent && agent.task is Task_PerformChallenge)
                                 {
 
-                                    if (agent.society is SG_Orc || agent.society is HolyOrder_OrcsPlus_Orcs)
+                                    if (agent.society is SG_Orc || agent.society is HolyOrder_Orcs)
                                     {
                                         targetAgents.Add(agent);
                                     }
@@ -1335,9 +1339,9 @@ namespace Orcs_Plus
 
             if (c.location.settlement is Set_OrcCamp camp && camp.army != null && camp.army.location == camp.location && camp.location.soc is SG_Orc orcSociety)
             {
-                if (orcSociety != null && ModCore.data.orcSGCultureMap.ContainsKey(orcSociety))
+                if (orcSociety != null && ModCore.core.data.orcSGCultureMap.ContainsKey(orcSociety))
                 {
-                    HolyOrder_OrcsPlus_Orcs orcCulture = ModCore.data.orcSGCultureMap[orcSociety];
+                    HolyOrder_Orcs orcCulture = ModCore.core.data.orcSGCultureMap[orcSociety];
 
                     if (orcCulture == null || __instance.society == orcSociety || __instance.society == orcCulture)
                     {
@@ -1349,10 +1353,10 @@ namespace Orcs_Plus
                         return utility;
                     }
 
-                    H_OrcsPlus_Intolerance tolerance = orcCulture.tenets.OfType<H_OrcsPlus_Intolerance>().FirstOrDefault();
+                    H_Intolerance tolerance = orcCulture.tenets.OfType<H_Intolerance>().FirstOrDefault();
                     if (tolerance != null)
                     {
-                        if (__instance.society is SG_Orc || __instance.society is HolyOrder_OrcsPlus_Orcs)
+                        if (__instance.society is SG_Orc || __instance.society is HolyOrder_Orcs)
                         {
                             willIntercept = true;
                         }
@@ -1413,9 +1417,9 @@ namespace Orcs_Plus
 
             if (challengeData.location.settlement is Set_OrcCamp camp && camp.army != null && camp.army.location == camp.location && camp.location.soc is SG_Orc orcSociety)
             {
-                if (orcSociety != null && ModCore.data.orcSGCultureMap.ContainsKey(orcSociety))
+                if (orcSociety != null && ModCore.core.data.orcSGCultureMap.ContainsKey(orcSociety))
                 {
-                    HolyOrder_OrcsPlus_Orcs orcCulture = ModCore.data.orcSGCultureMap[orcSociety];
+                    HolyOrder_Orcs orcCulture = ModCore.core.data.orcSGCultureMap[orcSociety];
 
                     if (orcCulture == null || ua.society == orcSociety || ua.society == orcCulture)
                     {
@@ -1427,10 +1431,10 @@ namespace Orcs_Plus
                         return utility;
                     }
 
-                    H_OrcsPlus_Intolerance tolerance = orcCulture.tenets.OfType<H_OrcsPlus_Intolerance>().FirstOrDefault();
+                    H_Intolerance tolerance = orcCulture.tenets.OfType<H_Intolerance>().FirstOrDefault();
                     if (tolerance != null)
                     {
-                        if (ua.society is SG_Orc || ua.society is HolyOrder_OrcsPlus_Orcs)
+                        if (ua.society is SG_Orc || ua.society is HolyOrder_Orcs)
                         {
                             willIntercept = true;
                         }

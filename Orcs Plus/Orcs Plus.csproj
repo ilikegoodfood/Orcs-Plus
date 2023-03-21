@@ -61,19 +61,22 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AgentAIs.cs" />
-    <Compile Include="Ch_OrcsPlus_FundHorde.cs" />
-    <Compile Include="Ch_OrcsPlus_GatherHorde.cs" />
+    <Compile Include="Ch_FundHorde.cs" />
+    <Compile Include="Ch_GatherHorde.cs" />
+    <Compile Include="Ch_H_ReprimandUpstart.cs" />
     <Compile Include="ComLibHooks.cs" />
     <Compile Include="HarmonyPatches.cs" />
-    <Compile Include="HolyOrder_OrcsPlus_Orcs.cs" />
-    <Compile Include="H_OrcsPlus_Intolerance.cs" />
+    <Compile Include="HolyOrder_Orcs.cs" />
+    <Compile Include="H_Intolerance.cs" />
     <Compile Include="ItemToOrcCulture.cs" />
     <Compile Include="ModCore.cs" />
     <Compile Include="ModData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Rti_OrcsPlus_RecruitWarband.cs" />
-    <Compile Include="Sub_OrcsPlus_OrcCultureCapital.cs" />
-    <Compile Include="Task_OrcsPlus_GatherAtLocation.cs" />
+    <Compile Include="Rti_RecruitWarband.cs" />
+    <Compile Include="Rt_Orcs_Confinement.cs" />
+    <Compile Include="Sub_OrcCultureCapital.cs" />
+    <Compile Include="Task_GatherAtLocation.cs" />
+    <Compile Include="UAA_OrcElder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

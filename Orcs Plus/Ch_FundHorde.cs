@@ -7,26 +7,26 @@ using UnityEngine;
 
 namespace Orcs_Plus
 {
-    public class Ch_OrcsPlus_FundHorde : Challenge
+    public class Ch_FundHorde : Challenge
     {
         public Set_OrcCamp camp;
 
         public SG_Orc orcSociety;
 
-        public HolyOrder_OrcsPlus_Orcs orcCulture;
+        public HolyOrder_Orcs orcCulture;
 
-        public Ch_OrcsPlus_FundHorde (Location location, Set_OrcCamp camp) : base(location)
+        public Ch_FundHorde (Location location, Set_OrcCamp camp) : base(location)
         {
             this.camp = camp;
         }
 
-        public HolyOrder_OrcsPlus_Orcs getOrcCulture()
+        public HolyOrder_Orcs getOrcCulture()
         {
             orcSociety = camp.location.soc as SG_Orc;
 
-            if (ModCore.data.orcSGCultureMap.ContainsKey(orcSociety))
+            if (orcSociety != null && ModCore.core.data.orcSGCultureMap.ContainsKey(orcSociety))
             {
-                orcCulture = ModCore.data.orcSGCultureMap[orcSociety];
+                orcCulture = ModCore.core.data.orcSGCultureMap[orcSociety];
             }
 
             return orcCulture;
@@ -34,17 +34,17 @@ namespace Orcs_Plus
 
         public override string getName()
         {
-            return "Fund the " + getOrcCulture().getName();
+            return "Fund the " + getOrcCulture()?.getName();
         }
 
         public override string getDesc()
         {
-            return "Allows you to donate gold to the " + getOrcCulture().getName() + ". You will gain influence over their culture equalt to half of the gold donated.";
+            return "Allows you to donate gold to the " + getOrcCulture()?.getName() + ". You will gain influence over their culture equalt to half of the gold donated.";
         }
 
         public override string getCastFlavour()
         {
-            return "The glitter of gold hold sway even among the clans of the orcs.";
+            return "The glitter of gold holds sway even among the clans of the orcs.";
         }
 
         public override string getRestriction()
@@ -140,7 +140,7 @@ namespace Orcs_Plus
 
         public override bool valid()
         {
-            return true;
+            return camp.location.settlement == camp && camp.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.ContainsKey(orcSociety);
         }
 
         public override int getSimplificationLevel()

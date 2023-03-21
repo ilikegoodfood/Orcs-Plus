@@ -3,7 +3,7 @@
 
 namespace Orcs_Plus
 {
-    internal class Task_OrcsPlus_GatherAtLocation : Assets.Code.Task
+    internal class Task_GatherAtLocation : Assets.Code.Task
     {
         public Location target;
 
@@ -11,7 +11,7 @@ namespace Orcs_Plus
 
         public int dur = 0;
 
-        public Task_OrcsPlus_GatherAtLocation(Location loc, int duration)
+        public Task_GatherAtLocation(Location loc, int duration)
         {
             target = loc;
             dur = duration;

@@ -5,13 +5,13 @@ using UnityEngine;
 
 namespace Orcs_Plus
 {
-    internal class Rti_OrcsPlus_RecruitWarband : Ritual
+    internal class Rti_RecruitWarband : Ritual
     {
         public I_HordeBanner banner;
 
         public Minion exemplar;
 
-        public Rti_OrcsPlus_RecruitWarband (Location loc, I_HordeBanner banner)
+        public Rti_RecruitWarband (Location loc, I_HordeBanner banner)
             : base (loc)
         {
             this.banner = banner;

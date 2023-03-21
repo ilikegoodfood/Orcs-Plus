@@ -10,35 +10,45 @@ namespace Orcs_Plus
 {
     public class AgentAIs
     {
-        Map map;
+        private Map map;
 
-        AgentAI comLibAI;
+        private AgentAI comLibAI;
+
+        private List<AIChallenge> aiChallenges_Upstart;
+
+        private List<AIChallenge> aiChallenges_Elder;
 
         public AgentAIs(Map map)
         {
             this.map = map;
-            comLibAI = ModCore.comLib.GetAgentAI();
+            comLibAI = ModCore.comLibAI;
 
             populateOrcUpstarts();
+
+            populateOrcElders();
         }
 
         private void populateOrcUpstarts()
         {
             if (comLibAI.TryGetAgentType(typeof(UAEN_OrcUpstart)))
             {
-                AIChallenge challenge = new AIChallenge(typeof(Rti_OrcsPlus_RecruitWarband), 0.0);
+                aiChallenges_Upstart = new List<AIChallenge>();
+
+                AIChallenge challenge = new AIChallenge(typeof(Rti_RecruitWarband), 0.0);
                 challenge.delegates_ValidFor.Add(delegate_ValidFor_RecruitWarband);
                 challenge.delegates_Utility.Add(delegate_Utility_RecruitWarband);
-                comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcUpstart), challenge);
+                aiChallenges_Upstart.Add(challenge);
 
-                AIChallenge challenge1 = new AIChallenge(typeof(Ch_OrcsPlus_FundHorde), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.RequiresOwnSociety });
+                AIChallenge challenge1 = new AIChallenge(typeof(Ch_FundHorde), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.RequiresOwnSociety });
                 challenge1.delegates_ValidFor.Add(delegate_ValidFor_FundHorde);
                 challenge1.delegates_Utility.Add(delegate_Utility_FundHorde);
-                comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcUpstart), challenge1);
+                aiChallenges_Upstart.Add(challenge1);
+
+                comLibAI.AddChallengesToAgentType(typeof(UAEN_OrcUpstart), aiChallenges_Upstart);
             }
         }
 
-        private static bool delegate_ValidFor_RecruitWarband(AgentAI.ChallengeData challengeData, UA ua)
+        private bool delegate_ValidFor_RecruitWarband(AgentAI.ChallengeData challengeData, UA ua)
         {
             bool hasFullMinions = ua.getStatCommandLimit() - ua.getCurrentlyUsedCommand() <= 0;
             Set_OrcCamp camp = ua.location.settlement as Set_OrcCamp;
@@ -71,9 +81,9 @@ namespace Orcs_Plus
             return !hasFullMinions && challengeData.location.soc != null && banner != null && challengeData.location.soc == banner.orcs && challengeData.location.settlement is Set_OrcCamp;
         }
 
-        private static double delegate_Utility_RecruitWarband(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
+        private double delegate_Utility_RecruitWarband(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
         {
-            Rti_OrcsPlus_RecruitWarband recruitWarband = challengeData.challenge as Rti_OrcsPlus_RecruitWarband;
+            Rti_RecruitWarband recruitWarband = challengeData.challenge as Rti_RecruitWarband;
             int availableCommand = ua.getStatCommandLimit() - ua.getCurrentlyUsedCommand();
             int availableSlots = 0;
 
@@ -106,7 +116,7 @@ namespace Orcs_Plus
             return utility;
         }
 
-        private static bool delegate_ValidFor_FundHorde(AgentAI.ChallengeData challengeDatae, UA ua)
+        private bool delegate_ValidFor_FundHorde(AgentAI.ChallengeData challengeDatae, UA ua)
         {
             if (ua.person.gold > 200)
             {
@@ -116,13 +126,43 @@ namespace Orcs_Plus
             return false;
         }
 
-        private static double delegate_Utility_FundHorde(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
+        private double delegate_Utility_FundHorde(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
         {
             double val = ua.person.gold - 200;
             reasonMsgs.Add(new ReasonMsg("Stash Gold", val));
             utility += val;
 
             return utility;
+        }
+
+        private void populateOrcElders()
+        {
+            aiChallenges_Elder = new List<AIChallenge>();
+
+            AIChallenge challenge = new AIChallenge(typeof(Ch_Rest_InOrcCamp), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.HealOrc, AIChallenge.ChallengeTags.Rest });
+            challenge.delegates_ValidFor.Add(delegate_ValidFor_OwnCulture);
+            aiChallenges_Elder.Add(challenge);
+
+            AIChallenge challenge1 = new AIChallenge(typeof(Ch_LayLowWilderness), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.ManageMenaceProfile });
+            challenge1.delegates_ValidFor.Add(delegate_ValidFor_OwnCulture);
+            aiChallenges_Elder.Add(challenge1);
+
+            AIChallenge challenge2 = new AIChallenge(typeof(Ch_H_ReprimandUpstart), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility });
+            challenge2.delegates_ValidFor.Add(delegate_ValidFor_OwnCulture);
+            aiChallenges_Elder.Add(challenge2);
+
+            comLibAI.RegisterAgentType(typeof(UAA_OrcElder), AgentAI.ControlParameters.newDefault());
+            comLibAI.AddChallengesToAgentType(typeof(UAA_OrcElder), aiChallenges_Elder);
+        }
+
+        private bool delegate_ValidFor_OwnCulture(AgentAI.ChallengeData challengeData, UA ua)
+        {
+            if (ua is UAA_OrcElder elder && (elder.society as HolyOrder_Orcs).orcSociety == challengeData.location.soc)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

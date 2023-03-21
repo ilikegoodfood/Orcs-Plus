@@ -7,15 +7,15 @@ namespace Orcs_Plus
 {
     public class ModData
     {
-        public Dictionary<SG_Orc, HolyOrder_OrcsPlus_Orcs> orcSGCultureMap = new Dictionary<SG_Orc, HolyOrder_OrcsPlus_Orcs>();
+        public Dictionary<SG_Orc, HolyOrder_Orcs> orcSGCultureMap;
 
         public double orcDefenceFactor = 2.0;
 
         public bool isPlayerTurn = false;
 
-        public Dictionary<HolyOrder_OrcsPlus_Orcs, List<ReasonMsg>> influenceGainElder = new Dictionary<HolyOrder_OrcsPlus_Orcs, List<ReasonMsg>>();
+        public Dictionary<HolyOrder_Orcs, List<ReasonMsg>> influenceGainElder;
 
-        public Dictionary<HolyOrder_OrcsPlus_Orcs, List<ReasonMsg>> influenceGainHuman = new Dictionary<HolyOrder_OrcsPlus_Orcs, List<ReasonMsg>>();
+        public Dictionary<HolyOrder_Orcs, List<ReasonMsg>> influenceGainHuman;
 
         public enum influenceGainAction
         {
@@ -66,6 +66,12 @@ namespace Orcs_Plus
             {
                 { menaceGainAction.Retreat, -2 }
             };
+
+            orcSGCultureMap = new Dictionary<SG_Orc, HolyOrder_Orcs>();
+
+            influenceGainElder = new Dictionary<HolyOrder_Orcs, List<ReasonMsg>>();
+
+            influenceGainHuman = new Dictionary<HolyOrder_Orcs, List<ReasonMsg>>();
         }
 
         public void getBattleArmyEnemies(BattleArmy battle, Unit u, out List<UM> enemies, out List<UA> enemyComs)
@@ -144,12 +150,12 @@ namespace Orcs_Plus
             return result;
         }
 
-        public List<HolyOrder_OrcsPlus_Orcs> getOrcCultures(Map map)
+        public List<HolyOrder_Orcs> getOrcCultures(Map map)
         {
-            List<HolyOrder_OrcsPlus_Orcs> result = new List<HolyOrder_OrcsPlus_Orcs>();
+            List<HolyOrder_Orcs> result = new List<HolyOrder_Orcs>();
             foreach (SocialGroup sg in map.socialGroups)
             {
-                HolyOrder_OrcsPlus_Orcs orcCulture = sg as HolyOrder_OrcsPlus_Orcs;
+                HolyOrder_Orcs orcCulture = sg as HolyOrder_Orcs;
 
                 if (orcCulture != null)
                 {
@@ -159,14 +165,14 @@ namespace Orcs_Plus
             return result;
         }
 
-        public void getOrcSocietiesAndCultures(Map map, out List<SG_Orc> orcSocieties, out List<HolyOrder_OrcsPlus_Orcs> orcCultures)
+        public void getOrcSocietiesAndCultures(Map map, out List<SG_Orc> orcSocieties, out List<HolyOrder_Orcs> orcCultures)
         {
             orcSocieties = new List<SG_Orc>();
-            orcCultures = new List<HolyOrder_OrcsPlus_Orcs>();
+            orcCultures = new List<HolyOrder_Orcs>();
             foreach (SocialGroup sg in map.socialGroups)
             {
                 SG_Orc orcs = sg as SG_Orc;
-                HolyOrder_OrcsPlus_Orcs orcCulture = sg as HolyOrder_OrcsPlus_Orcs;
+                HolyOrder_Orcs orcCulture = sg as HolyOrder_Orcs;
 
                 if (orcs != null)
                 {
@@ -206,7 +212,7 @@ namespace Orcs_Plus
             return;
         }
 
-        public void getOrcCamps(Map map, HolyOrder_OrcsPlus_Orcs orcCulture, out List<Set_OrcCamp> orcCamps, out List<Set_OrcCamp> specializedOrcCamps)
+        public void getOrcCamps(Map map, HolyOrder_Orcs orcCulture, out List<Set_OrcCamp> orcCamps, out List<Set_OrcCamp> specializedOrcCamps)
         {
             SG_Orc orcSociety = orcCulture?.orcSociety;
             orcCamps = new List<Set_OrcCamp>();
@@ -248,7 +254,7 @@ namespace Orcs_Plus
             return result;
         }
 
-        public List<UM_OrcArmy> getOrcArmies(Map map, HolyOrder_OrcsPlus_Orcs orcCulture)
+        public List<UM_OrcArmy> getOrcArmies(Map map, HolyOrder_Orcs orcCulture)
         {
             SG_Orc orcSociety = orcCulture?.orcSociety;
             List<UM_OrcArmy> result = new List<UM_OrcArmy>();

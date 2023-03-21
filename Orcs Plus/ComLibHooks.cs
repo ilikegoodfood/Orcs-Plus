@@ -26,7 +26,7 @@ namespace Orcs_Plus
             }
 
             SG_Orc orcs = u.society as SG_Orc;
-            HolyOrder_OrcsPlus_Orcs orcCulture = u.society as HolyOrder_OrcsPlus_Orcs;
+            HolyOrder_Orcs orcCulture = u.society as HolyOrder_Orcs;
 
             Unit uKiller = killer?.unit;
 
@@ -42,7 +42,7 @@ namespace Orcs_Plus
                     return;
                 }
 
-                ModCore.data.getBattleArmyEnemies(battle, u, out List<UM> enemies, out List<UA> enemyComs);
+                ModCore.core.data.getBattleArmyEnemies(battle, u, out List<UM> enemies, out List<UA> enemyComs);
 
                 if (enemies.Count == 0)
                 {
@@ -93,15 +93,15 @@ namespace Orcs_Plus
                 {
                     if (orcCulture != null)
                     {
-                        mod.TryAddInfluenceGain(orcCulture, new ReasonMsg("Destroyed orc army in batle", ModCore.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                        mod.TryAddInfluenceGain(orcCulture, new ReasonMsg("Destroyed orc army in batle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                     }
 
                     if (orcs != null)
                     {
-                        mod.TryAddInfluenceGain(orcs, new ReasonMsg("Destroyed orc army in batle", ModCore.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                        mod.TryAddInfluenceGain(orcs, new ReasonMsg("Destroyed orc army in batle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                     }
 
-                    List<SG_Orc> orcSocieties = ModCore.data.getOrcSocieties(map);
+                    List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(map);
 
                     if (orcSocieties?.Count > 0 && u.society != null)
                     {
@@ -114,7 +114,7 @@ namespace Orcs_Plus
 
                             if (orcSociety.getRel(u.society)?.state == DipRel.dipState.war)
                             {
-                                mod.TryAddInfluenceGain(orcSociety, new ReasonMsg("Destroyed enemy army in battle", ModCore.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                                mod.TryAddInfluenceGain(orcSociety, new ReasonMsg("Destroyed enemy army in battle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                             }
                         }
                     }
@@ -124,12 +124,12 @@ namespace Orcs_Plus
                 {
                     if (orcCulture != null)
                     {
-                        mod.TryAddInfluenceGain(orcCulture, new ReasonMsg("Destroyed orc army in batle", ModCore.data.influenceGain[ModData.influenceGainAction.ArmyKill]));
+                        mod.TryAddInfluenceGain(orcCulture, new ReasonMsg("Destroyed orc army in batle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]));
                     }
 
                     if (orcs != null)
                     {
-                        mod.TryAddInfluenceGain(orcs, new ReasonMsg("Destroyed orc army in batle", ModCore.data.influenceGain[ModData.influenceGainAction.ArmyKill]));
+                        mod.TryAddInfluenceGain(orcs, new ReasonMsg("Destroyed orc army in batle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]));
                     }
                 }
             }
@@ -137,15 +137,15 @@ namespace Orcs_Plus
             {
                 if (orcCulture != null)
                 {
-                    mod.TryAddInfluenceGain(orcCulture, new ReasonMsg("Smote orc army", ModCore.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                    mod.TryAddInfluenceGain(orcCulture, new ReasonMsg("Smote orc army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                 }
 
                 if (orcs != null)
                 {
-                    mod.TryAddInfluenceGain(orcs, new ReasonMsg("Smote orc army", ModCore.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                    mod.TryAddInfluenceGain(orcs, new ReasonMsg("Smote orc army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                 }
 
-                List<SG_Orc> orcSocieties = ModCore.data.getOrcSocieties(map);
+                List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(map);
 
                 if (orcSocieties?.Count > 0 && u.society != null)
                 {
@@ -158,7 +158,7 @@ namespace Orcs_Plus
 
                         if (orcSociety.getRel(u.society)?.state == DipRel.dipState.war)
                         {
-                            mod.TryAddInfluenceGain(orcSociety, new ReasonMsg("Smote enemy army", ModCore.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                            mod.TryAddInfluenceGain(orcSociety, new ReasonMsg("Smote enemy army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                         }
                     }
                 }
@@ -171,15 +171,15 @@ namespace Orcs_Plus
                     {
                         if (orcCulture != null)
                         {
-                            mod.TryAddInfluenceGain(orcCulture, new ReasonMsg("Volcanic eruption (geomancy) destroyed orc army", ModCore.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                            mod.TryAddInfluenceGain(orcCulture, new ReasonMsg("Volcanic eruption (geomancy) destroyed orc army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                         }
 
                         if (orcs != null)
                         {
-                            mod.TryAddInfluenceGain(orcs, new ReasonMsg("Volcanic eruption (geomancy) destroyed orc army", ModCore.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                            mod.TryAddInfluenceGain(orcs, new ReasonMsg("Volcanic eruption (geomancy) destroyed orc army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                         }
 
-                        List<SG_Orc> orcSocieties = ModCore.data.getOrcSocieties(map);
+                        List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(map);
 
                         if (orcSocieties?.Count > 0 && u.society != null)
                         {
@@ -192,7 +192,7 @@ namespace Orcs_Plus
 
                                 if (orcSociety.getRel(u.society)?.state == DipRel.dipState.war)
                                 {
-                                    mod.TryAddInfluenceGain(orcSociety, new ReasonMsg("Volcanic eruption (geomancy) destroyed enemy army", ModCore.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                                    mod.TryAddInfluenceGain(orcSociety, new ReasonMsg("Volcanic eruption (geomancy) destroyed enemy army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                                 }
                             }
                         }
@@ -201,12 +201,12 @@ namespace Orcs_Plus
                     {
                         if (orcCulture != null)
                         {
-                            mod.TryAddInfluenceGain(orcCulture, new ReasonMsg("Volcanic eruption (geomancy) destroyed orc army", ModCore.data.influenceGain[ModData.influenceGainAction.ArmyKill]));
+                            mod.TryAddInfluenceGain(orcCulture, new ReasonMsg("Volcanic eruption (geomancy) destroyed orc army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]));
                         }
 
                         if (orcs != null)
                         {
-                            mod.TryAddInfluenceGain(orcs, new ReasonMsg("Volcanic eruption (geomancy) destroyed orc army", ModCore.data.influenceGain[ModData.influenceGainAction.ArmyKill]));
+                            mod.TryAddInfluenceGain(orcs, new ReasonMsg("Volcanic eruption (geomancy) destroyed orc army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]));
                         }
                     }
                 }
@@ -214,15 +214,15 @@ namespace Orcs_Plus
                 {
                     if (orcCulture != null)
                     {
-                        mod.TryAddInfluenceGain(orcCulture, new ReasonMsg("Awakening destroyed orc army", ModCore.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                        mod.TryAddInfluenceGain(orcCulture, new ReasonMsg("Awakening destroyed orc army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                     }
 
                     if (orcs != null)
                     {
-                        mod.TryAddInfluenceGain(orcs, new ReasonMsg("Awakening destroyed orc army", ModCore.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                        mod.TryAddInfluenceGain(orcs, new ReasonMsg("Awakening destroyed orc army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                     }
 
-                    List<SG_Orc> orcSocieties = ModCore.data.getOrcSocieties(map);
+                    List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(map);
 
                     if (orcSocieties?.Count > 0 && u.society != null)
                     {
@@ -235,7 +235,7 @@ namespace Orcs_Plus
 
                             if (orcSociety.getRel(u.society)?.state == DipRel.dipState.war)
                             {
-                                mod.TryAddInfluenceGain(orcSociety, new ReasonMsg("Awakening destroyed enemy army", ModCore.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                                mod.TryAddInfluenceGain(orcSociety, new ReasonMsg("Awakening destroyed enemy army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                             }
                         }
                     }
@@ -245,7 +245,7 @@ namespace Orcs_Plus
 
         public override string onPopupHolyOrder_DisplayInfluenceElder(HolyOrder order, string s, int infGain)
         {
-            if (order is HolyOrder_OrcsPlus_Orcs)
+            if (order is HolyOrder_Orcs)
             {
                 s = s.Remove(s.LastIndexOf(" (+"));
                 s += " (+" + infGain + " This Turn)";
@@ -256,7 +256,7 @@ namespace Orcs_Plus
 
         public override string onPopupHolyOrder_DisplayInfluenceHuman(HolyOrder order, string s, int infGain)
         {
-            if (order is HolyOrder_OrcsPlus_Orcs)
+            if (order is HolyOrder_Orcs)
             {
                 s = s.Remove(s.LastIndexOf(" (+"));
                 s += " (+" + infGain + " This Turn)";
@@ -267,7 +267,7 @@ namespace Orcs_Plus
 
         public override void onPopupHolyOrder_DisplayBudget(HolyOrder order, List<ReasonMsg> msgs)
         {
-            HolyOrder_OrcsPlus_Orcs orcCulture = order as HolyOrder_OrcsPlus_Orcs;
+            HolyOrder_Orcs orcCulture = order as HolyOrder_Orcs;
 
             if (orcCulture != null)
             {
@@ -282,6 +282,9 @@ namespace Orcs_Plus
                             msg.value = orcCulture.plunderValue;
                             break;
                         case "Gold for Conversion":
+                            msgsToRemove.Add(msg);
+                            break;
+                        case "Gold for Acolytes":
                             msgsToRemove.Add(msg);
                             break;
                         case "Gold for Temples":
@@ -301,7 +304,7 @@ namespace Orcs_Plus
 
         public override void onPopupHolyOrder_DisplayStats(HolyOrder order, List<ReasonMsg> msgs)
         {
-            HolyOrder_OrcsPlus_Orcs orcCulture = order as HolyOrder_OrcsPlus_Orcs;
+            HolyOrder_Orcs orcCulture = order as HolyOrder_Orcs;
 
             if (orcCulture != null)
             {
@@ -356,10 +359,10 @@ namespace Orcs_Plus
                     {
                         if (orcs != null)
                         {
-                            mod.TryAddInfluenceGain(orcs, new ReasonMsg("Razed orc camp", ModCore.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                            mod.TryAddInfluenceGain(orcs, new ReasonMsg("Razed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                         }
 
-                        List<SG_Orc> orcSocieties = ModCore.data.getOrcSocieties(map);
+                        List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(map);
 
                         if (orcSocieties?.Count > 0 && set.location?.soc != null)
                         {
@@ -372,14 +375,14 @@ namespace Orcs_Plus
 
                                 if (orcSociety.getRel(set.location.soc)?.state == DipRel.dipState.war)
                                 {
-                                    mod.TryAddInfluenceGain(orcs, new ReasonMsg("Razed emeny settlement", ModCore.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                                    mod.TryAddInfluenceGain(orcs, new ReasonMsg("Razed emeny settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                                 }
                             }
                         }
                     }
                     else if (orcs != null && !uKiller.society.isDark())
                     {
-                        mod.TryAddInfluenceGain(orcs, new ReasonMsg("Razed orc camp", ModCore.data.influenceGain[ModData.influenceGainAction.RazeLocation]));
+                        mod.TryAddInfluenceGain(orcs, new ReasonMsg("Razed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]));
                     }
                 }
                 else if (v == "Destroyed by volcanic eruption")
@@ -388,10 +391,10 @@ namespace Orcs_Plus
                     {
                         if (orcs != null)
                         {
-                            mod.TryAddInfluenceGain(orcs, new ReasonMsg("Volcanic eruption (geomancy) razed orc camp", ModCore.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                            mod.TryAddInfluenceGain(orcs, new ReasonMsg("Volcanic eruption (geomancy) razed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                         }
 
-                        List<SG_Orc> orcSocieties = ModCore.data.getOrcSocieties(map);
+                        List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(map);
 
                         if (orcSocieties?.Count > 0 && set.location?.soc != null)
                         {
@@ -404,7 +407,7 @@ namespace Orcs_Plus
 
                                 if (orcSociety.getRel(set.location.soc)?.state == DipRel.dipState.war)
                                 {
-                                    mod.TryAddInfluenceGain(orcSociety, new ReasonMsg("Volcanic eruption (geomancy) razed enemy settlement", ModCore.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                                    mod.TryAddInfluenceGain(orcSociety, new ReasonMsg("Volcanic eruption (geomancy) razed enemy settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                                 }
                             }
                         }
@@ -413,7 +416,7 @@ namespace Orcs_Plus
                     {
                         if (orcs != null)
                         {
-                            mod.TryAddInfluenceGain(orcs, new ReasonMsg("Volcanic eruption (geomancy) razed orc camp", ModCore.data.influenceGain[ModData.influenceGainAction.RazeLocation]));
+                            mod.TryAddInfluenceGain(orcs, new ReasonMsg("Volcanic eruption (geomancy) razed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]));
                         }
                     }
                 }
@@ -422,10 +425,10 @@ namespace Orcs_Plus
             {
                 if (orcs != null)
                 {
-                    mod.TryAddInfluenceGain(orcs, new ReasonMsg("Smote orc camp", ModCore.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                    mod.TryAddInfluenceGain(orcs, new ReasonMsg("Smote orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                 }
 
-                List<SG_Orc> orcSocieties = ModCore.data.getOrcSocieties(map);
+                List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(map);
 
                 if (orcSocieties?.Count > 0 && set.location?.soc != null)
                 {
@@ -438,7 +441,7 @@ namespace Orcs_Plus
 
                         if (orcSociety.getRel(set.location.soc)?.state == DipRel.dipState.war)
                         {
-                            mod.TryAddInfluenceGain(orcSociety, new ReasonMsg("Smote emeny settlement", ModCore.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                            mod.TryAddInfluenceGain(orcSociety, new ReasonMsg("Smote emeny settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                         }
                     }
                 }
@@ -447,10 +450,10 @@ namespace Orcs_Plus
             {
                 if (orcs != null)
                 {
-                    mod.TryAddInfluenceGain(orcs, new ReasonMsg("Awakening razed orc camp", ModCore.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                    mod.TryAddInfluenceGain(orcs, new ReasonMsg("Awakening razed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                 }
 
-                List<SG_Orc> orcSocieties = ModCore.data.getOrcSocieties(map);
+                List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(map);
 
                 if (orcSocieties?.Count > 0 && set.location?.soc != null)
                 {
@@ -463,7 +466,7 @@ namespace Orcs_Plus
 
                         if (orcSociety.getRel(set.location.soc)?.state == DipRel.dipState.war)
                         {
-                            mod.TryAddInfluenceGain(orcSociety, new ReasonMsg("Awakening razed enemy settlement", ModCore.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                            mod.TryAddInfluenceGain(orcSociety, new ReasonMsg("Awakening razed enemy settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                         }
                     }
                 }
@@ -500,6 +503,20 @@ namespace Orcs_Plus
                     }
                 }
             }
+        }
+
+        public override bool interceptGetVisibleUnits(UA ua, List<Unit> visibleUnits)
+        {
+            switch (ua)
+            {
+                case UAA_OrcElder elder:
+                    visibleUnits = elder.getVisibleUnits();
+                    return true;
+                default:
+                    break;
+            }
+
+            return false;
         }
     }
 }

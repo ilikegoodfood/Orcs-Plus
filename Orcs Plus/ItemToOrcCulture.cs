@@ -14,7 +14,7 @@ namespace Orcs_Plus
 
         Item[] items;
 
-        HolyOrder_OrcsPlus_Orcs orcCulture;
+        HolyOrder_Orcs orcCulture;
 
         int gold = 0;
 
@@ -22,7 +22,7 @@ namespace Orcs_Plus
 
         Person other;
 
-        public ItemToOrcCulture(Map map, HolyOrder_OrcsPlus_Orcs orcCulture, Person trader)
+        public ItemToOrcCulture(Map map, HolyOrder_Orcs orcCulture, Person trader)
         {
             this.map = map;
             items = new Item[3];
