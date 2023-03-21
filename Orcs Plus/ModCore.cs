@@ -151,7 +151,7 @@ namespace Orcs_Plus
                 }
             }
 
-            Console.WriteLine("OrcsPlus: orcSGCultureMap updated");
+            //Console.WriteLine("OrcsPlus: orcSGCultureMap updated");
         }
 
         public override void onTurnEnd(Map map)

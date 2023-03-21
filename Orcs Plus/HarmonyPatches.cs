@@ -679,41 +679,41 @@ namespace Orcs_Plus
 
         private static bool Unit_hostileTo_Postfix(bool result, Unit __instance, Unit other, bool allowRecursion)
         {
-            Console.WriteLine("OrcsPlus: Running Unit_hostileTo_Postfix");
+            //Console.WriteLine("OrcsPlus: Running Unit_hostileTo_Postfix");
             if (__instance is UM_OrcArmy orcArmy && other is UA && !result)
             {
-                Console.WriteLine("OrcsPlus: __instance is UM_OrcArmy and other is UA");
+                //Console.WriteLine("OrcsPlus: __instance is UM_OrcArmy and other is UA");
                 SG_Orc orcSociety = __instance.society as SG_Orc;
-                Console.WriteLine("OrcsPlus: Got orcSociety");
+                //Console.WriteLine("OrcsPlus: Got orcSociety");
                 if (orcSociety != null && ModCore.core.data.orcSGCultureMap.ContainsKey(orcSociety) && ModCore.core.data.orcSGCultureMap[orcSociety] != null)
                 {
-                    Console.WriteLine("OrcsPlus: __instance.society is SG_Orc and orcCulture does not equal null");
+                    //Console.WriteLine("OrcsPlus: __instance.society is SG_Orc and orcCulture does not equal null");
                     HolyOrder_Orcs orcCulture = ModCore.core.data.orcSGCultureMap[orcSociety];
-                    Console.WriteLine("OrcsPlus: Got orcCulture");
+                    //Console.WriteLine("OrcsPlus: Got orcCulture");
 
                     if (other.society == orcSociety || other.society == orcCulture)
                     {
-                        Console.WriteLine("OrcsPlus: other.society is orcSociety or orcCulture");
+                        //Console.WriteLine("OrcsPlus: other.society is orcSociety or orcCulture");
                         return result;
                     }
 
                     if (other.homeLocation != -1 && (other.map.locations[other.homeLocation].soc == orcSociety || other.map.locations[other.homeLocation].soc == orcCulture))
                     {
-                        Console.WriteLine("OrcsPlus: other.homeLocation is index of location that is of orcSociety or orcCulture");
+                        //Console.WriteLine("OrcsPlus: other.homeLocation is index of location that is of orcSociety or orcCulture");
                         return result;
                     }
 
                     if (ModCore.modLivingWilds)
                     {
-                        Console.WriteLine("OrcsPlus: Mod LivingWilds is enabled");
+                        //Console.WriteLine("OrcsPlus: Mod LivingWilds is enabled");
                         Assembly asm = Assembly.Load("LivingWilds");
                         if (asm != null)
                         {
-                            Console.WriteLine("OrcsPlus: LivingWilds assembly loaded");
+                            //Console.WriteLine("OrcsPlus: LivingWilds assembly loaded");
                             Type t = asm.GetType("LivingWilds.UAEN_Nature_Critter");
                             if (t != null && other.GetType().IsSubclassOf(t))
                             {
-                                Console.WriteLine("OrcsPlus: other.GetType() is typeof(UAEN_Nature_Critter)");
+                                //Console.WriteLine("OrcsPlus: other.GetType() is typeof(UAEN_Nature_Critter)");
                                 return result;
                             }
                         }
@@ -722,15 +722,15 @@ namespace Orcs_Plus
                     H_Intolerance tolerance = orcCulture.tenets.OfType<H_Intolerance>().FirstOrDefault();
                     if (tolerance != null)
                     {
-                        Console.WriteLine("OrcsPlus: tolerance is not null");
+                        //Console.WriteLine("OrcsPlus: tolerance is not null");
                         if (other.society is SG_Orc || other.society is HolyOrder_Orcs)
                         {
-                            Console.WriteLine("OrcsPlus: other.society is SG_Orc or HolyOrder_Orcs");
+                            //Console.WriteLine("OrcsPlus: other.society is SG_Orc or HolyOrder_Orcs");
                             result = true;
                         }
                         else if (tolerance.status < 0)
                         {
-                            Console.WriteLine("OrcsPlus: tolerance.status is less than 0");
+                            //Console.WriteLine("OrcsPlus: tolerance.status is less than 0");
                             if ((other.society == null || !other.society.isDark()) && !other.isCommandable())
                             {
                                 result = true;
@@ -738,7 +738,7 @@ namespace Orcs_Plus
                         }
                         else if (tolerance.status > 0)
                         {
-                            Console.WriteLine("OrcsPlus: tolerance.status is greater than 0");
+                            //Console.WriteLine("OrcsPlus: tolerance.status is greater than 0");
                             if (other.isCommandable() && orcArmy.parent.shadow < 0.5 && orcArmy.parent.infiltration < 1.0)
                             {
                                 result = true;
@@ -754,7 +754,7 @@ namespace Orcs_Plus
                         }
                         else
                         {
-                            Console.WriteLine("OrcsPlus: tolerance.status is 0");
+                            //Console.WriteLine("OrcsPlus: tolerance.status is 0");
                             if ((other.society == null || !other.society.isDark()) && !other.isCommandable())
                             {
                                 result = true;
@@ -772,7 +772,7 @@ namespace Orcs_Plus
                 }
             }
 
-            Console.WriteLine("OrcsPlus: returning result: " + result.ToString());
+            //Console.WriteLine("OrcsPlus: returning result: " + result.ToString());
             return result;
         }
 
