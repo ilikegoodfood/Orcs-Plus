@@ -34,7 +34,7 @@ namespace Orcs_Plus
             if (!patched)
             {
                 patched = true;
-                HarmonyPatches.PatchingInit(this);
+                HarmonyPatches.PatchingInit();
             }
         }
 
@@ -45,8 +45,12 @@ namespace Orcs_Plus
                 switch (core.GetType().Namespace)
                 {
                     case "CommunityLib":
-                        ModCore.comLib = core as CommunityLib.ModCore;
-                        comLib?.RegisterHooks(new ComLibHooks(this, map));
+                        comLib = core as CommunityLib.ModCore;
+                        if (comLib != null)
+                        {
+                            comLib.RegisterHooks(comLibHooks);
+                            comLibAI = comLib.GetAgentAI();
+                        }
                         break;
                     case "LivingWilds":
                         modLivingWilds = true;
@@ -60,11 +64,7 @@ namespace Orcs_Plus
             {
                 throw new Exception("OrcsPlus: This mod REQUIRES the Community Library mod to be installed and enabled in order to operate.");
             }
-            else
-            {
-                comLibAI = comLib.GetAgentAI();
-            }
-
+            
             data = new ModData();
             agentAI = new AgentAIs(map);
         }
@@ -72,13 +72,21 @@ namespace Orcs_Plus
         public override void afterLoading(Map map)
         {
             core = this;
+
             foreach (ModKernel core in map.mods)
             {
                 switch (core.GetType().Namespace)
                 {
                     case "CommunityLib":
-                        ModCore.comLib = core as CommunityLib.ModCore;
-                        comLib?.RegisterHooks(comLibHooks);
+                        comLib = core as CommunityLib.ModCore;
+                        if (comLib != null)
+                        {
+                            comLib.RegisterHooks(comLibHooks);
+                            comLibAI = comLib.GetAgentAI();
+                        }
+                        break;
+                    case "LivingWilds":
+                        modLivingWilds = true;
                         break;
                     default:
                         break;
@@ -87,18 +95,16 @@ namespace Orcs_Plus
 
             if (comLib == null)
             {
-                Console.WriteLine("OrcsPlus :: ERROR: Failed to find Community Library");
-                return;
+                throw new Exception("OrcsPlus: This mod REQUIRES the Community Library mod to be installed and enabled in order to operate.");
             }
-            else
+
+            if (data == null)
             {
-                comLibAI = comLib.GetAgentAI();
+                data = new ModData();
+                data.isPlayerTurn = true;
+                UpdateOrcSGCultureMap(map);
             }
-
-            data = new ModData();
             agentAI = new AgentAIs(map);
-
-            UpdateOrcSGCultureMap(map);
         }
 
         public override void onTurnStart(Map map)
@@ -117,23 +123,7 @@ namespace Orcs_Plus
         {
             //Console.WriteLine("OrcsPlus: updating orcSGCultureMap");
             data.orcSGCultureMap.Clear();
-            data.getOrcSocietiesAndCultures(map, out List<SG_Orc> orcSocieties, out List<HolyOrder_Orcs> orcCultures);
-
-            if (orcSocieties?.Count > 0)
-            {
-                foreach (SG_Orc orcSociety in orcSocieties)
-                {
-                    if (orcSociety.checkIsGone())
-                    {
-                        continue;
-                    }
-
-                    if (!data.orcSGCultureMap.ContainsKey(orcSociety))
-                    {
-                        data.orcSGCultureMap.Add(orcSociety, null);
-                    }
-                }
-            }
+            List<HolyOrder_Orcs> orcCultures = data.getOrcCultures(map);
 
             if (orcCultures?.Count > 0)
             {
@@ -144,10 +134,7 @@ namespace Orcs_Plus
                         continue;
                     }
 
-                    if (data.orcSGCultureMap.ContainsKey(orcCulture.orcSociety))
-                    {
-                        data.orcSGCultureMap[orcCulture.orcSociety] = orcCulture;
-                    }
+                    data.orcSGCultureMap.Add(orcCulture.orcSociety, orcCulture);
                 }
             }
 
@@ -252,29 +239,29 @@ namespace Orcs_Plus
 
             if (data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
             {
-                orcCulture = data.orcSGCultureMap[orcSociety];
-            }
+                if (isElder)
+                {
+                    AddInfluenceGainElder(orcCulture, msg);
 
-            if (isElder)
-            {
-                AddInfluenceGainElder(orcCulture, msg);
+                    if (data.isPlayerTurn)
+                    {
+                        orcCulture.influenceElder += (int)Math.Floor(msg.value);
+                    }
+
+                    return true;
+                }
+
+                AddInfluenceGainHuman(orcCulture, msg);
 
                 if (data.isPlayerTurn)
                 {
-                    orcCulture.influenceElder += (int)Math.Floor(msg.value);
+                    orcCulture.influenceHuman += (int)Math.Floor(msg.value);
                 }
 
                 return true;
             }
 
-            AddInfluenceGainHuman(orcCulture, msg);
-
-            if (data.isPlayerTurn)
-            {
-                orcCulture.influenceHuman += (int)Math.Floor(msg.value);
-            }
-
-            return true;
+            return false;
         }
 
         private void AddInfluenceGainElder(HolyOrder_Orcs orcCulture, ReasonMsg msg)

@@ -14,11 +14,9 @@ namespace Orcs_Plus
     {
         private static readonly Type patchType = typeof(HarmonyPatches);
 
-        private static ModCore mod;
-
         private static bool patched = false;
 
-        public static void PatchingInit(ModCore core)
+        public static void PatchingInit()
         {
             if (patched)
             {
@@ -28,8 +26,6 @@ namespace Orcs_Plus
             {
                 patched = true;
             }
-
-            mod = core;
 
             Patching();
         }
@@ -131,7 +127,7 @@ namespace Orcs_Plus
 
             if (orcCulture != null)
             {
-                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
+                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
             }
         }
 
@@ -157,7 +153,7 @@ namespace Orcs_Plus
 
             if (orcCulture != null)
             {
-                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
+                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
             }
         }
 
@@ -183,7 +179,7 @@ namespace Orcs_Plus
 
             if (orcCulture != null)
             {
-                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildMenagerie]), true);
+                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildMenagerie]), true);
             }
         }
 
@@ -209,7 +205,7 @@ namespace Orcs_Plus
 
             if (orcCulture != null)
             {
-                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
+                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
             }
         }
 
@@ -259,7 +255,7 @@ namespace Orcs_Plus
 
             if (orcCulture != null)
             {
-                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(rt.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
+                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(rt.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
             }
         }
 
@@ -281,7 +277,7 @@ namespace Orcs_Plus
 
                 if (orcCulture != null)
                 {
-                    mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.DevastateIndustry]));
+                    ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.DevastateIndustry]));
                 }
             }
         }
@@ -308,7 +304,7 @@ namespace Orcs_Plus
 
             if (orcCulture != null)
             {
-                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand]), true);
+                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand]), true);
             }
         }
 
@@ -498,7 +494,7 @@ namespace Orcs_Plus
 
                 if (orcCulture != null)
                 {
-                    mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(ch.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Raiding]), true);
+                    ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(ch.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Raiding]), true);
                 }
             }
 
@@ -626,11 +622,11 @@ namespace Orcs_Plus
             {
                 if (orcCamp.specialism == 0)
                 {
-                    mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Subjugate]), true);
+                    ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Subjugate]), true);
                     return;
                 }
 
-                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Subjugate] * 2), true);
+                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Subjugate] * 2), true);
             }
         }
 
@@ -656,7 +652,7 @@ namespace Orcs_Plus
 
             if (orcCulture != null)
             {
-                mod.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand]), true);
+                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand]), true);
             }
         }
 
@@ -1190,11 +1186,11 @@ namespace Orcs_Plus
                 {
                     if (u.isCommandable())
                     {
-                        mod.TryAddInfluenceGain(orcs, new ReasonMsg("Razing Orc Camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
+                        ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razing Orc Camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
                     }
                     else if (!u.society.isDark())
                     {
-                        mod.TryAddInfluenceGain(orcs, new ReasonMsg("Razing Orc Camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]));
+                        ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razing Orc Camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]));
                     }
                 }
             }
@@ -1214,7 +1210,7 @@ namespace Orcs_Plus
 
                         if (orcSociety.getRel(u.society)?.state == DipRel.dipState.war)
                         {
-                            mod.TryAddInfluenceGain(orcs, new ReasonMsg("Razing Emeny Settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
+                            ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razing Emeny Settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
                         }
                     }
                 }

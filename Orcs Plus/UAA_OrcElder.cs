@@ -71,7 +71,7 @@ namespace Orcs_Plus
 
         public override void turnTickAI()
         {
-            ModCore.comLibAI.onTurnTickAI(this);
+            ModCore.comLibAI.turnTickAI(this);
         }
 
         public override bool definesName()
