@@ -56,18 +56,37 @@ namespace Orcs_Plus
         {
             bool profile = ua.inner_profile > ua.inner_profileMin;
             bool menace = ua.inner_menace > ua.inner_menaceMin;
+            double progress = getProgressPerTurn(ua, null);
             if (profile)
             {
-                ua.addProfile(Math.Min(-map.param.ch_layLowProfileReductionPerTurnNonhuman * base.getProgressPerTurn(ua, null), ua.inner_profile - ua.inner_profileMin));
+                ua.addProfile(Math.Min(-map.param.ch_layLowProfileReductionPerTurnNonhuman * progress, ua.inner_profile - ua.inner_profileMin));
             }
             if (menace)
             {
-                ua.addMenace(Math.Min(-map.param.ch_layLowMenaceReductionPerTurnNonhuman * base.getProgressPerTurn(ua, null), ua.inner_menace - ua.inner_menaceMin));
+                ua.addMenace(Math.Min(-map.param.ch_layLowMenaceReductionPerTurnNonhuman * progress, ua.inner_menace - ua.inner_menaceMin));
             }
 
             if (!profile && !menace)
             {
                 ua.task = null;
+            }
+
+            if (ua.hp < ua.maxHp)
+            {
+                ua.hp += Math.Min(ua.maxHp, (int)Math.Floor(1 * progress));
+            }
+
+            if (ua.challengesSinceRest > 0)
+            {
+                ua.challengesSinceRest -= Math.Max(0, (int)Math.Floor(1 * progress));
+            }
+
+            foreach (Minion minion in ua.minions)
+            {
+                if (minion != null && minion.hp < minion.getMaxHP() && minion.getTags().FirstOrDefault(i => i == Tags.UNDEAD) == 0)
+                {
+                    minion.hp += Math.Min(minion.getMaxHP(), (int)Math.Floor(1 * progress));
+                }
             }
         }
 

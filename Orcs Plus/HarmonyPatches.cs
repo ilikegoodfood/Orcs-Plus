@@ -1,12 +1,15 @@
 ﻿using Assets.Code;
 using Assets.Code.Modding;
 using CommunityLib;
+using DuloGames.UI;
 using HarmonyLib;
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using static UnityEngine.GraphicsBuffer;
 
 namespace Orcs_Plus
 {
@@ -41,33 +44,36 @@ namespace Orcs_Plus
             }
 
             // Patches for Challenges that specialise orc camps
-            harmony.Patch(original: AccessTools.Method(type: typeof(Ch_Orcs_BuildFortress), name: nameof(Ch_Orcs_BuildFortress.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildFortress_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Ch_Orcs_BuildFortress), name: nameof(Ch_Orcs_BuildFortress.complete), parameters: new Type[] { typeof(UA) } ), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildFortress_complete_Postfix)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Ch_Orcs_BuildMages), name: nameof(Ch_Orcs_BuildMages.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildMages_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Ch_Orcs_BuildMages), name: nameof(Ch_Orcs_BuildMages.complete), parameters: new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildMages_complete_Postfix)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Ch_Orcs_BuildMenagerie), name: nameof(Ch_Orcs_BuildMenagerie.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildMenagerie_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Ch_Orcs_BuildMenagerie), name: nameof(Ch_Orcs_BuildMenagerie.complete), parameters: new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildMenagerie_complete_Postfix)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Ch_Orcs_BuildShipyard), name: nameof(Ch_Orcs_BuildShipyard.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildShipyard_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Ch_Orcs_BuildShipyard), name: nameof(Ch_Orcs_BuildShipyard.complete), parameters: new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildShipyard_complete_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildFortress), nameof(Ch_Orcs_BuildFortress.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildFortress_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildFortress), nameof(Ch_Orcs_BuildFortress.complete), new Type[] { typeof(UA) } ), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildFortress_complete_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildMages), nameof(Ch_Orcs_BuildMages.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildMages_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildMages), nameof(Ch_Orcs_BuildMages.complete), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildMages_complete_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildMenagerie), nameof(Ch_Orcs_BuildMenagerie.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildMenagerie_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildMenagerie), nameof(Ch_Orcs_BuildMenagerie.complete), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildMenagerie_complete_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildShipyard), nameof(Ch_Orcs_BuildShipyard.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildShipyard_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildShipyard), nameof(Ch_Orcs_BuildShipyard.complete), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildShipyard_complete_Postfix)));
 
             // Patches for Warlord rituals
-            harmony.Patch(original: AccessTools.Method(type: typeof(Rt_Orcs_CommandeerShips), name: nameof(Rt_Orcs_CommandeerShips.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Rt_Orcs_CommandeerShips_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Rt_Orcs_CommandeerShips), name: nameof(Rt_Orcs_CommandeerShips.complete), parameters: new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Rt_Orcs_CommandeerShips_complete_Transpiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Rt_Orcs_ClaimTerritory), name: nameof(Rt_Orcs_ClaimTerritory.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Rt_Orcs_ClaimTerritory_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Rt_Orcs_ClaimTerritory), name: nameof(Rt_Orcs_ClaimTerritory.complete), parameters: new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Rt_Orcs_ClaimTerritory_complete_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_CommandeerShips), nameof(Rt_Orcs_CommandeerShips.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Rt_Orcs_CommandeerShips_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_CommandeerShips), nameof(Rt_Orcs_CommandeerShips.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Rt_Orcs_CommandeerShips_complete_Transpiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_ClaimTerritory), nameof(Rt_Orcs_ClaimTerritory.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Rt_Orcs_ClaimTerritory_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_ClaimTerritory), nameof(Rt_Orcs_ClaimTerritory.complete), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Rt_Orcs_ClaimTerritory_complete_Postfix)));
 
             // Patches for Challenges in orc camps
-            harmony.Patch(original: AccessTools.Method(type: typeof(Ch_Orcs_DevastateOrcishIndustry), name: nameof(Ch_Orcs_DevastateOrcishIndustry.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_DevastateOrcishIndustry_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Ch_Orcs_DevastateOrcishIndustry), name: nameof(Ch_Orcs_DevastateOrcishIndustry.complete), parameters: new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_DevastateOrcishIndustry_complete_Postfix)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Ch_Orcs_Expand), name: nameof(Ch_Orcs_Expand.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Ch_Orcs_Expand), name: nameof(Ch_Orcs_Expand.complete), parameters: new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_complete_Postfix)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Ch_OrcRaiding), name: nameof(Ch_OrcRaiding.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Ch_OrcRaiding), name: nameof(Ch_OrcRaiding.valid)), transpiler: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_valid_Transpiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Ch_OrcRaiding), name: nameof(Ch_OrcRaiding.complete), parameters: new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_complete_Transpiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Ch_Orcs_RetreatToTheHills), name: nameof(Ch_Orcs_RetreatToTheHills.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_RetreatToTheHills_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Ch_Orcs_RetreatToTheHills), name: nameof(Ch_Orcs_RetreatToTheHills.complete), parameters: new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_RetreatToTheHills_complete_Transpiler)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Ch_Subjugate_Orcs), name: nameof(Ch_Subjugate_Orcs.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Subjugate_Orcs_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(type: typeof(Ch_Subjugate_Orcs), name: nameof(Ch_Subjugate_Orcs.complete), parameters: new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Subjugate_Orcs_complete_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_DevastateOrcishIndustry), nameof(Ch_Orcs_DevastateOrcishIndustry.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_DevastateOrcishIndustry_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_DevastateOrcishIndustry), nameof(Ch_Orcs_DevastateOrcishIndustry.complete), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_DevastateOrcishIndustry_complete_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.complete), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_complete_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.valid)), transpiler: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_valid_Transpiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_complete_Transpiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_RetreatToTheHills), nameof(Ch_Orcs_RetreatToTheHills.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_RetreatToTheHills_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_RetreatToTheHills), nameof(Ch_Orcs_RetreatToTheHills.valid)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_RetreatToTheHills_valid_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_RetreatToTheHills), nameof(Ch_Orcs_RetreatToTheHills.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_RetreatToTheHills_validFor_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_RetreatToTheHills), nameof(Ch_Orcs_RetreatToTheHills.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_RetreatToTheHills_complete_Transpiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Rest_InOrcCamp), nameof(Ch_Rest_InOrcCamp.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Rest_InOrcCamp_validFor_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Subjugate_Orcs), nameof(Ch_Subjugate_Orcs.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Subjugate_Orcs_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Subjugate_Orcs), nameof(Ch_Subjugate_Orcs.complete), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Subjugate_Orcs_complete_Postfix)));
 
             // Patches for UAEN_OrcUpstart
             harmony.Patch(original: AccessTools.Constructor(typeof(UAEN_OrcUpstart), new Type[] { typeof(Location), typeof(SocialGroup), typeof(Person) }), postfix: new HarmonyMethod(patchType, nameof(UAEN_OrcUpstart_ctor_Postfix)));
@@ -81,6 +87,9 @@ namespace Orcs_Plus
 
             // Patches for I_HordeBanner
             harmony.Patch(original: AccessTools.Constructor(typeof(I_HordeBanner), new Type[] { typeof(Map), typeof(SG_Orc), typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(I_HordeBanner_ctor_Postfix)));
+
+            // Patches for SocialGroup
+            harmony.Patch(original: AccessTools.Method(typeof(SocialGroup), nameof(SocialGroup.checkIsGone), new Type[] { }), postfix: new HarmonyMethod(patchType, nameof(SocialGroup_checkIsGone_Postfix)));
 
             // Patches for SG_Orc
             harmony.Patch(original: AccessTools.Constructor(typeof(SG_Orc), new Type[] { typeof(Map), typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(SG_Orc_ctor_Postfox)));
@@ -506,22 +515,42 @@ namespace Orcs_Plus
             __result = "Causes half of all orc industry in this orc camp, and neighbouring orc camps, to be turned into defensive positions. Good at quickly reducing threat to avoid war, or surviving one against a powerful foe.";
         }
 
+        private static bool Ch_Orcs_RetreatToTheHills_valid_Postfix(bool result, Ch_Orcs_RetreatToTheHills __instance)
+        {
+            return __instance.location.settlement is Set_OrcCamp;
+        }
+
+        private static bool Ch_Orcs_RetreatToTheHills_validFor_Postfix(bool result, Ch_Orcs_RetreatToTheHills __instance, UA ua)
+        {
+            if (ua.isCommandable() && __instance.location.settlement?.infiltration == 1.0)
+            {
+                return true;
+            }
+            else if (!ua.isCommandable() && ua.society != null && (ua.society == __instance.location.soc || (ua.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety == __instance.location.soc)))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         private static IEnumerable<CodeInstruction> Ch_Orcs_RetreatToTheHills_complete_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
         {
-            MethodInfo MI_TranspilerBody = AccessTools.Method(typeof(HarmonyPatches), nameof(HarmonyPatches.Ch_Orcs_RetreatToTheHills_complete_TranspilerBody), new Type[] { typeof(Ch_Orcs_RetreatToTheHills) });
+            MethodInfo MI_TranspilerBody = AccessTools.Method(typeof(HarmonyPatches), nameof(HarmonyPatches.Ch_Orcs_RetreatToTheHills_complete_TranspilerBody), new Type[] { typeof(Ch_Orcs_RetreatToTheHills), typeof(UA) });
 
             yield return new CodeInstruction(OpCodes.Nop);
             yield return new CodeInstruction(OpCodes.Ldarg_0);
+            yield return new CodeInstruction(OpCodes.Ldarg_1);
             yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
             yield return new CodeInstruction(OpCodes.Ret);
         }
 
-        private static void Ch_Orcs_RetreatToTheHills_complete_TranspilerBody(Ch_Orcs_RetreatToTheHills ch)
+        private static void Ch_Orcs_RetreatToTheHills_complete_TranspilerBody(Ch_Orcs_RetreatToTheHills ch, UA ua)
         {
             SG_Orc orcSociety = ch.location.soc as SG_Orc;
             List<UM_OrcArmy> armies = new List<UM_OrcArmy>();
 
-            if (orcSociety == null || !(ch.location.settlement is Set_OrcCamp) || !ch.location.settlement.isInfiltrated)
+            if (orcSociety == null || !(ch.location.settlement is Set_OrcCamp))
             {
                 return;
             }
@@ -529,34 +558,37 @@ namespace Orcs_Plus
             List<Location> targetLocations = new List<Location> { ch.location };
             foreach (Location location in ch.location.getNeighbours())
             {
-                if (location.settlement is Set_OrcCamp && location.soc == orcSociety)
+                if (location.settlement is Set_OrcCamp camp && location.soc == orcSociety)
                 {
-                    targetLocations.Add(location);
+                    if (!ua.isCommandable() || camp.infiltration == 1.0)
+                    {
+                        targetLocations.Add(location);
+                    }
                 }
             }
 
-            foreach (Location targetLocation in targetLocations)
+            foreach (Location location in targetLocations)
             {
-                Set_OrcCamp targetCamp = targetLocation.settlement as Set_OrcCamp;
-                Pr_OrcishIndustry industry = targetLocation.properties.OfType<Pr_OrcishIndustry>().FirstOrDefault();
-                Pr_OrcDefences defences = targetLocation.properties.OfType<Pr_OrcDefences>().FirstOrDefault();
+                Set_OrcCamp camp = location.settlement as Set_OrcCamp;
+                Pr_OrcishIndustry industry = location.properties.OfType<Pr_OrcishIndustry>().FirstOrDefault();
+                Pr_OrcDefences defences = location.properties.OfType<Pr_OrcDefences>().FirstOrDefault();
 
                 if (defences == null)
                 {
-                    defences = new Pr_OrcDefences(targetLocation);
-                    targetLocation.properties.Add(defences);
+                    defences = new Pr_OrcDefences(location);
+                    location.properties.Add(defences);
                 }
 
                 if (industry == null)
                 {
-                    industry = new Pr_OrcishIndustry(targetLocation);
-                    industry.charge = 30.0;
-                    targetLocation.properties.Add(industry);
+                    industry = new Pr_OrcishIndustry(location);
+                    industry.charge = 0.0;
+                    location.properties.Add(industry);
                 }
 
                 industry.charge /= 2.0;
-                defences.charge += industry.charge * ModCore.core.data.orcDefenceFactor;
-                targetCamp.defences += industry.charge;
+                defences.charge += industry.charge;
+                camp.defences += industry.charge / 2;
             }
 
             foreach (Unit unit in ch.map.units)
@@ -577,6 +609,16 @@ namespace Orcs_Plus
             }
 
             //orcSociety.menace += ModCore.core.data.menaceGain[ModData.menaceGainAction.Retreat];
+        }
+
+        private static bool Ch_Rest_InOrcCamp_validFor_Postfix(bool result, UA ua)
+        {
+            if (ua is UAA_OrcElder)
+            {
+                return true;
+            }
+
+            return result;
         }
 
         private static void Ch_Subjugate_Orcs_getDesc_Postfix(Ch_Subjugate_Orcs __instance, ref string __result)
@@ -676,7 +718,7 @@ namespace Orcs_Plus
         private static bool Unit_hostileTo_Postfix(bool result, Unit __instance, Unit other, bool allowRecursion)
         {
             //Console.WriteLine("OrcsPlus: Running Unit_hostileTo_Postfix");
-            if (__instance is UM_OrcArmy orcArmy && other is UA && !result)
+            if (__instance is UM_OrcArmy orcArmy && other is UA)
             {
                 //Console.WriteLine("OrcsPlus: __instance is UM_OrcArmy and other is UA");
                 SG_Orc orcSociety = __instance.society as SG_Orc;
@@ -690,7 +732,7 @@ namespace Orcs_Plus
                     if (other.society == orcSociety || other.society == orcCulture)
                     {
                         //Console.WriteLine("OrcsPlus: other.society is orcSociety or orcCulture");
-                        return result;
+                        return false;
                     }
 
                     if (other.homeLocation != -1 && (other.map.locations[other.homeLocation].soc == orcSociety || other.map.locations[other.homeLocation].soc == orcCulture))
@@ -699,19 +741,35 @@ namespace Orcs_Plus
                         return result;
                     }
 
-                    if (ModCore.modLivingWilds)
+                    foreach (Item item in other.person.items)
                     {
-                        //Console.WriteLine("OrcsPlus: Mod LivingWilds is enabled");
-                        Assembly asm = Assembly.Load("LivingWilds");
-                        if (asm != null)
+                        if (item != null)
                         {
-                            //Console.WriteLine("OrcsPlus: LivingWilds assembly loaded");
-                            Type t = asm.GetType("LivingWilds.UAEN_Nature_Critter");
-                            if (t != null && other.GetType().IsSubclassOf(t))
+                            I_HordeBanner banner = item as I_HordeBanner;
+                            if (ModCore.core.data.modCovensCursesCurios && ModCore.core.data.asmCovensCursesCurtios != null)
                             {
-                                //Console.WriteLine("OrcsPlus: other.GetType() is typeof(UAEN_Nature_Critter)");
-                                return result;
+                                Type t = ModCore.core.data.asmCovensCursesCurtios.GetType("CovenExpansion.I_BarbDominion");
+                                if (t != null && item.GetType() == t)
+                                {
+                                    return false;
+                                }
                             }
+
+                            if (banner?.orcs == orcSociety && !(other.society != null && __instance.society.getRel(other.society).state == DipRel.dipState.war))
+                            {
+                                return false;
+                            }
+                        }
+                    }
+
+                    if (ModCore.core.data.modLivingWilds && ModCore.core.data.asmLivingWilds != null)
+                    {
+                        //Console.WriteLine("OrcsPlus: LivingWilds assembly loaded");
+                        Type t = ModCore.core.data.asmLivingWilds.GetType("LivingWilds.UAEN_Nature_Critter");
+                        if (t != null && other.GetType().IsSubclassOf(t))
+                        {
+                            //Console.WriteLine("OrcsPlus: other.GetType() is typeof(UAEN_Nature_Critter)");
+                            return result;
                         }
                     }
 
@@ -785,15 +843,9 @@ namespace Orcs_Plus
         public static double UAEN_OrcUpstart_getAttackUtility(double utility, UAEN_OrcUpstart upstart, Unit other, List<ReasonMsg> reasonMsgs, bool includeDangerousFoe)
         {
             utility = 0.0;
-            if (other is UA target && upstart.society is SG_Orc orcSociety && target.society != orcSociety)
+            if (other is UA target && upstart.society is SG_Orc orcSociety && !orcSociety.checkIsGone() && target.society != orcSociety)
             {
-                utility = 0.0;
-                HolyOrder_Orcs orcCulture = null;
-                if (ModCore.core.data.orcSGCultureMap.ContainsKey(orcSociety) && ModCore.core.data.orcSGCultureMap[orcSociety] != null)
-                {
-                    orcCulture = ModCore.core.data.orcSGCultureMap[orcSociety];
-                }
-                if (orcCulture != null && target.society != orcCulture)
+                if (ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && target.society != orcCulture)
                 {
                     H_Intolerance intolerance = orcCulture.tenets.OfType<H_Intolerance>().FirstOrDefault();
                     if (intolerance != null)
@@ -803,7 +855,7 @@ namespace Orcs_Plus
                         {
                             if (target.society != orcSociety && target.society != orcCulture)
                             {
-                                if (upstart.map.locations[target.homeLocation].soc != orcSociety || upstart.map.locations[target.homeLocation].soc != orcCulture)
+                                if (target.homeLocation == -1 || upstart.map.locations[target.homeLocation].soc != orcSociety || upstart.map.locations[target.homeLocation].soc != orcCulture)
                                 {
                                     if (intolerance.status == 0)
                                     {
@@ -811,7 +863,7 @@ namespace Orcs_Plus
                                     }
                                     else if (intolerance.status > 0)
                                     {
-                                        if (upstart.society.getRel(target.society).state == DipRel.dipState.war || target.society.isDark() || target.isCommandable())
+                                        if (orcSociety.getRel(target.society).state == DipRel.dipState.war || target.society.isDark() || target.isCommandable())
                                         {
                                             otherIsTarget = true;
                                         }
@@ -823,7 +875,7 @@ namespace Orcs_Plus
                                     }
                                     else if (intolerance.status < 0)
                                     {
-                                        if (upstart.society.getRel(target.society).state == DipRel.dipState.war || target.society is SG_Orc || target.society is HolyOrder_Orcs || !target.society.isDark() || !target.isCommandable())
+                                        if (!target.isCommandable() && (orcSociety.getRel(target.society).state == DipRel.dipState.war || target.society is SG_Orc || target.society is HolyOrder_Orcs || !target.society.isDark()))
                                         {
                                             otherIsTarget = true;
                                         }
@@ -868,12 +920,26 @@ namespace Orcs_Plus
                         {
                             foreach (Item item in target.person.items)
                             {
-                                I_HordeBanner banner = item as I_HordeBanner;
-                                if (banner?.orcs == orcSociety && !(target.society != null && upstart.society.getRel(target.society).state == DipRel.dipState.war))
+                                if (item != null)
                                 {
-                                    reasonMsgs?.Add(new ReasonMsg("Orcs will not attack banner bearer", -10000.0));
-                                    utility -= 10000.0;
-                                    return utility;
+                                    if (ModCore.core.data.modCovensCursesCurios && ModCore.core.data.asmCovensCursesCurtios != null)
+                                    {
+                                        Type t = ModCore.core.data.asmCovensCursesCurtios.GetType("CovenExpansion.I_BarbDominion");
+                                        if (t != null && item.GetType() == t)
+                                        {
+                                            reasonMsgs?.Add(new ReasonMsg("Orcs will not attack banner bearer", -10000.0));
+                                            utility -= 10000.0;
+                                            return utility;
+                                        }
+                                    }
+
+                                    I_HordeBanner banner = item as I_HordeBanner;
+                                    if (banner?.orcs == orcSociety && (target.society == null || upstart.society.getRel(target.society).state != DipRel.dipState.war))
+                                    {
+                                        reasonMsgs?.Add(new ReasonMsg("Orcs will not attack banner bearer", -10000.0));
+                                        utility -= 10000.0;
+                                        return utility;
+                                    }
                                 }
                             }
 
@@ -886,20 +952,27 @@ namespace Orcs_Plus
                                     reasonMsgs?.Add(new ReasonMsg("Target is outside of " + orcSociety.getName() + "'s territory", val));
                                     utility += val;
                                 }
-                                else if (target.task is Task_PerformChallenge)
+                                else if (target.task is Task_PerformChallenge task)
                                 {
                                     val = 20;
                                     reasonMsgs?.Add(new ReasonMsg("Agent is interfereing with " + orcSociety.getName() + "'s territory", val));
                                     utility += val;
+
+                                    if (task.challenge is Ch_Orcs_StealPlunder)
+                                    {
+                                        val = 20;
+                                        reasonMsgs?.Add(new ReasonMsg("Agent stealing gold from " + orcSociety.getName() + "'s plunder", val));
+                                        utility += val;
+                                    }
                                 }
 
                                 utility += upstart.person.getTagUtility(new int[]
                                 {
-                                Tags.COMBAT,
-                                Tags.CRUEL,
-                                Tags.DANGER
+                                    Tags.COMBAT,
+                                    Tags.CRUEL,
+                                    Tags.DANGER
                                 }, new int[0], reasonMsgs);
-                                utility += upstart.person.getTagUtility(target.getNegativeTags(), target.getPositiveTags(), reasonMsgs);
+                                utility += upstart.person.getTagUtility(target.getPositiveTags(), target.getNegativeTags(), reasonMsgs);
 
                                 val = 20;
                                 reasonMsgs?.Add(new ReasonMsg("Eager for Combat", val));
@@ -912,24 +985,20 @@ namespace Orcs_Plus
                                     utility += val;
                                 }
 
-                                if (ModCore.modLivingWilds)
+                                if (ModCore.core.data.modLivingWilds && ModCore.core.data.asmLivingWilds != null)
                                 {
-                                    Assembly asm = Assembly.Load("LivingWilds");
-                                    if (asm != null)
+                                    Type t = ModCore.core.data.asmLivingWilds.GetType("LivingWilds.UAEN_Nature_Critter", false);
+                                    if (t != null && target.GetType().IsSubclassOf(t))
                                     {
-                                        Type t = asm.GetType("LivingWilds.UAEN_Nature_Critter");
-                                        if (t != null && target.GetType().IsSubclassOf(t))
-                                        {
-                                            val = -30;
-                                            reasonMsgs?.Add(new ReasonMsg("Nature", val));
-                                            utility += val;
-                                        }
+                                        val = -30;
+                                        reasonMsgs?.Add(new ReasonMsg("Nature", val));
+                                        utility += val;
                                     }
                                 }
 
                                 val = upstart.map.getStepDist(target.location, upstart.location);
-                                reasonMsgs?.Add(new ReasonMsg("Distance", -val));
-                                utility -= val;
+                                reasonMsgs?.Add(new ReasonMsg("Distance", -val * 10));
+                                utility -= val * 10;
 
                                 if (includeDangerousFoe)
                                 {
@@ -1043,19 +1112,21 @@ namespace Orcs_Plus
                 units = new List<Unit>();
             }
 
-            if (upstart.society is SG_Orc orcSociety)
+            if (upstart.society is SG_Orc orcSociety && !orcSociety.checkIsGone())
             {
-                HolyOrder_Orcs orcCulture = null;
-                if (ModCore.core.data.orcSGCultureMap.ContainsKey(orcSociety) && ModCore.core.data.orcSGCultureMap[orcSociety] != null)
-                {
-                    orcCulture = ModCore.core.data.orcSGCultureMap[orcSociety];
-                }
+                ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture);
 
                 foreach (Unit unit in upstart.map.units)
                 {
+                    Type ccc_Banner = null;
                     if (unit == upstart)
                     {
                         continue;
+                    }
+
+                    if (ModCore.core.data.modCovensCursesCurios)
+                    {
+                        ccc_Banner = ModCore.core.data.asmCovensCursesCurtios.GetType("I_BarbDominion");
                     }
 
                     if (unit is UA agent)
@@ -1068,7 +1139,18 @@ namespace Orcs_Plus
                         {
                             units.Add(unit);
                         }
-                        else if (agent.homeLocation != -1 && (upstart.map.locations[agent.homeLocation].soc == orcSociety || upstart.map.locations[agent.homeLocation].soc == orcCulture) && !(agent.task is Task_InHiding))
+                        else if (ModCore.core.data.modCovensCursesCurios && ccc_Banner != null)
+                        {
+                            foreach (Item item in agent.person.items)
+                            {
+                                if (item.GetType() == ccc_Banner)
+                                {
+                                    units.Add(unit);
+                                    break;
+                                }
+                            }
+                        }
+                        else if (agent.homeLocation != -1 && (upstart.map.locations[agent.homeLocation].soc == orcSociety || (orcCulture != null && upstart.map.locations[agent.homeLocation].soc == orcCulture)) && !(agent.task is Task_InHiding))
                         {
                             units.Add(unit);
                         }
@@ -1096,6 +1178,40 @@ namespace Orcs_Plus
             __instance.rituals.Add(new Rti_RecruitWarband(l, __instance));
         }
 
+        private static bool SocialGroup_checkIsGone_Postfix(bool result, SocialGroup __instance)
+        {
+            if (__instance is SG_Orc orcSociety && orcSociety != null)
+            {
+                bool isGone = true;
+                List<Location> locations = new List<Location>();
+                foreach (Location location in orcSociety.map.locations)
+                {
+                    if (location.soc == orcSociety)
+                    {
+                        locations.Add(location);
+
+                        if (location.settlement is Set_OrcCamp)
+                        {
+                            isGone = false;
+                        }
+                    }
+                }
+
+                if (isGone)
+                {
+                    orcSociety.cachedGone = true;
+                    foreach (Location location in locations)
+                    {
+                        location.soc = null;
+                    }
+                }
+
+                return isGone;
+            }
+
+            return result;
+        }
+
         private static void SG_Orc_ctor_Postfox(SG_Orc __instance)
         {
             if (!ModCore.core.data.orcSGCultureMap.ContainsKey(__instance))
@@ -1109,10 +1225,12 @@ namespace Orcs_Plus
             }
         }
 
+
         private static void Set_OrcCamp_ctor_Postfix(Set_OrcCamp __instance)
         {
-            __instance.customChallenges.Add(new Ch_GatherHorde(__instance.location));
-            __instance.customChallenges.Add(new Ch_FundHorde(__instance.location, __instance));
+            __instance.customChallenges.Add(new Ch_Orcs_GatherHorde(__instance.location));
+            __instance.customChallenges.Add(new Ch_Orcs_FundHorde(__instance.location, __instance));
+            __instance.customChallenges.Add(new Ch_Orcs_RaidOutpost(__instance.location, __instance));
         }
 
         private static void Set_OrcCamp_turnTick_Postfix(Set_OrcCamp __instance)
@@ -1241,23 +1359,44 @@ namespace Orcs_Plus
                                     continue;
                                 }
 
-                                if (ModCore.modLivingWilds)
+                                if (ModCore.core.data.modLivingWilds && ModCore.core.data.asmLivingWilds != null)
                                 {
-                                    Assembly asm = Assembly.Load("LivingWilds");
-                                    if (asm != null)
+                                    Type t = ModCore.core.data.asmLivingWilds.GetType("LivingWilds.UAEN_Nature_Critter", false);
+                                    if (t != null && unit.GetType().IsSubclassOf(t))
                                     {
-                                        Type t = asm.GetType("LivingWilds.UAEN_Nature_Critter");
-                                        if (t != null && unit.GetType().IsSubclassOf(t))
-                                        {
-                                            continue;
-                                        }
+                                        continue;
                                     }
                                 }
 
-                                if (unit is UA agent && agent.task is Task_PerformChallenge)
+                                if (unit is UA agent && agent.task is Task_PerformChallenge task)
                                 {
 
+                                    foreach (Item item in agent.person.items)
+                                    {
+                                        if (item != null)
+                                        {
+                                            I_HordeBanner banner = item as I_HordeBanner;
+                                            if (ModCore.core.data.modCovensCursesCurios && ModCore.core.data.asmCovensCursesCurtios != null)
+                                            {
+                                                Type t = ModCore.core.data.asmCovensCursesCurtios.GetType("CovenExpansion.I_BarbDominion", false);
+                                                if (t != null && item.GetType() == t)
+                                                {
+                                                    continue;
+                                                }
+                                            }
+
+                                            if (banner?.orcs == __instance.society && !(agent.society != null && __instance.society.getRel(agent.society).state == DipRel.dipState.war))
+                                            {
+                                                continue;
+                                            }
+                                        }
+                                    }
+
                                     if (agent.society is SG_Orc || agent.society is HolyOrder_Orcs)
+                                    {
+                                        targetAgents.Add(agent);
+                                    }
+                                    else if (task.challenge is Ch_Orcs_StealPlunder)
                                     {
                                         targetAgents.Add(agent);
                                     }

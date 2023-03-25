@@ -17,7 +17,7 @@ namespace Orcs_Plus
             challenges.Clear();
 
             this.order = order;
-            challenges.Add(new Ch_H_ReprimandUpstart(this, this.settlement.location));
+            challenges.Add(new Ch_H_Orcs_ReprimandUpstart(this, this.settlement.location));
 
             // Notify the holy order that this temple exists.
             order.newTempleCreated(this);

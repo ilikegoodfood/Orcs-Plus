@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Orcs_Plus
 {
-    public class Ch_FundHorde : Challenge
+    public class Ch_Orcs_FundHorde : Challenge
     {
         public Set_OrcCamp camp;
 
@@ -15,7 +15,7 @@ namespace Orcs_Plus
 
         public HolyOrder_Orcs orcCulture;
 
-        public Ch_FundHorde (Location location, Set_OrcCamp camp) : base(location)
+        public Ch_Orcs_FundHorde (Location location, Set_OrcCamp camp) : base(location)
         {
             this.camp = camp;
         }

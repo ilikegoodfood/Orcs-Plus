@@ -42,6 +42,10 @@
       <HintPath>..\..\CommunityLib\CommunityLib\bin\Debug\CommunityLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="CovensCurses&amp;Curios">
+      <HintPath>D:\Program Files (x86)\Steam\steamapps\workshop\content\1741640\2932765110\CovensCurses&amp;Curios.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="LivingWilds">
       <HintPath>D:\Program Files (x86)\Steam\steamapps\workshop\content\1741640\2932110698\LivingWilds.dll</HintPath>
       <Private>False</Private>
@@ -61,9 +65,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AgentAIs.cs" />
-    <Compile Include="Ch_FundHorde.cs" />
-    <Compile Include="Ch_GatherHorde.cs" />
-    <Compile Include="Ch_H_ReprimandUpstart.cs" />
+    <Compile Include="Ch_Orcs_FundHorde.cs" />
+    <Compile Include="Ch_Orcs_GatherHorde.cs" />
+    <Compile Include="Ch_H_Orcs_ReprimandUpstart.cs" />
+    <Compile Include="Ch_Orcs_RaidOutpost.cs" />
     <Compile Include="ComLibHooks.cs" />
     <Compile Include="HarmonyPatches.cs" />
     <Compile Include="HolyOrder_Orcs.cs" />

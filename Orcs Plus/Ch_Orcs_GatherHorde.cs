@@ -9,9 +9,9 @@ using UnityEngine;
 
 namespace Orcs_Plus
 {
-    internal class Ch_GatherHorde : Challenge
+    internal class Ch_Orcs_GatherHorde : Challenge
     {
-        public Ch_GatherHorde(Location loc) : base(loc)
+        public Ch_Orcs_GatherHorde(Location loc) : base(loc)
         {
             
         }

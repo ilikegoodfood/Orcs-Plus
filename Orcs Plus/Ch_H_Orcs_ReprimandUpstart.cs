@@ -8,13 +8,13 @@ using UnityEngine;
 
 namespace Orcs_Plus
 {
-    public class Ch_H_ReprimandUpstart : ChallengeHoly
+    public class Ch_H_Orcs_ReprimandUpstart : ChallengeHoly
     {
         public HolyOrder_Orcs orcCulture;
 
         public Sub_OrcCultureCapital seat;
 
-        public Ch_H_ReprimandUpstart(Sub_OrcCultureCapital seat, Location location)
+        public Ch_H_Orcs_ReprimandUpstart(Sub_OrcCultureCapital seat, Location location)
             : base (location)
         {
             this.seat = seat;
@@ -116,7 +116,7 @@ namespace Orcs_Plus
             {
                 UAEN_OrcUpstart upstart = orcCulture.orcSociety.upstart;
 
-                if (upstart.inner_profile > upstart.inner_profileMin || upstart.inner_menace > upstart.inner_menaceMin)
+                if (upstart.inner_profile > upstart.inner_profileMin + 20 || upstart.inner_menace > upstart.inner_menaceMin + 15)
                 {
                     if (!((upstart.task is Task_PerformChallenge task && task.challenge is Rt_Orcs_Confinement) || (upstart.task is CommunityLib.Task_GoToPerformChallengeAtLocation task2 && task2.challenge is Rt_Orcs_Confinement)))
                     {

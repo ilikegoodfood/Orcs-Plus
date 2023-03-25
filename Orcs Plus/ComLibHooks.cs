@@ -516,5 +516,33 @@ namespace Orcs_Plus
 
             return false;
         }
+
+        public override bool interceptAgentAI(UA ua, List<CommunityLib.AgentAI.ChallengeData> validChallengeData, CommunityLib.AgentAI.ControlParameters controlParams)
+        {
+            switch(ua)
+            {
+                case UAA_OrcElder elder:
+                    return interceptOrcElder(elder);
+                default:
+                    break;
+            }
+
+            return false;
+        }
+
+        private bool interceptOrcElder(UAA_OrcElder elder)
+        {
+            if (elder == null)
+            {
+                return false;
+            }
+
+            if (elder.society.checkIsGone())
+            {
+                elder.die(map, "Died in the wilderness", null);
+                return true;
+            }
+            return false;
+        }
     }
 }

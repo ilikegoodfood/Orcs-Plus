@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Assets.Code;
 using Assets.Code.Modding;
 using CommunityLib;
@@ -23,8 +24,6 @@ namespace Orcs_Plus
 
         public AgentAIs agentAI;
 
-        public static bool modLivingWilds = false;
-
         private static bool patched = false;
 
         public override void onModsInitiallyLoaded()
@@ -40,71 +39,70 @@ namespace Orcs_Plus
 
         public override void beforeMapGen(Map map)
         {
-            foreach (ModKernel core in map.mods)
-            {
-                switch (core.GetType().Namespace)
-                {
-                    case "CommunityLib":
-                        comLib = core as CommunityLib.ModCore;
-                        if (comLib != null)
-                        {
-                            comLib.RegisterHooks(comLibHooks);
-                            comLibAI = comLib.GetAgentAI();
-                        }
-                        break;
-                    case "LivingWilds":
-                        modLivingWilds = true;
-                        break;
-                    default:
-                        break;
-                }
-            }
+            data = new ModData();
+            comLibHooks = new ComLibHooks(map);
+
+            getModKernels(map);
 
             if (comLib == null)
             {
                 throw new Exception("OrcsPlus: This mod REQUIRES the Community Library mod to be installed and enabled in order to operate.");
             }
-            
-            data = new ModData();
+
             agentAI = new AgentAIs(map);
         }
 
         public override void afterLoading(Map map)
         {
             core = this;
-
-            foreach (ModKernel core in map.mods)
-            {
-                switch (core.GetType().Namespace)
-                {
-                    case "CommunityLib":
-                        comLib = core as CommunityLib.ModCore;
-                        if (comLib != null)
-                        {
-                            comLib.RegisterHooks(comLibHooks);
-                            comLibAI = comLib.GetAgentAI();
-                        }
-                        break;
-                    case "LivingWilds":
-                        modLivingWilds = true;
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            if (comLib == null)
-            {
-                throw new Exception("OrcsPlus: This mod REQUIRES the Community Library mod to be installed and enabled in order to operate.");
-            }
-
             if (data == null)
             {
                 data = new ModData();
                 data.isPlayerTurn = true;
                 UpdateOrcSGCultureMap(map);
             }
+
+            if (comLib == null)
+            {
+                comLibHooks = new ComLibHooks(map);
+            }
+
+            getModKernels(map);
+
+            if (comLib == null)
+            {
+                throw new Exception("OrcsPlus: This mod REQUIRES the Community Library mod to be installed and enabled in order to operate.");
+            }
+            
             agentAI = new AgentAIs(map);
+        }
+
+        private void getModKernels(Map map)
+        {
+            foreach (ModKernel kernel in map.mods)
+            {
+                switch (kernel.GetType().Namespace)
+                {
+                    case "CommunityLib":
+                        comLib = kernel as CommunityLib.ModCore;
+                        if (comLib != null)
+                        {
+                            comLib.RegisterHooks(comLibHooks);
+                            comLibAI = comLib.GetAgentAI();
+                        }
+                        break;
+                    case "CovenExpansion":
+                        data.modCovensCursesCurios = true;
+                        data.asmCovensCursesCurtios = kernel.GetType().Assembly;
+                        break;
+                    case "LivingWilds":
+                        data.modLivingWilds = true;
+                        data.asmLivingWilds = kernel.GetType().Assembly;
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
         public override void onTurnStart(Map map)

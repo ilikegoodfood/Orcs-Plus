@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace Orcs_Plus
 {
@@ -9,13 +10,19 @@ namespace Orcs_Plus
     {
         public Dictionary<SG_Orc, HolyOrder_Orcs> orcSGCultureMap;
 
-        public double orcDefenceFactor = 2.0;
-
         public bool isPlayerTurn = false;
 
         public Dictionary<HolyOrder_Orcs, List<ReasonMsg>> influenceGainElder;
 
         public Dictionary<HolyOrder_Orcs, List<ReasonMsg>> influenceGainHuman;
+
+        public bool modCovensCursesCurios = false;
+
+        public bool modLivingWilds = false;
+
+        public Assembly asmCovensCursesCurtios = null;
+
+        public Assembly asmLivingWilds = null;
 
         public enum influenceGainAction
         {

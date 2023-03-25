@@ -109,12 +109,16 @@ namespace Orcs_Plus
 
         public override bool checkIsGone()
         {
-            if (cachedGone || orcSociety == null)
+            if (cachedGone)
             {
-                return true;
+                return cachedGone;
             }
 
-            cachedGone = orcSociety.isGone();
+            if (orcSociety == null || orcSociety.checkIsGone())
+            {
+                cachedGone = true;
+            }
+
             return cachedGone;
         }
 
