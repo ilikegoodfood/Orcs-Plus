@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Orcs_Plus
 {
-    public class H_Intolerance : HolyTenet
+    public class H_ShadowWeaving : HolyTenet
     {
-        public H_Intolerance(HolyOrder_Orcs ord)
+        public H_ShadowWeaving(HolyOrder_Orcs ord)
             : base(ord)
         {
 
@@ -17,17 +17,17 @@ namespace Orcs_Plus
 
         public override string getName()
         {
-            return "Intolerance";
+            return "Shadow Weaving";
         }
 
         public override string getDesc()
         {
-            return "Orcs or notoriously intolerant of outsiders, opportunistically attacking anyone who comes too close. With some influence, they can be discouraged from attacking others.";
+            return "If under human influence, orcs will purge shadow from their lands. As elder infleunce increases, they will allow shadow to spread through their camps. At maximum, orcs will push shadow to surrounding settlements.";
         }
 
         public override int getMaxPositiveInfluence()
         {
-            return 2;
+            return 1;
         }
 
         public override int getMaxNegativeInfluence()

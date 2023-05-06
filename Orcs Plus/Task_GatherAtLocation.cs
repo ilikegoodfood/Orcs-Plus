@@ -3,7 +3,7 @@
 
 namespace Orcs_Plus
 {
-    internal class Task_GatherAtLocation : Assets.Code.Task
+    public class Task_GatherAtLocation : Assets.Code.Task
     {
         public Location target;
 

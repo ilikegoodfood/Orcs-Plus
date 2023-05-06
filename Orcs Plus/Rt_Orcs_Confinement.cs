@@ -52,6 +52,11 @@ namespace Orcs_Plus
             return EventManager.getImg("OrcsPlus.Icon_GreatHall.png");
         }
 
+        public override bool validFor(UA ua)
+        {
+            return ua is UAEN_OrcUpstart && ua.location.settlement is Set_OrcCamp && ua.location.soc is SG_Orc orcSociety && orcSociety == ua.society;
+        }
+
         public override void turnTick(UA ua)
         {
             bool profile = ua.inner_profile > ua.inner_profileMin;
@@ -98,8 +103,7 @@ namespace Orcs_Plus
         public override int[] buildPositiveTags()
         {
             return new int[] {
-                Tags.COOPERATION,
-                Tags.RELIGION
+                Tags.COOPERATION
             };
         }
 
@@ -109,6 +113,7 @@ namespace Orcs_Plus
                 Tags.AMBITION,
                 Tags.COMBAT,
                 Tags.CRUEL,
+                Tags.DANGER,
                 Tags.DISCORD
             };
         }

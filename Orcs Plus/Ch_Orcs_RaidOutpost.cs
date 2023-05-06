@@ -8,24 +8,20 @@ using UnityEngine;
 
 namespace Orcs_Plus
 {
-    public class Ch_Orcs_RaidOutpost : Challenge
+    public class Ch_Orcs_RaidOutpost : ChallengeHoly
     {
-        public Set_OrcCamp camp;
-
         public SG_Orc orcSociety;
 
         public HolyOrder_Orcs orcCulture;
 
-        public Ch_Orcs_RaidOutpost(Location location, Set_OrcCamp camp)
+        public Ch_Orcs_RaidOutpost(Location location, SG_Orc orcSociety)
             : base(location)
         {
-            this.camp = camp;
+            this.orcSociety = orcSociety;
         }
 
         public HolyOrder_Orcs getOrcCulture()
         {
-            orcSociety = camp.location.soc as SG_Orc;
-
             if (orcSociety != null && ModCore.core.data.orcSGCultureMap.ContainsKey(orcSociety))
             {
                 orcCulture = ModCore.core.data.orcSGCultureMap[orcSociety];
@@ -47,6 +43,11 @@ namespace Orcs_Plus
         public override string getCastFlavour()
         {
             return "Unruly and disorganised, the orcish raiders are motivated by bloodlust, greed, remembered grudges and the need for personal glory. As a military force their poor discipline is offset by their extreme personal strength and reckless bravery.";
+        }
+
+        public override string getRestriction()
+        {
+            return "Requires a human outpost in a neighbouring location.";
         }
 
         public override challengeStat getChallengeType()
@@ -167,7 +168,7 @@ namespace Orcs_Plus
             else if (outposts.Count > 1)
             {
                 double charge = 0.0;
-                foreach( Pr_HumanOutpost outpost in outposts)
+                foreach (Pr_HumanOutpost outpost in outposts)
                 {
                     if (outpost.charge > charge)
                     {

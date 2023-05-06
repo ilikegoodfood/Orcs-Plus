@@ -65,6 +65,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AgentAIs.cs" />
+    <Compile Include="Ch_H_Orcs_CleansingFestival.cs" />
+    <Compile Include="Ch_H_Orcs_DarkFestival.cs" />
+    <Compile Include="Ch_Orcs_FundWaystation.cs" />
+    <Compile Include="Ch_Orcs_WarFestival.cs" />
+    <Compile Include="D_Blank.cs" />
+    <Compile Include="H_ShadowWeaving.cs" />
+    <Compile Include="Rt_Orcs_EndBloodFeud.cs" />
     <Compile Include="Ch_Orcs_FundHorde.cs" />
     <Compile Include="Ch_Orcs_GatherHorde.cs" />
     <Compile Include="Ch_H_Orcs_ReprimandUpstart.cs" />
@@ -73,15 +80,32 @@
     <Compile Include="HarmonyPatches.cs" />
     <Compile Include="HolyOrder_Orcs.cs" />
     <Compile Include="H_Intolerance.cs" />
+    <Compile Include="ItemFromOrcPlunder.cs" />
     <Compile Include="ItemToOrcCulture.cs" />
     <Compile Include="ModCore.cs" />
     <Compile Include="ModData.cs" />
+    <Compile Include="M_OrcChampion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rti_RecruitWarband.cs" />
+    <Compile Include="Rt_Orcs_BuildCamp.cs" />
     <Compile Include="Rt_Orcs_Confinement.cs" />
+    <Compile Include="Rt_H_Orcs_GiftGold.cs" />
+    <Compile Include="Rt_Orcs_PillageSettlement.cs" />
+    <Compile Include="Rt_Orcs_PirateTrade.cs" />
     <Compile Include="Sub_OrcCultureCapital.cs" />
+    <Compile Include="Sub_OrcTemple.cs" />
+    <Compile Include="Sub_OrcWaystation.cs" />
+    <Compile Include="Task_DevourArmy.cs" />
+    <Compile Include="Task_DevourLocation.cs" />
     <Compile Include="Task_GatherAtLocation.cs" />
+    <Compile Include="Task_RazeOutpost.cs" />
+    <Compile Include="T_BloodFeud.cs" />
+    <Compile Include="T_ReveredElder.cs" />
     <Compile Include="UAA_OrcElder.cs" />
+    <Compile Include="UAEN_OrcShaman.cs" />
+    <Compile Include="UMTaskDelegates.cs" />
+    <Compile Include="UM_OrcBeastArmy.cs" />
+    <Compile Include="UM_OrcCorsair.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

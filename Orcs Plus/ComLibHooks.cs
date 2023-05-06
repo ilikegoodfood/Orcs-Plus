@@ -3,8 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Orcs_Plus
 {
@@ -338,7 +340,7 @@ namespace Orcs_Plus
         {
             // Settlement Data
             Set_OrcCamp camp = set as Set_OrcCamp;
-            SG_Orc orcs = camp?.location?.soc as SG_Orc;
+            SG_Orc orcSociety = camp?.location?.soc as SG_Orc;
 
             // Killer Data
             Person pKiller = killer as Person;
@@ -355,116 +357,116 @@ namespace Orcs_Plus
                 {
                     if (uKiller.isCommandable())
                     {
-                        if (orcs != null)
+                        if (orcSociety != null && !orcSociety.isGone())
                         {
-                            ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                            ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Razed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                         }
 
                         List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(map);
 
-                        if (orcSocieties?.Count > 0 && set.location?.soc != null)
+                        if (orcSocieties.Count > 0 && set.location?.soc != null)
                         {
-                            foreach (SG_Orc orcSociety in orcSocieties)
+                            foreach (SG_Orc orcs in orcSocieties)
                             {
-                                if (orcs != null && orcs == orcSociety)
+                                if (orcSociety != null && orcSociety == orcs)
                                 {
                                     continue;
                                 }
 
-                                if (orcSociety.getRel(set.location.soc)?.state == DipRel.dipState.war)
+                                if (orcs.getRel(set.location.soc)?.state == DipRel.dipState.war)
                                 {
-                                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razed emeny settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                                    ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Razed emeny settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                                 }
                             }
                         }
                     }
-                    else if (orcs != null && !uKiller.society.isDark())
+                    else if (orcSociety != null && !orcSociety.isGone() && !uKiller.society.isDark())
                     {
-                        ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]));
+                        ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Razed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]));
                     }
                 }
                 else if (v == "Destroyed by volcanic eruption")
                 {
                     if (uKiller.isCommandable())
                     {
-                        if (orcs != null)
+                        if (orcSociety != null && !orcSociety.isGone())
                         {
-                            ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Volcanic eruption (geomancy) razed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                            ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Volcanic eruption (geomancy) razed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                         }
 
                         List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(map);
 
-                        if (orcSocieties?.Count > 0 && set.location?.soc != null)
+                        if (orcSocieties.Count > 0 && set.location?.soc != null)
                         {
-                            foreach (SG_Orc orcSociety in orcSocieties)
+                            foreach (SG_Orc orcs in orcSocieties)
                             {
-                                if (orcs != null && orcSociety == orcs)
+                                if (orcSociety != null && orcs == orcSociety)
                                 {
                                     continue;
                                 }
 
-                                if (orcSociety.getRel(set.location.soc)?.state == DipRel.dipState.war)
+                                if (orcs.getRel(set.location.soc)?.state == DipRel.dipState.war)
                                 {
-                                    ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Volcanic eruption (geomancy) razed enemy settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Volcanic eruption (geomancy) razed enemy settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                                 }
                             }
                         }
                     }
                     else if (!uKiller.society.isDark())
                     {
-                        if (orcs != null)
+                        if (orcSociety != null && !orcSociety.isGone())
                         {
-                            ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Volcanic eruption (geomancy) razed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]));
+                            ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Volcanic eruption (geomancy) razed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]));
                         }
                     }
                 }
             }
             else if (v == "Destroyed by smite")
             {
-                if (orcs != null)
+                if (orcSociety != null && !orcSociety.isGone())
                 {
-                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Smote orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                    ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Smote orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                 }
 
                 List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(map);
 
-                if (orcSocieties?.Count > 0 && set.location?.soc != null)
+                if (orcSocieties.Count > 0 && set.location?.soc != null)
                 {
-                    foreach (SG_Orc orcSociety in orcSocieties)
+                    foreach (SG_Orc orcs in orcSocieties)
                     {
-                        if (orcs != null && orcs == orcSociety)
+                        if (orcSociety != null && orcSociety == orcs)
                         {
                             continue;
                         }
 
-                        if (orcSociety.getRel(set.location.soc)?.state == DipRel.dipState.war)
+                        if (orcs.getRel(set.location.soc)?.state == DipRel.dipState.war)
                         {
-                            ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Smote emeny settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                            ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Smote emeny settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                         }
                     }
                 }
             }
             else if (v == "Destroyed by volcanic eruption")
             {
-                if (orcs != null)
+                if (orcSociety != null && !orcSociety.isGone())
                 {
-                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Awakening razed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                    ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Awakening razed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                 }
 
                 List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(map);
 
-                if (orcSocieties?.Count > 0 && set.location?.soc != null)
+                if (orcSocieties.Count > 0 && set.location?.soc != null)
                 {
-                    foreach (SG_Orc orcSociety in orcSocieties)
+                    foreach (SG_Orc orcs in orcSocieties)
                     {
-                        if (orcs != null && orcs == orcSociety)
+                        if (orcSociety != null && orcSociety == orcs)
                         {
                             continue;
                         }
 
-                        if (orcSociety.getRel(set.location.soc)?.state == DipRel.dipState.war)
+                        if (orcs.getRel(set.location.soc)?.state == DipRel.dipState.war)
                         {
-                            ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Awakening razed enemy settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                            ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Awakening razed enemy settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                         }
                     }
                 }
@@ -523,6 +525,8 @@ namespace Orcs_Plus
             {
                 case UAA_OrcElder elder:
                     return interceptOrcElder(elder);
+                case UAEN_OrcShaman shaman:
+                    return interceptOrcShaman(shaman);
                 default:
                     break;
             }
@@ -532,17 +536,129 @@ namespace Orcs_Plus
 
         private bool interceptOrcElder(UAA_OrcElder elder)
         {
-            if (elder == null)
-            {
-                return false;
-            }
-
-            if (elder.society.checkIsGone())
+            if (elder.society.isGone())
             {
                 elder.die(map, "Died in the wilderness", null);
                 return true;
             }
             return false;
+        }
+
+        private bool interceptOrcShaman(UAEN_OrcShaman shaman)
+        {
+            if (shaman.society.isGone())
+            {
+                shaman.die(map, "Died in the wilderness", null);
+                return true;
+            }
+            return false;
+        }
+
+        public override List<TaskData> onUIScroll_Unit_populateUM(UM um)
+        {
+            List<TaskData> tasks = new List<TaskData>();
+
+            if (um.location.properties.OfType<Pr_HumanOutpost>().FirstOrDefault() != null)
+            {
+                TaskData task_RazeOutpost = new TaskData();
+                task_RazeOutpost.onClick = UMTaskDelegates.onClick_RazeOutpost;
+                task_RazeOutpost.title = "Raze Outpost at " + um.location.getName();
+                task_RazeOutpost.icon = um.map.world.iconStore.raze;
+                task_RazeOutpost.menaceGain = um.map.param.um_menaceGainFromRaze;
+                task_RazeOutpost.backColor = new Color(0.8f, 0f, 0f);
+                task_RazeOutpost.enabled = true;
+
+                tasks.Add(task_RazeOutpost);
+            }
+
+            if (um is UM_OrcRaiders orcRaiders)
+            {
+                Rt_Orcs_BuildCamp challenge = orcRaiders.rituals.OfType<Rt_Orcs_BuildCamp>().FirstOrDefault();
+
+                if (challenge != null)
+                {
+                    TaskData task_Orcs_BuildCamp = new TaskData();
+                    task_Orcs_BuildCamp.challenge = challenge;
+                }
+            }
+
+            return tasks;
+        }
+
+        public override bool interceptChallengePopout(UM um, TaskData taskData, ref TaskData_Popout popoutData)
+        {
+            if (um != null && taskData.title == "Raze Outpost at " + um.location.getName())
+            {
+                popoutData.description = "This army is razing an outpost at this location, preventing positive growth and causing negative growth equal to 10 times the army's hp (" + um.hp * -10 + ").";
+                popoutData.menaceGain = um.map.param.um_menaceGainFromRaze;
+                popoutData.backColor = new Color(0.6f, 0.0f, 0.0f);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public override bool interceptReplaceItem(Person person, Item item, Item newItem, bool obligateHold)
+        {
+            if (person.unit is UAEN_OrcUpstart upstart && item is I_HordeBanner banner && banner.orcs == upstart.society)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public override void populatingMonsterActions(SG_ActionTakingMonster atMonster, List<MonsterAction> actions)
+        {
+            //Console.WriteLine("OrcsPlus: populatingMonsterActions");
+            if (atMonster is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            {
+                //Console.WriteLine("OrcsPlus: Monster is orcSociety with associated orcCulture");
+                List<MonsterAction> actionsToRemove = new List<MonsterAction>();
+
+                if (actions.Count > 0)
+                {
+                    //Console.WriteLine("OrcsPlus: orcSociety has actions");
+                    //Console.WriteLine("OrcsPlus: Iterating Actions");
+                    foreach (MonsterAction action in actions)
+                    {
+                        //Console.WriteLine("OrcsPlus: Iterating action " + action.getName() + " of type " + action.GetType().Name);
+                        if (action is MA_Orc_Attack attack && attack.target != null)
+                        {
+                            //Console.WriteLine("OrcsPlus: Action is MA_Orc_Attack");
+                            if (orcCulture.tenet_intolerance.status == -2)
+                            {
+                                //Console.WriteLine("OrcsPlus: orcCulture is Dark tolerant");
+                                if ((attack.target.isDark() && !(attack.target is SG_Orc || attack.target is HolyOrder_Orcs)) || (attack.target is Society society && (society.isDarkEmpire || society.isOphanimControlled)))
+                                {
+                                    actionsToRemove.Add(action);
+                                }
+                            }
+                            else if (orcCulture.tenet_intolerance.status == 2)
+                            {
+                                //Console.WriteLine("OrcsPlus: orcCulture is Human tolerant");
+                                if (!attack.target.isDark() && (!(attack.target is Society society) || !(society.isDarkEmpire || society.isOphanimControlled)))
+                                {
+                                    actionsToRemove.Add(action);
+                                }
+                            }
+                            //Console.WriteLine("OrcsPlus: Attack iterated");
+                        }
+                    }
+
+                    if (actionsToRemove.Count > 0)
+                    {
+                        //Console.WriteLine("OrcsPlus: Removing unwanted actions");
+                        foreach (MonsterAction action in actionsToRemove)
+                        {
+                            actions.Remove(action);
+                        }
+                    }
+                    //Console.WriteLine("OrcsPlus: Finished Processing Actions");
+                }
+                //Console.WriteLine("OrcsPlus: Finished processing orcSociety");
+            }
         }
     }
 }

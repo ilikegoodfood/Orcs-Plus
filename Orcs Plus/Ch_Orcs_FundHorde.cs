@@ -100,41 +100,34 @@ namespace Orcs_Plus
 
         public override void complete(UA u)
         {
-            if (u.isCommandable() && !map.automatic)
+            if (u.isCommandable())
             {
-                ItemToOrcCulture interB = new ItemToOrcCulture(map, getOrcCulture(), u.person);
-                map.world.prefabStore.popItemTrade(u.person, interB, "Donate To Orc Horde", 0, -1);
-            }
-            else
-            {
-                if (u.isCommandable() && map.automatic)
+                if (!map.automatic)
+                {
+                    map.world.prefabStore.popItemTrade(u.person, new ItemToOrcCulture(map, getOrcCulture(), u.person), "Donate To Orc Horde", 0, -1);
+                }
+                else
                 {
                     getOrcCulture()?.receiveFunding(u.person, u.person.gold);
                     ModCore.core.TryAddInfluenceGain(getOrcCulture(), new ReasonMsg("Gifted gold", u.person.gold / 2), true);
                     u.person.gold = 0;
                 }
-                else if (u is UAEN_OrcUpstart)
+            }
+            else if (u is UAEN_OrcUpstart)
+            {
+                u.person.gold /= 2;
+                getOrcCulture()?.receiveFunding(u.person, u.person.gold);
+            }
+            else
+            {
+                getOrcCulture()?.receiveFunding(u.person, u.person.gold);
+
+                if (u.society != null && !u.society.isDark() && !u.corrupted)
                 {
-                    getOrcCulture()?.receiveFunding(u.person, u.person.gold / 2);
-
-                    if (u.society != null && !u.society.isDark() && !u.corrupted)
-                    {
-                        ModCore.core.TryAddInfluenceGain(getOrcCulture(), new ReasonMsg("Gifted gold", u.person.gold / 4));
-                    }
-
-                    u.person.gold /= 2;
+                    ModCore.core.TryAddInfluenceGain(getOrcCulture(), new ReasonMsg("Gifted gold", u.person.gold / 2));
                 }
-                else
-                {
-                    getOrcCulture()?.receiveFunding(u.person, u.person.gold);
-                    
-                    if (u.society != null && !u.society.isDark() && !u.corrupted)
-                    {
-                        ModCore.core.TryAddInfluenceGain(getOrcCulture(), new ReasonMsg("Gifted gold", u.person.gold / 2));
-                    }
 
-                    u.person.gold = 0;
-                }
+                u.person.gold = 0;
             }
         }
 
@@ -179,7 +172,8 @@ namespace Orcs_Plus
             return new int[]
             {
                 Tags.COOPERATION,
-                Tags.ORC
+                Tags.ORC,
+                Tags.RELIGION
             };
         }
 

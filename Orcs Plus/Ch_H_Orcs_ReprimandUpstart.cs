@@ -12,23 +12,23 @@ namespace Orcs_Plus
     {
         public HolyOrder_Orcs orcCulture;
 
-        public Sub_OrcCultureCapital seat;
+        public Sub_Temple sub;
 
-        public Ch_H_Orcs_ReprimandUpstart(Sub_OrcCultureCapital seat, Location location)
+        public Ch_H_Orcs_ReprimandUpstart(Sub_Temple sub, Location location)
             : base (location)
         {
-            this.seat = seat;
-            orcCulture = seat.order as HolyOrder_Orcs;
+            this.sub = sub;
+            orcCulture = sub.order as HolyOrder_Orcs;
         }
 
         public override string getName()
         {
-            return "Reprimand Orc Upstart";
+            return "Holy: Reprimand Orc Upstart";
         }
 
         public override string getDesc()
         {
-            return "Recalls the upstart to the seat of the elders and reprimands him for his actions. The upstart will rapidly loose menace and profile while they are confined to the camp.";
+            return "Recalls the upstart to the seat of the elders and reprimands him for his actions. The upstart will rapidly loose menace and profile, and will heal and rest, while they are confined to the camp.";
         }
 
         public override string getCastFlavour()
@@ -38,7 +38,7 @@ namespace Orcs_Plus
 
         public override string getRestriction()
         {
-            return "Requires the camp hosting the seat of the elders to be infiltrated.";
+            return "Requires the camp hosting the seat of the elders or great hall to be infiltrated.";
         }
 
         public override challengeStat getChallengeType()
@@ -56,7 +56,26 @@ namespace Orcs_Plus
             double result = 0.0;
             double val = -10000.0;
 
-            UAEN_OrcUpstart upstart = orcCulture.orcSociety.upstart;
+            UAEN_OrcUpstart upstart = null;
+            double excessMenaceProfile = 0;
+
+            if (orcCulture != null)
+            {
+                foreach (UA agent in orcCulture.agents)
+                {
+                    if (agent is UAEN_OrcUpstart upstart2 && (upstart2.inner_profile > upstart2.inner_profileMin + 20 || upstart2.inner_menace > upstart2.inner_menaceMin + 15))
+                    {
+                        if (!((upstart2.task is Task_PerformChallenge task && task.challenge is Rt_Orcs_Confinement) || (upstart2.task is CommunityLib.Task_GoToPerformChallengeAtLocation task2 && task2.challenge is Rt_Orcs_Confinement) || upstart2.task is Task_Disrupted || upstart2.task is Task_DisruptUA))
+                        {
+                            if (upstart2.inner_profile - upstart2.inner_profileMin + upstart2.inner_menace - upstart2.inner_menaceMin > excessMenaceProfile)
+                            {
+                                excessMenaceProfile = upstart2.inner_profile - upstart2.inner_profileMin + upstart2.inner_menace - upstart2.inner_menaceMin;
+                                upstart = upstart2;
+                            }
+                        }
+                    }
+                }
+            }
 
             if (upstart == null)
             {
@@ -64,25 +83,25 @@ namespace Orcs_Plus
                 return val;
             }
 
-            val = Math.Max(0.0, upstart.inner_profile - upstart.inner_profileMin);
+            val = Math.Max(0.0, upstart.inner_profile - upstart.inner_profileMin) / 2;
             if (val > 0)
             {
                 msgs?.Add(new ReasonMsg("Potential Profile Reduction", val));
                 result += val;
             }
 
-            val = Math.Max(0.0, upstart.inner_menace - upstart.inner_menaceMin);
+            val = Math.Max(0.0, upstart.inner_menace - upstart.inner_menaceMin) / 2;
             if (val > 0)
             {
                 msgs?.Add(new ReasonMsg("Potential Menace Reduction", val));
                 result += val;
             }
 
-            if (upstart.task is Task_PerformChallenge task)
+            if (upstart.task is Task_PerformChallenge currentTask)
             {
-                Challenge challenge = task.challenge;
-                val = (task.progress / challenge.getProgressPerTurn(upstart, null)) * 10;
-                msgs?.Add(new ReasonMsg("Wasted Weeks", -val));
+                Challenge challenge = currentTask.challenge;
+                val = (currentTask.progress / challenge.getProgressPerTurn(upstart, null)) * 10;
+                msgs?.Add(new ReasonMsg("Wasted Challenge Progress", -val));
                 result -= val;
             }
 
@@ -102,40 +121,66 @@ namespace Orcs_Plus
 
         public override bool validFor(UA ua)
         {
-            return (ua is UAA_OrcElder elder && elder.society == seat.order) || (ua.isCommandable() && location.settlement is Set_OrcCamp camp && camp.isInfiltrated);
+            return ua is UAA_OrcElder elder && elder.society == orcCulture;
         }
 
         public override bool valid()
         {
-            if (location != seat.settlement.location || location.settlement != seat.settlement || location.settlement.subs.OfType<Sub_OrcCultureCapital>().FirstOrDefault() != seat)
+            bool result = false;
+            if (location != sub.settlement.location || location.settlement != sub.settlement || location.settlement.subs.OfType<Sub_Temple>().FirstOrDefault() != sub)
             {
-                return false;
+                return result;
             }
 
-            if (orcCulture.orcSociety?.upstart != null)
+            if (orcCulture != null)
             {
-                UAEN_OrcUpstart upstart = orcCulture.orcSociety.upstart;
-
-                if (upstart.inner_profile > upstart.inner_profileMin + 20 || upstart.inner_menace > upstart.inner_menaceMin + 15)
+                foreach (UA agent in orcCulture.agents)
                 {
-                    if (!((upstart.task is Task_PerformChallenge task && task.challenge is Rt_Orcs_Confinement) || (upstart.task is CommunityLib.Task_GoToPerformChallengeAtLocation task2 && task2.challenge is Rt_Orcs_Confinement)))
+                    if (agent is UAEN_OrcUpstart upstart && (upstart.inner_profile > upstart.inner_profileMin + 20 || upstart.inner_menace > upstart.inner_menaceMin + 15))
                     {
-                        return true;
+                        if (!((upstart.task is Task_PerformChallenge task && task.challenge is Rt_Orcs_Confinement) || (upstart.task is CommunityLib.Task_GoToPerformChallengeAtLocation task2 && task2.challenge is Rt_Orcs_Confinement) || upstart.task is Task_Disrupted || upstart.task is Task_DisruptUA))
+                        {
+                            result = true;
+                            break;
+                        }
                     }
                 }
             }
 
-            return false;
+            return result;
         }
 
         public override void complete(UA u)
         {
-            UAEN_OrcUpstart upstart = orcCulture.orcSociety.upstart;
-            Rt_Orcs_Confinement confine = upstart.rituals.OfType<Rt_Orcs_Confinement>().FirstOrDefault();
+            UAEN_OrcUpstart upstart = null;
+            double excessMenaceProfile = 0;
 
-            if (confine != null)
+            if (orcCulture != null)
             {
-                upstart.task = new CommunityLib.Task_GoToPerformChallengeAtLocation(confine, this.location);
+                foreach (UA agent in orcCulture.agents)
+                {
+                    if (agent is UAEN_OrcUpstart upstart2 && (upstart2.inner_profile > upstart2.inner_profileMin + 20 || upstart2.inner_menace > upstart2.inner_menaceMin + 15))
+                    {
+                        if (!((upstart2.task is Task_PerformChallenge task && task.challenge is Rt_Orcs_Confinement) || (upstart2.task is CommunityLib.Task_GoToPerformChallengeAtLocation task2 && task2.challenge is Rt_Orcs_Confinement) || upstart2.task is Task_Disrupted || upstart2.task is Task_DisruptUA))
+                        {
+                            if (upstart2.inner_profile - upstart2.inner_profileMin + upstart2.inner_menace - upstart2.inner_menaceMin > excessMenaceProfile)
+                            {
+                                excessMenaceProfile = upstart2.inner_profile - upstart2.inner_profileMin + upstart2.inner_menace - upstart2.inner_menaceMin;
+                                upstart = upstart2;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (upstart != null)
+            {
+                Rt_Orcs_Confinement confine = upstart.rituals.OfType<Rt_Orcs_Confinement>().FirstOrDefault();
+
+                if (confine != null)
+                {
+                    upstart.task = new CommunityLib.Task_GoToPerformChallengeAtLocation(confine, location, true);
+                }
             }
         }
 

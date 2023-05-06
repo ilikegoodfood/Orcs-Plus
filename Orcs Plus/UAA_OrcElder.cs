@@ -7,6 +7,8 @@ namespace Orcs_Plus
 {
     internal class UAA_OrcElder : UAA
     {
+        public Rt_H_Orcs_GiftGold giftGold;
+
         public UAA_OrcElder(Location loc, HolyOrder sg)
             : base(loc, sg)
         {
@@ -16,6 +18,11 @@ namespace Orcs_Plus
             person.stat_intrigue = 1 + Eleven.random.Next(2);
             person.stat_command = 3 + Eleven.random.Next(3);
             person.hasSoul = false;
+            person.traits.Add(new T_ReveredElder());
+            person.species = map.species_orc;
+
+            giftGold = new Rt_H_Orcs_GiftGold(loc);
+            rituals.Add(giftGold);
         }
 
         public UAA_OrcElder(Location loc, HolyOrder sg, Person p)
@@ -27,15 +34,20 @@ namespace Orcs_Plus
             person.stat_intrigue = 1 + Eleven.random.Next(2);
             person.stat_command = 3 + Eleven.random.Next(3);
             person.hasSoul = false;
+            person.traits.Add(new T_ReveredElder());
+            person.species = map.species_orc;
+
+            giftGold = new Rt_H_Orcs_GiftGold(loc);
+            rituals.Add(giftGold);
         }
 
-        public override void die(Map map, string v, Person killer = null)
+        public override void turnTick(Map map)
         {
-            base.die(map, v, killer);
-            bool flag = isCommandable() || this == map.awarenessManager.getChosenOne();
-            if (flag)
+            base.turnTick(map);
+            person.XP += map.param.socialGroup_orc_upstartXPPerTurn;
+            if (person.skillPoints > 0)
             {
-                map.stats.keyEvent = this.getName() + " died";
+                spendSkillPoint();
             }
         }
 
@@ -71,7 +83,7 @@ namespace Orcs_Plus
 
         public override void turnTickAI()
         {
-            ModCore.comLibAI.turnTickAI(this);
+            ModCore.core.comLibAI.turnTickAI(this);
         }
 
         public override bool definesName()
@@ -91,66 +103,62 @@ namespace Orcs_Plus
 
         public override Sprite getPortraitForeground()
         {
-            return EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
+            Sprite result;
+            if (order.genderExclusive == -1)
+            {
+                result = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
+            }
+            else if (order.genderExclusive == 1)
+            {
+                result = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
+            }
+            else
+            {
+                if (person.index % 2 == 0)
+                {
+                    result = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
+                }
+                else
+                {
+                    result = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
+                }
+            }
+            return result;
+        }
+
+        public override Sprite getPortraitForegroundAlt()
+        {
+            Sprite result;
+            if (order.genderExclusive == -1)
+            {
+                result = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
+            }
+            else if (order.genderExclusive == 1)
+            {
+                result = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
+            }
+            else
+            {
+                if (person.index % 2 == 0)
+                {
+                    result = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
+                }
+                else
+                {
+                    result = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
+                }
+            }
+            return result;
         }
 
         public override void spendSkillPoint()
         {
-            person.skillPoints--;
-            switch(Eleven.random.Next(3))
+            if (aiGrowthTargetTags.ContainsKey(Tags.INTRIGUE))
             {
-                case 0:
-                    person.stat_might++;
-                    break;
-                case 1:
-                    person.stat_lore++;
-                    break;
-                case 2:
-                    person.stat_command++;
-                    break;
-                default:
-                    break;
+                aiGrowthTargetTags[Tags.INTRIGUE] -= 20;
             }
-        }
 
-        public override string getEventID_combatVAR()
-        {
-            return "anw.combatOrcVictoryAttackingRetreat";
-        }
-
-        public override string getEventID_combatVDR()
-        {
-            return "anw.combatOrcVictoryDefendingRetreat";
-        }
-
-        public override string getEventID_combatVAL()
-        {
-            return "anw.combatOrcVictoryAttackingLethal";
-        }
-
-        public override string getEventID_combatVDL()
-        {
-            return "anw.combatOrcVictoryDefendingLethal";
-        }
-
-        public override string getEventID_combatDAR()
-        {
-            return "anw.combatOrcDefeatAttackingRetreat";
-        }
-
-        public override string getEventID_combatDDR()
-        {
-            return "anw.combatOrcDefeatDefendingRetreat";
-        }
-
-        public override string getEventID_combatDAL()
-        {
-            return "anw.combatOrcDefeatAttackingLethal";
-        }
-
-        public override string getEventID_combatDDL()
-        {
-            return "anw.combatOrcDefeatDefendingLethal";
+            base.spendSkillPoint();
         }
 
         public override int[] getPositiveTags()

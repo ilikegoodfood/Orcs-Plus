@@ -16,13 +16,9 @@ namespace Orcs_Plus
 
         public Dictionary<HolyOrder_Orcs, List<ReasonMsg>> influenceGainHuman;
 
-        public bool modCovensCursesCurios = false;
+        private Dictionary<string, Assembly> modAssemblies;
 
-        public bool modLivingWilds = false;
-
-        public Assembly asmCovensCursesCurtios = null;
-
-        public Assembly asmLivingWilds = null;
+        public List<Sub_OrcWaystation> waystationsToRemove;
 
         public enum influenceGainAction
         {
@@ -52,21 +48,23 @@ namespace Orcs_Plus
 
         public ModData()
         {
+            modAssemblies= new Dictionary<string, Assembly>();
+
             influenceGain = new Dictionary<influenceGainAction, int>
             {
-                { influenceGainAction.AgentKill, 8 },
-                { influenceGainAction.ArmyKill, 8 },
-                { influenceGainAction.BuildFortress, 10 },
-                { influenceGainAction.BuildMages, 15 },
-                { influenceGainAction.BuildMenagerie, 15 },
-                { influenceGainAction.BuildShipyard, 10 },
-                { influenceGainAction.CommandeerShips, 10 },
-                { influenceGainAction.DevastateIndustry, 10 },
-                { influenceGainAction.Expand, 6 },
-                { influenceGainAction.Raiding, 5 },
-                { influenceGainAction.RazeLocation, 8 },
-                { influenceGainAction.RazingLocation, 2 },
-                { influenceGainAction.Subjugate, 3}
+                { influenceGainAction.AgentKill, 16 },
+                { influenceGainAction.ArmyKill, 16 },
+                { influenceGainAction.BuildFortress, 35 },
+                { influenceGainAction.BuildMages, 40 },
+                { influenceGainAction.BuildMenagerie, 40 },
+                { influenceGainAction.BuildShipyard, 35 },
+                { influenceGainAction.CommandeerShips, 20 },
+                { influenceGainAction.DevastateIndustry, 20 },
+                { influenceGainAction.Expand, 12 },
+                { influenceGainAction.Raiding, 10 },
+                { influenceGainAction.RazeLocation, 16 },
+                { influenceGainAction.RazingLocation, 4 },
+                { influenceGainAction.Subjugate, 12}
             };
 
             menaceGain = new Dictionary<menaceGainAction, int>
@@ -79,6 +77,8 @@ namespace Orcs_Plus
             influenceGainElder = new Dictionary<HolyOrder_Orcs, List<ReasonMsg>>();
 
             influenceGainHuman = new Dictionary<HolyOrder_Orcs, List<ReasonMsg>>();
+
+            waystationsToRemove = new List<Sub_OrcWaystation>();
         }
 
         public void getBattleArmyEnemies(BattleArmy battle, Unit u, out List<UM> enemies, out List<UA> enemyComs)
@@ -141,30 +141,30 @@ namespace Orcs_Plus
             }
         }
 
-        public List<SG_Orc> getOrcSocieties(Map map)
+        public List<SG_Orc> getOrcSocieties(Map map, bool includeGone = false)
         {
             List<SG_Orc> result = new List<SG_Orc>();
 
             foreach (SocialGroup sg in map.socialGroups)
             {
-                SG_Orc orcs = sg as SG_Orc;
+                SG_Orc orcSociety = sg as SG_Orc;
 
-                if (orcs != null)
+                if (orcSociety != null && (includeGone || !orcSociety.isGone()))
                 {
-                    result.Add(orcs);
+                    result.Add(orcSociety);
                 }
             }
             return result;
         }
 
-        public List<HolyOrder_Orcs> getOrcCultures(Map map)
+        public List<HolyOrder_Orcs> getOrcCultures(Map map, bool includeGone = false)
         {
             List<HolyOrder_Orcs> result = new List<HolyOrder_Orcs>();
             foreach (SocialGroup sg in map.socialGroups)
             {
                 HolyOrder_Orcs orcCulture = sg as HolyOrder_Orcs;
 
-                if (orcCulture != null)
+                if (orcCulture != null && (includeGone || !orcCulture.isGone()))
                 {
                     result.Add(orcCulture);
                 }
@@ -172,20 +172,20 @@ namespace Orcs_Plus
             return result;
         }
 
-        public void getOrcSocietiesAndCultures(Map map, out List<SG_Orc> orcSocieties, out List<HolyOrder_Orcs> orcCultures)
+        public void getOrcSocietiesAndCultures(Map map, out List<SG_Orc> orcSocieties, out List<HolyOrder_Orcs> orcCultures, bool includeGone = false)
         {
             orcSocieties = new List<SG_Orc>();
             orcCultures = new List<HolyOrder_Orcs>();
             foreach (SocialGroup sg in map.socialGroups)
             {
-                SG_Orc orcs = sg as SG_Orc;
+                SG_Orc orcSociety = sg as SG_Orc;
                 HolyOrder_Orcs orcCulture = sg as HolyOrder_Orcs;
 
-                if (orcs != null)
+                if (orcSociety != null && (includeGone || ! orcSociety.isGone()))
                 {
-                    orcSocieties.Add(orcs);
+                    orcSocieties.Add(orcSociety);
                 }
-                else if (orcCulture != null)
+                else if (orcCulture != null && (includeGone || !orcCulture.isGone()))
                 {
                     orcCultures.Add(orcCulture);
                 }
@@ -273,6 +273,31 @@ namespace Orcs_Plus
                     result.Add(army);
                 }
             }
+
+            return result;
+        }
+
+        internal void addModAssembly(string key, Assembly asm)
+        {
+            if (key == "" || asm == null)
+            {
+                return;
+            }
+
+            if (modAssemblies.ContainsKey(key))
+            {
+                modAssemblies[key] = asm;
+            }
+            else
+            {
+                modAssemblies.Add(key, asm);
+            }
+        }
+
+        internal bool tryGetModAssembly(string key, out Assembly asm)
+        {
+            bool result = modAssemblies.TryGetValue(key, out Assembly retASM);
+            asm = retASM;
 
             return result;
         }

@@ -8,36 +8,31 @@ using UnityEngine;
 
 namespace Orcs_Plus
 {
-    public class ItemToOrcCulture : ItemTradeInterface
+    public class ItemFromOrcPlunder : ItemTradeInterface
     {
         Map map;
 
-        Item[] items;
-
-        HolyOrder_Orcs orcCulture;
-
-        int gold = 0;
-
-        int delta;
+        Pr_OrcPlunder plunder;
 
         Person other;
 
-        public ItemToOrcCulture(Map map, HolyOrder_Orcs orcCulture, Person trader)
+        int delta;
+
+        public ItemFromOrcPlunder(Map map, Pr_OrcPlunder plunder, Person trader)
         {
             this.map = map;
-            items = new Item[3];
-            this.orcCulture = orcCulture;
-            other = trader;
-            delta = other.gold;
+            this.plunder = plunder;
+            this.other = trader;
+            delta = plunder.gold;
         }
 
         public void addItemToSet(Item item)
         {
-            for (int i = 0; i < this.items.Length; i++)
+            for (int i = 0; i < plunder.items.Length; i++)
             {
-                if (items[i] == null)
+                if (plunder.items[i] == null)
                 {
-                    this.items[i] = item;
+                    plunder.items[i] = item;
                     break;
                 }
             }
@@ -45,9 +40,9 @@ namespace Orcs_Plus
 
         public void addGold(int delta)
         {
-            gold += delta;
+            plunder.gold += delta;
 
-            if (other != null && other.unit != null && other.unit.society != null)
+            if (other != null && other.unit != null && other.unit.society != null && plunder.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture))
             {
                 if (other.unit.isCommandable())
                 {
@@ -57,13 +52,12 @@ namespace Orcs_Plus
                 {
                     ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", delta / 2));
                 }
-                
             }
         }
 
         public double getGold()
         {
-            return gold;
+            return plunder.gold;
         }
 
         public Sprite getIconBack()
@@ -78,7 +72,7 @@ namespace Orcs_Plus
 
         public Item[] getItems()
         {
-            return items;
+            return plunder.items;
         }
 
         public string getName()
@@ -88,41 +82,37 @@ namespace Orcs_Plus
 
         public void nullTopItem()
         {
-            items[0] = null;
+            plunder.items[0] = null;
         }
 
         public void rotateItems()
         {
-            Item item = items[0];
-            for (int i = 0; i < items.Length - 1; i++)
+            Item item = plunder.items[0];
+            for (int i = 0; i < plunder.items.Length - 1; i++)
             {
-                items[i] = items[i + 1];
+                plunder.items[i] = plunder.items[i + 1];
             }
-            items[items.Length - 1] = item;
+            plunder.items[plunder.items.Length - 1] = item;
         }
 
         public void rotateItemsReversed()
         {
-            Item item = items[items.Length - 1];
-            for (int i = 0; i < items.Length - 1; i++)
+            Item item = plunder.items[plunder.items.Length - 1];
+            for (int i = 0; i < plunder.items.Length - 1; i++)
             {
-                items[this.items.Length - 1 - i] = items[items.Length - 2 - i];
+                plunder.items[plunder.items.Length - 1 - i] = plunder.items[plunder.items.Length - 2 - i];
             }
-            items[0] = item;
+            plunder.items[0] = item;
         }
 
         public void setTopItem(Item item)
         {
-            items[0] = item;
+            plunder.items[0] = item;
         }
 
         public void endTrading()
         {
-            delta -= other.gold;
-            if (delta > 0)
-            {
-                orcCulture.receiveFunding(other, delta);
-            }
+            delta -= plunder.gold;
         }
     }
 }

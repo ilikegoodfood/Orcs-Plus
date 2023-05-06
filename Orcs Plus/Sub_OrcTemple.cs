@@ -4,32 +4,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UnityEngine;
 
 namespace Orcs_Plus
 {
-    public class Sub_OrcCultureCapital : Sub_HolyOrderCapital
+    public class Sub_OrcTemple : Sub_Temple
     {
-        public Sub_OrcCultureCapital(Settlement set, HolyOrder_Orcs order)
+        public Sub_OrcTemple(Settlement set, HolyOrder order)
             : base(set, order)
         {
             // Remove unwanted challenges added by parent types.
             challenges.Clear();
 
-            this.order = order;
-
             // Add new challenges
             challenges.Add(new Ch_H_Orcs_ReprimandUpstart(this, settlement.location));
         }
 
-        public override string getName()
-        {
-            return "Seat of the Elders";
-        }
-
         public override string getHoverOverText()
         {
-            return "The seat of power of the elders of the \"" + order.getName() + "\" culture, from where all its decisions are made.";
+            return "A great hall built by the \"" + order.getName() + "\" culture, within which its people can gather.";
         }
 
         public override bool canBeInfiltrated()
@@ -40,11 +32,6 @@ namespace Orcs_Plus
         public override int getSecurityBoost()
         {
             return 0;
-        }
-
-        public override Sprite getIcon()
-        {
-            return EventManager.getImg("OrcsPlus.Icon_GreatHall.png");
         }
     }
 }

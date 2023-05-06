@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static SortedDictionaryProvider;
 
 namespace Orcs_Plus
 {
@@ -34,11 +33,15 @@ namespace Orcs_Plus
 
         public H_Intolerance tenet_intolerance;
 
+        public H_ShadowWeaving tenet_shadowWeaving;
+
         public HolyOrder_Orcs(Map m, Location l, SG_Orc o) : base(m, l)
         {
             //Console.WriteLine("OrcsPlus: HolyOrder_Orcs Ctor");
             orcSociety = o;
             capital = l.index;
+
+            genderExclusive = 1 - Eleven.random.Next(3);
 
             generateName(l);
             updateData();
@@ -46,27 +49,27 @@ namespace Orcs_Plus
 
             houseOrc = new House(map);
 
-            genderExclusive = 1 - Eleven.random.Next(3);
             priorityPreach.status = 0;
             priorityTemples.status = 0;
             elderInflueenceBias = 0.8;
-            humanInfluenceBias = 1.2;
+            humanInfluenceBias = 0.8;
 
             // Remove all base HolyTenets by wiping list.
             tenets = new List<HolyTenet>();
 
             // Add required base HolyTenets but does not add them to list.
-            priorityPreach = new H_Preachers(this);
 
             // Add required base HolyTenets to new list.
             tenet_alignment = new H_Alignment(this);
             tenets.Add(tenet_alignment);
-            tenet_intolerance = new H_Intolerance(this);
-            tenets.Add(tenet_intolerance);
             tenet_dogmatic = new H_Dogmantic(this);
             tenets.Add(tenet_dogmatic);
 
             // Add new HolyTenets to list.
+            tenet_intolerance = new H_Intolerance(this);
+            tenets.Add(tenet_intolerance);
+            tenet_shadowWeaving= new H_ShadowWeaving(this);
+            tenets.Add(tenet_shadowWeaving);
 
             // Function returns immediately. Does not do anything.
             // establishInitialProphecy();
@@ -100,11 +103,15 @@ namespace Orcs_Plus
             if (map.opt_divineEntities)
             {
                 divinity = null;
+                /*divinity = new DivineEntity(map, this);
+                divinity.name = "Ancestors of the " + orcSociety.getName();
+                divinity.desire = new D_Blank(map, divinity);*/
+
             }
 
             // Set map colour, favouring redish colours.
-            color = new Color((float)(Eleven.random.NextDouble() * 0.75 + 0.25), (float)(Eleven.random.NextDouble() * 0.75 + 0.25), (float)(Eleven.random.NextDouble() * 0.25));
-            color2 = new Color((float)(Eleven.random.NextDouble() * 0.75 + 0.25), (float)(Eleven.random.NextDouble() * 0.75 + 0.25), (float)(Eleven.random.NextDouble() * 0.25));
+            color = new Color(Math.Min(o.color.r * (1 + ((Eleven.random.Next(11) + 10) / 100)), 1f), Math.Min(o.color.g * (1 + ((Eleven.random.Next(11) + 10) / 100)), 1f), Math.Min(o.color.b * (1 + ((Eleven.random.Next(11) + 10) / 100)), 1f));
+            color2 = new Color(Math.Min(o.color2.r * (1 + ((Eleven.random.Next(11) + 10) / 100)), 1f), Math.Min(o.color2.g * (1 + ((Eleven.random.Next(11) + 10) / 100)), 1f), Math.Min(o.color2.b * (1 + ((Eleven.random.Next(11) + 10) / 100)), 1f));
         }
 
         public override bool checkIsGone()
@@ -134,12 +141,12 @@ namespace Orcs_Plus
 
         public override Sprite getLocationSpriteTemple()
         {
-            return map.world.textureStore.loc_evil_orcFort;
+            return EventManager.getImg("OrcsPlus.Icon_GreatHall.png");
         }
 
         public override Sprite getTempleIcon()
         {
-            return map.world.iconStore.orcDefences;
+            return EventManager.getImg("OrcsPlus.Icon_GreatHall.png");
         }
 
         public override void establishInitialProphecy()
@@ -149,7 +156,7 @@ namespace Orcs_Plus
 
         public override int[] getTags()
         {
-            int[] newTags = new int[1] { Tags.RELIGION };
+            int[] newTags = new int[] { Tags.ORC };
             int[] tags = base.getTags().Concat(newTags).ToArray();
             return tags;
         }
@@ -157,54 +164,34 @@ namespace Orcs_Plus
         new public void humanAIExpenditure()
         {
             HolyTenet holyTenet = null;
-            if (tenet_alignment.status < -1)
+            if (tenet_alignment.status < 0)
+            {
+                holyTenet = tenet_alignment;
+            }
+            else if (tenet_intolerance.status < tenet_intolerance.getMaxPositiveInfluence() && tenet_intolerance.status < tenet_alignment.status)
+            {
+                holyTenet= tenet_intolerance;
+            }
+            else if (tenet_shadowWeaving.status < tenet_shadowWeaving.getMaxPositiveInfluence() && tenet_shadowWeaving.status < tenet_alignment.status)
+            {
+                holyTenet = tenet_shadowWeaving;
+            }
+            else if (tenet_alignment.status < tenet_alignment.getMaxPositiveInfluence())
             {
                 holyTenet = tenet_alignment;
             }
             else
             {
-                int status = 0;
-                int priority = 0;
-                int randomSelectorNegative = 0;
-                int randomSelectorPositive = 0;
-                HolyTenet holyTenet2 = null;
-                foreach (HolyTenet tenet in tenets)
-                {
-                    if (tenet.structuralTenet() || tenet is H_Alignment)
-                    {
-                        continue;
-                    }
+                List<HolyTenet> holyTenets = tenets.FindAll(t => t.status < 0);
 
-                    if (tenet.status < 0)
-                    {
-                        priority++;
-                        randomSelectorNegative++;
-                        if (Eleven.random.Next(randomSelectorNegative) == 0)
-                        {
-                            holyTenet = tenet;
-                        }
-                    }
-                    else if (tenet.status > 0)
-                    {
-                        status += tenet.status;
-                    }
-                    else if (tenet.status >= 0 && tenet.getMaxPositiveInfluence() > tenet.status)
-                    {
-                        randomSelectorPositive++;
-                        if (Eleven.random.Next(randomSelectorPositive) == 0)
-                        {
-                            holyTenet2 = tenet;
-                        }
-                    }
+                if (holyTenets.Count == 0)
+                {
+                    holyTenets = tenets.FindAll(t => t.status < t.getMaxPositiveInfluence());
                 }
 
-                if (priority == 0 && tenet_alignment.status < 2)
+                if (holyTenets.Count > 0)
                 {
-                    holyTenet = tenet_alignment;
-                }
-                else if (holyTenet == null && status < 1 && holyTenet2 != null)
-                {
-                    holyTenet = holyTenet2;
+                    holyTenet = holyTenets[Eleven.random.Next(holyTenets.Count)];
                 }
             }
 
@@ -254,26 +241,22 @@ namespace Orcs_Plus
 
             foreach (Unit unit in map.units)
             {
-                if (unit.society != null && (unit.society == orcSociety || unit.society == this))
+                if (!unit.isDead && unit.society != null && (unit.society == orcSociety || unit.society == this))
                 {
-                    UA ua = unit as UA;
-
-                    if (ua == null)
+                    if (unit is UA ua)
                     {
-                        units.Add(unit);
-                    }
-                    else
-                    {
-                        UAA uaa = ua as UAA;
-
-                        if (uaa == null)
-                        {
-                            agents.Add(ua);
-                        }
-                        else
+                        if (ua is UAA uaa)
                         {
                             acolytes.Add(uaa);
                         }
+                        else
+                        {
+                            agents.Add(ua);
+                        }
+                    }
+                    else
+                    {
+                        units.Add(unit);
                     }
                 }
             }
@@ -307,11 +290,14 @@ namespace Orcs_Plus
             if (seat == null)
             {
                 Set_OrcCamp capitalCamp = map.locations[capital].settlement as Set_OrcCamp;
-                if (capitalCamp == null || !(capitalCamp is Set_OrcCamp))
+                if (capitalCamp == null || !(capitalCamp is Set_OrcCamp) || capitalCamp.location.soc != orcSociety)
                 {
                     //Console.WriteLine("OrcsPlus: Choosing seat of orc culture.");
-                    
-                    if (specializedCamps.Count == 0)
+                    if (temples.Count > 0)
+                    {
+                        capitalCamp = temples[Eleven.random.Next(temples.Count)].settlement as Set_OrcCamp;
+                    }
+                    else if (specializedCamps.Count == 0)
                     {
                         if (camps.Count == 0)
                         {
@@ -343,6 +329,12 @@ namespace Orcs_Plus
 
                 if (capitalCamp != null)
                 {
+                    Sub_OrcTemple temple = capitalCamp.subs.OfType<Sub_OrcTemple>().FirstOrDefault();
+                    if (temple != null)
+                    {
+                        capitalCamp.subs.Remove(temple);
+                    }
+
                     seat = new Sub_OrcCultureCapital(capitalCamp, this);
                     capitalCamp.subs.Add(seat);
                     temples.Add(seat);
@@ -393,6 +385,8 @@ namespace Orcs_Plus
                 seat = null;
                 CreateSeat();
             }
+
+            manageShamans();
 
             bool playerCanInfluenceFlag = influenceElder >= influenceElderReq;
 
@@ -485,7 +479,70 @@ namespace Orcs_Plus
                 UAA_OrcElder item = new UAA_OrcElder(location, this, new Person(this, houseOrc));
                 location.units.Add(item);
                 map.units.Add(item);
-                updateData();
+                acolytes.Add(item);
+                nAcolytes++;
+            }
+        }
+
+        public void manageShamans()
+        {
+            if (specializedCamps.Count > 0)
+            {
+                List<Set_OrcCamp> mageCamps = new List<Set_OrcCamp>();
+                foreach (Set_OrcCamp specializedCamp in specializedCamps)
+                {
+                    if (specializedCamp.specialism == 2)
+                    {
+                        mageCamps.Add(specializedCamp);
+                    }
+                }
+
+                List<UAEN_OrcShaman> shamans = new List<UAEN_OrcShaman>();
+                foreach(UA agent in agents)
+                {
+                    if (agent is UAEN_OrcShaman shaman)
+                    {
+                        shamans.Add(shaman);
+                    }
+                }
+
+                if (mageCamps.Count > 0)
+                {
+                    if (shamans.Count > 0)
+                    {
+                        foreach (UAEN_OrcShaman shaman in shamans)
+                        {
+                            if (shaman.homeLocation != -1 && map.locations[shaman.homeLocation].settlement is Set_OrcCamp mageCamp && mageCamp.specialism == 2)
+                            {
+                                mageCamps.Remove(mageCamp);
+                            }
+                        }
+                    }
+
+                    if (mageCamps.Count > 0)
+                    {
+                        foreach(Set_OrcCamp mageCamp in mageCamps)
+                        {
+                            if (Eleven.random.Next(4) == 0)
+                            {
+                                createShaman(mageCamp);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public void createShaman(Set_OrcCamp mageCamp)
+        {
+            Location location = mageCamp.location;
+
+            if (location != null)
+            {
+                UAEN_OrcShaman shaman = new UAEN_OrcShaman(location, orcSociety, new Person(map.soc_neutral, map.soc_neutral.houseOrc));
+                location.units.Add(shaman);
+                map.units.Add(shaman);
+                agents.Add(shaman);
             }
         }
 
@@ -510,9 +567,9 @@ namespace Orcs_Plus
                 allCamps.AddRange(specializedCamps);
                 allCamps.AddRange(specializedCamps);
 
-                if (allCamps.Count == 0)
+                if (isGone() || allCamps.Count == 0)
                 {
-                    Console.WriteLine("CommunityLib: ERROR: Tried to give gold to dead orc culture.");
+                    Console.WriteLine("CommunityLib: ERROR: Tried to give gold to a dead orc culture.");
                     return;
                 }
 
@@ -595,7 +652,7 @@ namespace Orcs_Plus
 
         public override string getTitle(Person person)
         {
-            return "Warrior ";
+            return "Elder ";
         }
 
         public override void generateName(Location cap)
@@ -645,12 +702,6 @@ namespace Orcs_Plus
         public override Sprite getPortrait(Person person)
         {
             return map.world.textureStore.evil_orcUpstart;
-        }
-
-        public override void newTempleCreated(Sub_Temple sub_Temple)
-        {
-            base.newTempleCreated(sub_Temple);
-            // Settlement settlement = sub_Temple.settlement;
         }
 
         public override void locationStolen(HolyOrder order, UA u)
