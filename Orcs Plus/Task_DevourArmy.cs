@@ -222,7 +222,7 @@ namespace Orcs_Plus
             double advantage = battle.computeAdvantage();
             double damage = um.map.param.war_battleLethalityBaseline;
 
-            if (battle.attackers.Contains(um))
+            if (battle.attackers.Contains(um) && battle.attackers.Count > 1)
             {
                 if (advantage > 0.0)
                 {
@@ -306,7 +306,7 @@ namespace Orcs_Plus
                     }), UnifiedMessage.messageType.BATTLE, false);
                 }
             }
-            else if (battle.defenders.Contains(um))
+            else if (battle.defenders.Contains(um) && battle.defenders.Count > 1)
             {
                 if (battle.defEffect != null)
                 {

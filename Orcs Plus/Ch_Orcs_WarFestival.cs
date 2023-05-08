@@ -12,7 +12,7 @@ namespace Orcs_Plus
     {
         public double industryMin = 25;
 
-        public double industryConsumption = 5;
+        public double industryConsumption = 1.7;
 
         public double industryConversionFactor = 1;
 
@@ -44,19 +44,29 @@ namespace Orcs_Plus
 
         public override challengeStat getChallengeType()
         {
-            return challengeStat.OTHER;
+            return challengeStat.LORE;
         }
 
         public override double getComplexity()
         {
-            return 5;
+            return 15;
         }
 
         public override double getProgressPerTurnInner(UA unit, List<ReasonMsg> msgs)
         {
-            msgs?.Add(new ReasonMsg("Base", 1.0));
+            double val = unit.getStatLore();
 
-            return 1.0;
+            if (val < 1)
+            {
+                msgs?.Add(new ReasonMsg("Base", 1.0));
+                val = 1.0;
+            }
+            else
+            {
+                msgs?.Add(new ReasonMsg("Stat: Lore", val));
+            }
+
+            return val;
         }
 
         public override double getUtility(UA ua, List<ReasonMsg> msgs)
@@ -122,11 +132,11 @@ namespace Orcs_Plus
 
             Pr_OrcishIndustry industry = location.properties.OfType<Pr_OrcishIndustry>().FirstOrDefault();
             double deltaIndustry = 0;
-            double val = industryConsumption;
+            double val = industryConsumption * getProgressPerTurnInner(ua, null);
 
             if (industry != null && industry.charge > industryMin)
             {
-                if (industry.charge - industryConsumption <= industryMin)
+                if (industry.charge - val <= industryMin)
                 {
                     val = industry.charge - industryMin;
                     if (val > 0)
@@ -145,8 +155,8 @@ namespace Orcs_Plus
                     Pr_OrcishIndustry industry2 = neighbour.properties.OfType<Pr_OrcishIndustry>().FirstOrDefault();
                     if (industry2 != null && industry2.charge > industryMin)
                     {
-                        val = industryConsumption;
-                        if (industry2.charge - industryConsumption <= industryMin)
+                        val = industryConsumption * getProgressPerTurnInner(ua, null);
+                        if (industry2.charge - val <= industryMin)
                         {
                             val = industry2.charge - industryMin;
                             Property.addToProperty(getName(), Property.standardProperties.ORCISH_INDUSTRY, -val, neighbour);
@@ -160,11 +170,6 @@ namespace Orcs_Plus
             {
                 Property.addToProperty(getName(), Property.standardProperties.DEATH, deltaIndustry * industryConversionFactor, location);
             }
-        }
-
-        public override bool isChannelled()
-        {
-            return true;
         }
 
         public override int[] buildPositiveTags()

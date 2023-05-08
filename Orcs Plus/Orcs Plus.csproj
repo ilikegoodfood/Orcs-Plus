@@ -65,12 +65,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AgentAIs.cs" />
+    <Compile Include="Ch_H_Orcs_BuildTemple.cs" />
     <Compile Include="Ch_H_Orcs_CleansingFestival.cs" />
     <Compile Include="Ch_H_Orcs_DarkFestival.cs" />
     <Compile Include="Ch_Orcs_FundWaystation.cs" />
     <Compile Include="Ch_Orcs_WarFestival.cs" />
     <Compile Include="D_Blank.cs" />
-    <Compile Include="H_ShadowWeaving.cs" />
+    <Compile Include="H_Orcs_Industrious.cs" />
+    <Compile Include="H_Orcs_SectOfTheSerpent.cs" />
+    <Compile Include="H_Orcs_ShadowWeaving.cs" />
+    <Compile Include="H_Orcs_TempleBuilders.cs" />
     <Compile Include="Rt_Orcs_EndBloodFeud.cs" />
     <Compile Include="Ch_Orcs_FundHorde.cs" />
     <Compile Include="Ch_Orcs_GatherHorde.cs" />
@@ -79,7 +83,7 @@
     <Compile Include="ComLibHooks.cs" />
     <Compile Include="HarmonyPatches.cs" />
     <Compile Include="HolyOrder_Orcs.cs" />
-    <Compile Include="H_Intolerance.cs" />
+    <Compile Include="H_Orcs_Intolerance.cs" />
     <Compile Include="ItemFromOrcPlunder.cs" />
     <Compile Include="ItemToOrcCulture.cs" />
     <Compile Include="ModCore.cs" />

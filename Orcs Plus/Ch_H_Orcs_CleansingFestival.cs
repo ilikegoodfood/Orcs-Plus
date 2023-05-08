@@ -10,7 +10,7 @@ namespace Orcs_Plus
 {
     public class Ch_H_Orcs_CleansingFestival : Challenge
     {
-        double shadowPull = 0.02;
+        public double shadowPull = 0.007;
 
         public Ch_H_Orcs_CleansingFestival(Location loc)
             : base(loc)
@@ -25,7 +25,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Draws shadow from nearby locations and units to this location, and simultaneously cleanses shadow at this location. Reduces society menace by 1 each turn.";
+            return "Draws shadow from nearby locations and units to this location, and simultaneously cleanses shadow at this location. Reduces society menace each turn.";
         }
 
         public override string getCastFlavour()
@@ -40,14 +40,24 @@ namespace Orcs_Plus
 
         public override challengeStat getChallengeType()
         {
-            return challengeStat.OTHER;
+            return challengeStat.LORE;
         }
 
         public override double getProgressPerTurnInner(UA unit, List<ReasonMsg> msgs)
         {
-            msgs?.Add(new ReasonMsg("Base", 1.0));
+            double val = unit.getStatLore();
 
-            return 1.0;
+            if (val < 1)
+            {
+                msgs?.Add(new ReasonMsg("Base", 1.0));
+                val = 1.0;
+            }
+            else
+            {
+                msgs?.Add(new ReasonMsg("Stat: Lore", val));
+            }
+
+            return val;
         }
 
         public override double getUtility(UA ua, List<ReasonMsg> msgs)
@@ -76,7 +86,7 @@ namespace Orcs_Plus
 
         public override double getComplexity()
         {
-            return 5;
+            return 15;
         }
 
         public override Sprite getSprite()
@@ -93,7 +103,7 @@ namespace Orcs_Plus
         {
             bool result = false;
 
-            if (location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenets.OfType<H_ShadowWeaving>().FirstOrDefault()?.status > 0)
+            if (location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenets.OfType<H_Orcs_ShadowWeaving>().FirstOrDefault()?.status > 0)
             {
                 double shadow = location.getShadow();
 
@@ -114,11 +124,11 @@ namespace Orcs_Plus
         public override void turnTick(UA ua)
         {
             ua.addProfile(1);
-            ua.addMenace(-1.5);
+            ua.addMenace(-0.5 * getProgressPerTurnInner(ua, null));
 
             foreach (Location neighbour in location.getNeighbours())
             {
-                float deltaShadow = (float)Math.Min(1.0 - location.getShadow(), Math.Min(neighbour.getShadow(), shadowPull));
+                float deltaShadow = (float)Math.Min(1.0 - location.getShadow(), Math.Min(neighbour.getShadow(), shadowPull * getProgressPerTurnInner(ua, null)));
 
                 if (neighbour.settlement != null)
                 {
@@ -126,7 +136,7 @@ namespace Orcs_Plus
                 }
                 else
                 {
-                    neighbour.hex.purity += deltaShadow;
+                    neighbour.hex.purity += (float)(deltaShadow);
                 }
 
                 location.settlement.shadow += deltaShadow;
@@ -135,26 +145,26 @@ namespace Orcs_Plus
                 {
                     if (unit is UA agent)
                     {
-                        agent.person.shadow -= shadowPull;
+                        agent.person.shadow -= shadowPull * getProgressPerTurnInner(ua, null);
                     }
                 }
 
                 if (neighbour.soc is SG_Orc orcs)
                 {
-                    if (orcs.upstart != null && orcs.upstart.homeLocation == location.index)
+                    if (orcs.upstart != null && orcs.upstart.homeLocation == neighbour.index)
                     {
-                        orcs.upstart.person.shadow -= shadowPull;
+                        orcs.upstart.person.shadow -= shadowPull * getProgressPerTurnInner(ua, null);
                     }
                 }
             }
 
-            location.settlement.shadow -= 0.1;
+            location.settlement.shadow -= 0.035 * getProgressPerTurnInner(ua, null);
 
             foreach (Unit unit in location.units)
             {
                 if (unit is UA agent)
                 {
-                    agent.person.shadow -= shadowPull;
+                    agent.person.shadow -= shadowPull * getProgressPerTurnInner(ua, null);
                 }
             }
 
@@ -162,10 +172,10 @@ namespace Orcs_Plus
             {
                 if (orcSociety.upstart != null && orcSociety.upstart.homeLocation == location.index)
                 {
-                    orcSociety.upstart.person.shadow -= shadowPull;
+                    orcSociety.upstart.person.shadow -= shadowPull * getProgressPerTurnInner(ua, null);
                 }
 
-                orcSociety.menace -= 1;
+                orcSociety.menace -= 0.35 * getProgressPerTurnInner(ua, null);
 
                 if (orcSociety.menace < 0)
                 {
@@ -173,12 +183,7 @@ namespace Orcs_Plus
                 }
             }
 
-            ua.addMenace(-0.5);
-        }
-
-        public override bool isChannelled()
-        {
-            return true;
+            ua.addMenace(-0.5 * getProgressPerTurnInner(ua, null));
         }
 
         public override int[] buildNegativeTags()

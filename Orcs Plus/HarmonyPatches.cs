@@ -78,6 +78,8 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Rest_InOrcCamp), nameof(Ch_Rest_InOrcCamp.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Rest_InOrcCamp_validFor_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Subjugate_Orcs), nameof(Ch_Subjugate_Orcs.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Subjugate_Orcs_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Subjugate_Orcs), nameof(Ch_Subjugate_Orcs.complete), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Subjugate_Orcs_complete_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OrganiseTheHorde), nameof(Ch_Orcs_OrganiseTheHorde.valid), new Type[] { }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OrganiseTheHorde_valid_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OrganiseTheHorde), nameof(Ch_Orcs_OrganiseTheHorde.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OrganiseTheHorde_validFor_Postfix)));
 
             // Patches for Pr_OrcPlunder
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.valid), new Type[] {  }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_valid_Postfix)));
@@ -123,8 +125,11 @@ namespace Orcs_Plus
             // Patches for Ch_Orcs_StealPlunder
             harmony.Patch(original: AccessTools.Method(typeof(UA), nameof(UA.getChallengeUtility), new Type[] { typeof(Challenge), typeof(List<ReasonMsg>) }), postfix: new HarmonyMethod(patchType, nameof(UA_getChallengeUtility_Postfix)));
 
-            // Patches for CH_LearnSecret
+            // Patches for Ch_LearnSecret
             harmony.Patch(original: AccessTools.Method(typeof(Ch_LearnSecret), nameof(Ch_LearnSecret.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_LearnSecret_validFor_Postfix)));
+
+            // Patches for Ch_EnslaveTheDead
+            harmony.Patch(original: AccessTools.Method(typeof(Mg_EnslaveTheDead), nameof(Mg_EnslaveTheDead.complete), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Mg_EnslaveTheDead_complete_Postfix)));
 
             // COMMUNITY LIBRARY PATCHES
             harmony.Patch(original: AccessTools.Method(typeof(AIChallenge), nameof(AIChallenge.checkChallengeUtility), new Type[] { typeof(AgentAI.ChallengeData), typeof(UA), typeof(List<ReasonMsg>)}), postfix: new HarmonyMethod(patchType, nameof(AIChallenge_checkChallengeUtility_Postfix)));
@@ -863,6 +868,29 @@ namespace Orcs_Plus
             }
         }
 
+        private static bool Ch_Orcs_OrganiseTheHorde_valid_Postfix(bool result, Ch_Orcs_OrganiseTheHorde __instance)
+        {
+            Pr_OrcishIndustry industry = __instance.location.properties.OfType<Pr_OrcishIndustry>().FirstOrDefault();
+            return __instance.location.settlement is Set_OrcCamp && (__instance.location.soc is SG_Orc || __instance.location.soc is HolyOrder_Orcs) && (industry == null || industry.charge < __instance.map.param.ch_orcs_organisethehorde_parameterValue1);
+        }
+
+        private static bool Ch_Orcs_OrganiseTheHorde_validFor_Postfix(bool result, Ch_Orcs_OrganiseTheHorde __instance, UA ua)
+        {
+            if (ua is UAA_OrcElder elder)
+            {
+                if (elder.society is HolyOrder_Orcs orcCulture && __instance.location.soc == orcCulture.orcSociety && orcCulture.tenet_industrious.status < 0)
+                {
+                    return true;
+                }
+            }
+            else if (__instance.location.settlement.infiltration == 1.0)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         private static void Rt_Orcs_ClaimTerritory_getDesc_Postfix(ref string __result)
         {
             __result += " You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand] + " influence with the orc culture by completing this challenge.";
@@ -980,7 +1008,7 @@ namespace Orcs_Plus
                         }
                     }
 
-                    H_Intolerance tolerance = orcCulture.tenet_intolerance;
+                    H_Orcs_Intolerance tolerance = orcCulture.tenet_intolerance;
                     if (tolerance != null)
                     {
                         //Console.WriteLine("OrcsPlus: tolerance is not null");
@@ -1054,7 +1082,7 @@ namespace Orcs_Plus
             {
                 if (ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.orcSociety == orcSociety)
                 {
-                    H_Intolerance intolerance = orcCulture.tenet_intolerance;
+                    H_Orcs_Intolerance intolerance = orcCulture.tenet_intolerance;
                     if (intolerance != null)
                     {
                         bool otherIsTarget = false;
@@ -1595,6 +1623,7 @@ namespace Orcs_Plus
             __instance.customChallenges.Add(new Ch_H_Orcs_DarkFestival(__instance.location));
             __instance.customChallenges.Add(new Ch_Orcs_FundWaystation(__instance.location));
             __instance.customChallenges.Add(new Ch_Orcs_WarFestival(__instance.location));
+            __instance.customChallenges.Add(new Ch_H_BuildTemple(__instance.location));
         }
 
         private static void Set_OrcCamp_turnTick_Postfix(Set_OrcCamp __instance)
@@ -1747,7 +1776,7 @@ namespace Orcs_Plus
                 {
                     if (ModCore.core.data.orcSGCultureMap.TryGetValue(__instance.society as SG_Orc, out HolyOrder_Orcs orcCulture))
                     {
-                        H_Intolerance tolerance = orcCulture.tenet_intolerance;
+                        H_Orcs_Intolerance tolerance = orcCulture.tenet_intolerance;
                         if (tolerance != null)
                         {
                             foreach (Unit unit in __instance.parent.location.units)
@@ -1854,7 +1883,7 @@ namespace Orcs_Plus
                         return utility;
                     }
 
-                    H_Intolerance tolerance = orcCulture.tenet_intolerance;
+                    H_Orcs_Intolerance tolerance = orcCulture.tenet_intolerance;
                     if (tolerance != null)
                     {
                         if (__instance.society is SG_Orc || __instance.society is HolyOrder_Orcs)
@@ -1922,6 +1951,20 @@ namespace Orcs_Plus
             return result;
         }
 
+        private static void Mg_EnslaveTheDead_complete_Postfix(UA u)
+        {
+            if (u is UAA_OrcElder)
+            {
+                foreach (Unit unit in u.location.units)
+                {
+                    if (unit is UM_UntamedDead dead && dead.master == u)
+                    {
+                        dead.master = null;
+                    }
+                }
+            }
+        }
+
         private static double AIChallenge_checkChallengeUtility_Postfix(double utility, AgentAI.ChallengeData challengeData, UA ua, List<ReasonMsg> reasonMsgs)
         {
             bool willIntercept = false;
@@ -1942,7 +1985,7 @@ namespace Orcs_Plus
                         return utility;
                     }
 
-                    H_Intolerance tolerance = orcCulture.tenet_intolerance;
+                    H_Orcs_Intolerance tolerance = orcCulture.tenet_intolerance;
                     if (tolerance != null)
                     {
                         if (ua.society is SG_Orc || ua.society is HolyOrder_Orcs)

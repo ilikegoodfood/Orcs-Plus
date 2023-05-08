@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Orcs_Plus
 {
-    public class H_ShadowWeaving : HolyTenet
+    public class H_Orcs_ShadowWeaving : HolyTenet
     {
-        public H_ShadowWeaving(HolyOrder_Orcs ord)
+        public H_Orcs_ShadowWeaving(HolyOrder_Orcs ord)
             : base(ord)
         {
 

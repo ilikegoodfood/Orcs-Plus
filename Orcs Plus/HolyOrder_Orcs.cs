@@ -31,9 +31,11 @@ namespace Orcs_Plus
 
         public double plunderValue;
 
-        public H_Intolerance tenet_intolerance;
+        public H_Orcs_Intolerance tenet_intolerance;
 
-        public H_ShadowWeaving tenet_shadowWeaving;
+        public H_Orcs_ShadowWeaving tenet_shadowWeaving;
+
+        public H_Orcs_Industrious tenet_industrious;
 
         public HolyOrder_Orcs(Map m, Location l, SG_Orc o) : base(m, l)
         {
@@ -62,14 +64,18 @@ namespace Orcs_Plus
             // Add required base HolyTenets to new list.
             tenet_alignment = new H_Alignment(this);
             tenets.Add(tenet_alignment);
+            priorityTemples = new H_Orcs_TempleBuilders(this);
+            tenets.Add(priorityTemples);
             tenet_dogmatic = new H_Dogmantic(this);
             tenets.Add(tenet_dogmatic);
 
             // Add new HolyTenets to list.
-            tenet_intolerance = new H_Intolerance(this);
+            tenet_intolerance = new H_Orcs_Intolerance(this);
             tenets.Add(tenet_intolerance);
-            tenet_shadowWeaving= new H_ShadowWeaving(this);
+            tenet_shadowWeaving= new H_Orcs_ShadowWeaving(this);
             tenets.Add(tenet_shadowWeaving);
+            tenet_industrious = new H_Orcs_Industrious(this);
+            tenets.Add(tenet_industrious);
 
             // Function returns immediately. Does not do anything.
             // establishInitialProphecy();
@@ -98,6 +104,11 @@ namespace Orcs_Plus
             }
 
             // Add god specific HolyTenets
+            if (map.overmind.god is God_Snake)
+            {
+                tenet_sectOfTheSerpent = new H_Orcs_SectOfTheSerpent(this);
+                tenets.Add(tenet_sectOfTheSerpent);
+            }
 
             // No divine entities as this is a culture, not a religion. Maybe replace with Ancestors or Heroes later.
             if (map.opt_divineEntities)
@@ -351,8 +362,6 @@ namespace Orcs_Plus
                 inf += mod.adjustHolyInfluenceDark(this, inf, msgs);
             }
 
-            msgs?.Add(new ReasonMsg("Gain influence with orc cultures by defeating them in combat, aiding them, or harming their foes", 0));
-
             return inf;
         }
 
@@ -370,8 +379,6 @@ namespace Orcs_Plus
             {
                 inf += mod.adjustHolyInfluenceGood(this, inf, msgs);
             }
-
-            msgs?.Add(new ReasonMsg("Gain influence with orc cultures by defeating them in combat", 0));
 
             return inf;
         }

@@ -174,7 +174,9 @@ namespace Orcs_Plus
                 new AIChallenge(typeof(Ch_H_Orcs_DarkFestival), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
                 new AIChallenge(typeof(Rt_H_Orcs_GiftGold), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocal, AIChallenge.ChallengeTags.ForbidWar }),
                 new AIChallenge(typeof(Ch_Orcs_FundWaystation), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
-                new AIChallenge(typeof(Ch_BuyItem), 0.0, new List<AIChallenge.ChallengeTags> {  AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocalRandomized})
+                new AIChallenge(typeof(Ch_BuyItem), 0.0, new List<AIChallenge.ChallengeTags> {  AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocalRandomized}),
+                new AIChallenge(typeof(Ch_H_BuildTemple), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
+                new AIChallenge(typeof(Ch_Orcs_OrganiseTheHorde), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor })
             };
 
             aiChallenges_Elder[0].delegates_ValidFor.Add(delegate_ValidFor_OwnCulture);
@@ -192,6 +194,8 @@ namespace Orcs_Plus
             aiChallenges_Elder[4].delegates_Utility.Add(delegate_Utility_AccessPlunder);
 
             aiChallenges_Elder[9].delegates_ValidFor.Add(delegate_ValidFor_BuyItem);
+
+            aiChallenges_Elder[11].delegates_Utility.Add(delegate_Utility_Organise);
 
             comLibAI.RegisterAgentType(typeof(UAA_OrcElder), AgentAI.ControlParameters.newDefault());
             comLibAI.AddChallengesToAgentType(typeof(UAA_OrcElder), aiChallenges_Elder);
@@ -340,6 +344,38 @@ namespace Orcs_Plus
             return utility;
         }
 
+        private double delegate_Utility_Organise(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
+        {
+            if (ua is UAA_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture)
+            {
+                Sub_OrcTemple hall = challengeData.location.settlement?.subs.OfType<Sub_OrcTemple>().FirstOrDefault();
+                if (hall != null && hall.order == orcCulture)
+                {
+                    Pr_OrcishIndustry industry = challengeData.location.properties.OfType<Pr_OrcishIndustry>().FirstOrDefault();
+                    double charge = 0.0;
+                    if (industry != null)
+                    {
+                        charge = industry.charge;
+                    }
+
+                    if (orcCulture.tenet_industrious.status == -1)
+                    {
+                        double val = ua.map.param.ch_orcs_organisethehorde_parameterValue5 - charge;
+                        reasonMsgs?.Add(new ReasonMsg("Failing Industry", val));
+                        utility += val;
+                    }
+                    else if (orcCulture.tenet_industrious.status == -2)
+                    {
+                        double val = ua.map.param.ch_orcs_organisethehorde_parameterValue1 - charge;
+                        reasonMsgs?.Add(new ReasonMsg("Failing Industry", val));
+                        utility += val;
+                    }
+                }
+            }
+
+            return utility;
+        }
+
         private void populateOrcShamans()
         {
             aiChallenges_Shaman = new List<AIChallenge>
@@ -455,16 +491,10 @@ namespace Orcs_Plus
 
         private double delegate_Utility_EnslaveDead(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
         {
-            Location location = challengeData.challenge.location;
-            if (challengeData.challenge is Ritual)
-            {
-                location = challengeData.location;
-            }
-
-            Pr_Death death = location.properties.OfType<Pr_Death>().FirstOrDefault();
+            Pr_Death death = challengeData.location.properties.OfType<Pr_Death>().FirstOrDefault();
             if (death != null)
             {
-                double val = Math.Min(death.charge * 100, map.param.ch_releaseFromDeathMax) * 2;
+                double val = Math.Min(death.charge, map.param.ch_releaseFromDeathMax) * 2;
                 reasonMsgs?.Add(new ReasonMsg("Potential Streangth of Undead", val));
                 utility += val;
             }
@@ -488,7 +518,7 @@ namespace Orcs_Plus
             Pr_Death death = location.properties.OfType<Pr_Death>().FirstOrDefault();
             if (death != null)
             {
-                double val = Math.Min(death.charge * 100, map.param.mg_ravenousDeadMax);
+                double val = Math.Min(death.charge, map.param.mg_ravenousDeadMax);
                 reasonMsgs?.Add(new ReasonMsg("Potential Streangth of Undead", val));
                 utility += val;
             }
