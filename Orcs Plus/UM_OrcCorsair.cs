@@ -239,16 +239,15 @@ namespace Orcs_Plus
                                     Pr_Devastation devastation = loc.properties.OfType<Pr_Devastation>().FirstOrDefault();
                                     if (devastation == null || devastation.charge < 150)
                                     {
-                                        int gold = settlementHuman.ruler?.gold ?? 0;
-                                        if ((pillageLocations.Count == 0 || score <= gold))
+                                        if ((pillageLocations.Count == 0 || score <= settlementHuman.prosperity))
                                         {
-                                            if (score < gold)
+                                            if (score < settlementHuman.prosperity)
                                             {
                                                 pillageLocations.Clear();
                                             }
 
                                             pillageLocations.Add(loc);
-                                            score = gold;
+                                            score = settlementHuman.prosperity;
                                         }
                                     }
                                 }
