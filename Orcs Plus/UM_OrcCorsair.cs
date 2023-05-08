@@ -301,83 +301,83 @@ namespace Orcs_Plus
                         }
                     }
                 }
+            }
 
-                if (warLocations.Count > 0)
+            if (warLocations.Count > 0)
+            {
+                //Console.WriteLine("OrcsPlus: Getting target war location");
+                if (warLocations.Count == 1)
                 {
-                    //Console.WriteLine("OrcsPlus: Getting target war location");
-                    if (warLocations.Count == 1)
+                    targetLocation = warLocations[0];
+                }
+                else
+                {
+                    targetLocation = warLocations[Eleven.random.Next(warLocations.Count)];
+                }
+            }
+            else if (location.isOcean)
+            {
+                //Console.WriteLine("OrcsPlus: Checking for actions at location");
+                // Insert Piracy at location
+                if (pirateTrade.valid() && pirateTrade.validFor(this))
+                {
+                    task = new Task_PerformChallenge(pirateTrade);
+                    return;
+                }
+
+                // Insert Pillaging at location
+                if (pillageSettlement.valid() && pillageSettlement.validFor(this))
+                {
+                    task = new Task_PerformChallenge(pillageSettlement);
+                    return;
+                }
+            }
+
+            if (targetLocation == null && tradeLocations.Count > 0)
+            {
+                //Console.WriteLine("OrcsPlus: Getting target trade piracy location");
+                if (tradeLocations.Count == 1)
+                {
+                    targetLocation = tradeLocations[0];
+                }
+                else
+                {
+                    targetLocation = tradeLocations[Eleven.random.Next(tradeLocations.Count)];
+                }
+            }
+
+            if (targetLocation == null && pillageLocations.Count > 0)
+            {
+                //Console.WriteLine("OrcsPlus: Getting target pillage location");
+                Location loc;
+                if (pillageLocations.Count == 1)
+                {
+                    loc = pillageLocations[0];
+                }
+                else
+                {
+                    loc = pillageLocations[Eleven.random.Next(pillageLocations.Count)];
+                }
+
+                List<Location> oceanLocations = new List<Location>();
+                foreach (Location neighbour in loc.getNeighbours())
+                {
+                    if (neighbour.isOcean)
                     {
-                        targetLocation = warLocations[0];
+                        oceanLocations.Add(neighbour);
+                    }
+                }
+
+                if (oceanLocations.Count > 0)
+                {
+                    //Console.WriteLine("OrcsPlus: Getting ocean location");
+                    if (oceanLocations.Count == 1)
+                    {
+                        targetLocation = oceanLocations[0];
                     }
                     else
                     {
-                        targetLocation = warLocations[Eleven.random.Next(warLocations.Count)];
-                    }
-                }
-                else if (location.isOcean)
-                {
-                    //Console.WriteLine("OrcsPlus: Checking for actions at location");
-                    // Insert Piracy at location
-                    if (pirateTrade.valid() && pirateTrade.validFor(this))
-                    {
-                        task = new Task_PerformChallenge(pirateTrade);
-                        return;
-                    }
-
-                    // Insert Pillaging at location
-                    if (pillageSettlement.valid() && pillageSettlement.validFor(this))
-                    {
-                        task = new Task_PerformChallenge(pillageSettlement);
-                        return;
-                    }
-                }
-
-                if (targetLocation == null && tradeLocations.Count > 0)
-                {
-                    //Console.WriteLine("OrcsPlus: Getting target trade piracy location");
-                    if (tradeLocations.Count == 1)
-                    {
-                        targetLocation = tradeLocations[0];
-                    }
-                    else
-                    {
-                        targetLocation = tradeLocations[Eleven.random.Next(tradeLocations.Count)];
-                    }
-                }
-
-                if (targetLocation == null && pillageLocations.Count > 0)
-                {
-                    //Console.WriteLine("OrcsPlus: Getting target pillage location");
-                    Location loc;
-                    if (pillageLocations.Count == 1)
-                    {
-                        loc = pillageLocations[0];
-                    }
-                    else
-                    {
-                        loc = pillageLocations[Eleven.random.Next(pillageLocations.Count)];
-                    }
-
-                    List<Location> oceanLocations = new List<Location>();
-                    foreach (Location neighbour in loc.getNeighbours())
-                    {
-                        if (neighbour.isOcean)
-                        {
-                            oceanLocations.Add(neighbour);
-                        }
-                    }
-
-                    if (oceanLocations.Count > 0)
-                    {
-                        //Console.WriteLine("OrcsPlus: Getting ocean location");
-                        if (oceanLocations.Count == 1)
-                        {
-                            targetLocation = oceanLocations[0];
-                        }
-                        else
-                        {
-                            targetLocation = oceanLocations[Eleven.random.Next(oceanLocations.Count)];
-                        }
+                        targetLocation = oceanLocations[Eleven.random.Next(oceanLocations.Count)];
                     }
                 }
             }
