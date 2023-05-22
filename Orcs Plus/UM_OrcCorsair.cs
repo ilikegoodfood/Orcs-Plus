@@ -231,7 +231,7 @@ namespace Orcs_Plus
                         if (loc.soc != null && loc.settlement is SettlementHuman settlementHuman)
                         {
                             //Console.WriteLine("OrcsPlus: loc is settlement human");
-                            if (checkAlignment(loc))
+                            if (ModCore.core.checkAlignment(society as SG_Orc, loc))
                             {
                                 //Console.WriteLine("OrcsPlus: loc alignment is valid");
                                 if (checkPath(loc))
@@ -265,7 +265,7 @@ namespace Orcs_Plus
                 {
                     if (tradeRoute.raidingCooldown == 0)
                     {
-                        if (!checkAlignment(tradeRoute.start()) && !checkAlignment(tradeRoute.end()))
+                        if (!ModCore.core.checkAlignment(society as SG_Orc, tradeRoute.start()) && !ModCore.core.checkAlignment(society as SG_Orc, tradeRoute.end()))
                         {
                             //Console.WriteLine("OrcsPlus: Trade route alignment is valid");
                             foreach (Location loc in tradeRoute.path)
@@ -404,31 +404,6 @@ namespace Orcs_Plus
                 task = new Task_GoToLocation(map.locations[homeLocation]);
                 return;
             }
-        }
-
-        public bool checkAlignment(Location loc)
-        {
-            bool result = true;
-            SG_Orc orcSociety = society as SG_Orc;
-            if (orcSociety != null && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
-            {
-                if (orcCulture.tenet_intolerance.status == -2)
-                {
-                    if (loc.soc.isDark() || (loc.soc is Society society && (society.isDarkEmpire || society.isOphanimControlled)))
-                    {
-                        result = false;
-                    }
-                }
-                else if (orcCulture.tenet_intolerance.status == 2)
-                {
-                    if (!loc.soc.isDark() || (loc.soc is Society society && (!society.isDarkEmpire || !society.isOphanimControlled)))
-                    {
-                        result = false;
-                    }
-                }
-            }
-
-            return result;
         }
 
         public bool checkPath(Location loc, bool safeMove = false)

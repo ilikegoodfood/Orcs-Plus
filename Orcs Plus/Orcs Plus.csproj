@@ -42,14 +42,6 @@
       <HintPath>..\..\CommunityLib\CommunityLib\bin\Debug\CommunityLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="CovensCurses&amp;Curios">
-      <HintPath>D:\Program Files (x86)\Steam\steamapps\workshop\content\1741640\2932765110\CovensCurses&amp;Curios.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="LivingWilds">
-      <HintPath>D:\Program Files (x86)\Steam\steamapps\workshop\content\1741640\2932110698\LivingWilds.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -68,7 +60,11 @@
     <Compile Include="Ch_H_Orcs_BuildTemple.cs" />
     <Compile Include="Ch_H_Orcs_CleansingFestival.cs" />
     <Compile Include="Ch_H_Orcs_DarkFestival.cs" />
+    <Compile Include="Ch_Orcs_DeathFestival.cs" />
     <Compile Include="Ch_Orcs_FundWaystation.cs" />
+    <Compile Include="HarmonyPatches_Conditional.cs" />
+    <Compile Include="Pr_Orcs_SacrificialSite.cs" />
+    <Compile Include="Rti_RouseHorde.cs" />
     <Compile Include="Ch_Orcs_WarFestival.cs" />
     <Compile Include="D_Blank.cs" />
     <Compile Include="H_Orcs_Industrious.cs" />
@@ -96,6 +92,7 @@
     <Compile Include="Rt_H_Orcs_GiftGold.cs" />
     <Compile Include="Rt_Orcs_PillageSettlement.cs" />
     <Compile Include="Rt_Orcs_PirateTrade.cs" />
+    <Compile Include="Rt_Orcs_SacrificialSite.cs" />
     <Compile Include="Sub_OrcCultureCapital.cs" />
     <Compile Include="Sub_OrcTemple.cs" />
     <Compile Include="Sub_OrcWaystation.cs" />
@@ -110,6 +107,7 @@
     <Compile Include="UMTaskDelegates.cs" />
     <Compile Include="UM_OrcBeastArmy.cs" />
     <Compile Include="UM_OrcCorsair.cs" />
+    <Compile Include="UM_OrcRabble.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

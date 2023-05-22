@@ -10,6 +10,8 @@ namespace Orcs_Plus
 {
     public class UAEN_OrcShaman : UAEN
     {
+        public Rt_Orcs_SacrificialSite sacrificalSite;
+
         public UAEN_OrcShaman(Location loc, SocialGroup sg, Person p)
             : base(loc, sg, p)
         {
@@ -20,11 +22,16 @@ namespace Orcs_Plus
             p.hasSoul = false;
             p.species = map.species_orc;
 
-            p.receiveTrait(new T_ArcaneKnowledge());
+            T_ArcaneKnowledge knowledge = new T_ArcaneKnowledge();
+            knowledge.level = 0;
+            p.receiveTrait(knowledge);
 
             T_MasteryDeath deathMastery = new T_MasteryDeath();
             deathMastery.level = 2;
             p.receiveTrait(deathMastery);
+
+            sacrificalSite = new Rt_Orcs_SacrificialSite(loc, this);
+            rituals.Add(sacrificalSite);
         }
 
         public override void turnTick(Map map)

@@ -1,12 +1,10 @@
 ﻿using Assets.Code;
 using Assets.Code.Modding;
 using CommunityLib;
-using LivingWilds;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Security.Cryptography;
 
 namespace Orcs_Plus
 {
@@ -41,6 +39,7 @@ namespace Orcs_Plus
             comLibHooks = new ComLibHooks(map);
 
             getModKernels(map);
+            HarmonyPatches_Conditional.PatchingInit();
 
             if (comLib == null)
             {
@@ -88,6 +87,7 @@ namespace Orcs_Plus
             }
 
             getModKernels(map);
+            HarmonyPatches_Conditional.PatchingInit();
 
             if (comLib == null)
             {
@@ -198,18 +198,73 @@ namespace Orcs_Plus
             core.data.influenceGainHuman.Clear();
         }
 
+        public override double sovereignAI(Map map, AN actionNational, Person ruler, List<ReasonMsg> reasons, double initialUtility)
+        {
+            if (actionNational is AN_WarOnThreat threatWar && threatWar.target is SG_Orc)
+            {
+                if (reasons != null)
+                {
+                    ReasonMsg distanceReason = reasons.FirstOrDefault(r => r.msg == "Distance between");
+                    if (distanceReason != null)
+                    {
+                        initialUtility += distanceReason.value;
+                        distanceReason.value *= 2;
+                    }
+                }
+                else
+                {
+                    double val = map.getStepDist(ruler.society, threatWar.target) - 1;
+                    if (val > 0)
+                    {
+                        val *= Math.Min(map.param.utility_soc_warDistancePenaltyPerStep, map.param.utility_soc_warDistancePenaltyCap);
+                        initialUtility += val;
+                    }
+                }
+            }
+
+            if (actionNational is AN_DeclareWar war && war.target is SG_Orc)
+            {
+                if (reasons != null)
+                {
+                    ReasonMsg distanceReason = reasons.FirstOrDefault(r => r.msg == "Distance between");
+                    if (distanceReason != null)
+                    {
+                        initialUtility += distanceReason.value;
+                        distanceReason.value *= 2;
+                    }
+                }
+                else
+                {
+                    double val = map.getStepDist(ruler.society, war.target) - 1;
+                    if (val > 0)
+                    {
+                        val *= Math.Min(map.param.utility_soc_warDistancePenaltyPerStep, map.param.utility_soc_warDistancePenaltyCap);
+                        initialUtility += val;
+                    }
+                }
+            }
+
+            return initialUtility;
+        }
 
         public override void onChallengeComplete(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)
         {
-            if (ua is UAEN_OrcShaman shaman && !shaman.isCommandable() && challenge is Mg_EnslaveTheDead)
+            switch (challenge)
             {
-                foreach (Unit unit in shaman.location.units)
-                {
-                    if (unit is UM_UntamedDead dead && dead.master == shaman)
+                case Mg_EnslaveTheDead _:
+                    if (ua is UAEN_OrcShaman shaman && !shaman.isCommandable())
                     {
-                        dead.master = null;
+                        foreach (Unit unit in shaman.location.units)
+                        {
+                            if (unit is UM_UntamedDead dead && dead.master == shaman)
+                            {
+                                dead.master = null;
+                            }
+                        }
                     }
-                }
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -782,6 +837,35 @@ namespace Orcs_Plus
                     }
                 }
             }
+        }
+
+        public bool checkAlignment(SG_Orc orcSociety, Location loc)
+        {
+            if (orcSociety == null)
+            {
+                return false;
+            }
+
+            bool result = true;
+            if (orcSociety != null && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            {
+                if (orcCulture.tenet_intolerance.status == -2)
+                {
+                    if (loc.soc.isDark() || (loc.soc is Society society && (society.isDarkEmpire || society.isOphanimControlled)))
+                    {
+                        result = false;
+                    }
+                }
+                else if (orcCulture.tenet_intolerance.status == 2)
+                {
+                    if (!loc.soc.isDark() || (loc.soc is Society society && (!society.isDarkEmpire || !society.isOphanimControlled)))
+                    {
+                        result = false;
+                    }
+                }
+            }
+
+            return result;
         }
     }
 }

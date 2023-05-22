@@ -60,30 +60,13 @@ namespace Orcs_Plus
                 {
                     if (neighbour.settlement is SettlementHuman settlementHuman && neighbour.soc != null)
                     {
-                        bool validAlignment = true;
-                        SG_Orc orcSociety = um.society as SG_Orc;
-                        if (orcSociety != null && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
-                        {
-                            if (orcCulture.tenet_intolerance.status == -2)
-                            {
-                                if (neighbour.soc.isDark() || (neighbour.soc is Society society && (society.isDarkEmpire || society.isOphanimControlled)))
-                                {
-                                    validAlignment = false;
-                                }
-                            }
-                            else if (orcCulture.tenet_intolerance.status == 2)
-                            {
-                                if (!neighbour.soc.isDark() || (neighbour.soc is Society society && (!society.isDarkEmpire || !society.isOphanimControlled)))
-                                {
-                                    validAlignment = false;
-                                }
-                            }
-                        }
-
                         Pr_Devastation devastation = settlementHuman.location.properties.OfType<Pr_Devastation>().FirstOrDefault();
-                        if (validAlignment && devastation == null || devastation.charge < 150)
+                        if (devastation == null || devastation.charge < 150)
                         {
-                            return true;
+                            if (ModCore.core.checkAlignment(um.society as SG_Orc, neighbour))
+                            {
+                                return true;
+                            }
                         }
                     }
                 }
@@ -94,7 +77,7 @@ namespace Orcs_Plus
 
         public override double getComplexity()
         {
-            return 10;
+            return 30;
         }
 
         public override int getCompletionMenace()
@@ -109,7 +92,7 @@ namespace Orcs_Plus
 
         public override double getProgressPerTurnInner(UM unit, List<ReasonMsg> msgs)
         {
-            double val = unit.hp / 10;
+            double val = unit.hp / 5;
             if (val < 1)
             {
                 val = 1.0;
@@ -127,38 +110,19 @@ namespace Orcs_Plus
             if (u.location.isOcean)
             {
                 List<SettlementHuman> targetSettlements = new List<SettlementHuman>();
-                int gold = 0;
+                double prosperity = 0.0;
                 SettlementHuman target = null;
 
                 foreach (Location neighbour in u.location.getNeighbours())
                 {
                     if (neighbour.settlement is SettlementHuman settlementHuman && neighbour.soc != null)
                     {
-                        bool validAlignment = true;
-                        SG_Orc orcSociety = u.society as SG_Orc;
-                        if (orcSociety != null && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+                        if (ModCore.core.checkAlignment(u.society as SG_Orc, neighbour) && (targetSettlements.Count == 0 || settlementHuman.prosperity >= prosperity))
                         {
-                            if (orcCulture.tenet_intolerance.status == -2)
-                            {
-                                if (neighbour.soc.isDark() || (neighbour.soc is Society society && (society.isDarkEmpire || society.isOphanimControlled)))
-                                {
-                                    validAlignment = false;
-                                }
-                            }
-                            else if (orcCulture.tenet_intolerance.status == 2)
-                            {
-                                if (!neighbour.soc.isDark() || (neighbour.soc is Society society && (!society.isDarkEmpire || !society.isOphanimControlled)))
-                                {
-                                    validAlignment = false;
-                                }
-                            }
-                        }
-
-                        if (validAlignment && (targetSettlements.Count == 0 || (settlementHuman.ruler?.gold ?? 0) >= gold))
-                        {
-                            if ((settlementHuman.ruler?.gold ?? 0) > gold)
+                            if (settlementHuman.prosperity > prosperity)
                             {
                                 targetSettlements.Clear();
+                                prosperity = settlementHuman.prosperity;
                             }
 
                             targetSettlements.Add(settlementHuman);
@@ -166,19 +130,23 @@ namespace Orcs_Plus
                     }
                 }
 
-                if (targetSettlements.Count > 0)
+                if (targetSettlements.Count == 1)
+                {
+                    target = targetSettlements[0];
+                }
+                else if (targetSettlements.Count > 1)
                 {
                     target = targetSettlements[Eleven.random.Next(targetSettlements.Count)];
                 }
 
                 if (target != null)
                 {
-                    gold = (int)Math.Ceiling(target.prosperity * 10);
+                    int gold = (int)Math.Ceiling(target.prosperity * 100);
 
                     if (target.ruler != null)
                     {
-                        target.ruler.gold *= (int)Math.Floor(1 - map.param.ch_orcRaidingGoldGain);
                         gold += (int)Math.Ceiling(target.ruler.gold * map.param.ch_orcRaidingGoldGain);
+                        target.ruler.gold -= (int)Math.Floor(target.ruler.gold * map.param.ch_orcRaidingGoldGain);
                     }
 
                     Property.addToPropertySingleShot("Pillaged by " + u.getName(), Property.standardProperties.DEVASTATION, 100.0, target.location);

@@ -176,7 +176,7 @@ namespace Orcs_Plus
                 new AIChallenge(typeof(Ch_Orcs_FundWaystation), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
                 new AIChallenge(typeof(Ch_BuyItem), 0.0, new List<AIChallenge.ChallengeTags> {  AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocalRandomized}),
                 new AIChallenge(typeof(Ch_H_BuildTemple), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
-                new AIChallenge(typeof(Ch_Orcs_OrganiseTheHorde), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor })
+                new AIChallenge(typeof(Ch_Orcs_OrganiseTheHorde), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.PreferLocal })
             };
 
             aiChallenges_Elder[0].delegates_ValidFor.Add(delegate_ValidFor_OwnCulture);
@@ -389,7 +389,9 @@ namespace Orcs_Plus
                 new AIChallenge(typeof(Mg_EnslaveTheDead), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.PreferOwnSociety, AIChallenge.ChallengeTags.PreferLocal }),
                 new AIChallenge(typeof(Mg_RavenousDead), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.PreferOwnSociety, AIChallenge.ChallengeTags.PreferLocal }),
                 new AIChallenge(typeof(Ch_DeathsShadow), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor }),
-                new AIChallenge(typeof(Ch_Orcs_WarFestival), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.RequiresOwnSociety })
+                new AIChallenge(typeof(Ch_Orcs_WarFestival), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.RequiresOwnSociety }),
+                new AIChallenge(typeof(Rt_Orcs_SacrificialSite), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.RequiresSociety, AIChallenge.ChallengeTags.ForbidWar, AIChallenge.ChallengeTags.PreferLocal }),
+                new AIChallenge(typeof(Ch_Orcs_DeathFestival), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.RequiresSociety, AIChallenge.ChallengeTags.PreferLocal, AIChallenge.ChallengeTags.ForbidWar })
             };
 
             aiChallenges_Shaman[2].delegates_Utility.Add(delegate_Utility_SecretsOfDeath);
@@ -399,6 +401,8 @@ namespace Orcs_Plus
             aiChallenges_Shaman[7].delegates_Utility.Add(delegate_Utility_RavenousDead);
             aiChallenges_Shaman[8].delegates_ValidFor.Add(delegate_ValidFor_DeathsShadow);
             aiChallenges_Shaman[8].delegates_Utility.Add(delegate_Utility_DeathsShadow);
+            aiChallenges_Shaman[10].delegates_ValidFor.Add(delegate_ValidFor_SacrificialSite);
+            aiChallenges_Shaman[10].delegates_Utility.Add(delegate_Utility_SacrificialSite);
 
             comLibAI.RegisterAgentType(typeof(UAEN_OrcShaman), AgentAI.ControlParameters.newDefault());
             comLibAI.AddChallengesToAgentType(typeof(UAEN_OrcShaman), aiChallenges_Shaman);
@@ -560,6 +564,34 @@ namespace Orcs_Plus
             {
                 reasonMsgs?.Add(new ReasonMsg("Requires Death", -10000));
                 utility -= 10000;
+            }
+
+            return utility;
+        }
+
+        private bool delegate_ValidFor_SacrificialSite(AgentAI.ChallengeData challengeData, UA ua)
+        {
+            return challengeData.location.settlement is SettlementHuman && challengeData.location.properties.OfType<Pr_Orcs_SacrificialSite>().FirstOrDefault() == null && challengeData.location.properties.OfType<Pr_Devastation>().FirstOrDefault()?.charge >= (challengeData.challenge as Rt_Orcs_SacrificialSite)?.minDevastation;
+        }
+
+        private double delegate_Utility_SacrificialSite(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
+        {
+            utility += 55.0;
+            reasonMsgs?.Add(new ReasonMsg("Base", 55.0));
+
+            if (challengeData.location.settlement is SettlementHuman settlementHuman)
+            {
+                if (settlementHuman.getSecurity(null) > 0)
+                {
+                    double val = settlementHuman.getSecurity(null) * -5.0;
+                    reasonMsgs?.Add(new ReasonMsg("Security", val));
+                    utility += val;
+                }
+            }
+            else
+            {
+                reasonMsgs?.Add(new ReasonMsg("Invalid Location", -10000.0));
+                utility -= 10000.0;
             }
 
             return utility;

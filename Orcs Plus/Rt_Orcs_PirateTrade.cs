@@ -97,7 +97,7 @@ namespace Orcs_Plus
 
         public override double getComplexity()
         {
-            return 10;
+            return 30;
         }
 
         public override int getCompletionMenace()
@@ -112,7 +112,7 @@ namespace Orcs_Plus
 
         public override double getProgressPerTurnInner(UM unit, List<ReasonMsg> msgs)
         {
-            double val = unit.hp / 10;
+            double val = unit.hp / 5;
             if (val < 1)
             {
                 val = 1.0;

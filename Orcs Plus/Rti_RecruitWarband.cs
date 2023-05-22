@@ -1,20 +1,35 @@
 ﻿using Assets.Code;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
 namespace Orcs_Plus
 {
     internal class Rti_RecruitWarband : Ritual
     {
-        public I_HordeBanner banner;
+        public Item banner;
 
         public Minion exemplar;
 
-        public Rti_RecruitWarband (Location loc, I_HordeBanner banner)
+        public Rti_RecruitWarband (Location loc, Item banner)
             : base (loc)
         {
-            this.banner = banner;
+            Type tBanner = null;
+            if (ModCore.core.data.tryGetModAssembly("CovensCursesCurios", out Assembly asmCCC))
+            {
+                tBanner = asmCCC.GetType("CovenExpansion.I_BarbDominion");
+            }
+
+            if ((banner is I_HordeBanner) || banner.GetType() == tBanner)
+            {
+                this.banner = banner;
+            }
+            else
+            {
+                this.banner = null;
+            }
+
             exemplar = new M_Goblin(loc.map);
         }
 
@@ -76,20 +91,25 @@ namespace Orcs_Plus
 
         public override int getCompletionMenace()
         {
-            return 0;
+            return 4;
         }
 
         public override int getCompletionProfile()
         {
-            return 0;
+            return 2;
         }
 
         public override bool validFor(UA ua)
         {
+            if (banner == null)
+            {
+                return false;
+            }
+
             bool hasFullMinions = ua.getStatCommandLimit() - ua.getCurrentlyUsedCommand() <= 0;
             Set_OrcCamp camp = ua.location.settlement as Set_OrcCamp;
 
-            if (ua.isCommandable() && !(camp?.isInfiltrated ?? false))
+            if (camp == null || (ua.isCommandable() && !camp.isInfiltrated))
             {
                 return false;
             }
@@ -112,7 +132,13 @@ namespace Orcs_Plus
                 }
             }
 
-            return !hasFullMinions && ua.location.soc != null && ua.location.soc == banner.orcs && ua.location.settlement is Set_OrcCamp;
+            bool result = !hasFullMinions && ua.location.soc != null && ua.location.settlement is Set_OrcCamp;
+            if (result && banner is I_HordeBanner hordeBanner && ua.location.soc != hordeBanner.orcs)
+            {
+                result = false;
+            }
+
+            return result;
         }
 
         public override bool valid()

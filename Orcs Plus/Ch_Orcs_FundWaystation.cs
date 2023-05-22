@@ -113,7 +113,8 @@ namespace Orcs_Plus
 
             if (ua is UAA_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture)
             {
-                msgs?.Add(new ReasonMsg("Base", 50.0));
+                msgs?.Add(new ReasonMsg("Base", 40.0));
+                utility += 40.0;
             }
 
             return utility;

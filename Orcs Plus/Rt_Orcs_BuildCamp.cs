@@ -1,4 +1,5 @@
 ﻿using Assets.Code;
+using FullSerializer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -132,23 +133,17 @@ namespace Orcs_Plus
 
         public override double getProgressPerTurnInner(UM unit, List<ReasonMsg> msgs)
         {
-            int result = 0;
-            
-            if (unit.person == null)
+            double result = unit.hp / 5;
+            if (result > 0)
             {
-                int val = unit.hp / buildCost;
-                if (val > 0)
-                {
-                    msgs?.Add(new ReasonMsg("Army Size", val));
-                    result = val;
-                }
-                else
-                {
-                    msgs?.Add(new ReasonMsg("Base", 1));
-                    result = 1;
-                }
+                msgs?.Add(new ReasonMsg("Army Size", result));
             }
             else
+            {
+                result = 0.0;
+            }
+
+            if (unit.person != null)
             {
                 int val = unit.person.getStatCommand();
                 if (val > 0)
@@ -156,19 +151,13 @@ namespace Orcs_Plus
                     msgs?.Add(new ReasonMsg("Stat: Command", val));
                     result += val;
                 }
+            }
 
-                val = unit.hp / buildCost;
-                if (val > 0)
-                {
-                    msgs?.Add(new ReasonMsg("Army Size", val));
-                    result += val;
-                }
-
-                if (result < 1)
-                {
-                    msgs?.Add(new ReasonMsg("Base", 1));
-                    result = 1;
-                }
+            if (result < 1)
+            {
+                msgs.Clear();
+                msgs?.Add(new ReasonMsg("Base", 1));
+                result = 1;
             }
 
             return result;
