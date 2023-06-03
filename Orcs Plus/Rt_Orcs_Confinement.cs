@@ -64,11 +64,11 @@ namespace Orcs_Plus
             double progress = getProgressPerTurn(ua, null);
             if (profile)
             {
-                ua.addProfile(Math.Min(-map.param.ch_layLowProfileReductionPerTurnNonhuman * progress, ua.inner_profile - ua.inner_profileMin));
+                ua.addProfile(Math.Min(-map.param.ch_layLoweReductionPerTurnNonhuman * progress, ua.inner_profile - ua.inner_profileMin));
             }
             if (menace)
             {
-                ua.addMenace(Math.Min(-map.param.ch_layLowMenaceReductionPerTurnNonhuman * progress, ua.inner_menace - ua.inner_menaceMin));
+                ua.addMenace(Math.Min(-map.param.ch_layLoweReductionPerTurnNonhuman * progress, ua.inner_menace - ua.inner_menaceMin));
             }
 
             if (!profile && !menace)

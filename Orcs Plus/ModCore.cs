@@ -47,6 +47,24 @@ namespace Orcs_Plus
             }
 
             new AgentAIs(map);
+
+            foreach (ModKernel kernel in map.mods)
+            {
+                if (kernel.GetType().Namespace == "Orcs_Plus")
+                {
+                    // Gets the register Function.
+                    MethodInfo registerInfo = kernel.GetType().GetMethod("registerGodTenet", new Type[] { typeof(Type), typeof(Type) });
+
+                    // Creates the args that will be passed into the function.
+                    // Make sure to replace 'God_YourGod' and 'H_Orcs_YourGodTenet' with the required classes.
+                    //object[] parameters = new object[] { typeof(God_YourGod), typeof(H_Orcs_YourGodTenet) };
+                    // Example Line using God_Snake:
+                    object[] parameters = new object[] { typeof(God_Snake), typeof(H_Orcs_SectOfTheSerpent) };
+
+                    // The registerGodTenet function returns a bool result. It returns false if 'typeof(God_YourGod)' is not a subtype of 'God', 'typeof(H_Orcs_YourGodTenet)' is not a subtype of HolyTenet, or a tenet has already been registered to that god type.
+                    bool result = (bool)registerInfo.Invoke(kernel, parameters);
+                }
+            }
         }
 
         public override void afterMapGenAfterHistorical(Map map)
@@ -866,6 +884,26 @@ namespace Orcs_Plus
             }
 
             return result;
+        }
+
+        public bool registerGodTenet(Type godType, Type tenetType)
+        {
+            if (godType.IsSubclassOf(typeof(God)) && tenetType.IsSubclassOf(typeof(HolyTenet)))
+            {
+                if (!core.data.godTenetTypes.ContainsKey(godType))
+                {
+                    core.data.godTenetTypes.Add(godType, tenetType);
+                    return true;
+                }
+
+                if (core.data.godTenetTypes[godType] == null)
+                {
+                    core.data.godTenetTypes[godType] = tenetType;
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

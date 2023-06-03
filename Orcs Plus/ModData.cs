@@ -20,6 +20,8 @@ namespace Orcs_Plus
 
         public List<Sub_OrcWaystation> waystationsToRemove;
 
+        public Dictionary<Type, Type> godTenetTypes;
+
         public enum influenceGainAction
         {
             AgentKill,
@@ -79,6 +81,8 @@ namespace Orcs_Plus
             influenceGainHuman = new Dictionary<HolyOrder_Orcs, List<ReasonMsg>>();
 
             waystationsToRemove = new List<Sub_OrcWaystation>();
+
+            godTenetTypes = new Dictionary<Type, Type>();
         }
 
         public void getBattleArmyEnemies(BattleArmy battle, Unit u, out List<UM> enemies, out List<UA> enemyComs)

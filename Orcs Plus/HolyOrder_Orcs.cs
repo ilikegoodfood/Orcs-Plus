@@ -104,10 +104,14 @@ namespace Orcs_Plus
             }
 
             // Add god specific HolyTenets
-            if (map.overmind.god is God_Snake)
+            if (ModCore.core.data.godTenetTypes.TryGetValue(map.overmind.god.GetType(), out Type tenetType) && tenetType != null)
             {
-                tenet_sectOfTheSerpent = new H_Orcs_SectOfTheSerpent(this);
-                tenets.Add(tenet_sectOfTheSerpent);
+                HolyTenet tenet = (HolyTenet)Activator.CreateInstance(tenetType, new object[] { this });
+                tenets.Add(tenet);
+            }
+            else
+            {
+                tenets.Add(new H_Orcs_SectOfTheSerpent(this));
             }
 
             // No divine entities as this is a culture, not a religion. Maybe replace with Ancestors or Heroes later.
