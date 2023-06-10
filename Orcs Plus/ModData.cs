@@ -22,6 +22,8 @@ namespace Orcs_Plus
 
         public Dictionary<Type, Type> godTenetTypes;
 
+        private List<Type> settlementTypesForWaystations;
+
         public enum influenceGainAction
         {
             AgentKill,
@@ -82,7 +84,18 @@ namespace Orcs_Plus
 
             waystationsToRemove = new List<Sub_OrcWaystation>();
 
-            godTenetTypes = new Dictionary<Type, Type>();
+            godTenetTypes = new Dictionary<Type, Type> {
+                { typeof(God_Snake), typeof(H_Orcs_SerpentWarriors) }
+            };
+
+            settlementTypesForWaystations = new List<Type>
+            {
+                typeof(Set_CityRuins),
+                typeof(Set_MinorOther),
+                typeof(Set_MinorVinerva),
+                typeof(Set_VinervaManifestation),
+                typeof(Set_TombOfGods)
+            };
         }
 
         public void getBattleArmyEnemies(BattleArmy battle, Unit u, out List<UM> enemies, out List<UA> enemyComs)
@@ -304,6 +317,22 @@ namespace Orcs_Plus
             asm = retASM;
 
             return result;
+        }
+
+        internal bool tryAddSettlementTypeForWaystation(Type t)
+        {
+            if (!settlementTypesForWaystations.Contains(t))
+            {
+                settlementTypesForWaystations.Add(t);
+                return true;
+            }
+
+            return false;
+        }
+
+        internal List<Type> getSettlementTypesForWaystation()
+        {
+            return settlementTypesForWaystations;
         }
     }
 }

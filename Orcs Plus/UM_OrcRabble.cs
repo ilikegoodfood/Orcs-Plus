@@ -15,7 +15,7 @@ namespace Orcs_Plus
             : base (loc, sg, camp)
         {
             this.hp = hp;
-            maxHp = 0;
+            maxHp = hp;
         }
 
         public override string getName()

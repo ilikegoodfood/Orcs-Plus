@@ -1,12 +1,8 @@
 ﻿using Assets.Code;
-using CommunityLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Orcs_Plus
@@ -15,28 +11,10 @@ namespace Orcs_Plus
     {
         public int cost = 40;
 
-        public List<Type> settlementTypes;
-
         public Ch_Orcs_FundWaystation(Location loc)
             :base(loc)
         {
-            settlementTypes = new List<Type>
-            {
-                typeof(Set_CityRuins),
-                typeof(Set_MinorOther),
-                typeof(Set_MinorVinerva),
-                typeof(Set_VinervaManifestation),
-                typeof(Set_TombOfGods)
-            };
 
-            if (ModCore.core.data.tryGetModAssembly("LivingWilds", out Assembly asmLivingWilds))
-            {
-                Type t = asmLivingWilds.GetType("LivingWilds.Set_Nature_WolfRun", false);
-                if (t != null)
-                {
-                    settlementTypes.Add(t);
-                }
-            }
         }
 
         public override string getName()
@@ -151,7 +129,7 @@ namespace Orcs_Plus
                 {
                     if (neighbour.settlement != null && neighbour.hex.getHabilitability() >= map.opt_orcHabMult * map.param.orc_habRequirement)
                     {
-                        if (settlementTypes.Contains(neighbour.settlement.GetType()) && neighbour.settlement.subs.OfType<Sub_OrcWaystation>().FirstOrDefault(s => s.orcSociety == location.soc) == null)
+                        if (ModCore.core.data.getSettlementTypesForWaystation().Contains(neighbour.settlement.GetType()) && neighbour.settlement.subs.OfType<Sub_OrcWaystation>().FirstOrDefault(s => s.orcSociety == location.soc) == null)
                         {
                             return true;
                         }
@@ -198,7 +176,7 @@ namespace Orcs_Plus
                 {
                     if (neighbour.settlement != null && neighbour.hex.getHabilitability() >= map.opt_orcHabMult * map.param.orc_habRequirement)
                     {
-                        if (settlementTypes.Contains(neighbour.settlement.GetType()) && neighbour.settlement.subs.OfType<Sub_OrcWaystation>().FirstOrDefault(s => s.orcSociety == location.soc) == null)
+                        if (ModCore.core.data.getSettlementTypesForWaystation().Contains(neighbour.settlement.GetType()) && neighbour.settlement.subs.OfType<Sub_OrcWaystation>().FirstOrDefault(s => s.orcSociety == location.soc) == null)
                         {
                             settlements.Add(neighbour.settlement);
                         }
@@ -212,7 +190,6 @@ namespace Orcs_Plus
                     if (targetSettlement != null)
                     {
                         Sub_OrcWaystation waystation = new Sub_OrcWaystation(targetSettlement, orcSociety);
-                        waystation.settlementTypes = new List<Type>(settlementTypes);
                         targetSettlement.subs.Add(waystation);
                         u.person.gold -= cost;
                     }

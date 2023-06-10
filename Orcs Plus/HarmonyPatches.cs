@@ -100,9 +100,6 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Constructor(typeof(Set_OrcCamp), new Type[] { typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(Set_OrcCamp_ctor_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Set_OrcCamp), nameof(Set_OrcCamp.turnTick)), postfix: new HarmonyMethod(patchType, nameof(Set_OrcCamp_turnTick_Postfix)));
 
-            // Patches for Task_RazeLocation
-            harmony.Patch(original: AccessTools.Method(typeof(Task_RazeLocation), nameof(Task_RazeLocation.turnTick)), transpiler: new HarmonyMethod(patchType, nameof(Task_RazeLocation_turnTick_Transpiler)));
-
             // Patches for UM_OrcArmy
             harmony.Patch(original: AccessTools.Method(typeof(UM_OrcArmy), nameof(UM_OrcArmy.turnTickInner), new Type[] { typeof(Map) }), postfix: new HarmonyMethod(patchType, nameof(UM_OrcArmy_turnTickInner_Postfix)));
 
@@ -208,7 +205,7 @@ namespace Orcs_Plus
 
         private static void Rt_Orcs_CommandeerShips_complete_TranspilerBody(Rt_Orcs_CommandeerShips rt, UA u, Set_OrcCamp targetShipyard)
         {
-            if (u != null && u.isCommandable() && u.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            if (u != null && u.isCommandable() && targetShipyard.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
             {
                 ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(rt.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
             }
@@ -1717,81 +1714,6 @@ namespace Orcs_Plus
                         __instance.army.location.units.Add(__instance.army);
                         __instance.map.units.Add(__instance.army);
                         __instance.armyRebuildTimer = 0;
-                    }
-                }
-            }
-        }
-
-        private static IEnumerable<CodeInstruction> Task_RazeLocation_turnTick_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
-        {
-            List<CodeInstruction> instructionList = codeInstructions.ToList();
-
-            MethodInfo MI_TranspilerBody = AccessTools.Method(typeof(HarmonyPatches), nameof(Task_RazeLocation_turnTick_TranspilerBody));
-
-            bool found = false;
-            for (int i = 0; i < instructionList.Count; i++)
-            {
-                if (!found)
-                {
-                    if (i > 0 && instructionList[i].opcode == OpCodes.Ldloc_0 && instructionList[i-1].opcode == OpCodes.Stfld && instructionList[i-2].opcode == OpCodes.Sub)
-                    {
-                        yield return new CodeInstruction(OpCodes.Ldloc_0);
-                        yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
-                        found = true;
-                    }
-                }
-
-                yield return instructionList[i];
-            }
-        }
-
-        private static void Task_RazeLocation_turnTick_TranspilerBody(UM u)
-        {
-            Settlement set = u.location?.settlement;
-            SG_Orc orcSociety = u.location.soc as SG_Orc;
-
-            if (set is Set_OrcCamp)
-            {
-                Pr_Death death = u.location.properties.OfType<Pr_Death>().FirstOrDefault();
-                if (death == null)
-                {
-                    death = new Pr_Death(u.location);
-                    death.charge = 0;
-                    u.location.properties.Add(death);
-                }
-
-                Property.addToProperty("Militray Action", Property.standardProperties.DEATH, 2.0, set.location);
-
-                if (orcSociety != null)
-                {
-                    if (u.isCommandable())
-                    {
-                        ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Razing Orc Camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
-                    }
-                    else if (!u.society.isDark())
-                    {
-                        ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Razing Orc Camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]));
-                    }
-                }
-            }
-
-            if (u.isCommandable() && u.location.soc != null)
-            {
-                List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(u.map);
-
-                if (orcSocieties.Count > 0 && u.society != null)
-                {
-                    foreach (SG_Orc orcs in orcSocieties)
-                    {
-                        if (orcs == orcSociety)
-                        {
-                            continue;
-                        }
-
-                        if (orcs.getRel(u.location.soc)?.state == DipRel.dipState.war)
-                        {
-                            ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razing Emeny Settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation] * 2), true);
-                        }
                     }
                 }
             }

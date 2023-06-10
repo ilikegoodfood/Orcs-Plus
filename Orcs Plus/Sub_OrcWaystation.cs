@@ -14,8 +14,6 @@ namespace Orcs_Plus
 
         public SG_Orc orcSociety;
 
-        public List<Type> settlementTypes;
-
         public Sub_OrcWaystation(Settlement settlement, SG_Orc orcSociety)
             :base(settlement)
         {
@@ -76,7 +74,7 @@ namespace Orcs_Plus
                 return;
             }
 
-            if (settlementTypes == null || !settlementTypes.Contains(settlement.GetType()))
+            if (!ModCore.core.data.getSettlementTypesForWaystation().Contains(settlement.GetType()))
             {
                 ModCore.core.data.waystationsToRemove.Add(this);
                 return;

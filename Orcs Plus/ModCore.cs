@@ -48,7 +48,7 @@ namespace Orcs_Plus
 
             new AgentAIs(map);
 
-            foreach (ModKernel kernel in map.mods)
+            /*foreach (ModKernel kernel in map.mods)
             {
                 if (kernel.GetType().Namespace == "Orcs_Plus")
                 {
@@ -64,7 +64,7 @@ namespace Orcs_Plus
                     // The registerGodTenet function returns a bool result. It returns false if 'typeof(God_YourGod)' is not a subtype of 'God', 'typeof(H_Orcs_YourGodTenet)' is not a subtype of HolyTenet, or a tenet has already been registered to that god type.
                     bool result = (bool)registerInfo.Invoke(kernel, parameters);
                 }
-            }
+            }*/
         }
 
         public override void afterMapGenAfterHistorical(Map map)
@@ -86,6 +86,11 @@ namespace Orcs_Plus
                         }
                     }
                 }
+            }
+
+            if (!map.options.noOrcs)
+            {
+                map.hintSystem.popCustomHint("Orc Cultures", "Orcs Plus introduces cultures to the orc societies. These cultures can be found in the holy order UI, and use many of the same mechanics, such as tenets, acolytes, and temples, however you gain influence with them in a very different way to other holy orders. Many challenges and rituals that benefit orcs, or that can only be done in orc camps, provide influence upon completion. These challenges specify this in their tooltips. In addition to this, killing an orc agent, or being involved in an army battle in which an orc military unit is destroyed, grants influence over that orc culture. Similarly, killing agents, or being involved in army battles in which military units are destroyed, grants influence over any orc cultures that are at war with those agents or military units. Razing an orc camp, or razing a location belonging to a society that an orc society is at war with also grants influence over the orc culture.");
             }
         }
 
@@ -143,10 +148,10 @@ namespace Orcs_Plus
                                 comLib.registerSettlementTypeForOrcExpansion(natureSanctuary);
                             }
 
-                            Type wilderness = asmLW.GetType("LivingWilds.Set_Nature_UnoccupiedWilderness", false);
-                            if (wilderness != null)
+                            Type wolfRun = asmLW.GetType("LivingWilds.Set_Nature_WolfRun", false);
+                            if (wolfRun != null)
                             {
-                                comLib.registerSettlementTypeForOrcExpansion(wilderness);
+                                core.data.tryAddSettlementTypeForWaystation(wolfRun);
                             }
                         }
                         break;
@@ -901,6 +906,21 @@ namespace Orcs_Plus
                     core.data.godTenetTypes[godType] = tenetType;
                     return true;
                 }
+            }
+
+            return false;
+        }
+
+        public bool registerSettlementTypeForOrcWaystation(Type setType)
+        {
+            if (!setType.IsSubclassOf(typeof(Settlement)))
+            {
+                return false;
+            }
+
+            if (core.data.tryAddSettlementTypeForWaystation(setType))
+            {
+                return true;
             }
 
             return false;

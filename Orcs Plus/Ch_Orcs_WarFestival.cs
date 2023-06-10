@@ -71,7 +71,7 @@ namespace Orcs_Plus
 
         public override double getUtility(UA ua, List<ReasonMsg> msgs)
         {
-            double val = 50;
+            double val = 30;
             msgs?.Add(new ReasonMsg("Base", val));
 
             return val;

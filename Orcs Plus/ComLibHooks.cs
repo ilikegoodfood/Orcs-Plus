@@ -116,6 +116,35 @@ namespace Orcs_Plus
                             }
                         }
                     }
+
+                    orcSocieties.Clear();
+                    List<HolyOrder_Orcs> enemyCultures = new List<HolyOrder_Orcs>();
+                    foreach (UM enemy in enemies)
+                    {
+                        if (enemy.society is SG_Orc enemySociety && !orcSocieties.Contains(enemySociety))
+                        {
+                            orcSocieties.Add(enemySociety);
+                        }
+                        else if (enemy.society is HolyOrder_Orcs enemyCulture && !enemyCultures.Contains(enemyCulture))
+                        {
+                            enemyCultures.Add(enemyCulture);
+                        }
+                    }
+
+                    if (orcSocieties.Count > 0 || enemyCultures.Count > 0)
+                    {
+                        foreach (HolyOrder_Orcs enemyCulture in enemyCultures)
+                        {
+                            ModCore.core.TryAddInfluenceGain(enemyCulture, new ReasonMsg("Destroyed enemy army in battle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+
+                            orcSocieties.Remove(enemyCulture.orcSociety);
+                        }
+
+                        foreach (SG_Orc enemySociety in orcSocieties)
+                        {
+                            ModCore.core.TryAddInfluenceGain(enemySociety, new ReasonMsg("Destroyed enemy army in battle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                        }
+                    }
                 }
 
                 if (infGainHuman)
@@ -239,6 +268,131 @@ namespace Orcs_Plus
                     }
                 }
             }
+        }
+
+        public override void onRazeLocation_StartOfProcess(UM um)
+        {
+            Settlement set = um.location?.settlement;
+            SG_Orc orcSociety = um.location.soc as SG_Orc;
+
+            if (set is Set_OrcCamp)
+            {
+                Pr_Death death = um.location.properties.OfType<Pr_Death>().FirstOrDefault();
+                if (death == null)
+                {
+                    death = new Pr_Death(um.location);
+                    death.charge = 0;
+                    um.location.properties.Add(death);
+                }
+
+                Property.addToProperty("Militray Action", Property.standardProperties.DEATH, 2.0, set.location);
+
+                if (orcSociety != null)
+                {
+                    if (um.isCommandable())
+                    {
+                        ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Razing Orc Camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
+                    }
+                    else if (!um.society.isDark())
+                    {
+                        ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Razing Orc Camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]));
+                    }
+                }
+            }
+
+            if (um.isCommandable() && um.location.soc != null)
+            {
+                List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(um.map);
+
+                if (orcSocieties.Count > 0 && um.society != null)
+                {
+                    foreach (SG_Orc orcs in orcSocieties)
+                    {
+                        if (orcs == orcSociety)
+                        {
+                            continue;
+                        }
+
+                        if (orcs.getRel(um.location.soc)?.state == DipRel.dipState.war)
+                        {
+                            ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razing Emeny Settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation] * 2), true);
+                        }
+                    }
+                }
+            }
+        }
+
+        public override int onArmyBattleCycle_DamageCalculated(BattleArmy batle, int dmg, UM unit, UM target)
+        {
+            if (unit is UM_OrcArmy orcArmy && orcArmy.society is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            {
+                if (orcCulture.tenet_god is H_Orcs_ShadowWarriors shadowWariors && shadowWariors.status < 0)
+                {
+                    if (orcArmy.homeLocation != -1)
+                    {
+                        Location home = map.locations[orcArmy.homeLocation];
+                        if (home.settlement != null)
+                        {
+                            if (home.settlement.shadow >= 1.0)
+                            {
+                                dmg += 2;
+                            }
+                            else if (home.settlement.shadow >= 0.5)
+                            {
+                                dmg += 1;
+                            }
+                        }
+                        else
+                        {
+                            if (home.hex.purity <= 0.0f)
+                            {
+                                dmg += 2;
+                            }
+                            else if (home.hex.purity <= 0.5f)
+                            {
+                                dmg += 1;
+
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (target is UM_OrcArmy orcArmy2 && orcArmy2.society is SG_Orc orcSociety2 && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null)
+            {
+                if (orcCulture2.tenet_god is H_Orcs_ShadowWarriors shadowWariors && shadowWariors.status < -1)
+                {
+                    if (orcArmy2.homeLocation != -1)
+                    {
+                        Location home = map.locations[orcArmy2.homeLocation];
+                        if (home.settlement != null)
+                        {
+                            if (home.settlement.shadow >= 1.0)
+                            {
+                                dmg = Math.Max(1, dmg - 2);
+                            }
+                            else if (home.settlement.shadow >= 0.5)
+                            {
+                                dmg = Math.Max(1, dmg - 1);
+                            }
+                        }
+                        else
+                        {
+                            if (home.hex.purity <= 0.0f)
+                            {
+                                dmg = Math.Max(1, dmg - 2);
+                            }
+                            else if (home.hex.purity <= 0.5f)
+                            {
+                                dmg = Math.Max(1, dmg - 1);
+
+                            }
+                        }
+                    }
+                }
+            }
+
+            return dmg;
         }
 
         public override string onPopupHolyOrder_DisplayInfluenceElder(HolyOrder order, string s, int infGain)
