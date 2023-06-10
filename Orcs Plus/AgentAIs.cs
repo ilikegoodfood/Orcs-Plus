@@ -398,6 +398,7 @@ namespace Orcs_Plus
             aiChallenges_Shaman[3].delegates_Utility.Add(delegate_Utility_LearnSecret);
             aiChallenges_Shaman[6].delegates_ValidFor.Add(delegate_ValidFor_EnslaveDead);
             aiChallenges_Shaman[6].delegates_Utility.Add(delegate_Utility_EnslaveDead);
+            aiChallenges_Shaman[7].delegates_ValidFor.Add(delegate_ValidFor_RavenousDead);
             aiChallenges_Shaman[7].delegates_Utility.Add(delegate_Utility_RavenousDead);
             aiChallenges_Shaman[8].delegates_ValidFor.Add(delegate_ValidFor_DeathsShadow);
             aiChallenges_Shaman[8].delegates_Utility.Add(delegate_Utility_DeathsShadow);
@@ -434,7 +435,7 @@ namespace Orcs_Plus
                 if (studyDeath != null && arcaneKnowledge.level < studyDeath.getReq(deathMastery.level))
                 {
                     reasonMsgs?.Add(new ReasonMsg("Requires Arcane Knowledge", 60));
-                    utility += 100;
+                    utility += 60;
                 }
             }
 
@@ -490,6 +491,14 @@ namespace Orcs_Plus
                 return false;
             }
 
+            foreach(Minion minion in ua.minions)
+            {
+                if (minion == null)
+                {
+                    return false;
+                }
+            }
+
             return true;
         }
 
@@ -498,7 +507,7 @@ namespace Orcs_Plus
             Pr_Death death = challengeData.location.properties.OfType<Pr_Death>().FirstOrDefault();
             if (death != null)
             {
-                double val = Math.Min(death.charge, map.param.ch_releaseFromDeathMax) * 2;
+                double val = Math.Min(death.charge, map.param.ch_releaseFromDeathMax);
                 reasonMsgs?.Add(new ReasonMsg("Potential Streangth of Undead", val));
                 utility += val;
             }
@@ -509,6 +518,19 @@ namespace Orcs_Plus
             }
 
             return utility;
+        }
+
+        private bool delegate_ValidFor_RavenousDead(AgentAI.ChallengeData challengeData, UA ua)
+        {
+            foreach (Minion minion in ua.minions)
+            {
+                if (minion == null)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private double delegate_Utility_RavenousDead(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)

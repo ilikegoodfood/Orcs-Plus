@@ -37,6 +37,8 @@ namespace Orcs_Plus
 
         public H_Orcs_Industrious tenet_industrious;
 
+        public HolyTenet tenet_god;
+
         public HolyOrder_Orcs(Map m, Location l, SG_Orc o) : base(m, l)
         {
             //Console.WriteLine("OrcsPlus: HolyOrder_Orcs Ctor");
@@ -81,7 +83,8 @@ namespace Orcs_Plus
             // establishInitialProphecy();
 
             // Remove half of non-structural tenets at Random for reduced tenets option.
-            if (map.opt_holyOrderSubsetting)
+            // Orcs do not have enough tenets, or tenet variety, fo this to be viable at this time.
+            /*if (map.opt_holyOrderSubsetting)
             {
                 List<HolyTenet> tenets_NonStructural = new List<HolyTenet>();
                 foreach (HolyTenet tenet in tenets)
@@ -101,17 +104,18 @@ namespace Orcs_Plus
                 {
                     tenets.Remove(item);
                 }
-            }
+            }*/
 
             // Add god specific HolyTenets
             if (ModCore.core.data.godTenetTypes.TryGetValue(map.overmind.god.GetType(), out Type tenetType) && tenetType != null)
             {
-                HolyTenet tenet = (HolyTenet)Activator.CreateInstance(tenetType, new object[] { this });
-                tenets.Add(tenet);
+                tenet_god = (HolyTenet)Activator.CreateInstance(tenetType, new object[] { this });
+                tenets.Add(tenet_god);
             }
             else
             {
-                tenets.Add(new H_Orcs_SectOfTheSerpent(this));
+                tenet_god = new H_Orcs_ShadowWarriors(this);
+                tenets.Add(tenet_god);
             }
 
             // No divine entities as this is a culture, not a religion. Maybe replace with Ancestors or Heroes later.
@@ -120,7 +124,7 @@ namespace Orcs_Plus
                 divinity = null;
                 /*divinity = new DivineEntity(map, this);
                 divinity.name = "Ancestors of the " + orcSociety.getName();
-                divinity.desire = new D_Blank(map, divinity);*/
+                divinity.desire = new D_Orc(map, divinity);*/
 
             }
 

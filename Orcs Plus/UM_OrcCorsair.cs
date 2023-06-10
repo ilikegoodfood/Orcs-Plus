@@ -116,31 +116,29 @@ namespace Orcs_Plus
         public override void turnTickAI()
         {
             //Console.WriteLine("OrcsPlus: Start Corsair AI");
-            if (hp < maxHp * 0.3)
+            if (location.index == homeLocation && hp < maxHp)
+            {
+                //Console.WriteLine("OrcsPlus: Is At home and not at maxHp");
+                task = new Task_Recruit();
+                return;
+            }
+            else if (hp < maxHp * 0.3)
             {
                 //Console.WriteLine("OrcsPlus: Health under ecruitment threshold");
-                if (location.index == homeLocation)
+                if (homeLocation != -1)
                 {
-                    task = new Task_Recruit();
-                    return;
-                }
-                else
-                {
-                    if (homeLocation != -1)
-                    {
-                        if (!checkPath(map.locations[homeLocation]))
-                        {
-                            die(map, "Lost at Sea");
-                            return;
-                        }
-
-                        task = new Task_GoToLocation(map.locations[homeLocation]);
-                    }
-                    else
+                    if (!checkPath(map.locations[homeLocation]))
                     {
                         die(map, "Lost at Sea");
                         return;
                     }
+
+                    task = new Task_GoToLocation(map.locations[homeLocation]);
+                }
+                else
+                {
+                    die(map, "Lost at Sea");
+                    return;
                 }
             }
 

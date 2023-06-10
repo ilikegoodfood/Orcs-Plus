@@ -159,6 +159,7 @@ namespace Orcs_Plus
             }
 
             base.spendSkillPoint();
+            person.skillPoints--;
         }
 
         public override int[] getPositiveTags()
