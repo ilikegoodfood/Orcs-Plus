@@ -101,7 +101,7 @@ namespace Orcs_Plus
 
         public override bool validFor(UA ua)
         {
-            return ua is UAA_OrcElder elder && elder.person.gold >= bribeCost && elder.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety.menace > 5;
+            return ua is UAEN_OrcElder elder && elder.person.gold >= bribeCost && elder.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety.menace > 5 && elder.location.settlement is SettlementHuman;
         }
 
         public override int getCompletionProfile()

@@ -24,7 +24,7 @@ namespace Orcs_Plus
             if (c is Ch_H_Orcs_BuildTemple)
             {
                 double val = 0.0;
-                foreach (UAA acolyte in orcCulture.acolytes)
+                foreach (UAEN_OrcElder acolyte in orcCulture.acolytes)
                 {
                     if (acolyte.task is CommunityLib.Task_GoToPerformChallengeAtLocation perfomrChallenge && perfomrChallenge.challenge is Ch_H_Orcs_BuildTemple)
                     {

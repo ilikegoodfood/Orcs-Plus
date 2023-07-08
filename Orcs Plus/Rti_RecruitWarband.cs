@@ -15,13 +15,13 @@ namespace Orcs_Plus
         public Rti_RecruitWarband (Location loc, Item banner)
             : base (loc)
         {
-            Type tBanner = null;
-            if (ModCore.core.data.tryGetModAssembly("CovensCursesCurios", out Assembly asmCCC))
+            Type t = null;
+            if (ModCore.core.data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC) && intDataCCC.assembly != null)
             {
-                tBanner = asmCCC.GetType("CovenExpansion.I_BarbDominion");
+                intDataCCC.typeDict.TryGetValue("Banner", out t);
             }
 
-            if ((banner is I_HordeBanner) || banner.GetType() == tBanner)
+            if ((banner is I_HordeBanner) || (t != null && (banner.GetType() == t || banner.GetType().IsSubclassOf(t))))
             {
                 this.banner = banner;
             }

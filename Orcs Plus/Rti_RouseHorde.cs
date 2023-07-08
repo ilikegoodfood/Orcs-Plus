@@ -16,13 +16,13 @@ namespace Orcs_Plus
         public Rti_RouseHorde (Location loc, Item banner)
             : base(loc)
         {
-            Type tBanner = null;
-            if (ModCore.core.data.tryGetModAssembly("CovensCursesCurios", out Assembly asmCCC))
+            Type t = null;
+            if (ModCore.core.data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC) && intDataCCC.assembly != null)
             {
-                tBanner = asmCCC.GetType("CovenExpansion.I_BarbDominion");
+                intDataCCC.typeDict.TryGetValue("Banner", out t);
             }
 
-            if ((banner is I_HordeBanner) || banner.GetType() == tBanner)
+            if ((banner is I_HordeBanner) || (t != null && (banner.GetType() == t || banner.GetType().IsSubclassOf(t))))
             {
                 this.banner = banner;
             }
@@ -136,7 +136,15 @@ namespace Orcs_Plus
                 Pr_OrcishIndustry industry = camp.location.properties.OfType<Pr_OrcishIndustry>().FirstOrDefault();
                 if (industry != null)
                 {
-                    UM_OrcRabble rabble = new UM_OrcRabble(camp.location, camp.location.soc, camp, (int)Math.Ceiling(industry.charge));
+                    double initHp = industry.charge;
+
+                    Pr_Ophanim_Perfection perfection = u.location.properties.OfType<Pr_Ophanim_Perfection>().FirstOrDefault();
+                    if (perfection != null)
+                    {
+                        initHp *= 1 + (perfection.charge / 1200);
+                    }
+
+                    UM_OrcRabble rabble = new UM_OrcRabble(camp.location, camp.location.soc, camp, (int)Math.Ceiling(initHp));
                     camp.location.units.Add(rabble);
                     map.units.Add(rabble);
                     camp.fallIntoRuin("Camp Abandonned");

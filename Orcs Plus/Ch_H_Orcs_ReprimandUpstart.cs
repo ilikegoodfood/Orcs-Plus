@@ -121,7 +121,7 @@ namespace Orcs_Plus
 
         public override bool validFor(UA ua)
         {
-            return ua is UAA_OrcElder elder && elder.society == orcCulture;
+            return ua is UAEN_OrcElder elder && elder.society == orcCulture;
         }
 
         public override bool valid()

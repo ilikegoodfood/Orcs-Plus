@@ -66,12 +66,12 @@ namespace Orcs_Plus
 
         public override bool validFor(UA ua)
         {
-            return location.soc is SG_Orc orcSociety && ua is UAA_OrcElder elder && elder.person.gold >= cost && elder.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety == orcSociety;
+            return location.soc is SG_Orc orcSociety && ua is UAEN_OrcElder elder && elder.person.gold >= cost && elder.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety == orcSociety;
         }
 
         public override bool valid()
         {
-            return location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.priorityTemples.status > 0 && location.settlement is Set_OrcCamp camp && camp.specialism != 0 && camp.subs.OfType<Sub_OrcTemple>().FirstOrDefault() == null;
+            return location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.priorityTemples.status > 0 && location.settlement is Set_OrcCamp camp && camp.specialism != 0 && !camp.subs.Any(sub => sub is Sub_Temple);
         }
 
         public override void complete(UA u)

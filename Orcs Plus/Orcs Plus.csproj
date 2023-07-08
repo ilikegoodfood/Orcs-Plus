@@ -40,7 +40,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="CommunityLib">
-      <HintPath>D:\Program Files (x86)\Steam\steamapps\common\Shadows of Forbidden Gods\data\optionalData\CommunityLib\1.0\CommunityLib.dll</HintPath>
+      <HintPath>..\..\CommunityLib\CommunityLib\bin\Debug\CommunityLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -59,15 +59,36 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AgentAIs.cs" />
+    <Compile Include="BE_OrcPerfection.cs" />
     <Compile Include="Ch_H_Orcs_BuildTemple.cs" />
     <Compile Include="Ch_H_Orcs_CleansingFestival.cs" />
     <Compile Include="Ch_H_Orcs_DarkFestival.cs" />
+    <Compile Include="Ch_H_Orcs_HarvestGourd.cs" />
+    <Compile Include="Ch_H_Orcs_MadnessFestival.cs" />
+    <Compile Include="Ch_H_Orcs_NurtureOrchard.cs" />
+    <Compile Include="Ch_H_Orcs_PerfectionFestival.cs" />
     <Compile Include="Ch_Orcs_DeathFestival.cs" />
     <Compile Include="Ch_Orcs_FundWaystation.cs" />
     <Compile Include="HarmonyPatches_Conditional.cs" />
+    <Compile Include="H_Orcs_GodTenet.cs" />
+    <Compile Include="H_Orcs_HarbringersMadness.cs" />
+    <Compile Include="H_Orcs_InsectileSymbiosis.cs" />
+    <Compile Include="H_Orcs_LifeMother.cs" />
+    <Compile Include="H_Orcs_MammonClient.cs" />
+    <Compile Include="H_Orcs_Perfection.cs" />
     <Compile Include="H_Orcs_SerpentWarriors.cs" />
     <Compile Include="H_Orcs_ShadowWarriors.cs" />
+    <Compile Include="MA_Orc_HireMercenaries.cs" />
+    <Compile Include="Pr_Ophanim_Perfection.cs" />
     <Compile Include="Pr_Orcs_SacrificialSite.cs" />
+    <Compile Include="Pr_Vinerva_Health.cs" />
+    <Compile Include="Pr_Vinerva_Life.cs" />
+    <Compile Include="Pr_Vinerva_LifeBoon.cs" />
+    <Compile Include="Pr_Vinerva_Thorns.cs" />
+    <Compile Include="P_Ophanim_PerfectHorde.cs" />
+    <Compile Include="P_Vinerva_Health.cs" />
+    <Compile Include="P_Vinerva_Life.cs" />
+    <Compile Include="P_Vinerva_Thorns.cs" />
     <Compile Include="Rti_RouseHorde.cs" />
     <Compile Include="Ch_Orcs_WarFestival.cs" />
     <Compile Include="H_Orcs_Industrious.cs" />
@@ -104,12 +125,14 @@
     <Compile Include="Task_RazeOutpost.cs" />
     <Compile Include="T_BloodFeud.cs" />
     <Compile Include="T_ReveredElder.cs" />
-    <Compile Include="UAA_OrcElder.cs" />
+    <Compile Include="UAEN_OrcElder.cs" />
     <Compile Include="UAEN_OrcShaman.cs" />
     <Compile Include="UMTaskDelegates.cs" />
+    <Compile Include="UM_Mercenary.cs" />
     <Compile Include="UM_OrcBeastArmy.cs" />
     <Compile Include="UM_OrcCorsair.cs" />
     <Compile Include="UM_OrcRabble.cs" />
+    <Compile Include="UM_PerfectHorde.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

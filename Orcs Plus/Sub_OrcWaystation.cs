@@ -70,13 +70,13 @@ namespace Orcs_Plus
 
             if (orcSociety == null || orcSociety.isGone())
             {
-                ModCore.core.data.waystationsToRemove.Add(this);
+                settlement.subs.Remove(this);
                 return;
             }
 
             if (!ModCore.core.data.getSettlementTypesForWaystation().Contains(settlement.GetType()))
             {
-                ModCore.core.data.waystationsToRemove.Add(this);
+                settlement.subs.Remove(this);
                 return;
             }
 
@@ -99,7 +99,7 @@ namespace Orcs_Plus
 
             if (!neighbouring)
             {
-                ModCore.core.data.waystationsToRemove.Add(this);
+                settlement.subs.Remove(this);
                 return;
             }
         }

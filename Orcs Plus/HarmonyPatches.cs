@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Orcs_Plus
@@ -23,11 +24,12 @@ namespace Orcs_Plus
         private static void Patching()
         {
             Harmony.DEBUG = false;
-            Harmony harmony = new Harmony("ILikeGoodFood.SOFG.OrcsPlus");
+            string harmonyID = "ILikeGoodFood.SOFG.OrcsPlus";
+            Harmony harmony = new Harmony(harmonyID);
 
-            if (Harmony.HasAnyPatches(harmony.Id))
+            if (Harmony.HasAnyPatches(harmonyID))
             {
-                return;
+                harmony.UnpatchAll(harmonyID);
             }
 
             // Patches for Challenges that specialise orc camps
@@ -59,7 +61,6 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_RetreatToTheHills), nameof(Ch_Orcs_RetreatToTheHills.valid)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_RetreatToTheHills_valid_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_RetreatToTheHills), nameof(Ch_Orcs_RetreatToTheHills.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_RetreatToTheHills_validFor_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_RetreatToTheHills), nameof(Ch_Orcs_RetreatToTheHills.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_RetreatToTheHills_complete_Transpiler)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Rest_InOrcCamp), nameof(Ch_Rest_InOrcCamp.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Rest_InOrcCamp_validFor_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Subjugate_Orcs), nameof(Ch_Subjugate_Orcs.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Subjugate_Orcs_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Subjugate_Orcs), nameof(Ch_Subjugate_Orcs.complete), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Subjugate_Orcs_complete_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OrganiseTheHorde), nameof(Ch_Orcs_OrganiseTheHorde.valid), new Type[] { }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OrganiseTheHorde_valid_Postfix)));
@@ -99,12 +100,26 @@ namespace Orcs_Plus
             // Patches for Set_OrcCamp
             harmony.Patch(original: AccessTools.Constructor(typeof(Set_OrcCamp), new Type[] { typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(Set_OrcCamp_ctor_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Set_OrcCamp), nameof(Set_OrcCamp.turnTick)), postfix: new HarmonyMethod(patchType, nameof(Set_OrcCamp_turnTick_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Set_OrcCamp), nameof(Set_OrcCamp.getMaxDefence)), postfix: new HarmonyMethod(patchType, nameof(Set_OrcCamp_getMaxDefence_Postfix)));
+
+            // Patches for Pr_OrcDefences
+            harmony.Patch(original: AccessTools.Method(typeof(Pr_OrcDefences), nameof(Pr_OrcDefences.turnTick), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Pr_OrcDefences_turnTick_Postfix)));
+
+            // Patches for Pr_OrcishIndustry
+            harmony.Patch(original: AccessTools.Method(typeof(Pr_OrcishIndustry), nameof(Pr_OrcishIndustry.turnTick), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Pr_OrcishIndustry_turnTick_Postfix)));
 
             // Patches for UM_OrcArmy
+            harmony.Patch(original: AccessTools.Method(typeof(UM_OrcArmy), nameof(UM_OrcArmy.getName), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(UM_OrcArmy_getName_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(UM_OrcArmy), nameof(UM_OrcArmy.turnTickInner), new Type[] { typeof(Map) }), postfix: new HarmonyMethod(patchType, nameof(UM_OrcArmy_turnTickInner_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(UM_OrcArmy), nameof(UM_OrcArmy.updateMaxHP), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(UM_OrcArmy_updateMaxHP_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(UM_OrcArmy), nameof(UM_OrcArmy.turnTickAI), new Type[0]), transpiler: new HarmonyMethod(patchType, nameof(UM_OrcArmy_turnTickAI_Transpiler)));
 
             // Patches for UM_OrcRaiders
             harmony.Patch(original: AccessTools.Constructor(typeof(UM_OrcRaiders), new Type[] { typeof(Location), typeof(SocialGroup) }), postfix: new HarmonyMethod(patchType, nameof(UM_OrcRaiders_ctor_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(UM_OrcRaiders), nameof(UM_OrcRaiders.assignMaxHP), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(UM_OrcRaiders_assignMaxHP_Postfix)));
+
+            // Pathes for UM_UntamedDead
+            harmony.Patch(original: AccessTools.Method(typeof(UM_UntamedDead), nameof(UM_UntamedDead.turnTickInner), new Type[] { typeof(Map) }), postfix: new HarmonyMethod(patchType, nameof(UM_UntamedDead_turnTickInner_Postfix)));
 
             // Patches for Ch_Orcs_StealPlunder
             harmony.Patch(original: AccessTools.Method(typeof(UA), nameof(UA.getChallengeUtility), new Type[] { typeof(Challenge), typeof(List<ReasonMsg>) }), postfix: new HarmonyMethod(patchType, nameof(UA_getChallengeUtility_Postfix)));
@@ -115,8 +130,12 @@ namespace Orcs_Plus
             // Patches for Ch_EnslaveTheDead
             harmony.Patch(original: AccessTools.Method(typeof(Mg_EnslaveTheDead), nameof(Mg_EnslaveTheDead.complete), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Mg_EnslaveTheDead_complete_Postfix)));
 
+            // Patches for P_Opha_Crusade
+            harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Crusade), nameof(P_Opha_Crusade.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Crusade_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Crusade), nameof(P_Opha_Crusade.cast), new Type[] { typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Crusade_cast_Postfix)));
+
             // COMMUNITY LIBRARY PATCHES
-            harmony.Patch(original: AccessTools.Method(typeof(AIChallenge), nameof(AIChallenge.checkChallengeUtility), new Type[] { typeof(AgentAI.ChallengeData), typeof(UA), typeof(List<ReasonMsg>)}), postfix: new HarmonyMethod(patchType, nameof(AIChallenge_checkChallengeUtility_Postfix)));
+            // harmony.Patch(original: AccessTools.Method(typeof(AIChallenge), nameof(AIChallenge.checkChallengeUtility), new Type[] { typeof(AgentAI.ChallengeData), typeof(UA), typeof(AgentAI.ControlParameters), typeof(List<ReasonMsg>)}), postfix: new HarmonyMethod(patchType, nameof(AIChallenge_checkChallengeUtility_Postfix)));
 
             // Template Patch
             // harmony.Patch(original: AccessTools.Method(typeof(), nameof(), new Type[] { typeof() }), postfix: new HarmonyMethod(patchType, nameof()));
@@ -205,7 +224,7 @@ namespace Orcs_Plus
 
         private static void Rt_Orcs_CommandeerShips_complete_TranspilerBody(Rt_Orcs_CommandeerShips rt, UA u, Set_OrcCamp targetShipyard)
         {
-            if (u != null && u.isCommandable() && targetShipyard.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            if (u.isCommandable() && targetShipyard.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
             {
                 ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(rt.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
             }
@@ -643,16 +662,6 @@ namespace Orcs_Plus
             }
         }
 
-        private static bool Ch_Rest_InOrcCamp_validFor_Postfix(bool result, UA ua)
-        {
-            if (ua is UAA_OrcElder)
-            {
-                return true;
-            }
-
-            return result;
-        }
-
         private static void Ch_Subjugate_Orcs_getDesc_Postfix(Ch_Subjugate_Orcs __instance, ref string __result)
         {
             Set_OrcCamp orcCamp = __instance.sub as Set_OrcCamp;
@@ -698,7 +707,7 @@ namespace Orcs_Plus
             {
                 result = true;
             }
-            else if (!ua.isCommandable() && ((ua.society is SG_Orc && __instance.location.soc == ua.society) || (ua.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety != null && orcCulture.orcSociety == __instance.location.soc)))
+            else if (!ua.isCommandable() && ((ua.society is SG_Orc && __instance.location.soc == ua.society) || (ua.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety != null && (orcCulture.orcSociety == __instance.location.soc || orcCulture == __instance.location.soc))))
             {
                 result = true;
             }
@@ -724,40 +733,48 @@ namespace Orcs_Plus
             if (ch.cache.charge == 0.0 || ch.cache.gold == 0)
             {
                 ch.map.world.prefabStore.popMsg("This cache was empty for too long and is gone, you must form a new one.", false, false);
+                Pr_OrcPlunder plunder = ch.location.properties.OfType<Pr_OrcPlunder>().FirstOrDefault();
+                if (plunder != null)
+                {
+                    ch.location.properties.Remove(plunder);
+                }
                 return;
             }
 
-            if (ua.isCommandable() && ch.location.settlement != null && ch.location.settlement.infiltration == 1.0)
+            if (ua.isCommandable())
             {
-                double initGold = ch.cache.gold;
-
-                if (!ch.map.automatic)
+                if (ch.location.settlement != null && ch.location.settlement.infiltration == 1.0)
                 {
-                    ch.map.world.prefabStore.popItemTrade(ua.person, new ItemFromOrcPlunder(ch.map, ch.cache, ua.person), "Swap Items", -1, -1);
-                }
-                else
-                {
-                    ua.person.gold += ch.cache.gold;
-                    ch.cache.gold = 0;
+                    double initGold = ch.cache.gold;
 
-                    for (int i = 0; i < ch.cache.items.Length; i++)
+                    if (!ch.map.automatic)
                     {
-                        if (ch.cache.items[i] != null)
+                        ch.map.world.prefabStore.popItemTrade(ua.person, new ItemFromOrcPlunder(ch.map, ch.cache, ua.person), "Swap Items", -1, -1);
+                    }
+                    else
+                    {
+                        ua.person.gold += ch.cache.gold;
+                        ch.cache.gold = 0;
+
+                        for (int i = 0; i < ch.cache.items.Length; i++)
                         {
-                            ua.person.gainItem(ch.cache.items[i], false);
-                            ch.cache.items[i] = null;
+                            if (ch.cache.items[i] != null)
+                            {
+                                ua.person.gainItem(ch.cache.items[i], false);
+                                ch.cache.items[i] = null;
+                            }
                         }
-                    }
 
-                    if (ModCore.core.data.orcSGCultureMap.TryGetValue(ch.location.soc as SG_Orc, out HolyOrder_Orcs orcCulture))
-                    {
-                        ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Gold Taken", -initGold / 2), true);
-                    }
+                        if (ModCore.core.data.orcSGCultureMap.TryGetValue(ch.location.soc as SG_Orc, out HolyOrder_Orcs orcCulture))
+                        {
+                            ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Gold Taken", -initGold / 2), true);
+                        }
 
-                    ch.location.properties.Remove(ch.cache);
+                        ch.location.properties.Remove(ch.cache);
+                    }
                 }
             }
-            else if (!ua.isCommandable() && ((ua.society is SG_Orc && ch.location.soc == ua.society) || (ua.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety != null && orcCulture.orcSociety == ch.location.soc)))
+            else if ((ua.society is SG_Orc && ch.location.soc == ua.society) || (ua.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety != null && (orcCulture.orcSociety == ch.location.soc || orcCulture == ch.location.soc)))
             {
                 int delta = 0;
                 if (ch.cache.gold <= 50)
@@ -802,7 +819,7 @@ namespace Orcs_Plus
 
                 if (ModCore.core.data.orcSGCultureMap.TryGetValue(ch.location.soc as SG_Orc, out HolyOrder_Orcs orcCulture2) && ua.society != null && !ua.society.isDark())
                 {
-                    ModCore.core.TryAddInfluenceGain(orcCulture2, new ReasonMsg("Gold Taken", -ch.cache.gold / 2));
+                    ModCore.core.TryAddInfluenceGain(orcCulture2, new ReasonMsg("Plunder Looted", -ch.cache.gold / 2));
                 }
 
                 ch.cache.gold = 0;
@@ -829,7 +846,7 @@ namespace Orcs_Plus
 
         private static bool Ch_Orcs_OrganiseTheHorde_validFor_Postfix(bool result, Ch_Orcs_OrganiseTheHorde __instance, UA ua)
         {
-            if (ua is UAA_OrcElder elder)
+            if (ua is UAEN_OrcElder elder)
             {
                 if (elder.society is HolyOrder_Orcs orcCulture && __instance.location.soc == orcCulture.orcSociety && orcCulture.tenet_industrious.status < 0)
                 {
@@ -908,10 +925,8 @@ namespace Orcs_Plus
                 //Console.WriteLine("OrcsPlus: __instance is UM_OrcArmy and other is UA");
                 SG_Orc orcSociety = __instance.society as SG_Orc;
                 //Console.WriteLine("OrcsPlus: Got orcSociety");
-                if (orcSociety != null && ModCore.core.data.orcSGCultureMap.ContainsKey(orcSociety) && ModCore.core.data.orcSGCultureMap[orcSociety] != null)
+                if (orcSociety != null && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture))
                 {
-                    //Console.WriteLine("OrcsPlus: __instance.society is SG_Orc and orcCulture does not equal null");
-                    HolyOrder_Orcs orcCulture = ModCore.core.data.orcSGCultureMap[orcSociety];
                     //Console.WriteLine("OrcsPlus: Got orcCulture");
 
                     T_BloodFeud feud = other.person.traits.OfType<T_BloodFeud>().FirstOrDefault(t => t.orcSociety == __instance.society);
@@ -932,20 +947,21 @@ namespace Orcs_Plus
                         return result;
                     }
 
+                    Type dominionBanner = null;
+                    if (ModCore.core.data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC) && intDataCCC.assembly != null)
+                    {
+                        intDataCCC.typeDict.TryGetValue("Banner", out dominionBanner);
+                    }
                     foreach (Item item in other.person.items)
                     {
                         if (item != null)
                         {
-                            I_HordeBanner banner = item as I_HordeBanner;
-                            if (ModCore.core.data.tryGetModAssembly("CovensCursesCurios", out Assembly asmCCC) && asmCCC != null)
+                            if (dominionBanner != null && (item.GetType() == dominionBanner || item.GetType().IsSubclassOf(dominionBanner)))
                             {
-                                Type t = asmCCC.GetType("CovenExpansion.I_BarbDominion");
-                                if (t != null && item.GetType() == t)
-                                {
-                                    return false;
-                                }
+                                return false;
                             }
 
+                            I_HordeBanner banner = item as I_HordeBanner;
                             if (banner?.orcs == orcSociety && !(other.society != null && __instance.society.getRel(other.society).state == DipRel.dipState.war))
                             {
                                 return false;
@@ -953,11 +969,10 @@ namespace Orcs_Plus
                         }
                     }
 
-                    if (ModCore.core.data.tryGetModAssembly("LivingWilds", out Assembly asmLW) && asmLW != null)
+                    if (ModCore.core.data.tryGetModAssembly("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.assembly != null)
                     {
                         //Console.WriteLine("OrcsPlus: LivingWilds assembly loaded");
-                        Type t = asmLW.GetType("LivingWilds.UAEN_Nature_Critter");
-                        if (t != null && other.GetType().IsSubclassOf(t))
+                        if (intDataLW.typeDict.TryGetValue("NatureCritter", out Type t) && t != null && other.GetType().IsSubclassOf(t))
                         {
                             //Console.WriteLine("OrcsPlus: other.GetType() is typeof(UAEN_Nature_Critter)");
                             return result;
@@ -1116,28 +1131,30 @@ namespace Orcs_Plus
                         if (otherIsTarget)
                         {
                             Type dominionBanner = null;
-                            if (ModCore.core.data.tryGetModAssembly("CovensCursesCurios", out Assembly asmCCC) && asmCCC != null)
+                            if (ModCore.core.data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC) && intDataCCC.assembly != null)
                             {
-                                dominionBanner = asmCCC.GetType("CovenExpansion.I_BarbDominion");
+                                intDataCCC.typeDict.TryGetValue("Banner", out dominionBanner);
                             }
 
                             foreach (Item item in target.person.items)
                             {
                                 if (item != null)
                                 {
-                                    if (dominionBanner != null && item.GetType() == dominionBanner)
+                                    if (dominionBanner != null && (item.GetType() == dominionBanner || item.GetType().IsSubclassOf(dominionBanner)))
                                     {
                                         reasonMsgs?.Add(new ReasonMsg("Orcs will not attack banner bearer", -10000.0));
                                         utility -= 10000.0;
                                         return utility;
                                     }
-
-                                    I_HordeBanner banner = item as I_HordeBanner;
-                                    if (banner?.orcs == orcSociety && (target.society == null || upstart.society.getRel(target.society).state != DipRel.dipState.war) && (feud == null))
+                                    else
                                     {
-                                        reasonMsgs?.Add(new ReasonMsg("Orcs will not attack banner bearer", -10000.0));
-                                        utility -= 10000.0;
-                                        return utility;
+                                        I_HordeBanner banner = item as I_HordeBanner;
+                                        if (banner?.orcs == orcSociety && (target.society == null || upstart.society.getRel(target.society).state != DipRel.dipState.war) && (feud == null))
+                                        {
+                                            reasonMsgs?.Add(new ReasonMsg("Orcs will not attack banner bearer", -10000.0));
+                                            utility -= 10000.0;
+                                            return utility;
+                                        }
                                     }
                                 }
                             }
@@ -1184,9 +1201,8 @@ namespace Orcs_Plus
                                     utility += val;
                                 }
 
-                                if (ModCore.core.data.tryGetModAssembly("LivingWilds", out Assembly asmLW) && asmLW != null)
+                                if (ModCore.core.data.tryGetModAssembly("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.assembly != null && intDataLW.typeDict.TryGetValue("NatureCritter", out Type t))
                                 {
-                                    Type t = asmLW.GetType("LivingWilds.UAEN_Nature_Critter", false);
                                     if (t != null && target.GetType().IsSubclassOf(t))
                                     {
                                         val = -30;
@@ -1308,17 +1324,17 @@ namespace Orcs_Plus
             {
                 ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture);
 
+                Type dominionBanner = null;
+                if (ModCore.core.data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC) && intDataCCC.assembly != null)
+                {
+                    intDataCCC.typeDict.TryGetValue("Banner", out dominionBanner);
+                }
+
                 foreach (Unit unit in upstart.map.units)
                 {
-                    Type ccc_Banner = null;
                     if (unit == upstart)
                     {
                         continue;
-                    }
-
-                    if (ModCore.core.data.tryGetModAssembly("CovensCursesCurios", out Assembly asmCCC) && asmCCC != null)
-                    {
-                        ccc_Banner = asmCCC.GetType("CovenExpansion.I_BarbDominion");
                     }
 
                     if (unit is UA agent)
@@ -1335,7 +1351,7 @@ namespace Orcs_Plus
                         {
                             units.Add(unit);
                         }
-                        else if (ccc_Banner != null && agent.person.items.FirstOrDefault(i => i != null && i.GetType() == ccc_Banner) != null)
+                        else if (dominionBanner != null && (agent.person.items.FirstOrDefault(i => i != null && (i.GetType() == dominionBanner || i.GetType().IsSubclassOf(dominionBanner))) != null))
                         {
                             units.Add(unit);
                         }
@@ -1555,9 +1571,8 @@ namespace Orcs_Plus
                     return result;
                 }
 
-                if (ModCore.core.data.tryGetModAssembly("LivingWilds", out Assembly asmLivingWilds))
+                if (ModCore.core.data.tryGetModAssembly("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.assembly != null && intDataLW.typeDict.TryGetValue("WolfRun", out Type t))
                 {
-                    Type t = asmLivingWilds.GetType("LivingWilds.Set_Nature_NatureSanctuary", false);
                     if (t != null && l2.settlement.GetType() == t)
                     {
                         if (l2.hex.getHabilitability() >= l2.map.opt_orcHabMult * l2.map.param.orc_habRequirement)
@@ -1650,7 +1665,12 @@ namespace Orcs_Plus
             __instance.customChallenges.Add(new Ch_H_Orcs_DarkFestival(__instance.location));
             __instance.customChallenges.Add(new Ch_Orcs_FundWaystation(__instance.location));
             __instance.customChallenges.Add(new Ch_Orcs_WarFestival(__instance.location));
-            __instance.customChallenges.Add(new Ch_H_BuildTemple(__instance.location));
+            __instance.customChallenges.Add(new Ch_H_Orcs_BuildTemple(__instance.location));
+
+            if (ModCore.core.data.godTenetTypes.TryGetValue(__instance.map.overmind.god.GetType(), out Type tenetType) && tenetType == typeof(H_Orcs_HarbringersMadness))
+            {
+                __instance.customChallenges.Add(new Ch_H_Orcs_MadnessFestival(__instance.location));
+            }
         }
 
         private static void Set_OrcCamp_turnTick_Postfix(Set_OrcCamp __instance)
@@ -1667,28 +1687,33 @@ namespace Orcs_Plus
                 {
                     __instance.shadowPolicy = Settlement.shadowResponse.RECEIVE_ONLY;
                 }
+
+                if (orcCulture.tenet_god is H_Orcs_Perfection perfection && perfection.status < 0)
+                {
+                    Pr_Ophanim_Perfection perfectionLocal = __instance.location.properties.OfType<Pr_Ophanim_Perfection>().FirstOrDefault();
+                    if (perfectionLocal == null)
+                    {
+                        foreach (Location neighbour in __instance.location.getNeighbours())
+                        {
+                            if (neighbour.settlement is SettlementHuman && neighbour.properties.OfType<Pr_Opha_Faith>().FirstOrDefault()?.charge > 100.0)
+                            {
+                                perfectionLocal = new Pr_Ophanim_Perfection(__instance.location);
+                                __instance.location.properties.Add(perfectionLocal);
+                                break;
+                            }
+                        }
+                    }
+                }
             }
 
             if (__instance.specialism == 1)
             {
-                ReasonMsg fortressDefenceMsg = new ReasonMsg("Fortifications (max 50%)", 4.0);
-
-                if (__instance.location.settlement != __instance)
-                {
-                    return;
-                }
-
                 Pr_OrcDefences defences = __instance.location.properties.OfType<Pr_OrcDefences>().FirstOrDefault();
                 if (defences == null)
                 {
                     defences = new Pr_OrcDefences(__instance.location);
+                    defences.charge = 2.0;
                     __instance.location.properties.Add(defences);
-                }
-
-                if (defences.charge <= 50.0)
-                {
-                    fortressDefenceMsg.value = Math.Min(4, 2 + defences.charge - 50);
-                    defences.influences.Add(fortressDefenceMsg);
                 }
             }
             else if (__instance.specialism == 3 || __instance.specialism == 5)
@@ -1717,6 +1742,105 @@ namespace Orcs_Plus
                     }
                 }
             }
+        }
+
+        private static double Set_OrcCamp_getMaxDefence_Postfix(double def, Set_OrcCamp __instance)
+        {
+            Pr_Vinerva_Thorns giftThorns = __instance.location.properties.OfType<Pr_Vinerva_Thorns>().FirstOrDefault();
+
+            if (giftThorns != null)
+            {
+                def += giftThorns.charge / 2;
+            }
+
+            return def;
+        }
+
+        private static void Pr_OrcDefences_turnTick_Postfix(Pr_OrcDefences __instance)
+        {
+            if (__instance.location.settlement is Set_OrcCamp camp)
+            {
+                double targetDef = 0.0;
+                if (camp.specialism == 1)
+                {
+                    targetDef += 50.0;
+                }
+
+                Pr_Ophanim_Perfection perfection = __instance.location.properties.OfType<Pr_Ophanim_Perfection>().FirstOrDefault();
+                if (perfection != null)
+                {
+                    targetDef += Math.Ceiling(perfection.charge / 12);
+                }
+
+                ReasonMsg maintenance = __instance.influences.FirstOrDefault(msg => msg.msg == "Lack of maintenance");
+
+                if (__instance.charge == targetDef)
+                {
+                    __instance.influences.Remove(maintenance);
+                }
+                if (__instance.charge > targetDef)
+                {
+                    maintenance.value = Math.Max(-2.0, targetDef - __instance.charge);
+                }
+                else
+                {
+                    maintenance.msg = "Building fortifications";
+                    maintenance.value = Math.Min(2.0, targetDef - __instance.charge);
+                }
+            }
+        }
+
+        private static void Pr_OrcishIndustry_turnTick_Postfix(Pr_OrcishIndustry __instance)
+        {
+            if (__instance.location.settlement is Set_OrcCamp camp && __instance.location.soc is SG_Orc orcSociety)
+            {
+                if (ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_MammonClient client && client.status < 0)
+                {
+                    int income = (int)Math.Round(__instance.charge / 50);
+
+                    if (income > 0)
+                    {
+                        if (camp.specialism > 0)
+                        {
+                            income++;
+                        }
+
+                        if (__instance.location.properties.Any(p => p is Pr_GeomanticLocus locus && locus.charge >= 25.0))
+                        {
+                            income++;
+                        }
+
+                        foreach (Subsettlement sub in camp.subs)
+                        {
+                            if (sub is Sub_AncientRuins)
+                            {
+                                income++;
+                                break;
+                            }
+                        }
+
+                        Pr_OrcPlunder plunder = __instance.location.properties.OfType<Pr_OrcPlunder>().FirstOrDefault();
+                        if (plunder == null)
+                        {
+                            plunder = new Pr_OrcPlunder(__instance.location);
+                            plunder.gold = 0;
+                            __instance.location.properties.Add(plunder);
+                        }
+                        plunder.addGold(income);
+                    }
+                }
+            }
+        }
+
+        // Patches for UM_OrcArmy
+        private static string UM_OrcArmy_getName_Postfix(string name, UM_OrcArmy __instance)
+        {
+            if (__instance.parent.specialism == 1)
+            {
+                return "Orc Horde";
+            }
+
+            return name;
         }
 
         private static void UM_OrcArmy_turnTickInner_Postfix(UM_OrcArmy __instance)
@@ -1810,9 +1934,262 @@ namespace Orcs_Plus
             }
         }
 
+        private static void UM_OrcArmy_updateMaxHP_Postfix(UM_OrcArmy __instance)
+        {
+            if (__instance.homeLocation != -1 && __instance.map.locations[__instance.homeLocation].settlement is Set_OrcCamp && __instance.map.locations[__instance.homeLocation].soc == __instance.society)
+            {
+                Pr_Ophanim_Perfection perfection = __instance.map.locations[__instance.homeLocation].properties.OfType<Pr_Ophanim_Perfection>().FirstOrDefault();
+                if (perfection != null)
+                {
+                    __instance.maxHp = (int)Math.Ceiling(__instance.maxHp * (1 + (perfection.charge / 1200)));
+                }
+            }
+        }
+
+        private static IEnumerable<CodeInstruction> UM_OrcArmy_turnTickAI_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
+        {
+            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(UM_Orc_army_turnTickAI_TranspilerBody));
+
+            yield return new CodeInstruction(OpCodes.Nop);
+            yield return new CodeInstruction(OpCodes.Ldarg_0);
+            yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
+            yield return new CodeInstruction(OpCodes.Ret);
+        }
+
+        private static void UM_Orc_army_turnTickAI_TranspilerBody(UM_OrcArmy um)
+        {
+            SG_Orc orcSociety = um.society as SG_Orc;
+            HolyOrder_Orcs orcCulture = null;
+
+            if (orcSociety != null)
+            {
+                ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+            }
+
+            if (um.hp < um.maxHp * 0.3)
+            {
+                if (um.location.index == um.homeLocation)
+                {
+                    um.task = new Task_Recruit();
+                }
+                else
+                {
+                    um.task = new Task_GoToLocation(um.map.locations[um.homeLocation]);
+                }
+                return;
+            }
+
+            if (um.location.soc != null && um.location.soc != um.society && um.society.getRel(um.location.soc).state == DipRel.dipState.war && um.location.settlement != null && !(um.location.settlement is Set_CityRuins) && !(um.location.settlement is Set_TombOfGods))
+            {
+                um.task = new Task_RazeLocation();
+                return;
+            }
+
+            Pr_HumanOutpost outpost = um.location.properties.OfType<Pr_HumanOutpost>().FirstOrDefault();
+            if (outpost != null && outpost.parent != null && um.society.getRel(outpost.parent).state == DipRel.dipState.war)
+            {
+                um.task = new Task_RazeOutpost();
+                return;
+            }
+
+            int steps = -1;
+            List<UM> targets = new List<UM>();
+            UM target = null;
+
+            foreach (Unit unit in um.location.map.units)
+            {
+                // Will not attack non militray units or units of this society.
+                if (unit is UM um2 && um2.society != um.society)
+                {
+                    int dist = um.map.getStepDist(um.location, um2.location);
+                    // Will not attack refugees that are further than 1 step distance.
+                    if (!(um2 is UM_Refugees) || dist <= 1)
+                    {
+                        // Will attack military units in own societ's territory or at a distance up to 4 step distance away.
+                        if (um2.location.soc == um.society || dist <= 4)
+                        {
+                            // Will only attack military units in own society if they are above recruitment threshold.
+                            if (um2.location.soc != um2.society || um2.hp >= um2.maxHp / 3)
+                            {
+                                if (um2.society != null)
+                                {
+                                    DipRel rel = um.society.getRel(um2.society);
+                                    // Will attack military units that they are at war with, or that they are hostile with and are within this army's territory.
+                                    if (rel.state == DipRel.dipState.war || (rel.state == DipRel.dipState.hostile && unit.location.soc == um.society && ModCore.core.checkAlignment(um.society as SG_Orc, um2.society)))
+                                    {
+                                        if (steps == -1 || dist <= steps)
+                                        {
+                                            if (dist < steps)
+                                            {
+                                                targets.Clear();
+                                            }
+
+                                            targets.Add(um2);
+                                            steps = dist;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    if (steps == -1 || dist <= steps)
+                                    {
+                                        if (dist < steps)
+                                        {
+                                            targets.Clear();
+                                        }
+
+                                        targets.Add(um2);
+                                        steps = dist;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (targets.Count == 1)
+            {
+                target = targets[0];
+            }
+            else if (targets.Count > 1)
+            {
+                target = targets[Eleven.random.Next(targets.Count)];
+            }
+
+            if (target != null)
+            {
+                um.task = new Task_AttackArmy(target, um);
+                return;
+            }
+
+            if (um.society.isAtWar())
+            {
+                steps = -1;
+                List<Location> targetLocations = new List<Location>();
+                Location targetLocation = null;
+
+                if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
+                {
+                    if (ModCore.core.data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("God", out Type t))
+                    {
+                        if (t != null && (um.map.overmind.god.GetType() == t || um.map.overmind.god.GetType().IsSubclassOf(t)))
+                        {
+                            FieldInfo FI_VespidicAttack = AccessTools.Field(t, "God_Insect.vespidicSwarmTarget");
+                            if (FI_VespidicAttack != null)
+                            {
+                                Location vespidicTarget = (Location)FI_VespidicAttack.GetValue(um.map.overmind.god);
+                                if (vespidicTarget != null && vespidicTarget != um.location && um.map.getStepDist(um.location, vespidicTarget) < 3)
+                                {
+                                    if (vespidicTarget.soc != null && vespidicTarget.soc != orcSociety && vespidicTarget.soc != orcCulture && orcSociety.getRel(vespidicTarget.soc).state == DipRel.dipState.war)
+                                    {
+                                        if (vespidicTarget.settlement != null && !(vespidicTarget.settlement is Set_TombOfGods) && !(vespidicTarget.settlement is Set_CityRuins))
+                                        {
+                                            targetLocation = vespidicTarget;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (targetLocation == null)
+                {
+                    foreach (Location loc in um.map.locations)
+                    {
+                        if (loc.soc == null)
+                        {
+                            Pr_HumanOutpost targetOutpost = loc.properties.OfType<Pr_HumanOutpost>().FirstOrDefault();
+                            if (targetOutpost != null && loc.settlement == null && targetOutpost.parent != null && targetOutpost.parent != um.society && um.society.getRel(targetOutpost.parent).state == DipRel.dipState.war)
+                            {
+                                int dist = um.map.getStepDist(um.location, loc);
+                                if (steps == -1 || dist <= steps)
+                                {
+                                    if (dist < steps)
+                                    {
+                                        targetLocations.Clear();
+                                    }
+
+                                    targetLocations.Add(loc);
+                                    steps = dist;
+                                }
+                            }
+                        }
+                        else if (loc.soc != um.society && um.society.getRel(loc.soc).state == DipRel.dipState.war)
+                        {
+                            if (loc.settlement != null && !(loc.settlement is Set_TombOfGods) && !(loc.settlement is Set_CityRuins))
+                            {
+                                int dist = um.map.getStepDist(um.location, loc);
+                                if (steps == -1 || dist <= steps)
+                                {
+                                    if (dist < steps)
+                                    {
+                                        targetLocations.Clear();
+                                    }
+
+                                    targetLocations.Add(loc);
+                                    steps = dist;
+                                }
+                            }
+                        }
+                    }
+
+                    if (targetLocations.Count == 1)
+                    {
+                        targetLocation = targetLocations[0];
+                    }
+                    else if (targetLocations.Count > 1)
+                    {
+                        targetLocation = targetLocations[Eleven.random.Next(targetLocations.Count)];
+                    }
+                }
+
+                if (targetLocation != null)
+                {
+                    um.task = new Task_GoToLocation(targetLocation);
+                    return;
+                }
+            }
+
+            if (um.location.index == um.homeLocation)
+            {
+                if (um.hp < um.maxHp)
+                {
+                    um.task = new Task_Recruit();
+                    return;
+                }
+            }
+            else
+            {
+                um.task = new Task_GoToLocation(um.map.locations[um.homeLocation]);
+                return;
+            }
+        }
+
         private static void UM_OrcRaiders_ctor_Postfix(UM_OrcRaiders __instance)
         {
             __instance.rituals.Add(new Rt_Orcs_BuildCamp(__instance.location));
+        }
+
+        private static void UM_OrcRaiders_assignMaxHP_Postfix(UM_OrcRaiders __instance)
+        {
+            if (__instance.homeLocation != -1 && __instance.map.locations[__instance.homeLocation].settlement is Set_OrcCamp && __instance.map.locations[__instance.homeLocation].soc == __instance.society)
+            {
+                Pr_Ophanim_Perfection perfection = __instance.map.locations[__instance.homeLocation].properties.OfType<Pr_Ophanim_Perfection>().FirstOrDefault();
+                if (perfection != null)
+                {
+                    __instance.maxHp = (int)Math.Ceiling(__instance.maxHp * (1 + (perfection.charge / 1200)));
+                }
+            }
+        }
+
+        private static void UM_UntamedDead_turnTickInner_Postfix(UM_UntamedDead __instance)
+        {
+            if (__instance.master is UAEN_OrcShaman shaman && !shaman.isCommandable())
+            {
+                __instance.master = null;
+            }
         }
 
         private static double UA_getChallengeUtility_Postfix(double utility, UA __instance, Challenge c, List<ReasonMsg> reasons)
@@ -1905,7 +2282,7 @@ namespace Orcs_Plus
 
         private static void Mg_EnslaveTheDead_complete_Postfix(UA u)
         {
-            if (u is UAA_OrcElder)
+            if (u is UAEN_OrcElder)
             {
                 foreach (Unit unit in u.location.units)
                 {
@@ -1917,6 +2294,35 @@ namespace Orcs_Plus
             }
         }
 
+        // Patches for P_Opha_Crusade
+        private static string P_Opha_Crusade_getDesc_Postfix(string desc)
+        {
+            return "Causes all societies you have turned into Ophanim's Theocracies, and all perfected orc tribes, to begin a war against the target society if they are not already at war.";
+        }
+
+        private static void P_Opha_Crusade_cast_Postfix(P_Opha_Crusade __instance, Location location)
+        {
+            if (location.soc != null)
+            {
+                foreach (SocialGroup sg in __instance.map.socialGroups)
+                {
+                    if (sg is HolyOrder_Orcs orcCulture && orcCulture.ophanim_PerfectSociety && location.soc != orcCulture && location.soc != orcCulture.orcSociety)
+                    {
+                        if (orcCulture.orcSociety.getRel(location.soc).state != DipRel.dipState.war)
+                        {
+                            War war = orcCulture.map.declareWar(orcCulture.orcSociety, location.soc, true, null);
+                            war.attackerObjective = War.warType.INVASION;
+                        }
+                        else
+                        {
+                            __instance.map.world.prefabStore.popMsg(orcCulture.orcSociety.getName() + " is already at war with " + location.soc.getName() + ", so will not start a new war until this one is completed", false, false);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Community Library Patches
         private static double AIChallenge_checkChallengeUtility_Postfix(double utility, AgentAI.ChallengeData challengeData, UA ua, List<ReasonMsg> reasonMsgs)
         {
             bool willIntercept = false;

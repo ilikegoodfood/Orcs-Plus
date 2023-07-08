@@ -89,7 +89,7 @@ namespace Orcs_Plus
                 orcSociety = waystation.orcSociety;
             }
 
-            if (ua is UAA_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture)
+            if (ua is UAEN_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture)
             {
                 msgs?.Add(new ReasonMsg("Base", 40.0));
                 utility += 40.0;
@@ -113,7 +113,7 @@ namespace Orcs_Plus
                 orcSociety = waystation.orcSociety;
             }
 
-            if (orcSociety != null && ua.person.gold >= cost && location.settlement != null && (location.settlement.infiltration == 1.0 || waystation != null || (ua is UAA_OrcElder elder && (elder.society as HolyOrder_Orcs)?.orcSociety == orcSociety)))
+            if (orcSociety != null && ua.person.gold >= cost && location.settlement != null && (location.settlement.infiltration == 1.0 || waystation != null || (ua is UAEN_OrcElder elder && (elder.society as HolyOrder_Orcs)?.orcSociety == orcSociety)))
             {
                 return true;
             }
@@ -168,7 +168,7 @@ namespace Orcs_Plus
                 }
             }
 
-            if (orcSociety != null && location.settlement != null && (location.settlement.infiltration == 1.0 || (u is UAA_OrcElder elder && (elder.society as HolyOrder_Orcs)?.orcSociety == orcSociety)))
+            if (orcSociety != null && location.settlement != null && (location.settlement.infiltration == 1.0 || (u is UAEN_OrcElder elder && (elder.society as HolyOrder_Orcs)?.orcSociety == orcSociety)))
             {
                 List<Settlement> settlements = new List<Settlement>();
 

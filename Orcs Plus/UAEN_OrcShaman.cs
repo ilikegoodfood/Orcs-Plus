@@ -86,7 +86,7 @@ namespace Orcs_Plus
 
         public override string getName()
         {
-            return "Orc Shaman";
+            return "Orc Spirit Caller";
         }
 
         public override Sprite getPortraitBackground()

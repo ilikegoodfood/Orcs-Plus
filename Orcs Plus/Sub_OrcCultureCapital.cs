@@ -20,6 +20,11 @@ namespace Orcs_Plus
 
             // Add new challenges
             challenges.Add(new Ch_H_Orcs_ReprimandUpstart(this, settlement.location));
+
+            if (ModCore.core.data.godTenetTypes.TryGetValue(order.map.overmind.god.GetType(), out Type tenetType) && tenetType != null && tenetType == typeof(H_Orcs_Perfection))
+            {
+                challenges.Add(new Ch_H_Orcs_PerfectionFestival(settlement.location));
+            }
         }
 
         public override string getName()

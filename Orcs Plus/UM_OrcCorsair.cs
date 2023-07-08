@@ -1,7 +1,9 @@
 ﻿using Assets.Code;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -37,7 +39,7 @@ namespace Orcs_Plus
 
         public override string getName()
         {
-            return "Corsairs";
+            return "Orc Corsairs";
         }
 
         public override void turnTickInner(Map map)
@@ -99,8 +101,14 @@ namespace Orcs_Plus
                     }
                 }
 
-                maxHp = (int)(totalIndustry * map.param.minor_orcMilitaryScaling * map.difficultyMult_shrinkWithDifficulty * map.opt_orcStrMult);
-                maxHp = (int)Math.Ceiling(maxHp * strengthFactor);
+                Pr_Ophanim_Perfection perfection = map.locations[this.homeLocation].properties.OfType<Pr_Ophanim_Perfection>().FirstOrDefault();
+                double perfectionMult = 1.0;
+                if (perfection != null)
+                {
+                    perfectionMult += (perfection.charge / 1200);
+                }
+
+                maxHp = (int)(totalIndustry * perfectionMult * map.param.minor_orcMilitaryScaling * map.difficultyMult_shrinkWithDifficulty * map.opt_orcStrMult * strengthFactor);
 
                 if (maxHp < 10 * strengthFactor)
                 {
@@ -115,6 +123,14 @@ namespace Orcs_Plus
 
         public override void turnTickAI()
         {
+            SG_Orc orcSociety = society as SG_Orc;
+            HolyOrder_Orcs orcCulture = null;
+
+            if (orcSociety != null)
+            {
+                ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+            }
+
             //Console.WriteLine("OrcsPlus: Start Corsair AI");
             if (location.index == homeLocation && hp < maxHp)
             {
@@ -127,7 +143,7 @@ namespace Orcs_Plus
                 //Console.WriteLine("OrcsPlus: Health under ecruitment threshold");
                 if (homeLocation != -1)
                 {
-                    if (!checkPath(map.locations[homeLocation]))
+                    if (!checkPath(map.locations[homeLocation], out _))
                     {
                         die(map, "Lost at Sea");
                         return;
@@ -157,7 +173,8 @@ namespace Orcs_Plus
                 return;
             }
 
-            if (!society.isAtWar() && location.isOcean)
+            bool atWar = society.isAtWar();
+            if (!atWar && location.isOcean)
             {
                 //Console.WriteLine("OrcsPlus: Orc society is at peace");
                 // Insert Piracy at location
@@ -182,70 +199,105 @@ namespace Orcs_Plus
             List<Location> pillageLocations = new List<Location>();
             Location targetLocation = null;
             
-            //Console.WriteLine("OrcsPlus: Iterate Locations");
-            foreach (Location loc in map.locations)
+            if (atWar)
             {
-                if (loc.isCoastal || loc.isOcean)
+                if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
                 {
-                    //Console.WriteLine("OrcsPlus: Iterateing " + loc.getName());
-
-                    if (society.isAtWar())
+                    if (ModCore.core.data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("God", out Type t) && t != null)
                     {
-                        if (loc.soc == null)
+                        if (map.overmind.god.GetType() == t || map.overmind.god.GetType().IsSubclassOf(t))
                         {
-                            //Console.WriteLine("OrcsPlus: Loc is wilderness");
-                            Pr_HumanOutpost targetOutpost = loc.properties.OfType<Pr_HumanOutpost>().FirstOrDefault();
-                            if (targetOutpost != null && targetOutpost.parent != null && targetOutpost.parent != society && society.getRel(targetOutpost.parent).state == DipRel.dipState.war)
+                            FieldInfo FI_VespidicAttack = AccessTools.Field(t, "God_Insect.vespidSwarmTarget");
+                            if (FI_VespidicAttack != null)
                             {
-                                if (checkPath(loc) && warLocations.Count == 0 || score <= map.getStepDist(location, loc))
+                                Location vespidicTarget = (Location)FI_VespidicAttack.GetValue(map.overmind.god);
+                                if (vespidicTarget != null && vespidicTarget != location)
                                 {
-                                    if (score < map.getStepDist(location, loc))
+                                    if ((vespidicTarget.isCoastal || vespidicTarget.isOcean) && checkPath(vespidicTarget, out int dist) && dist < 3)
+                                    {
+                                        if (vespidicTarget.soc != null && vespidicTarget.soc != orcSociety && vespidicTarget.soc != orcCulture && orcSociety.getRel(vespidicTarget.soc).state == DipRel.dipState.war)
+                                        {
+                                            if (vespidicTarget.settlement != null && !(vespidicTarget.settlement is Set_TombOfGods) && !(vespidicTarget.settlement is Set_CityRuins))
+                                            {
+                                                targetLocation = vespidicTarget;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            //Console.WriteLine("OrcsPlus: Iterate Locations");
+            if (targetLocation == null)
+            {
+                foreach (Location loc in map.locations)
+                {
+                    if (loc.isCoastal || loc.isOcean)
+                    {
+                        //Console.WriteLine("OrcsPlus: Iterateing " + loc.getName());
+                        if (atWar)
+                        {
+                            if (loc.soc == null)
+                            {
+                                //Console.WriteLine("OrcsPlus: Loc is wilderness");
+                                Pr_HumanOutpost targetOutpost = loc.properties.OfType<Pr_HumanOutpost>().FirstOrDefault();
+                                if (targetOutpost != null && targetOutpost.parent != null && targetOutpost.parent != society && society.getRel(targetOutpost.parent).state == DipRel.dipState.war)
+                                {
+                                    if (checkPath(loc, out int dist) && warLocations.Count == 0 || dist >= score)
+                                    {
+                                        if (dist > score)
+                                        {
+                                            warLocations.Clear();
+                                        }
+
+                                        warLocations.Add(loc);
+                                        score = dist;
+                                    }
+                                }
+                            }
+                            else if (loc.soc != society && society.getRel(loc.soc).state == DipRel.dipState.war)
+                            {
+                                //Console.WriteLine("OrcsPlus: loc is owned by " + loc.soc.getName());
+                                if (checkPath(loc, out int dist) && warLocations.Count == 0 || dist >= score)
+                                {
+                                    if (dist > score)
                                     {
                                         warLocations.Clear();
                                     }
 
                                     warLocations.Add(loc);
+                                    score = dist;
                                 }
                             }
                         }
-                        else if (loc.soc != society && society.getRel(loc.soc).state == DipRel.dipState.war)
-                        {
-                            //Console.WriteLine("OrcsPlus: loc is owned by " + loc.soc.getName());
-                            if (checkPath(loc) && warLocations.Count == 0 || score <= map.getStepDist(location, loc))
-                            {
-                                if (score < map.getStepDist(location, loc))
-                                {
-                                    warLocations.Clear();
-                                }
 
-                                warLocations.Add(loc);
-                            }
-                        }
-                    }
-
-                    if (warLocations.Count == 0)
-                    {
-                        //Console.WriteLine("OrcsPlus: No war locations yet");
-                        if (loc.soc != null && loc.settlement is SettlementHuman settlementHuman)
+                        if (warLocations.Count == 0)
                         {
-                            //Console.WriteLine("OrcsPlus: loc is settlement human");
-                            if (ModCore.core.checkAlignment(society as SG_Orc, loc))
+                            //Console.WriteLine("OrcsPlus: No war locations yet");
+                            if (loc.soc != null && loc.settlement is SettlementHuman settlementHuman)
                             {
-                                //Console.WriteLine("OrcsPlus: loc alignment is valid");
-                                if (checkPath(loc))
+                                //Console.WriteLine("OrcsPlus: loc is settlement human");
+                                if (ModCore.core.checkAlignment(society as SG_Orc, loc))
                                 {
-                                    Pr_Devastation devastation = loc.properties.OfType<Pr_Devastation>().FirstOrDefault();
-                                    if (devastation == null || devastation.charge < 150)
+                                    //Console.WriteLine("OrcsPlus: loc alignment is valid");
+                                    if (checkPath(loc, out _))
                                     {
-                                        if ((pillageLocations.Count == 0 || score <= settlementHuman.prosperity))
+                                        Pr_Devastation devastation = loc.properties.OfType<Pr_Devastation>().FirstOrDefault();
+                                        if (devastation == null || devastation.charge < 150)
                                         {
-                                            if (score < settlementHuman.prosperity)
+                                            if ((pillageLocations.Count == 0 || score <= settlementHuman.prosperity))
                                             {
-                                                pillageLocations.Clear();
-                                            }
+                                                if (score < settlementHuman.prosperity)
+                                                {
+                                                    pillageLocations.Clear();
+                                                }
 
-                                            pillageLocations.Add(loc);
-                                            score = settlementHuman.prosperity;
+                                                pillageLocations.Add(loc);
+                                                score = settlementHuman.prosperity;
+                                            }
                                         }
                                     }
                                 }
@@ -253,44 +305,44 @@ namespace Orcs_Plus
                         }
                     }
                 }
-            }
 
-            if (warLocations.Count == 0)
-            {
-                //Console.WriteLine("OrcsPlus: No war locations");
-                //Console.WriteLine("OrcsPlus: Iterating trade routes");
-                foreach (TradeRoute tradeRoute in map.tradeManager.routes)
+                if (warLocations.Count == 0)
                 {
-                    if (tradeRoute.raidingCooldown == 0)
+                    //Console.WriteLine("OrcsPlus: No war locations");
+                    //Console.WriteLine("OrcsPlus: Iterating trade routes");
+                    foreach (TradeRoute tradeRoute in map.tradeManager.routes)
                     {
-                        if (!ModCore.core.checkAlignment(society as SG_Orc, tradeRoute.start()) && !ModCore.core.checkAlignment(society as SG_Orc, tradeRoute.end()))
+                        if (tradeRoute.raidingCooldown == 0)
                         {
-                            //Console.WriteLine("OrcsPlus: Trade route alignment is valid");
-                            foreach (Location loc in tradeRoute.path)
+                            if (!ModCore.core.checkAlignment(society as SG_Orc, tradeRoute.start()) && !ModCore.core.checkAlignment(society as SG_Orc, tradeRoute.end()))
                             {
-                                if (loc.isOcean)
+                                //Console.WriteLine("OrcsPlus: Trade route alignment is valid");
+                                foreach (Location loc in tradeRoute.path)
                                 {
-                                    if (checkPath(loc))
+                                    if (loc.isOcean)
                                     {
-                                        double prosperity = 0;
-                                        if (tradeRoute.start().settlement is SettlementHuman start)
+                                        if (checkPath(loc, out int dist))
                                         {
-                                            prosperity += start.prosperity;
-                                        }
-                                        if (tradeRoute.end().settlement is SettlementHuman end)
-                                        {
-                                            prosperity += end.prosperity;
-                                        }
-
-                                        if (tradeLocations.Count == 0 || (prosperity * 100) - map.getStepDist(location, loc) >= score)
-                                        {
-                                            if ((prosperity * 100) - map.getStepDist(location, loc) > score)
+                                            double prosperity = 0;
+                                            if (tradeRoute.start().settlement is SettlementHuman start)
                                             {
-                                                tradeLocations.Clear();
+                                                prosperity += start.prosperity;
+                                            }
+                                            if (tradeRoute.end().settlement is SettlementHuman end)
+                                            {
+                                                prosperity += end.prosperity;
                                             }
 
-                                            tradeLocations.Add(loc);
-                                            score = (prosperity * 100) - map.getStepDist(location, loc);
+                                            if (tradeLocations.Count == 0 || (prosperity * 100) - dist >= score)
+                                            {
+                                                if ((prosperity * 100) - dist > score)
+                                                {
+                                                    tradeLocations.Clear();
+                                                }
+
+                                                tradeLocations.Add(loc);
+                                                score = (prosperity * 100) - dist;
+                                            }
                                         }
                                     }
                                 }
@@ -298,35 +350,35 @@ namespace Orcs_Plus
                         }
                     }
                 }
-            }
 
-            if (warLocations.Count > 0)
-            {
-                //Console.WriteLine("OrcsPlus: Getting target war location");
-                if (warLocations.Count == 1)
+                if (warLocations.Count > 0)
                 {
-                    targetLocation = warLocations[0];
+                    //Console.WriteLine("OrcsPlus: Getting target war location");
+                    if (warLocations.Count == 1)
+                    {
+                        targetLocation = warLocations[0];
+                    }
+                    else
+                    {
+                        targetLocation = warLocations[Eleven.random.Next(warLocations.Count)];
+                    }
                 }
-                else
+                else if (location.isOcean)
                 {
-                    targetLocation = warLocations[Eleven.random.Next(warLocations.Count)];
-                }
-            }
-            else if (location.isOcean)
-            {
-                //Console.WriteLine("OrcsPlus: Checking for actions at location");
-                // Insert Piracy at location
-                if (pirateTrade.valid() && pirateTrade.validFor(this))
-                {
-                    task = new Task_PerformChallenge(pirateTrade);
-                    return;
-                }
+                    //Console.WriteLine("OrcsPlus: Checking for actions at location");
+                    // Insert Piracy at location
+                    if (pirateTrade.valid() && pirateTrade.validFor(this))
+                    {
+                        task = new Task_PerformChallenge(pirateTrade);
+                        return;
+                    }
 
-                // Insert Pillaging at location
-                if (pillageSettlement.valid() && pillageSettlement.validFor(this))
-                {
-                    task = new Task_PerformChallenge(pillageSettlement);
-                    return;
+                    // Insert Pillaging at location
+                    if (pillageSettlement.valid() && pillageSettlement.validFor(this))
+                    {
+                        task = new Task_PerformChallenge(pillageSettlement);
+                        return;
+                    }
                 }
             }
 
@@ -379,7 +431,7 @@ namespace Orcs_Plus
                 }
             }
 
-            if (targetLocation != null && checkPath(targetLocation))
+            if (targetLocation != null && checkPath(targetLocation, out _))
             {
                 //Console.WriteLine("OrcsPlus: Going to target location");
                 task = new Task_GoToLocation(targetLocation);
@@ -404,20 +456,22 @@ namespace Orcs_Plus
             }
         }
 
-        public bool checkPath(Location loc, bool safeMove = false)
+        public bool checkPath(Location loc, out int steps, bool safeMove = false)
         {
-            bool result = true;
+            steps = 0;
             if (loc != location)
             {
                 Location[] pathTo = location.map.getPathTo(location, loc, this, safeMove);
 
                 if (pathTo == null || pathTo.Length < 2)
                 {
-                    result = false;
+                    return false;
                 }
+
+                steps = pathTo.Length;
             }
 
-            return result;
+            return true;
         }
     }
 }

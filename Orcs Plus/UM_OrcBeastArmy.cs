@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using HarmonyLib;
+using System.Reflection;
 
 namespace Orcs_Plus
 {
@@ -59,8 +61,14 @@ namespace Orcs_Plus
                     }
                 }
 
-                maxHp = (int)(totalIndustry * map.param.minor_orcMilitaryScaling * map.difficultyMult_shrinkWithDifficulty * map.opt_orcStrMult);
-                maxHp = (int)Math.Ceiling(maxHp * strengthFactor);
+                Pr_Ophanim_Perfection perfection = map.locations[this.homeLocation].properties.OfType<Pr_Ophanim_Perfection>().FirstOrDefault();
+                double perfectionMult = 1.0;
+                if (perfection != null)
+                {
+                    perfectionMult += (perfection.charge / 1200);
+                }
+
+                maxHp = (int)(totalIndustry * perfectionMult * map.param.minor_orcMilitaryScaling * map.difficultyMult_shrinkWithDifficulty * map.opt_orcStrMult * strengthFactor);
 
                 if (maxHp < 10 * strengthFactor)
                 {
@@ -80,6 +88,14 @@ namespace Orcs_Plus
 
         public override void turnTickAI()
         {
+            SG_Orc orcSociety = society as SG_Orc;
+            HolyOrder_Orcs orcCulture = null;
+
+            if (orcSociety != null)
+            {
+                ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+            }
+
             if (hp < maxHp * 0.3)
             {
                 if (location.index == homeLocation)
@@ -93,7 +109,7 @@ namespace Orcs_Plus
                 return;
             }
             
-            if (location.soc != null && location.soc != society && society.getRel(location.soc).state == DipRel.dipState.war && location.settlement != null)
+            if (location.soc != null && location.soc != society && society.getRel(location.soc).state == DipRel.dipState.war && location.settlement != null && !(location.settlement is Set_CityRuins) && !(location.settlement is Set_TombOfGods))
             {
                 if (location.settlement is SettlementHuman)
                 {
@@ -114,7 +130,7 @@ namespace Orcs_Plus
                 return;
             }
 
-            int distance = 0;
+            int steps = -1;
             List<UM> targets = new List<UM>();
             UM target = null;
 
@@ -137,29 +153,31 @@ namespace Orcs_Plus
                                 {
                                     DipRel rel = society.getRel(um.society);
                                     // Will attack military units that they are at war with, or that they are hostile with and are within this army's territory.
-                                    if (rel.state == DipRel.dipState.war || (rel.state == DipRel.dipState.hostile && unit.location.soc == society))
+                                    if (rel.state == DipRel.dipState.war || (rel.state == DipRel.dipState.hostile && unit.location.soc == society && ModCore.core.checkAlignment(society as SG_Orc, um.society)))
                                     {
-                                        if (targets.Count == 0 || distance >= dist)
+                                        if (steps == -1 || dist <= steps)
                                         {
-                                            if (distance > dist)
+                                            if (dist < steps)
                                             {
                                                 targets.Clear();
                                             }
 
                                             targets.Add(um);
+                                            steps = dist;
                                         }
                                     }
                                 }
                                 else
                                 {
-                                    if (targets.Count == 0 || distance >= dist)
+                                    if (steps == -1 || dist <= steps)
                                     {
-                                        if (distance > dist)
+                                        if (dist < steps)
                                         {
                                             targets.Clear();
                                         }
 
                                         targets.Add(um);
+                                        steps = dist;
                                     }
                                 }
                             }
@@ -168,7 +186,11 @@ namespace Orcs_Plus
                 }
             }
 
-            if (targets.Count > 0)
+            if (targets.Count == 1)
+            {
+                target = targets[0];
+            }
+            else if (targets.Count > 1)
             {
                 target = targets[Eleven.random.Next(targets.Count)];
             }
@@ -179,51 +201,90 @@ namespace Orcs_Plus
                 return;
             }
 
-            distance = 0;
-            List<Location> targetLocations = new List<Location>();
-            Location targetLocation = null;
-
-            foreach(Location loc in map.locations)
+            if (society.isAtWar())
             {
-                if (loc.soc == null)
+                steps = -1;
+                List<Location> targetLocations = new List<Location>();
+                Location targetLocation = null;
+
+                if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
                 {
-                    Pr_HumanOutpost targetOutpost = loc.properties.OfType<Pr_HumanOutpost>().FirstOrDefault();
-                    if (targetOutpost != null && targetOutpost.parent != null && targetOutpost.parent != society && society.getRel(targetOutpost.parent).state == DipRel.dipState.war)
+                    if (ModCore.core.data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("God", out Type t) && t != null)
                     {
-                        if (targetLocations.Count == 0 || distance >= map.getStepDist(location, loc))
+                        if (map.overmind.god.GetType() == t || map.overmind.god.GetType().IsSubclassOf(t))
                         {
-                            if (distance > map.getStepDist(location, loc))
+                            FieldInfo FI_VespidicAttack = AccessTools.Field(t, "God_Insect.vespidSwarmTarget");
+                            if (FI_VespidicAttack != null)
                             {
-                                targetLocations.Clear();
+                                Location vespidicTarget = (Location)FI_VespidicAttack.GetValue(map.overmind.god);
+                                if (vespidicTarget != null && vespidicTarget != location && map.getStepDist(location, vespidicTarget) < 3)
+                                {
+                                    if (vespidicTarget.soc != null && vespidicTarget.soc != orcSociety && vespidicTarget.soc != orcCulture && orcSociety.getRel(vespidicTarget.soc).state == DipRel.dipState.war)
+                                    {
+                                        if (vespidicTarget.settlement != null && !(vespidicTarget.settlement is Set_TombOfGods) && !(vespidicTarget.settlement is Set_CityRuins))
+                                        {
+                                            targetLocation = vespidicTarget;
+                                        }
+                                    }
+                                }
                             }
-
-                            targetLocations.Add(loc);
                         }
                     }
                 }
-                else if (loc.soc != society && society.getRel(loc.soc).state == DipRel.dipState.war)
+
+                if (targetLocation == null)
                 {
-                    if (targetLocations.Count == 0 || distance >= map.getStepDist(location, loc))
+                    foreach (Location loc in map.locations)
                     {
-                        if (distance > map.getStepDist(location, loc))
+                        if (loc.soc == null)
                         {
-                            targetLocations.Clear();
-                        }
+                            Pr_HumanOutpost targetOutpost = loc.properties.OfType<Pr_HumanOutpost>().FirstOrDefault();
+                            if (targetOutpost != null && targetOutpost.parent != null && targetOutpost.parent != society && society.getRel(targetOutpost.parent).state == DipRel.dipState.war)
+                            {
+                                int dist = map.getStepDist(location, loc);
+                                if (steps == -1 || dist <= steps)
+                                {
+                                    if (dist < steps)
+                                    {
+                                        targetLocations.Clear();
+                                    }
 
-                        targetLocations.Add(loc);
+                                    targetLocations.Add(loc);
+                                    steps = dist;
+                                }
+                            }
+                        }
+                        else if (loc.soc != society && society.getRel(loc.soc).state == DipRel.dipState.war)
+                        {
+                            int dist = map.getStepDist(location, loc);
+                            if (steps == -1 || dist <= steps)
+                            {
+                                if (dist < steps)
+                                {
+                                    targetLocations.Clear();
+                                }
+
+                                targetLocations.Add(loc);
+                                steps = dist;
+                            }
+                        }
+                    }
+
+                    if (targetLocations.Count == 1)
+                    {
+                        targetLocation = targetLocations[0];
+                    }
+                    else if (targetLocations.Count > 1)
+                    {
+                        targetLocation = targetLocations[Eleven.random.Next(targetLocations.Count)];
                     }
                 }
-            }
 
-            if (targetLocations.Count > 0)
-            {
-                targetLocation = targetLocations[Eleven.random.Next(targetLocations.Count)];
-            }
-
-            if (targetLocation != null)
-            {
-                task = new Task_GoToLocation(targetLocation);
-                return;
+                if (targetLocation != null)
+                {
+                    task = new Task_GoToLocation(targetLocation);
+                    return;
+                }
             }
 
             if (location.index == homeLocation)

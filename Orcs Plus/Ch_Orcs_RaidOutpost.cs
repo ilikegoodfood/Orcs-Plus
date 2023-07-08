@@ -101,7 +101,7 @@ namespace Orcs_Plus
 
             if (targetOutpost != null)
             {
-                if (ua is UAEN_OrcUpstart || ua is UAA_OrcElder)
+                if (ua is UAEN_OrcUpstart || ua is UAEN_OrcElder)
                 {
                     result = Math.Min(map.param.ch_raidOutpostDmg, charge);
                     msgs?.Add(new ReasonMsg("Potential Damage", result));

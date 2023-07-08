@@ -20,7 +20,7 @@ namespace Orcs_Plus
 
         public override string getName()
         {
-            return "Orc Rabble of " + society.getName();
+            return "Orc Rabble";
         }
 
         public override void turnTickInner(Map map)

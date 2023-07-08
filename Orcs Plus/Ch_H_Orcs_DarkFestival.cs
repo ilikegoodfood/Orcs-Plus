@@ -10,7 +10,9 @@ namespace Orcs_Plus
 {
     public class Ch_H_Orcs_DarkFestival : ChallengeHoly
     {
-        public double shadowPush = 0.007;
+        public double shadowGen = 0.025;
+
+        public double shadowPush = 0.005;
 
         public Ch_H_Orcs_DarkFestival(Location loc)
             : base(loc)
@@ -25,7 +27,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Gradually enshadows this location and nearby locations and units. Increaces society menace each turn.";
+            return "Gradually enshadows this location and nearby locations and units. The Elder gains profile (1) and menace (2) each turn while performing this challenge.";
         }
 
         public override string getCastFlavour()
@@ -84,7 +86,7 @@ namespace Orcs_Plus
 
         public override double getComplexity()
         {
-            return 15;
+            return 20;
         }
 
         public override Sprite getSprite()
@@ -114,7 +116,7 @@ namespace Orcs_Plus
 
         public override bool validFor(UA ua)
         {
-            return ua is UAA_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety == location.soc;
+            return ua is UAEN_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety == location.soc;
         }
 
         public override void turnTick(UA ua)
@@ -122,21 +124,39 @@ namespace Orcs_Plus
             ua.addProfile(1);
             ua.addMenace(2);
 
-            location.settlement.shadow += 0.35 * getProgressPerTurnInner(ua, null);
+            double deltaShadow = shadowPush * getProgressPerTurnInner(ua, null);
+
+            if (location.settlement.shadow < 1.0)
+            {
+                location.settlement.shadow += shadowGen * getProgressPerTurnInner(ua, null);
+            }
 
             foreach (Unit unit in location.units)
             {
-                if (unit is UA agent)
+                if (unit is UA agent && agent.person.shadow < 1.0)
                 {
-                    agent.person.shadow += shadowPush * getProgressPerTurnInner(ua, null);
+                    agent.person.shadow += deltaShadow;
+
+                    if (agent.person.shadow > 1.0)
+                    {
+                        agent.person.shadow = 1.0;
+                    }
                 }
             }
 
             if (location.soc is SG_Orc orcSociety)
             {
-                if (orcSociety.upstart != null && orcSociety.upstart.homeLocation == location.index)
+                foreach (Unit unit in map.units)
                 {
-                    orcSociety.upstart.person.shadow += shadowPush * getProgressPerTurnInner(ua, null);
+                    if (unit.homeLocation == location.index && unit is UA agent && !agent.isCommandable() && agent.person.shadow < 1.0)
+                    {
+                        agent.person.shadow += deltaShadow;
+
+                        if (agent.person.shadow > 1.0)
+                        {
+                            agent.person.shadow = 1.0;
+                        }
+                    }
                 }
 
                 orcSociety.menace += 1.0;
@@ -146,15 +166,23 @@ namespace Orcs_Plus
             {
                 if (location.getShadow() > neighbour.getShadow())
                 {
-                    float deltaShadow = (float)Math.Min(1.0 - location.getShadow(), shadowPush * getProgressPerTurnInner(ua, null));
-
                     if (neighbour.settlement != null)
                     {
                         neighbour.settlement.shadow += deltaShadow;
+
+                        if (neighbour.settlement.shadow > 1.0)
+                        {
+                            neighbour.settlement.shadow = 1.0;
+                        }
                     }
                     else
                     {
-                        neighbour.hex.purity -= deltaShadow;
+                        neighbour.hex.purity -= (float)deltaShadow;
+
+                        if (neighbour.hex.purity > 1.0f)
+                        {
+                            neighbour.hex.purity = 1.0f;
+                        }
                     }
 
                     location.settlement.shadow -= deltaShadow;
@@ -164,16 +192,17 @@ namespace Orcs_Plus
                 {
                     if (unit is UA agent)
                     {
-                        agent.person.shadow += shadowPush * getProgressPerTurnInner(ua, null);
+                        agent.person.shadow += deltaShadow;
                     }
                 }
 
-                if (neighbour.soc is SG_Orc orcs)
+                if (location.settlement.shadow > 1.0)
                 {
-                    if (orcs.upstart != null && orcs.upstart.homeLocation == location.index)
-                    {
-                        orcs.upstart.person.shadow += shadowPush * getProgressPerTurnInner(ua, null);
-                    }
+                    location.settlement.shadow = 1.0;
+                }
+                else if (location.settlement.shadow < 0.0)
+                {
+                    location.settlement.shadow = 0.0;
                 }
             }
         }

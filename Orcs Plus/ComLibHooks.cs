@@ -16,15 +16,62 @@ namespace Orcs_Plus
 
         }
 
+        public override void onPlayerInfluenceTenet(HolyOrder order, HolyTenet tenet)
+        {
+            if (ModCore.core.godPowers1.Count > 0 || ModCore.core.godPowers2.Count > 0)
+            {
+                ModCore.core.updateGodPowers(order.map);
+            }
+        }
+
         public override void onUnitDeath_StartOfProcess(Unit u, string v, Person killer)
         {
-            if (u?.society == null || u is UA)
+            if (u is UA)
             {
                 return;
             }
 
             SG_Orc orcs = u.society as SG_Orc;
             HolyOrder_Orcs orcCulture = u.society as HolyOrder_Orcs;
+
+            if (u is UM um && (orcs != null || orcCulture != null))
+            {
+                SG_Orc orcSociety = orcs;
+                HolyOrder_Orcs orcCulture2 = orcCulture;
+
+                if (um is UM_Mercenary mercenary)
+                {
+                    orcSociety = mercenary.source as SG_Orc;
+                    orcCulture2 = mercenary.source as HolyOrder_Orcs;
+                }
+
+                if (orcSociety != null)
+                {
+                    ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture2);
+                }
+
+                if (orcCulture2 != null && orcCulture2.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < -1)
+                {
+                    if (ModCore.core.data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("VespidicSwarm", out Type vSwarmType) && vSwarmType != null && intDataCord.typeDict.TryGetValue("Swarm", out Type swarmType) && swarmType != null)
+                    {
+                        Location loc = um.location;
+                        SocialGroup soc = um.map.soc_dark;
+                        if (loc.soc.GetType() == swarmType || loc.soc.GetType().IsSubclassOf(swarmType))
+                        {
+                            soc = loc.soc;
+                        }
+
+                        object[] args = new object[] {
+                                loc,
+                                soc,
+                                um.maxHp / 2
+                            };
+                        UM vSwarm = (UM)Activator.CreateInstance(vSwarmType, args);
+                        um.map.units.Add(vSwarm);
+                        loc.units.Add(vSwarm);
+                    }
+                }
+            }
 
             Unit uKiller = killer?.unit;
 
@@ -183,7 +230,7 @@ namespace Orcs_Plus
                             continue;
                         }
 
-                        if (orcSociety.getRel(u.society)?.state == DipRel.dipState.war)
+                        if (orcSociety.getRel(u.society).state == DipRel.dipState.war)
                         {
                             ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Smote enemy army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                         }
@@ -217,7 +264,7 @@ namespace Orcs_Plus
                                     continue;
                                 }
 
-                                if (orcSociety.getRel(u.society)?.state == DipRel.dipState.war)
+                                if (orcSociety.getRel(u.society).state == DipRel.dipState.war)
                                 {
                                     ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Volcanic eruption (geomancy) destroyed enemy army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                                 }
@@ -260,7 +307,7 @@ namespace Orcs_Plus
                                 continue;
                             }
 
-                            if (orcSociety.getRel(u.society)?.state == DipRel.dipState.war)
+                            if (orcSociety.getRel(u.society).state == DipRel.dipState.war)
                             {
                                 ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Awakening destroyed enemy army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                             }
@@ -316,6 +363,94 @@ namespace Orcs_Plus
                         if (orcs.getRel(um.location.soc)?.state == DipRel.dipState.war)
                         {
                             ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razing Emeny Settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation] * 2), true);
+                        }
+                    }
+                }
+            }
+
+            if (ModCore.core.data.godTenetTypes.TryGetValue(map.overmind.god.GetType(), out Type tenetType) && tenetType != null && tenetType == typeof(H_Orcs_HarbringersMadness))
+            {
+                if (um.society is SG_Orc orcSociety2 && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null && orcCulture2.tenet_god is H_Orcs_HarbringersMadness harbringers && harbringers.status < -1)
+                {
+                    if (um.location.settlement is SettlementHuman settlementHuman && settlementHuman.ruler != null)
+                    {
+                        settlementHuman.ruler.sanity -= 1;
+
+                        if (settlementHuman.ruler.sanity < 1.0)
+                        {
+                            settlementHuman.ruler.goInsane(-1);
+                        }
+                    }
+
+                    foreach (Unit unit in map.units)
+                    {
+                        if (unit.homeLocation == um.location.index && unit is UA agent && !agent.isCommandable() && (agent.person.species is Species_Human || agent.person.species is Species_Elf))
+                        {
+                            agent.person.sanity -= 1;
+
+                            if (agent.person.sanity < 1.0)
+                            {
+                                agent.person.goInsane(-1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public override void onRazeLocation_EndOfProcess(UM um)
+        {
+            SG_Orc orcSociety = um.society as SG_Orc;
+            HolyOrder_Orcs orcCulture = null;
+
+            if (um is UM_Mercenary mercenary)
+            {
+                orcSociety = mercenary.source as SG_Orc;
+            }
+
+            if (orcSociety != null)
+            {
+                ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+            }
+
+            if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
+            {
+                if (ModCore.core.data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null)
+                {
+                    intDataCord.typeDict.TryGetValue("Hive", out Type hiveType);
+                    intDataCord.typeDict.TryGetValue("Doomed", out Type doomedType);
+                    List<UM_Refugees> refugees = new List<UM_Refugees>();
+
+                    if (doomedType != null && hiveType != null)
+                    {
+                        foreach (Unit unit in um.location.units)
+                        {
+                            if (unit is UM_Refugees refugee && refugee.homeLocation == um.location.index && refugee.task == null)
+                            {
+                                refugees.Add(refugee);
+                            }
+                        }
+
+                        if (refugees.Count > 0)
+                        {
+                            bool isHive = false;
+
+                            foreach (Location loc in um.map.locations)
+                            {
+                                if (loc.settlement != null && (loc.settlement.GetType() == hiveType || loc.settlement.GetType().IsSubclassOf(hiveType)))
+                                {
+                                    isHive = true;
+                                    break;
+                                }
+                            }
+
+                            if (isHive)
+                            {
+                                foreach (UM_Refugees refugee in refugees)
+                                {
+                                    refugee.task = (Task)Activator.CreateInstance(doomedType, new object[] { refugee });
+                                }
+                            }
                         }
                     }
                 }
@@ -661,7 +796,7 @@ namespace Orcs_Plus
         {
             switch (ua)
             {
-                case UAA_OrcElder elder:
+                case UAEN_OrcElder elder:
                     visibleUnits = elder.getVisibleUnits();
                     return true;
                 default:
@@ -675,7 +810,7 @@ namespace Orcs_Plus
         {
             switch(ua)
             {
-                case UAA_OrcElder elder:
+                case UAEN_OrcElder elder:
                     return interceptOrcElder(elder);
                 case UAEN_OrcShaman shaman:
                     return interceptOrcShaman(shaman);
@@ -686,7 +821,7 @@ namespace Orcs_Plus
             return false;
         }
 
-        private bool interceptOrcElder(UAA_OrcElder elder)
+        private bool interceptOrcElder(UAEN_OrcElder elder)
         {
             if (elder.society.isGone())
             {
@@ -799,17 +934,62 @@ namespace Orcs_Plus
                         }
                     }
 
-                    if (actionsToRemove.Count > 0)
+                    //Console.WriteLine("OrcsPlus: Removing " + actionsToRemove.Count + " unwanted actions");
+                    foreach (MonsterAction action in actionsToRemove)
                     {
-                        //Console.WriteLine("OrcsPlus: Removing unwanted actions");
-                        foreach (MonsterAction action in actionsToRemove)
-                        {
-                            actions.Remove(action);
-                        }
+                        actions.Remove(action);
                     }
                     //Console.WriteLine("OrcsPlus: Finished Processing Actions");
                 }
                 //Console.WriteLine("OrcsPlus: Finished processing orcSociety");
+
+                if (orcCulture.tenet_god is H_Orcs_MammonClient client && client.status < 0)
+                {
+                    foreach (SocialGroup neighbour in orcSociety.getNeighbours())
+                    {
+                        if (neighbour is Society society && !(society is HolyOrder) && orcSociety.getRel(society).state != DipRel.dipState.war && society.capital != -1)
+                        {
+                            bool present = false;
+                            foreach(MonsterAction action in orcCulture.monsterActions)
+                            {
+                                if (action is MA_Orc_HireMercenaries hire && hire.target == society)
+                                {
+                                    present = true;
+                                    actions.Add(action);
+                                    break;
+                                }
+                            }
+
+                            if (!present)
+                            {
+                                MonsterAction action = new MA_Orc_HireMercenaries(orcSociety, society);
+                                orcCulture.monsterActions.Add(action);
+                                actions.Add(action);
+                            }
+                        }
+
+                        if (neighbour is SG_Orc orcs && orcSociety.getRel(orcs).state != DipRel.dipState.war && orcs.capital != -1)
+                        {
+                            bool present = false;
+                            foreach (MonsterAction action in orcCulture.monsterActions)
+                            {
+                                if (action is MA_Orc_HireMercenaries hire && hire.target == orcs)
+                                {
+                                    present = true;
+                                    actions.Add(action);
+                                    break;
+                                }
+                            }
+
+                            if (!present)
+                            {
+                                MonsterAction action = new MA_Orc_HireMercenaries(orcSociety, orcs);
+                                orcCulture.monsterActions.Add(action);
+                                actions.Add(action);
+                            }
+                        }
+                    }
+                }
             }
         }
     }

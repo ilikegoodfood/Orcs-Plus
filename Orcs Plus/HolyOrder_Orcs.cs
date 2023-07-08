@@ -19,11 +19,11 @@ namespace Orcs_Plus
 
         public List<Sub_Temple> temples = new List<Sub_Temple>();
 
-        public List<Unit> units = new List<Unit>();
+        public List<UM> militaryUnits = new List<UM>();
 
         public List<UA> agents = new List<UA>();
 
-        public List<UAA> acolytes = new List<UAA>();
+        public List<UAEN_OrcElder> acolytes = new List<UAEN_OrcElder>();
 
         public int acolyteSpawnCounter = 0;
 
@@ -38,6 +38,12 @@ namespace Orcs_Plus
         public H_Orcs_Industrious tenet_industrious;
 
         public HolyTenet tenet_god;
+
+        public int vinerva_HealthDuration = 0;
+
+        public bool ophanim_PerfectSociety = false;
+
+        public List<MonsterAction> monsterActions = new List<MonsterAction>();
 
         public HolyOrder_Orcs(Map m, Location l, SG_Orc o) : base(m, l)
         {
@@ -231,7 +237,7 @@ namespace Orcs_Plus
             camps.Clear();
             specializedCamps.Clear();
             temples.Clear();
-            units.Clear();
+            militaryUnits.Clear();
             agents.Clear();
             acolytes.Clear();
             plunder.Clear();
@@ -250,9 +256,9 @@ namespace Orcs_Plus
                     temples.Add(temple);
                 }
 
-                Pr_OrcPlunder plunderProperty = camp.location.properties.OfType<Pr_OrcPlunder>().FirstOrDefault();
-                if (plunderProperty != null)
-                {
+                List<Pr_OrcPlunder> plunderProperties = camp.location.properties.OfType<Pr_OrcPlunder>().ToList();
+                foreach (Pr_OrcPlunder plunderProperty in plunderProperties)
+                { 
                     plunder.Add(plunderProperty);
                     plunderValue += plunderProperty.getGold();
                 }
@@ -264,18 +270,18 @@ namespace Orcs_Plus
                 {
                     if (unit is UA ua)
                     {
-                        if (ua is UAA uaa)
+                        if (ua is UAEN_OrcElder elder)
                         {
-                            acolytes.Add(uaa);
+                            acolytes.Add(elder);
                         }
                         else
                         {
                             agents.Add(ua);
                         }
                     }
-                    else
+                    else if (unit is UM um)
                     {
-                        units.Add(unit);
+                        militaryUnits.Add(um);
                     }
                 }
             }
@@ -289,9 +295,9 @@ namespace Orcs_Plus
             nWorshippers += allCamps.Count;
             nTemples = temples.Count;
 
-            if (units != null)
+            if (militaryUnits != null)
             {
-                nWorshippers += units.Count;
+                nWorshippers += militaryUnits.Count;
             }
             if (agents != null)
             {
@@ -375,8 +381,11 @@ namespace Orcs_Plus
 
         new public int processIncome(List<ReasonMsg> msgs)
         {
+            int income = 0;
             msgs?.Add(new ReasonMsg("Plunder", plunderValue));
-            return (int)Math.Floor(plunderValue);
+            income += (int)Math.Floor(plunderValue);
+
+            return income;
         }
 
         new public int computeInfluenceHuman(List<ReasonMsg> msgs)
@@ -401,6 +410,7 @@ namespace Orcs_Plus
                 CreateSeat();
             }
 
+            manageMonsterActions();
             manageShamans();
 
             bool playerCanInfluenceFlag = influenceElder >= influenceElderReq;
@@ -432,10 +442,58 @@ namespace Orcs_Plus
             if (acolyteCount < map.param.holy_maxAcolytes)
             {
                 acolyteSpawnCounter++;
-                if (acolyteSpawnCounter > costAcolyte)
+                if (acolyteSpawnCounter >= costAcolyte)
                 {
                     createAcolyte();
                     acolyteSpawnCounter = 0;
+                }
+            }
+
+            if (militaryUnits.Count > 0 && vinerva_HealthDuration > 0)
+            {
+                vinerva_HealthDuration--;
+                foreach(UM um in militaryUnits)
+                {
+                    if (um.hp < um.maxHp)
+                    {
+                        um.hp = Math.Min(um.hp + 2, um.maxHp);
+                    }
+                }
+            }
+
+            if (ophanim_PerfectSociety)
+            {
+                if (!(tenet_god is H_Orcs_Perfection perfection) || perfection.status > -2)
+                {
+                    ophanim_PerfectSociety = false;
+                }
+                else
+                {
+                    bool perfect = false;
+
+                    foreach (Set_OrcCamp camp in camps)
+                    {
+                        if (camp.location.properties.OfType<Pr_Ophanim_Perfection>().FirstOrDefault()?.charge >= 300)
+                        {
+                            perfect = true;
+                            break;
+                        }
+                    }
+
+                    if (perfect)
+                    {
+                        foreach (Set_OrcCamp camp in camps)
+                        {
+                            if (!camp.location.properties.Any(p => p is Pr_Ophanim_Perfection))
+                            {
+                                camp.location.properties.Add(new Pr_Ophanim_Perfection(camp.location));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        ophanim_PerfectSociety = false;
+                    }
                 }
             }
 
@@ -491,7 +549,7 @@ namespace Orcs_Plus
 
             if (location != null)
             {
-                UAA_OrcElder item = new UAA_OrcElder(location, this, new Person(this, houseOrc));
+                UAEN_OrcElder item = new UAEN_OrcElder(location, this, new Person(this, houseOrc));
                 location.units.Add(item);
                 map.units.Add(item);
                 acolytes.Add(item);
@@ -561,6 +619,24 @@ namespace Orcs_Plus
             }
         }
 
+        public void manageMonsterActions()
+        {
+            List<MonsterAction> actionsToRemove = new List<MonsterAction>();
+
+            foreach(MonsterAction action in monsterActions)
+            {
+                if (action is MA_Orc_HireMercenaries hire && !orcSociety.getNeighbours().Contains(hire.target))
+                {
+                    actionsToRemove.Add(action);
+                }
+            }
+
+            foreach (MonsterAction action in actionsToRemove)
+            {
+                monsterActions.Remove(action);
+            }
+        }
+
         public new void receiveFunding(Person other, int delta)
         {
             if (seat != null)
@@ -605,54 +681,42 @@ namespace Orcs_Plus
         public bool spendGold(double gold)
         {
             updateData();
-            
-            List<Pr_OrcPlunder> emptyPlunder = new List<Pr_OrcPlunder>();
 
             if (gold > plunderValue)
             {
                 return false;
             }
 
-            foreach (Pr_OrcPlunder p in plunder)
+            while (gold > 0 && plunderValue > 0)
             {
-                int pGold = (int)Math.Floor(Math.Min(gold, p.getGold()));
-                p.addGold(-pGold);
-                if (p.getGold() <= 0)
+                int index = Eleven.random.Next(plunder.Count);
+
+                int pGold = (int)Math.Floor(Math.Min(gold, plunder[index].getGold()));
+                plunder[index].addGold(-pGold);
+                if (plunder[index].getGold() <= 0)
                 {
                     bool isEmpty = true;
-                    foreach (Item item in p.items)
+                    foreach (Item item in plunder[index].items)
                     {
-                        if (p != null)
+                        if (plunder[index] != null)
                         {
                             isEmpty = false;
                             break;
                         }
+                    }
 
-                        if (isEmpty)
-                        {
-                            emptyPlunder.Add(p);
-                        }
+                    if (isEmpty)
+                    {
+                        plunder[index].location.properties.Remove(plunder[index]);
+                        plunder.Remove(plunder[index]);
                     }
                 }
 
                 gold -= pGold;
+                plunderValue -= pGold;
             }
 
-            foreach (Pr_OrcPlunder p in emptyPlunder)
-            {
-                p.location.properties.Remove(p);
-            }
-
-            updateData();
-
-            if (gold <= 0.0)
-            {
-                return true;
-            }
-            else
-            {
-                return true;
-            }
+            return true;
         }
 
         public override bool hasNormalDiplomacy()

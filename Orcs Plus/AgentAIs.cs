@@ -135,7 +135,7 @@ namespace Orcs_Plus
                     reason += "s";
                 }
 
-                reasonMsgs.Add(new ReasonMsg(reason, val));
+                reasonMsgs?.Add(new ReasonMsg(reason, val));
                 utility += val;
             }
 
@@ -155,7 +155,7 @@ namespace Orcs_Plus
         private double delegate_Utility_FundHorde(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
         {
             double val = ua.person.gold - 100;
-            reasonMsgs.Add(new ReasonMsg("Excess Gold", val));
+            reasonMsgs?.Add(new ReasonMsg("Excess Gold", val));
             utility += val;
 
             return utility;
@@ -172,11 +172,11 @@ namespace Orcs_Plus
                 new AIChallenge(typeof(Ch_Orcs_AccessPlunder), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor }),
                 new AIChallenge(typeof(Ch_H_Orcs_CleansingFestival), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
                 new AIChallenge(typeof(Ch_H_Orcs_DarkFestival), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
-                new AIChallenge(typeof(Rt_H_Orcs_GiftGold), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocal, AIChallenge.ChallengeTags.ForbidWar }),
+                new AIChallenge(typeof(Rt_H_Orcs_GiftGold), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocalRandomized, AIChallenge.ChallengeTags.ForbidWar }),
                 new AIChallenge(typeof(Ch_Orcs_FundWaystation), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
                 new AIChallenge(typeof(Ch_BuyItem), 0.0, new List<AIChallenge.ChallengeTags> {  AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocalRandomized}),
-                new AIChallenge(typeof(Ch_H_BuildTemple), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
-                new AIChallenge(typeof(Ch_Orcs_OrganiseTheHorde), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.PreferLocal })
+                new AIChallenge(typeof(Ch_H_Orcs_BuildTemple), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocalRandomized }),
+                new AIChallenge(typeof(Ch_Orcs_OrganiseTheHorde), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.PreferLocalRandomized })
             };
 
             aiChallenges_Elder[0].delegates_ValidFor.Add(delegate_ValidFor_OwnCulture);
@@ -193,17 +193,19 @@ namespace Orcs_Plus
             aiChallenges_Elder[4].delegates_ValidFor.Add(delegate_ValidFor_AccessPlunder);
             aiChallenges_Elder[4].delegates_Utility.Add(delegate_Utility_AccessPlunder);
 
+            aiChallenges_Elder[7].delegates_ValidFor.Add(delegate_ValidFor_OrcGift);
+
             aiChallenges_Elder[9].delegates_ValidFor.Add(delegate_ValidFor_BuyItem);
 
             aiChallenges_Elder[11].delegates_Utility.Add(delegate_Utility_Organise);
 
-            comLibAI.RegisterAgentType(typeof(UAA_OrcElder), AgentAI.ControlParameters.newDefault());
-            comLibAI.AddChallengesToAgentType(typeof(UAA_OrcElder), aiChallenges_Elder);
+            comLibAI.RegisterAgentType(typeof(UAEN_OrcElder), AgentAI.ControlParameters.newDefault());
+            comLibAI.AddChallengesToAgentType(typeof(UAEN_OrcElder), aiChallenges_Elder);
         }
 
         private bool delegate_ValidFor_OwnCulture(AgentAI.ChallengeData challengeData, UA ua)
         {
-            if (ua is UAA_OrcElder elder && (elder.society as HolyOrder_Orcs)?.orcSociety == challengeData.location.soc)
+            if (ua is UAEN_OrcElder elder && (elder.society as HolyOrder_Orcs)?.orcSociety == challengeData.location.soc)
             {
                 return true;
             }
@@ -322,7 +324,7 @@ namespace Orcs_Plus
         private double delegate_Utility_AccessPlunder(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
         {
             Pr_OrcPlunder plunder = (challengeData.challenge as Ch_Orcs_AccessPlunder)?.cache;
-            int gold = 0;
+            int gold;
 
             if (plunder.gold <= 50)
             {
@@ -337,16 +339,34 @@ namespace Orcs_Plus
                 gold = (int)Math.Floor(plunder.gold / 2.0);
             }
 
-            double val = Math.Min(gold, 150 - ua.person.gold);
+            int goldTarget = 150;
+            if (ua.society is HolyOrder_Orcs orcCulture && orcCulture.tenet_god is H_Orcs_MammonClient client && client.status < 0)
+            {
+                goldTarget += 50;
+            }
+
+            double val = Math.Min(gold, goldTarget - ua.person.gold);
             reasonMsgs?.Add(new ReasonMsg("Gold", val));
             utility += val;
 
             return utility;
         }
 
+        private bool delegate_ValidFor_OrcGift(AgentAI.ChallengeData challengeData, UA ua)
+        {
+            bool result = false;
+
+            if (challengeData.location.settlement is SettlementHuman)
+            {
+                result = true;
+            }
+
+            return result;
+        }
+
         private double delegate_Utility_Organise(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
         {
-            if (ua is UAA_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture)
+            if (ua is UAEN_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture)
             {
                 Sub_OrcTemple hall = challengeData.location.settlement?.subs.OfType<Sub_OrcTemple>().FirstOrDefault();
                 if (hall != null && hall.order == orcCulture)
@@ -391,7 +411,10 @@ namespace Orcs_Plus
                 new AIChallenge(typeof(Ch_DeathsShadow), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor }),
                 new AIChallenge(typeof(Ch_Orcs_WarFestival), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.RequiresOwnSociety }),
                 new AIChallenge(typeof(Rt_Orcs_SacrificialSite), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.RequiresSociety, AIChallenge.ChallengeTags.ForbidWar, AIChallenge.ChallengeTags.PreferLocal }),
-                new AIChallenge(typeof(Ch_Orcs_DeathFestival), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.RequiresSociety, AIChallenge.ChallengeTags.PreferLocal, AIChallenge.ChallengeTags.ForbidWar })
+                new AIChallenge(typeof(Ch_Orcs_DeathFestival), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.RequiresSociety, AIChallenge.ChallengeTags.PreferLocal, AIChallenge.ChallengeTags.ForbidWar }),
+                new AIChallenge(typeof(Ch_Orcs_AccessPlunder), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor }),
+                new AIChallenge(typeof(Ch_BuyItem), 0.0, new List<AIChallenge.ChallengeTags> {  AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocalRandomized}),
+                new AIChallenge(typeof(Rt_StudyDeath), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.RequiresOwnSociety, AIChallenge.ChallengeTags.PreferLocalRandomized })
             };
 
             aiChallenges_Shaman[2].delegates_Utility.Add(delegate_Utility_SecretsOfDeath);
@@ -404,6 +427,7 @@ namespace Orcs_Plus
             aiChallenges_Shaman[8].delegates_Utility.Add(delegate_Utility_DeathsShadow);
             aiChallenges_Shaman[10].delegates_ValidFor.Add(delegate_ValidFor_SacrificialSite);
             aiChallenges_Shaman[10].delegates_Utility.Add(delegate_Utility_SacrificialSite);
+            aiChallenges_Shaman[12].delegates_Utility.Add(delegate_Utility_AccessPlunder_Shaman);
 
             comLibAI.RegisterAgentType(typeof(UAEN_OrcShaman), AgentAI.ControlParameters.newDefault());
             comLibAI.AddChallengesToAgentType(typeof(UAEN_OrcShaman), aiChallenges_Shaman);
@@ -615,6 +639,37 @@ namespace Orcs_Plus
                 reasonMsgs?.Add(new ReasonMsg("Invalid Location", -10000.0));
                 utility -= 10000.0;
             }
+
+            return utility;
+        }
+
+        private double delegate_Utility_AccessPlunder_Shaman(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
+        {
+            Pr_OrcPlunder plunder = (challengeData.challenge as Ch_Orcs_AccessPlunder)?.cache;
+            int gold;
+
+            if (plunder.gold <= 50)
+            {
+                gold = plunder.gold;
+            }
+            else if (plunder.gold / 2.0 <= 50.0)
+            {
+                gold = 50;
+            }
+            else
+            {
+                gold = (int)Math.Floor(plunder.gold / 2.0);
+            }
+
+            int goldTarget = 100;
+            if (ua.society is HolyOrder_Orcs orcCulture && orcCulture.tenet_god is H_Orcs_MammonClient client && client.status < 0)
+            {
+                goldTarget += 25;
+            }
+
+            double val = Math.Min(gold, goldTarget - ua.person.gold);
+            reasonMsgs?.Add(new ReasonMsg("Gold", val));
+            utility += val;
 
             return utility;
         }

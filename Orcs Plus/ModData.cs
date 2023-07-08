@@ -16,9 +16,21 @@ namespace Orcs_Plus
 
         public Dictionary<HolyOrder_Orcs, List<ReasonMsg>> influenceGainHuman;
 
-        private Dictionary<string, Assembly> modAssemblies;
+        public struct ModIntegrationData
+        {
+            public Assembly assembly;
+            public Dictionary<string, Type> typeDict;
 
-        public List<Sub_OrcWaystation> waystationsToRemove;
+            public static ModIntegrationData newIntegrationData(Assembly asm)
+            {
+                ModIntegrationData data = new ModIntegrationData();
+                data.assembly = asm;
+                data.typeDict = new Dictionary<string, Type>();
+                return data;
+            }
+        }
+
+        private Dictionary<string, ModIntegrationData> modAssemblies;
 
         public Dictionary<Type, Type> godTenetTypes;
 
@@ -38,7 +50,8 @@ namespace Orcs_Plus
             Raiding,
             RazeLocation,
             RazingLocation,
-            Subjugate
+            Subjugate,
+            RecieveGift
         }
 
         public Dictionary<influenceGainAction, int> influenceGain;
@@ -52,7 +65,7 @@ namespace Orcs_Plus
 
         public ModData()
         {
-            modAssemblies= new Dictionary<string, Assembly>();
+            modAssemblies= new Dictionary<string, ModIntegrationData>();
 
             influenceGain = new Dictionary<influenceGainAction, int>
             {
@@ -68,7 +81,8 @@ namespace Orcs_Plus
                 { influenceGainAction.Raiding, 10 },
                 { influenceGainAction.RazeLocation, 16 },
                 { influenceGainAction.RazingLocation, 4 },
-                { influenceGainAction.Subjugate, 12}
+                { influenceGainAction.Subjugate, 12},
+                { influenceGainAction.RecieveGift, 20 }
             };
 
             menaceGain = new Dictionary<menaceGainAction, int>
@@ -82,10 +96,12 @@ namespace Orcs_Plus
 
             influenceGainHuman = new Dictionary<HolyOrder_Orcs, List<ReasonMsg>>();
 
-            waystationsToRemove = new List<Sub_OrcWaystation>();
-
             godTenetTypes = new Dictionary<Type, Type> {
-                { typeof(God_Snake), typeof(H_Orcs_SerpentWarriors) }
+                { typeof(God_Snake), typeof(H_Orcs_SerpentWarriors) },
+                { typeof(God_LaughingKing), typeof(H_Orcs_HarbringersMadness) },
+                { typeof(God_Vinerva), typeof(H_Orcs_LifeMother) },
+                { typeof(God_Ophanim), typeof(H_Orcs_Perfection) },
+                { typeof(God_Mammon), typeof(H_Orcs_MammonClient) }
             };
 
             settlementTypesForWaystations = new List<Type>
@@ -179,9 +195,7 @@ namespace Orcs_Plus
             List<HolyOrder_Orcs> result = new List<HolyOrder_Orcs>();
             foreach (SocialGroup sg in map.socialGroups)
             {
-                HolyOrder_Orcs orcCulture = sg as HolyOrder_Orcs;
-
-                if (orcCulture != null && (includeGone || !orcCulture.isGone()))
+                if (sg is HolyOrder_Orcs orcCulture && (includeGone || !orcCulture.isGone()))
                 {
                     result.Add(orcCulture);
                 }
@@ -294,14 +308,14 @@ namespace Orcs_Plus
             return result;
         }
 
-        internal void addModAssembly(string key, Assembly asm)
+        internal void addModAssembly(string key, ModIntegrationData asm)
         {
-            if (key == "" || asm == null)
+            if (key == "" || asm.assembly == null)
             {
                 return;
             }
 
-            if (modAssemblies.ContainsKey(key))
+            if (modAssemblies.ContainsKey(key) && modAssemblies[key].assembly == null)
             {
                 modAssemblies[key] = asm;
             }
@@ -311,9 +325,9 @@ namespace Orcs_Plus
             }
         }
 
-        internal bool tryGetModAssembly(string key, out Assembly asm)
+        internal bool tryGetModAssembly(string key, out ModIntegrationData asm)
         {
-            bool result = modAssemblies.TryGetValue(key, out Assembly retASM);
+            bool result = modAssemblies.TryGetValue(key, out ModIntegrationData retASM);
             asm = retASM;
 
             return result;

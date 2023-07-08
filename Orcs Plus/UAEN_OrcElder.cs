@@ -5,11 +5,13 @@ using UnityEngine;
 
 namespace Orcs_Plus
 {
-    internal class UAA_OrcElder : UAA
+    public class UAEN_OrcElder : UAEN
     {
         public Rt_H_Orcs_GiftGold giftGold;
 
-        public UAA_OrcElder(Location loc, HolyOrder sg)
+        public HolyOrder order;
+
+        public UAEN_OrcElder(Location loc, HolyOrder sg)
             : base(loc, sg)
         {
             // Raises stats granted by base: Might 1-3, Intrigue 1-3, Lore 2-3, Command 2-3
@@ -21,11 +23,13 @@ namespace Orcs_Plus
             person.traits.Add(new T_ReveredElder());
             person.species = map.species_orc;
 
+            order = society as HolyOrder;
+
             giftGold = new Rt_H_Orcs_GiftGold(loc);
             rituals.Add(giftGold);
         }
 
-        public UAA_OrcElder(Location loc, HolyOrder sg, Person p)
+        public UAEN_OrcElder(Location loc, HolyOrder sg, Person p)
             : base(loc, sg, p)
         {
             // Raises stats granted by base: Might 1-3, Intrigue 1-3, Lore 2-3, Command 2-3
@@ -36,6 +40,8 @@ namespace Orcs_Plus
             person.hasSoul = false;
             person.traits.Add(new T_ReveredElder());
             person.species = map.species_orc;
+
+            order = society as HolyOrder;
 
             giftGold = new Rt_H_Orcs_GiftGold(loc);
             rituals.Add(giftGold);

@@ -10,7 +10,9 @@ namespace Orcs_Plus
 {
     public class Ch_H_Orcs_CleansingFestival : Challenge
     {
-        public double shadowPull = 0.007;
+        public double shadowPurge = 0.025;
+
+        public double shadowPull = 0.005;
 
         public Ch_H_Orcs_CleansingFestival(Location loc)
             : base(loc)
@@ -25,7 +27,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Draws shadow from nearby locations and units to this location, and simultaneously cleanses shadow at this location. Reduces society menace each turn.";
+            return "Draws shadow from nearby locations and units to this location, and simultaneously cleanses shadow at this location. The Elder gains profile (1) and looses menace (-4) each turn while performing this challenge.";
         }
 
         public override string getCastFlavour()
@@ -86,7 +88,7 @@ namespace Orcs_Plus
 
         public override double getComplexity()
         {
-            return 15;
+            return 20;
         }
 
         public override Sprite getSprite()
@@ -118,72 +120,102 @@ namespace Orcs_Plus
 
         public override bool validFor(UA ua)
         {
-            return ua is UAA_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety == location.soc;
+            return ua is UAEN_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety == location.soc;
         }
 
         public override void turnTick(UA ua)
         {
             ua.addProfile(1);
-            ua.addMenace(-0.5 * getProgressPerTurnInner(ua, null));
+            ua.addMenace(-4);
+
+            double deltaShadow = shadowPull * getProgressPerTurnInner(ua, null);
+            double deltaPurge = shadowPurge * getProgressPerTurnInner(ua, null);
 
             foreach (Location neighbour in location.getNeighbours())
             {
-                float deltaShadow = (float)Math.Min(1.0 - location.getShadow(), Math.Min(neighbour.getShadow(), shadowPull * getProgressPerTurnInner(ua, null)));
-
-                if (neighbour.settlement != null)
+                if (location.settlement.shadow + deltaShadow < 1.0 + deltaPurge)
                 {
-                    neighbour.settlement.shadow -= deltaShadow;
-                }
-                else
-                {
-                    neighbour.hex.purity += (float)(deltaShadow);
-                }
-
-                location.settlement.shadow += deltaShadow;
-
-                foreach (Unit unit in location.units)
-                {
-                    if (unit is UA agent)
+                    if (neighbour.settlement != null && neighbour.settlement.shadow > 0.0)
                     {
-                        agent.person.shadow -= shadowPull * getProgressPerTurnInner(ua, null);
+                        neighbour.settlement.shadow -= deltaShadow;
+
+                        if (neighbour.settlement.shadow < 0.0)
+                        {
+                            neighbour.settlement.shadow = 0.0;
+                        }
                     }
+                    else if (neighbour.hex.purity < 1.0f)
+                    {
+                        neighbour.hex.purity += (float)deltaShadow;
+
+                        if (neighbour.hex.purity > 1.0f)
+                        {
+                            neighbour.hex.purity = 1.0f;
+                        }
+                    }
+
+                    location.settlement.shadow += deltaShadow;
                 }
 
-                if (neighbour.soc is SG_Orc orcs)
+                foreach (Unit unit in neighbour.units)
                 {
-                    if (orcs.upstart != null && orcs.upstart.homeLocation == neighbour.index)
+                    if (unit is UA agent && !agent.isCommandable() && agent.person.shadow > 0.0)
                     {
-                        orcs.upstart.person.shadow -= shadowPull * getProgressPerTurnInner(ua, null);
+                        agent.person.shadow -= deltaShadow;
+
+                        if (agent.person.shadow < 0.0)
+                        {
+                            agent.person.shadow = 0.0;
+                        }
                     }
                 }
             }
 
-            location.settlement.shadow -= 0.035 * getProgressPerTurnInner(ua, null);
+            location.settlement.shadow -= deltaPurge;
+
+            if (location.settlement.shadow < 0.0)
+            {
+                location.settlement.shadow = 0.0;
+            }
 
             foreach (Unit unit in location.units)
             {
-                if (unit is UA agent)
+                if (unit is UA agent && !agent.isCommandable() && agent.person.shadow > 0.0)
                 {
                     agent.person.shadow -= shadowPull * getProgressPerTurnInner(ua, null);
+
+                    if (agent.person.shadow < 0.0)
+                    {
+                        agent.person.shadow = 0.0;
+                    }
                 }
             }
 
             if (location.soc is SG_Orc orcSociety)
             {
-                if (orcSociety.upstart != null && orcSociety.upstart.homeLocation == location.index)
+                foreach(Unit unit in map.units)
                 {
-                    orcSociety.upstart.person.shadow -= shadowPull * getProgressPerTurnInner(ua, null);
+                    if (unit.homeLocation == location.index && unit is UA agent && !agent.isCommandable() && agent.person.shadow > 0.0)
+                    {
+                        agent.person.shadow -= shadowPull * getProgressPerTurnInner(ua, null);
+
+                        if (agent.person.shadow < 0.0)
+                        {
+                            agent.person.shadow = 0.0;
+                        }
+                    }
                 }
 
-                orcSociety.menace -= 0.35 * getProgressPerTurnInner(ua, null);
-
-                if (orcSociety.menace < 0)
+                if (orcSociety.menace > 0.0)
                 {
-                    orcSociety.menace = 0;
+                    orcSociety.menace -= 1;
+
+                    if (orcSociety.menace < 0)
+                    {
+                        orcSociety.menace = 0;
+                    }
                 }
             }
-
-            ua.addMenace(-0.5 * getProgressPerTurnInner(ua, null));
         }
 
         public override int[] buildNegativeTags()

@@ -121,7 +121,7 @@ namespace Orcs_Plus
             ua.addProfile(1);
             ua.addMenace(2);
 
-            Property.addToProperty(getName(), Property.standardProperties.DEVASTATION, deathRate * getProgressPerTurnInner(ua, null), location);
+            Property.addToProperty(getName(), Property.standardProperties.DEATH, deathRate * getProgressPerTurnInner(ua, null), location);
             Property.addToProperty(getName(), Property.standardProperties.DEVASTATION, devastationRate * getProgressPerTurnInner(ua, null), location);
 
             Pr_Orcs_SacrificialSite site = ua.location.properties.OfType<Pr_Orcs_SacrificialSite>().FirstOrDefault();
