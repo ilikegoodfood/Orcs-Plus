@@ -36,8 +36,8 @@ namespace Orcs_Plus
 
             if (u is UM um && (orcs != null || orcCulture != null))
             {
-                SG_Orc orcSociety = orcs;
-                HolyOrder_Orcs orcCulture2 = orcCulture;
+                SG_Orc orcSociety = um.society as SG_Orc;
+                HolyOrder_Orcs orcCulture2 = um.society as HolyOrder_Orcs;
 
                 if (um is UM_Mercenary mercenary)
                 {
@@ -52,13 +52,16 @@ namespace Orcs_Plus
 
                 if (orcCulture2 != null && orcCulture2.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < -1)
                 {
-                    if (ModCore.core.data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("VespidicSwarm", out Type vSwarmType) && vSwarmType != null && intDataCord.typeDict.TryGetValue("Swarm", out Type swarmType) && swarmType != null)
+                    if (ModCore.core.data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("VespidicSwarm", out Type vSwarmType) && vSwarmType != null)
                     {
                         Location loc = um.location;
                         SocialGroup soc = um.map.soc_dark;
-                        if (loc.soc.GetType() == swarmType || loc.soc.GetType().IsSubclassOf(swarmType))
+                        if (intDataCord.typeDict.TryGetValue("Swarm", out Type swarmType) && swarmType != null)
                         {
-                            soc = loc.soc;
+                            if (loc.soc != null && (loc.soc.GetType() == swarmType || loc.soc.GetType().IsSubclassOf(swarmType)))
+                            {
+                                soc = loc.soc;
+                            }
                         }
 
                         object[] args = new object[] {

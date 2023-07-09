@@ -2002,8 +2002,9 @@ namespace Orcs_Plus
                 if (unit is UM um2 && um2.society != um.society)
                 {
                     int dist = um.map.getStepDist(um.location, um2.location);
-                    // Will not attack refugees that are further than 1 step distance.
-                    if (!(um2 is UM_Refugees) || dist <= 1)
+
+                    // Will not attack refugees that are further than 1 step distance. Also will not attack refugees that are en-route to a Cordyceps hive if Cordyceps' god tenet is Elder aligned.
+                    if (!(um2 is UM_Refugees) || (dist <= 1))
                     {
                         // Will attack military units in own societ's territory or at a distance up to 4 step distance away.
                         if (um2.location.soc == um.society || dist <= 4)
@@ -2017,6 +2018,25 @@ namespace Orcs_Plus
                                     // Will attack military units that they are at war with, or that they are hostile with and are within this army's territory.
                                     if (rel.state == DipRel.dipState.war || (rel.state == DipRel.dipState.hostile && unit.location.soc == um.society && ModCore.core.checkAlignment(um.society as SG_Orc, um2.society)))
                                     {
+                                        if (!checkIsDoomed(um2, orcCulture))
+                                        {
+                                            if (steps == -1 || dist <= steps)
+                                            {
+                                                if (dist < steps)
+                                                {
+                                                    targets.Clear();
+                                                }
+
+                                                targets.Add(um2);
+                                                steps = dist;
+                                            }
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    if (!checkIsDoomed(um2, orcCulture))
+                                    {
                                         if (steps == -1 || dist <= steps)
                                         {
                                             if (dist < steps)
@@ -2027,19 +2047,6 @@ namespace Orcs_Plus
                                             targets.Add(um2);
                                             steps = dist;
                                         }
-                                    }
-                                }
-                                else
-                                {
-                                    if (steps == -1 || dist <= steps)
-                                    {
-                                        if (dist < steps)
-                                        {
-                                            targets.Clear();
-                                        }
-
-                                        targets.Add(um2);
-                                        steps = dist;
                                     }
                                 }
                             }
@@ -2165,6 +2172,34 @@ namespace Orcs_Plus
                 um.task = new Task_GoToLocation(um.map.locations[um.homeLocation]);
                 return;
             }
+        }
+
+        private static bool checkIsDoomed(UM um, HolyOrder_Orcs orcCulture)
+        {
+            UM_Refugees refugee = um as UM_Refugees;
+
+            bool doomed = false;
+            if (refugee != null && refugee.task != null)
+            {
+                if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
+                {
+                    if (ModCore.core.data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("Doomed", out Type doomedType))
+                    {
+                        if (doomedType != null && (refugee.task.GetType() == doomedType || refugee.task.GetType().IsSubclassOf(doomedType)))
+                        {
+                            if (intDataCord.typeDict.TryGetValue("Hive", out Type hiveType) && hiveType != null)
+                            {
+                                if (um.map.locations.Any(l => l.settlement != null && (l.settlement.GetType() == hiveType || l.settlement.GetType().IsSubclassOf(hiveType))))
+                                {
+                                    doomed = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return doomed;
         }
 
         private static void UM_OrcRaiders_ctor_Postfix(UM_OrcRaiders __instance)

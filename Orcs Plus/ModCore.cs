@@ -184,7 +184,7 @@ namespace Orcs_Plus
 
                         if (core.data.tryGetModAssembly("Cordyceps", out intDataCord) && intDataCord.assembly != null)
                         {
-                            foreach (Type type in intDataCord.assembly.GetTypes())
+                            /*foreach (Type type in intDataCord.assembly.GetTypes())
                             {
                                 //Console.WriteLine("OrcsPlus: " + type.Name);
                                 switch (type.Name)
@@ -214,6 +214,49 @@ namespace Orcs_Plus
                                     default:
                                         break;
                                 }
+                            }*/
+
+                            Type kernelType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.ModCore", false);
+                            if (kernelType != null )
+                            {
+                                intDataCord.typeDict.Add("Kernel", kernelType);
+                            }
+
+                            Type godType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.God_Insect", false);
+                            if (kernelType != null)
+                            {
+                                intDataCord.typeDict.Add("God", godType);
+                                registerGodTenet(godType, typeof(H_Orcs_InsectileSymbiosis));
+                            }
+
+                            Type doomedType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.UAEN_Doomed", false);
+                            if (kernelType != null)
+                            {
+                                intDataCord.typeDict.Add("Doomed", doomedType);
+                            }
+
+                            Type droneType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.Drone", false);
+                            if (kernelType != null)
+                            {
+                                intDataCord.typeDict.Add("Drone", droneType);
+                            }
+
+                            Type vespidiciSwarmType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.UM_Vespidic_Swarm", false);
+                            if (kernelType != null)
+                            {
+                                intDataCord.typeDict.Add("VespidicSwarm", vespidiciSwarmType);
+                            }
+
+                            Type hiveType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.Set_Hive", false);
+                            if (kernelType != null)
+                            {
+                                intDataCord.typeDict.Add("Hive", hiveType);
+                            }
+
+                            Type swarmType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.SG_Swarm", false);
+                            if (kernelType != null)
+                            {
+                                intDataCord.typeDict.Add("Swarm", swarmType);
                             }
                         }
                         break;

@@ -461,28 +461,34 @@ namespace Orcs_Plus
                                     // Will attack military units that they are at war with, or that they are hostile with and are within this army's territory.
                                     if (rel.state == DipRel.dipState.war || (rel.state == DipRel.dipState.hostile && unit.location.soc == society))
                                     {
-                                        if (targets.Count == 0 || dist <= steps)
+                                        if (!checkIsDoomed(um, orcCulture))
                                         {
-                                            if (dist < steps)
+                                            if (targets.Count == 0 || dist <= steps)
                                             {
-                                                targets.Clear();
-                                            }
+                                                if (dist < steps)
+                                                {
+                                                    targets.Clear();
+                                                }
 
-                                            targets.Add(um);
-                                            steps = dist;
+                                                targets.Add(um);
+                                                steps = dist;
+                                            }
                                         }
                                     }
                                 }
                                 else
                                 {
-                                    if (targets.Count == 0 || dist <= steps)
+                                    if (!checkIsDoomed(um, orcCulture))
                                     {
-                                        if (steps > dist)
+                                        if (targets.Count == 0 || dist <= steps)
                                         {
-                                            targets.Clear();
-                                        }
+                                            if (steps > dist)
+                                            {
+                                                targets.Clear();
+                                            }
 
-                                        targets.Add(um);
+                                            targets.Add(um);
+                                        }
                                     }
                                 }
                             }
@@ -593,6 +599,34 @@ namespace Orcs_Plus
             }
 
             return false;
+        }
+
+        public bool checkIsDoomed(UM um, HolyOrder_Orcs orcCulture)
+        {
+            UM_Refugees refugee = um as UM_Refugees;
+
+            bool doomed = false;
+            if (refugee != null && refugee.task != null)
+            {
+                if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
+                {
+                    if (ModCore.core.data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("Doomed", out Type doomedType))
+                    {
+                        if (doomedType != null && (refugee.task.GetType() == doomedType || refugee.task.GetType().IsSubclassOf(doomedType)))
+                        {
+                            if (intDataCord.typeDict.TryGetValue("Hive", out Type hiveType) && hiveType != null)
+                            {
+                                if (um.map.locations.Any(l => l.settlement != null && (l.settlement.GetType() == hiveType || l.settlement.GetType().IsSubclassOf(hiveType))))
+                                {
+                                    doomed = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return doomed;
         }
 
         public override int[] getPositiveTags()
