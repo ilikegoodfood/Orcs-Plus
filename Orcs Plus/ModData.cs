@@ -20,13 +20,15 @@ namespace Orcs_Plus
         {
             public Assembly assembly;
             public Dictionary<string, Type> typeDict;
+            public Dictionary<string, MethodInfo> methodInfoDict;
+            public Dictionary<string, FieldInfo> fieldInfoDict;
 
-            public static ModIntegrationData newIntegrationData(Assembly asm)
+            public ModIntegrationData(Assembly asm)
             {
-                ModIntegrationData data = new ModIntegrationData();
-                data.assembly = asm;
-                data.typeDict = new Dictionary<string, Type>();
-                return data;
+                assembly = asm;
+                typeDict = new Dictionary<string, Type>();
+                methodInfoDict = new Dictionary<string, MethodInfo>();
+                fieldInfoDict = new Dictionary<string, FieldInfo>();
             }
         }
 

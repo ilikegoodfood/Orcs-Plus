@@ -809,7 +809,7 @@ namespace Orcs_Plus
             return false;
         }
 
-        public override bool interceptAgentAI(UA ua, List<CommunityLib.AgentAI.ChallengeData> validChallengeData, CommunityLib.AgentAI.ControlParameters controlParams)
+        public override bool interceptAgentAI(UA ua, List<CommunityLib.AgentAI.ChallengeData> validChallengeData, List<CommunityLib.AgentAI.TaskData> taskData, List<Unit> visibleUnits, CommunityLib.AgentAI.ControlParameters controlParams)
         {
             switch(ua)
             {

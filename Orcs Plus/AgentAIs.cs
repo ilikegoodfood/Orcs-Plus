@@ -50,7 +50,7 @@ namespace Orcs_Plus
         // Orc Upstart
         private void populateOrcUpstarts()
         {
-            if (comLibAI.TryGetAgentType(typeof(UAEN_OrcUpstart)))
+            if (comLibAI.ContainsAgentType(typeof(UAEN_OrcUpstart)))
             {
                 aiChallenges_Upstart = new List<AIChallenge>
                 {
@@ -199,7 +199,7 @@ namespace Orcs_Plus
 
             aiChallenges_Elder[11].delegates_Utility.Add(delegate_Utility_Organise);
 
-            comLibAI.RegisterAgentType(typeof(UAEN_OrcElder), AgentAI.ControlParameters.newDefault());
+            comLibAI.RegisterAgentType(typeof(UAEN_OrcElder), new AgentAI.ControlParameters(true));
             comLibAI.AddChallengesToAgentType(typeof(UAEN_OrcElder), aiChallenges_Elder);
         }
 
@@ -429,7 +429,7 @@ namespace Orcs_Plus
             aiChallenges_Shaman[10].delegates_Utility.Add(delegate_Utility_SacrificialSite);
             aiChallenges_Shaman[12].delegates_Utility.Add(delegate_Utility_AccessPlunder_Shaman);
 
-            comLibAI.RegisterAgentType(typeof(UAEN_OrcShaman), AgentAI.ControlParameters.newDefault());
+            comLibAI.RegisterAgentType(typeof(UAEN_OrcShaman), new AgentAI.ControlParameters(true));
             comLibAI.AddChallengesToAgentType(typeof(UAEN_OrcShaman), aiChallenges_Shaman);
         }
 

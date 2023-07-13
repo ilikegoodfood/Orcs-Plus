@@ -179,43 +179,11 @@ namespace Orcs_Plus
                         break;
                     case "ShadowsInsectGod.Code":
                         //Console.WriteLine("OrcsPlus: Found Cordyceps");
-                        ModData.ModIntegrationData intDataCord = ModData.ModIntegrationData.newIntegrationData(kernel.GetType().Assembly);
+                        ModData.ModIntegrationData intDataCord = new ModData.ModIntegrationData(kernel.GetType().Assembly);
                         core.data.addModAssembly("Cordyceps", intDataCord);
 
                         if (core.data.tryGetModAssembly("Cordyceps", out intDataCord) && intDataCord.assembly != null)
                         {
-                            /*foreach (Type type in intDataCord.assembly.GetTypes())
-                            {
-                                //Console.WriteLine("OrcsPlus: " + type.Name);
-                                switch (type.Name)
-                                {
-                                    case "ModCore":
-                                        intDataCord.typeDict.Add("Kernel", type);
-                                        break;
-                                    case "God_Insect":
-                                        intDataCord.typeDict.Add("God", type);
-                                        registerGodTenet(type, typeof(H_Orcs_InsectileSymbiosis));
-                                        break;
-                                    case "Task_Doomed":
-                                        intDataCord.typeDict.Add("Doomed", type);
-                                        break;
-                                    case "UAEN_Drone":
-                                        intDataCord.typeDict.Add("Drone", type);
-                                        break;
-                                    case "UM_Vespidic_Swarm":
-                                        intDataCord.typeDict.Add("VespidicSwarm", type);
-                                        break;
-                                    case "Set_Hive":
-                                        intDataCord.typeDict.Add("Hive", type);
-                                        break;
-                                    case "SG_Swarm":
-                                        intDataCord.typeDict.Add("Swarm", type);
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            }*/
-
                             Type kernelType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.ModCore", false);
                             if (kernelType != null )
                             {
@@ -223,45 +191,45 @@ namespace Orcs_Plus
                             }
 
                             Type godType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.God_Insect", false);
-                            if (kernelType != null)
+                            if (godType != null)
                             {
                                 intDataCord.typeDict.Add("God", godType);
                                 registerGodTenet(godType, typeof(H_Orcs_InsectileSymbiosis));
                             }
 
                             Type doomedType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.UAEN_Doomed", false);
-                            if (kernelType != null)
+                            if (doomedType != null)
                             {
                                 intDataCord.typeDict.Add("Doomed", doomedType);
                             }
 
                             Type droneType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.Drone", false);
-                            if (kernelType != null)
+                            if (droneType != null)
                             {
                                 intDataCord.typeDict.Add("Drone", droneType);
                             }
 
                             Type vespidiciSwarmType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.UM_Vespidic_Swarm", false);
-                            if (kernelType != null)
+                            if (vespidiciSwarmType != null)
                             {
                                 intDataCord.typeDict.Add("VespidicSwarm", vespidiciSwarmType);
                             }
 
                             Type hiveType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.Set_Hive", false);
-                            if (kernelType != null)
+                            if (hiveType != null)
                             {
                                 intDataCord.typeDict.Add("Hive", hiveType);
                             }
 
                             Type swarmType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.SG_Swarm", false);
-                            if (kernelType != null)
+                            if (swarmType != null)
                             {
                                 intDataCord.typeDict.Add("Swarm", swarmType);
                             }
                         }
                         break;
                     case "CovenExpansion":
-                        ModData.ModIntegrationData intDataCCC = ModData.ModIntegrationData.newIntegrationData(kernel.GetType().Assembly);
+                        ModData.ModIntegrationData intDataCCC = new ModData.ModIntegrationData(kernel.GetType().Assembly);
                         core.data.addModAssembly("CovensCursesCurios", intDataCCC);
 
                         if (core.data.tryGetModAssembly("CovensCursesCurios", out intDataCCC) && intDataCCC.assembly != null)
@@ -271,7 +239,7 @@ namespace Orcs_Plus
                         }
                         break;
                     case "LivingWilds":
-                        ModData.ModIntegrationData intDataLW = ModData.ModIntegrationData.newIntegrationData(kernel.GetType().Assembly);
+                        ModData.ModIntegrationData intDataLW = new ModData.ModIntegrationData(kernel.GetType().Assembly);
                         core.data.addModAssembly("LivingWilds", intDataLW);
 
                         if (core.data.tryGetModAssembly("LivingWilds", out intDataLW))
@@ -298,7 +266,7 @@ namespace Orcs_Plus
                         }
                         break;
                     case "ShadowsLib":
-                        ModData.ModIntegrationData intDataIx = ModData.ModIntegrationData.newIntegrationData(kernel.GetType().Assembly);
+                        ModData.ModIntegrationData intDataIx = new ModData.ModIntegrationData(kernel.GetType().Assembly);
                         core.data.addModAssembly("Ixthus", intDataIx);
 
                         if (core.data.tryGetModAssembly("Ixthus", out intDataIx))

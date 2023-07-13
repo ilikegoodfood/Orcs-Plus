@@ -2012,30 +2012,16 @@ namespace Orcs_Plus
                             // Will only attack military units in own society if they are above recruitment threshold.
                             if (um2.location.soc != um2.society || um2.hp >= um2.maxHp / 3)
                             {
+                                DipRel rel = null;
                                 if (um2.society != null)
                                 {
-                                    DipRel rel = um.society.getRel(um2.society);
-                                    // Will attack military units that they are at war with, or that they are hostile with and are within this army's territory.
-                                    if (rel.state == DipRel.dipState.war || (rel.state == DipRel.dipState.hostile && unit.location.soc == um.society && ModCore.core.checkAlignment(um.society as SG_Orc, um2.society)))
-                                    {
-                                        if (!checkIsDoomed(um2, orcCulture))
-                                        {
-                                            if (steps == -1 || dist <= steps)
-                                            {
-                                                if (dist < steps)
-                                                {
-                                                    targets.Clear();
-                                                }
-
-                                                targets.Add(um2);
-                                                steps = dist;
-                                            }
-                                        }
-                                    }
+                                    rel = um.society.getRel(um2.society);
                                 }
-                                else
+                                // Will attack military units that they are at war with, or that they are hostile with and are within this army's territory.
+                                if (um2.society == null || rel.state == DipRel.dipState.war || (rel.state == DipRel.dipState.hostile && unit.location.soc == um.society && ModCore.core.checkAlignment(um.society as SG_Orc, um2.society)))
                                 {
-                                    if (!checkIsDoomed(um2, orcCulture))
+                                    // Ignore military units that are already in combat with armies that the orcs are also at war with.
+                                    if (!um.fightingMutualEnemy(um2) && !checkIsCordyceps(um2, orcCulture))
                                     {
                                         if (steps == -1 || dist <= steps)
                                         {
@@ -2174,32 +2160,37 @@ namespace Orcs_Plus
             }
         }
 
-        private static bool checkIsDoomed(UM um, HolyOrder_Orcs orcCulture)
+        private static bool checkIsCordyceps(UM um, HolyOrder_Orcs orcCulture)
         {
-            UM_Refugees refugee = um as UM_Refugees;
-
-            bool doomed = false;
-            if (refugee != null && refugee.task != null)
+            bool cordyceps = false;
+            if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
             {
-                if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
+                if (ModCore.core.data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null)
                 {
-                    if (ModCore.core.data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("Doomed", out Type doomedType))
+                    if (um is UM_Refugees refugee)
                     {
-                        if (doomedType != null && (refugee.task.GetType() == doomedType || refugee.task.GetType().IsSubclassOf(doomedType)))
+                        if (refugee.task != null)
                         {
-                            if (intDataCord.typeDict.TryGetValue("Hive", out Type hiveType) && hiveType != null)
+                            if (intDataCord.typeDict.TryGetValue("Doomed", out Type doomedType) && doomedType != null && (refugee.task.GetType() == doomedType || refugee.task.GetType().IsSubclassOf(doomedType)))
                             {
-                                if (um.map.locations.Any(l => l.settlement != null && (l.settlement.GetType() == hiveType || l.settlement.GetType().IsSubclassOf(hiveType))))
+                                if (intDataCord.typeDict.TryGetValue("Hive", out Type hiveType) && hiveType != null)
                                 {
-                                    doomed = true;
+                                    if (um.map.locations.Any(l => l.settlement != null && (l.settlement.GetType() == hiveType || l.settlement.GetType().IsSubclassOf(hiveType))))
+                                    {
+                                        cordyceps = true;
+                                    }
                                 }
                             }
                         }
                     }
+                    else if (intDataCord.typeDict.TryGetValue("VespidicSwarm", out Type vSwarmType) && vSwarmType != null && (um.GetType() == vSwarmType || um.GetType().IsSubclassOf(vSwarmType)))
+                    {
+                        cordyceps = true;
+                    }
                 }
             }
 
-            return doomed;
+            return cordyceps;
         }
 
         private static void UM_OrcRaiders_ctor_Postfix(UM_OrcRaiders __instance)

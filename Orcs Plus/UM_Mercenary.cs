@@ -306,7 +306,7 @@ namespace Orcs_Plus
                             }
 
                             int dist = map.getStepDist(location, um.location);
-                            if (engagedHP < um.hp * 2 && (steps == -1 || dist <= steps))
+                            if (engagedHP < um.hp * 2 && !fightingMutualEnemy(um) && (steps == -1 || dist <= steps))
                             {
                                 if (dist < steps)
                                 {
@@ -455,39 +455,26 @@ namespace Orcs_Plus
                             // Will only attack military units in own society if they are above recruitment threshold.
                             if (um.location.soc != um.society || um.hp >= um.maxHp / 3)
                             {
+                                DipRel rel = null;
                                 if (um.society != null)
                                 {
-                                    DipRel rel = society.getRel(um.society);
-                                    // Will attack military units that they are at war with, or that they are hostile with and are within this army's territory.
-                                    if (rel.state == DipRel.dipState.war || (rel.state == DipRel.dipState.hostile && unit.location.soc == society))
-                                    {
-                                        if (!checkIsDoomed(um, orcCulture))
-                                        {
-                                            if (targets.Count == 0 || dist <= steps)
-                                            {
-                                                if (dist < steps)
-                                                {
-                                                    targets.Clear();
-                                                }
-
-                                                targets.Add(um);
-                                                steps = dist;
-                                            }
-                                        }
-                                    }
+                                    rel = um.society.getRel(um.society);
                                 }
-                                else
+                                // Will attack military units that they are at war with, or that they are hostile with and are within this army's territory.
+                                if (um.society == null || rel.state == DipRel.dipState.war || (rel.state == DipRel.dipState.hostile && unit.location.soc == um.society && ModCore.core.checkAlignment(um.society as SG_Orc, um.society)))
                                 {
-                                    if (!checkIsDoomed(um, orcCulture))
+                                    // Ignore units that are already in combat with armies that the orcs are also at war with.
+                                    if (!fightingMutualEnemy(um) && !checkIsCordyceps(um, orcCulture))
                                     {
                                         if (targets.Count == 0 || dist <= steps)
                                         {
-                                            if (steps > dist)
+                                            if (dist < steps)
                                             {
                                                 targets.Clear();
                                             }
 
                                             targets.Add(um);
+                                            steps = dist;
                                         }
                                     }
                                 }
@@ -601,32 +588,37 @@ namespace Orcs_Plus
             return false;
         }
 
-        public bool checkIsDoomed(UM um, HolyOrder_Orcs orcCulture)
+        private static bool checkIsCordyceps(UM um, HolyOrder_Orcs orcCulture)
         {
-            UM_Refugees refugee = um as UM_Refugees;
-
-            bool doomed = false;
-            if (refugee != null && refugee.task != null)
+            bool cordyceps = false;
+            if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
             {
-                if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
+                if (ModCore.core.data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null)
                 {
-                    if (ModCore.core.data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("Doomed", out Type doomedType))
+                    if (um is UM_Refugees refugee)
                     {
-                        if (doomedType != null && (refugee.task.GetType() == doomedType || refugee.task.GetType().IsSubclassOf(doomedType)))
+                        if (refugee.task != null)
                         {
-                            if (intDataCord.typeDict.TryGetValue("Hive", out Type hiveType) && hiveType != null)
+                            if (intDataCord.typeDict.TryGetValue("Doomed", out Type doomedType) && doomedType != null && (refugee.task.GetType() == doomedType || refugee.task.GetType().IsSubclassOf(doomedType)))
                             {
-                                if (um.map.locations.Any(l => l.settlement != null && (l.settlement.GetType() == hiveType || l.settlement.GetType().IsSubclassOf(hiveType))))
+                                if (intDataCord.typeDict.TryGetValue("Hive", out Type hiveType) && hiveType != null)
                                 {
-                                    doomed = true;
+                                    if (um.map.locations.Any(l => l.settlement != null && (l.settlement.GetType() == hiveType || l.settlement.GetType().IsSubclassOf(hiveType))))
+                                    {
+                                        cordyceps = true;
+                                    }
                                 }
                             }
                         }
                     }
+                    else if (intDataCord.typeDict.TryGetValue("VespidicSwarm", out Type vSwarmType) && vSwarmType != null && (um.GetType() == vSwarmType || um.GetType().IsSubclassOf(vSwarmType)))
+                    {
+                        cordyceps = true;
+                    }
                 }
             }
 
-            return doomed;
+            return cordyceps;
         }
 
         public override int[] getPositiveTags()

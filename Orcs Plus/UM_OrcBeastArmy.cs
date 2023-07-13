@@ -149,11 +149,16 @@ namespace Orcs_Plus
                             // Will only attack military units in own society if they are above recruitment threshold.
                             if (um.location.soc != um.society || um.hp >= um.maxHp / 3)
                             {
+                                DipRel rel = null;
                                 if (um.society != null)
                                 {
-                                    DipRel rel = society.getRel(um.society);
-                                    // Will attack military units that they are at war with, or that they are hostile with and are within this army's territory.
-                                    if (rel.state == DipRel.dipState.war || (rel.state == DipRel.dipState.hostile && unit.location.soc == society && ModCore.core.checkAlignment(society as SG_Orc, um.society)))
+                                    rel = society.getRel(um.society);
+                                }
+                                // Will attack military units that they are at war with, or that they are hostile with and are within this army's territory.
+                                if (um.society == null || rel.state == DipRel.dipState.war || (rel.state == DipRel.dipState.hostile && unit.location.soc == society && ModCore.core.checkAlignment(society as SG_Orc, um.society)))
+                                {
+                                    // Ignore units that are already in combat with armies that the orcs are also at war with.
+                                    if (!fightingMutualEnemy(um) && !checkIsCordyceps(um, orcCulture))
                                     {
                                         if (steps == -1 || dist <= steps)
                                         {
@@ -165,19 +170,6 @@ namespace Orcs_Plus
                                             targets.Add(um);
                                             steps = dist;
                                         }
-                                    }
-                                }
-                                else
-                                {
-                                    if (steps == -1 || dist <= steps)
-                                    {
-                                        if (dist < steps)
-                                        {
-                                            targets.Clear();
-                                        }
-
-                                        targets.Add(um);
-                                        steps = dist;
                                     }
                                 }
                             }
@@ -300,6 +292,23 @@ namespace Orcs_Plus
                 task = new Task_GoToLocation(map.locations[homeLocation]);
                 return;
             }
+        }
+
+        private static bool checkIsCordyceps(UM um, HolyOrder_Orcs orcCulture)
+        {
+            bool cordyceps = false;
+            if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
+            {
+                if (ModCore.core.data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null)
+                {
+                    if (intDataCord.typeDict.TryGetValue("VespidicSwarm", out Type vSwarmType) && vSwarmType != null && (um.GetType() == vSwarmType || um.GetType().IsSubclassOf(vSwarmType)))
+                    {
+                        cordyceps = true;
+                    }
+                }
+            }
+
+            return cordyceps;
         }
     }
 }
