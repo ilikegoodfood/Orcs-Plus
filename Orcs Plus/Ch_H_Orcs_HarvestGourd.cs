@@ -23,12 +23,12 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "The Gourd of Blood grants orc warriors the ability to survive and rapidly heal from even the most grousome of wounds, at least for a time. When this challenge is completed, Vinerva gains " + ModCore.core.data.influenceGain[ModData.influenceGainAction.RecieveGift] + " influence over the orc culture.";
+            return "The Gourd of Blood grants orc warriors the ability to survive and rapidly heal from even the most gruesome of wounds, at least for a time. When this challenge is completed, Vinerva gains " + ModCore.core.data.influenceGain[ModData.influenceGainAction.RecieveGift] + " influence over the orc culture.";
         }
 
         public override string getRestriction()
         {
-            return "Can only be performed by a member of an Orc Culture within their own borders. The Orc Culture's Life Mother tenet status must be elder aligned.";
+            return "Can only be performed by an Orc Elder in a camp belonging to their culture. The Orc Culture's Life Mother tenet status must be elder aligned.";
         }
 
         public override Sprite getSprite()

@@ -27,12 +27,12 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Gradually creates death and devastation at this location. Increaces society menace each turn.";
+            return "This festival gradually creates death and devastation at this location. Increases society menace each turn.";
         }
 
         public override string getCastFlavour()
         {
-            return "A shaman has desperate villagers captured from the nearby settlment, brought to his hidden sacrifical site, and one by one, slaughtered in the name of the ancestors.";
+            return "A shaman has desperate villagers captured from the nearby settlement, brought to his hidden sacrificial site, and one by one, slaughtered in the names of the ancestors.";
         }
 
         public override string getRestriction()

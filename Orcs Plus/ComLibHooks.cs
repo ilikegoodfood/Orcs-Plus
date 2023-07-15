@@ -105,7 +105,7 @@ namespace Orcs_Plus
                         {
                             infGainElder = true;
                         }
-                        else if (!enemy.society.isDark())
+                        else if (enemy.society != null && !enemy.society.isDark())
                         {
                             infGainHuman = true;
                         }
@@ -117,7 +117,7 @@ namespace Orcs_Plus
                     }
                 }
 
-                if (enemyComs.Count > 0 && !(infGainElder && infGainHuman))
+                if (!(infGainElder && infGainHuman))
                 {
                     foreach (UA com in enemyComs)
                     {
@@ -125,7 +125,7 @@ namespace Orcs_Plus
                         {
                             infGainElder = true;
                         }
-                        else if (!com.society.isDark())
+                        else if (com.society != null && !com.society.isDark())
                         {
                             infGainHuman = true;
                         }
@@ -149,31 +149,24 @@ namespace Orcs_Plus
                         ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Destroyed orc army in batle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                     }
 
-                    List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(map);
-
-                    if (orcSocieties?.Count > 0 && u.society != null)
+                    List<SG_Orc> enemySocieties = new List<SG_Orc>();
+                    if (u.society != null)
                     {
-                        foreach (SG_Orc orcSociety in orcSocieties)
+                        foreach (SocialGroup sg in u.map.socialGroups)
                         {
-                            if (orcs != null && orcs == orcSociety)
+                            if (sg is SG_Orc orcSociety && orcs != orcSociety && orcSociety.getRel(u.society)?.state == DipRel.dipState.war)
                             {
-                                continue;
-                            }
-
-                            if (orcSociety.getRel(u.society)?.state == DipRel.dipState.war)
-                            {
-                                ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Destroyed enemy army in battle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                                enemySocieties.Add(orcSociety);
                             }
                         }
                     }
 
-                    orcSocieties.Clear();
                     List<HolyOrder_Orcs> enemyCultures = new List<HolyOrder_Orcs>();
                     foreach (UM enemy in enemies)
                     {
-                        if (enemy.society is SG_Orc enemySociety && !orcSocieties.Contains(enemySociety))
+                        if (enemy.society is SG_Orc enemySociety && !enemySocieties.Contains(enemySociety))
                         {
-                            orcSocieties.Add(enemySociety);
+                            enemySocieties.Add(enemySociety);
                         }
                         else if (enemy.society is HolyOrder_Orcs enemyCulture && !enemyCultures.Contains(enemyCulture))
                         {
@@ -181,19 +174,16 @@ namespace Orcs_Plus
                         }
                     }
 
-                    if (orcSocieties.Count > 0 || enemyCultures.Count > 0)
+                    foreach (HolyOrder_Orcs enemyCulture in enemyCultures)
                     {
-                        foreach (HolyOrder_Orcs enemyCulture in enemyCultures)
-                        {
-                            ModCore.core.TryAddInfluenceGain(enemyCulture, new ReasonMsg("Destroyed enemy army in battle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                        ModCore.core.TryAddInfluenceGain(enemyCulture, new ReasonMsg("Destroyed enemy army in battle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
 
-                            orcSocieties.Remove(enemyCulture.orcSociety);
-                        }
+                        enemySocieties.Remove(enemyCulture.orcSociety);
+                    }
 
-                        foreach (SG_Orc enemySociety in orcSocieties)
-                        {
-                            ModCore.core.TryAddInfluenceGain(enemySociety, new ReasonMsg("Destroyed enemy army in battle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
-                        }
+                    foreach (SG_Orc enemySociety in enemySocieties)
+                    {
+                        ModCore.core.TryAddInfluenceGain(enemySociety, new ReasonMsg("Destroyed enemy army in battle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                     }
                 }
 
@@ -354,7 +344,7 @@ namespace Orcs_Plus
             {
                 List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(um.map);
 
-                if (orcSocieties.Count > 0 && um.society != null)
+                if (orcSocieties.Count > 0)
                 {
                     foreach (SG_Orc orcs in orcSocieties)
                     {
@@ -367,6 +357,20 @@ namespace Orcs_Plus
                         {
                             ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razing Emeny Settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation] * 2), true);
                         }
+                    }
+
+                    List<SG_Orc> neighbouringOrcSocieties = new List<SG_Orc>();
+                    foreach(Location neighbour in um.location.getNeighbours())
+                    {
+                        if (neighbour.soc is SG_Orc orcSociety2 && orcSociety2 != um.location.soc && !neighbouringOrcSocieties.Contains(orcSociety2))
+                        {
+                            neighbouringOrcSocieties.Add(orcSociety2);
+                        }
+                    }
+
+                    foreach (SG_Orc neighbouringOrcSociety in neighbouringOrcSocieties)
+                    {
+                        ModCore.core.TryAddInfluenceGain(neighbouringOrcSociety, new ReasonMsg("Razing Encroaching Settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation] * 2), true);
                     }
                 }
             }
@@ -460,71 +464,86 @@ namespace Orcs_Plus
             }
         }
 
-        public override int onArmyBattleCycle_DamageCalculated(BattleArmy batle, int dmg, UM unit, UM target)
+        public override int onArmyBattleCycle_DamageCalculated(BattleArmy battle, int dmg, UM unit, UM target)
         {
-            if (unit is UM_OrcArmy orcArmy && orcArmy.society is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            if (unit is UM_OrcArmy || unit is UM_OrcRaiders)
+            {
+                dmg = SWWF_boostArmyDamage(battle, dmg, unit);
+            }
+
+            if (target is UM_OrcArmy || target is UM_OrcRaiders)
+            {
+                dmg = SWWF_mitigateArmyDamage(battle, dmg, target);
+            }
+
+            return dmg;
+        }
+
+        public int SWWF_boostArmyDamage(BattleArmy battle, int dmg, UM unit)
+        {
+            if (unit.society is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
             {
                 if (orcCulture.tenet_god is H_Orcs_ShadowWarriors shadowWariors && shadowWariors.status < 0)
                 {
-                    if (orcArmy.homeLocation != -1)
+                    if (unit.homeLocation != -1)
                     {
-                        Location home = map.locations[orcArmy.homeLocation];
-                        if (home.settlement != null)
-                        {
-                            if (home.settlement.shadow >= 1.0)
-                            {
-                                dmg += 2;
-                            }
-                            else if (home.settlement.shadow >= 0.5)
-                            {
-                                dmg += 1;
-                            }
-                        }
-                        else
-                        {
-                            if (home.hex.purity <= 0.0f)
-                            {
-                                dmg += 2;
-                            }
-                            else if (home.hex.purity <= 0.5f)
-                            {
-                                dmg += 1;
+                        Location home = map.locations[unit.homeLocation];
+                        double shadow = shadow = 1.0 - home.hex.purity;
 
-                            }
+                        int bonus = 0;
+                        if (shadow >= 0.5)
+                        {
+                            bonus += 1;
+                        }
+                        if (Eleven.random.NextDouble() <= shadow)
+                        {
+                            bonus += 1;
+                        }
+
+                        if (bonus > 0)
+                        {
+                            battle.messages.Add("Elder Influence boosted the damage dealt by " + unit.getName() + " by " + bonus + " (home location shadow at " + Math.Floor(shadow * 100) + "%)");
+                            dmg += bonus;
                         }
                     }
                 }
             }
 
-            if (target is UM_OrcArmy orcArmy2 && orcArmy2.society is SG_Orc orcSociety2 && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null)
-            {
-                if (orcCulture2.tenet_god is H_Orcs_ShadowWarriors shadowWariors && shadowWariors.status < -1)
-                {
-                    if (orcArmy2.homeLocation != -1)
-                    {
-                        Location home = map.locations[orcArmy2.homeLocation];
-                        if (home.settlement != null)
-                        {
-                            if (home.settlement.shadow >= 1.0)
-                            {
-                                dmg = Math.Max(1, dmg - 2);
-                            }
-                            else if (home.settlement.shadow >= 0.5)
-                            {
-                                dmg = Math.Max(1, dmg - 1);
-                            }
-                        }
-                        else
-                        {
-                            if (home.hex.purity <= 0.0f)
-                            {
-                                dmg = Math.Max(1, dmg - 2);
-                            }
-                            else if (home.hex.purity <= 0.5f)
-                            {
-                                dmg = Math.Max(1, dmg - 1);
+            return dmg;
+        }
 
+        public int SWWF_mitigateArmyDamage(BattleArmy battle, int dmg, UM target)
+        {
+            if (target.society is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            {
+                if (orcCulture.tenet_god is H_Orcs_ShadowWarriors shadowWariors && shadowWariors.status < -1)
+                {
+                    if (target.homeLocation != -1)
+                    {
+                        Location home = map.locations[target.homeLocation];
+                        double shadow = 1.0 - home.hex.purity;
+
+                        int bonus = 0;
+                        if (shadow >= 0.5)
+                        {
+                            bonus += 1;
+                        }
+                        if (Eleven.random.NextDouble() <= shadow)
+                        {
+                            bonus += 1;
+                        }
+
+                        if (bonus > 0)
+                        {
+                            if (dmg - bonus <= 1)
+                            {
+                                battle.messages.Add("Elder Influence allowed " + target.getName() + " to almost entirely shrug off the attack (home location shadow at " + Math.Floor(shadow * 100) + "%)");
                             }
+                            else
+                            {
+                                battle.messages.Add("Elder Influence allowed " + target.getName() + " to shrug off" + bonus + " damage (home location shadow at " + Math.Floor(shadow * 100) + "%)");
+                            }
+                            dmg = Math.Max(1, dmg - bonus);
                         }
                     }
                 }

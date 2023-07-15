@@ -25,7 +25,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Gradually raises perfection at this camp. The Elder gains profile (2) and menace (4) each turn while performing this challenge.";
+            return "This festival gradually raises perfection in this camp. The Elder gains profile (2) and menace (4) each turn while performing this challenge.";
         }
 
         public override string getCastFlavour()
@@ -35,7 +35,7 @@ namespace Orcs_Plus
 
         public override string getRestriction()
         {
-            return "Can only be performed by a member of an Orc Culture within their own borders. The Orc Culture's Perfection tenet status must be elder aligned (-1 or lower).";
+            return "Can only be performed by an Orc Elder in a camp belonging to their culture. The Orc Culture's Perfection tenet status must be elder aligned (-1 or lower).";
         }
 
         public override challengeStat getChallengeType()

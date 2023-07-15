@@ -27,7 +27,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Draws shadow from nearby locations and units to this location, and simultaneously cleanses shadow at this location. The Elder gains profile (1) and looses menace (-4) each turn while performing this challenge.";
+            return "This festival gradually draws shadow, from nearby locations and units, to this location, and simultaneously cleanses shadow at this location. The Elder gains profile (1) and loses menace (-4) each turn while performing this challenge.";
         }
 
         public override string getCastFlavour()
@@ -37,7 +37,7 @@ namespace Orcs_Plus
 
         public override string getRestriction()
         {
-            return "Can only be performed by a member of an Orc Culture within their own borders. The Orc Culture's Shadow Weaving tenet status must be greater than zero.";
+            return "Can only be performed by an Orc Elder in a camp belonging to their culture.\r\n The Orc Culture's Shadow Weaving tenet status must be greater than zero.";
         }
 
         public override challengeStat getChallengeType()

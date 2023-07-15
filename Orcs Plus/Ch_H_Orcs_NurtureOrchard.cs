@@ -27,7 +27,7 @@ namespace Orcs_Plus
 
         public override string getRestriction()
         {
-            return "Can only be performed by a member of an Orc Culture adjacent to their own borders. The Orc Culture's Life Mother tenet status must be elder aligned.";
+            return "Can only be performed by an Orc Elder adjacent to lands belonging to their own culture. The Orc Culture's Life Mother tenet status must be elder aligned.";
         }
 
         public override Sprite getSprite()

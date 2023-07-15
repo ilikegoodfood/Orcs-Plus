@@ -34,26 +34,25 @@ namespace Orcs_Plus
 
             // Patches for Challenges that specialise orc camps
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildFortress), nameof(Ch_Orcs_BuildFortress.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildFortress_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildFortress), nameof(Ch_Orcs_BuildFortress.complete), new Type[] { typeof(UA) } ), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildFortress_complete_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildMages), nameof(Ch_Orcs_BuildMages.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildMages_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildMages), nameof(Ch_Orcs_BuildMages.complete), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildMages_complete_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildMenagerie), nameof(Ch_Orcs_BuildMenagerie.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildMenagerie_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildMenagerie), nameof(Ch_Orcs_BuildMenagerie.complete), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildMenagerie_complete_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildShipyard), nameof(Ch_Orcs_BuildShipyard.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildShipyard_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildShipyard), nameof(Ch_Orcs_BuildShipyard.complete), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildShipyard_complete_Postfix)));
 
             // Patches for Warlord rituals
             harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_CommandeerShips), nameof(Rt_Orcs_CommandeerShips.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Rt_Orcs_CommandeerShips_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_CommandeerShips), nameof(Rt_Orcs_CommandeerShips.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Rt_Orcs_CommandeerShips_complete_Transpiler)));
             harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_ClaimTerritory), nameof(Rt_Orcs_ClaimTerritory.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Rt_Orcs_ClaimTerritory_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_ClaimTerritory), nameof(Rt_Orcs_ClaimTerritory.complete), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Rt_Orcs_ClaimTerritory_complete_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_RecruitRaiders), nameof(Rt_Orcs_RecruitRaiders.complete), new Type[] { typeof(UA) }), prefix: new HarmonyMethod(patchType, nameof(Rt_Orcs_RecruitRaiders_complete_Prefix)));
 
             // Patches for Challenges in orc camps
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_ChallengeTheHorde), nameof(Ch_Orcs_ChallengeTheHorde.getRestriction), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_ChallengeTheHorde_getRestriction_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_ChallengeTheHorde), nameof(Ch_Orcs_ChallengeTheHorde.valid), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_ChallengeTheHorde_valid_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_ChallengeTheHorde), nameof(Ch_Orcs_ChallengeTheHorde.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_ChallengeTheHorde_validFor_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_DevastateOrcishIndustry), nameof(Ch_Orcs_DevastateOrcishIndustry.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_DevastateOrcishIndustry_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_DevastateOrcishIndustry), nameof(Ch_Orcs_DevastateOrcishIndustry.complete), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_DevastateOrcishIndustry_complete_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_DevastateOrcishIndustry), nameof(Ch_Orcs_DevastateOrcishIndustry.complete), new Type[] { typeof(UA) }));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.valid)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_valid_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.complete), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_complete_Postfix)), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_complete_Transpiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_complete_Transpiler)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.valid)), transpiler: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_valid_Transpiler)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_complete_Transpiler)));
@@ -62,7 +61,7 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_RetreatToTheHills), nameof(Ch_Orcs_RetreatToTheHills.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_RetreatToTheHills_validFor_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_RetreatToTheHills), nameof(Ch_Orcs_RetreatToTheHills.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_RetreatToTheHills_complete_Transpiler)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Subjugate_Orcs), nameof(Ch_Subjugate_Orcs.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Subjugate_Orcs_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Subjugate_Orcs), nameof(Ch_Subjugate_Orcs.complete), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Subjugate_Orcs_complete_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Subjugate_Orcs), nameof(Ch_Subjugate_Orcs.complete), new Type[] { typeof(UA) }));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OrganiseTheHorde), nameof(Ch_Orcs_OrganiseTheHorde.valid), new Type[] { }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OrganiseTheHorde_valid_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OrganiseTheHorde), nameof(Ch_Orcs_OrganiseTheHorde.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OrganiseTheHorde_validFor_Postfix)));
 
@@ -95,7 +94,8 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Method(typeof(SG_Orc), nameof(SG_Orc.canSettle), new Type[] { typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(SG_Orc_canSettle_Postfix)));
 
             // Patches for MA_Orc_Expand
-            harmony.Patch(original: AccessTools.Method(typeof(MA_Orc_Expand), nameof(MA_Orc_Expand.complete), new Type[] { }), transpiler: new HarmonyMethod(patchType, nameof(MA_Orc_Expand_complete_Transpiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(MA_Orc_Expand), nameof(MA_Orc_Expand.getUtility), new Type[] { typeof(List<ReasonMsg>) }), postfix: new HarmonyMethod(patchType, nameof(MA_Orcs_Expand_getUtility_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(MA_Orc_Expand), nameof(MA_Orc_Expand.complete), new Type[0]), transpiler: new HarmonyMethod(patchType, nameof(MA_Orc_Expand_complete_Transpiler)));
 
             // Patches for Set_OrcCamp
             harmony.Patch(original: AccessTools.Constructor(typeof(Set_OrcCamp), new Type[] { typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(Set_OrcCamp_ctor_Postfix)));
@@ -127,9 +127,6 @@ namespace Orcs_Plus
             // Patches for Ch_LearnSecret
             harmony.Patch(original: AccessTools.Method(typeof(Ch_LearnSecret), nameof(Ch_LearnSecret.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_LearnSecret_validFor_Postfix)));
 
-            // Patches for Ch_EnslaveTheDead
-            harmony.Patch(original: AccessTools.Method(typeof(Mg_EnslaveTheDead), nameof(Mg_EnslaveTheDead.complete), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Mg_EnslaveTheDead_complete_Postfix)));
-
             // Patches for P_Opha_Crusade
             harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Crusade), nameof(P_Opha_Crusade.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Crusade_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Crusade), nameof(P_Opha_Crusade.cast), new Type[] { typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Crusade_cast_Postfix)));
@@ -146,25 +143,9 @@ namespace Orcs_Plus
             __result += " You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildFortress] + " influence with the orc culture by completing this challenge.";
         }
 
-        private static void Ch_Orcs_BuildFortress_complete_Postfix(Ch_Orcs_BuildFortress __instance, UA u)
-        {
-            if (u != null && u.isCommandable() && u.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
-            {
-                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
-            }
-        }
-
         private static void Ch_Orcs_BuildMages_getDesc_Postfix(ref string __result)
         {
             __result += " You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildMages] + " influence with the orc culture by completing this challenge.";
-        }
-
-        private static void Ch_Orcs_BuildMages_complete_Postfix(Ch_Orcs_BuildMages __instance, UA u)
-        {
-            if (u != null && u.isCommandable() && u.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
-            {
-                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
-            }
         }
 
         private static void Ch_Orcs_BuildMenagerie_getDesc_Postfix(ref string __result)
@@ -172,25 +153,9 @@ namespace Orcs_Plus
             __result += " You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildMenagerie] + " influence with the orc culture by completing this challenge.";
         }
 
-        private static void Ch_Orcs_BuildMenagerie_complete_Postfix(Ch_Orcs_BuildMenagerie __instance, UA u)
-        {
-            if (u != null && u.isCommandable() && u.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
-            {
-                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildMenagerie]), true);
-            }
-        }
-
         private static void Ch_Orcs_BuildShipyard_getDesc_Postfix(ref string __result)
         {
             __result += " You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildShipyard] + " influence with the orc culture by completing this challenge.";
-        }
-
-        private static void Ch_Orcs_BuildShipyard_complete_Postfix(Ch_Orcs_BuildShipyard __instance, UA u)
-        {
-            if (u != null && u.isCommandable() && u.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
-            {
-                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildShipyard]), true);
-            }
         }
 
         private static void Rt_Orcs_CommandeerShips_getDesc_Postfix(ref string __result)
@@ -230,17 +195,34 @@ namespace Orcs_Plus
             }
         }
 
+        // Challenges in Orc Camps
+        private static void Ch_Orcs_ChallengeTheHorde_getRestriction_Postfix(ref string __result)
+        {
+            __result = "The orc horde cannot have a live orc upstart";
+        }
+
+        private static bool Ch_Orcs_ChallengeTheHorde_valid_Postfix(bool _, Ch_Orcs_ChallengeTheHorde __instance)
+        {
+            SG_Orc orcSociety = __instance.location.soc as SG_Orc;
+            if (orcSociety != null)
+            {
+                if (__instance.map.units.Any(u => u is UAEN_OrcUpstart && u.society == orcSociety))
+                {
+                    return false;
+                }
+                return true;
+            }
+            return false;
+        }
+
+        private static bool Ch_Orcs_ChallengeTheHorde_validFor_Postfix(bool _, UA ua)
+        {
+            return ua.isCommandable();
+        }
+
         private static void Ch_Orcs_DevastateOrcishIndustry_getDesc_Postfix(ref string __result)
         {
             __result += " If completed by a human agent, they gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.DevastateIndustry] + " influence with the orc culture.";
-        }
-
-        private static void Ch_Orcs_DevastateOrcishIndustry_complete_Postfix(Ch_Orcs_DevastateOrcishIndustry __instance, UA u)
-        {
-            if (u != null && u.isCommandable() && u.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
-            {
-                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.DevastateIndustry]));
-            }
         }
 
         private static void Ch_Orcs_Expand_getDesc_Postfix(ref string __result)
@@ -263,83 +245,6 @@ namespace Orcs_Plus
             }
 
             return result;
-        }
-
-        private static void Ch_Orcs_Expand_complete_Postfix(Ch_Orcs_Expand __instance, UA u)
-        {
-            if (u == null)
-            {
-                return;
-            }
-
-            SG_Orc orcSociety = u.location.soc as SG_Orc;
-            HolyOrder_Orcs orcCulture = null;
-
-            if (orcSociety != null)
-            {
-                ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
-            }
-            else
-            {
-                if (u.location.settlement != null && u.location.settlement.subs.Count > 0)
-                {
-                    Sub_OrcWaystation waystation = u.location.settlement.subs.OfType<Sub_OrcWaystation>().FirstOrDefault();
-                    if (waystation != null && waystation.orcSociety != null)
-                    {
-                        orcSociety = waystation.orcSociety;
-                        ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
-
-                        List<Location> targets = new List<Location>();
-                        Location target = null;
-
-                        foreach (Location neighbour in u.location.getNeighbours())
-                        {
-                            if (orcSociety.canSettle(neighbour))
-                            {
-                                targets.Add(neighbour);
-                            }
-                        }
-
-                        if (targets.Count == 1)
-                        {
-                            target = targets[0];
-                        }
-                        else if (targets.Count > 1)
-                        {
-                            target = targets[Eleven.random.Next(targets.Count)];
-                        }
-
-                        if (target != null)
-                        {
-                            Settlement oldSettlement = target.settlement;
-                            target.soc = orcSociety;
-                            target.settlement = new Set_OrcCamp(target);
-                            if (oldSettlement != null && oldSettlement.subs.Count > 0)
-                            {
-                                foreach (Subsettlement sub in oldSettlement.subs)
-                                {
-                                    if (!(sub is Sub_OrcWaystation))
-                                    {
-                                        target.settlement.subs.Add(sub);
-                                    }
-                                }
-                            }
-
-                            if (u.isCommandable())
-                            {
-                                target.settlement.isInfiltrated = true;
-                            }
-
-                            orcSociety.expandTarget = -1;
-                        }
-                    }
-                }
-            }
-
-            if (u.isCommandable() && orcCulture != null)
-            {
-                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand]), true);
-            }
         }
 
         private static IEnumerable<CodeInstruction> Ch_Orcs_Expand_complete_Transpiler(IEnumerable<CodeInstruction> codeInstructions, ILGenerator ilg)
@@ -680,20 +585,6 @@ namespace Orcs_Plus
             __result += " You gain " + (ModCore.core.data.influenceGain[ModData.influenceGainAction.Subjugate] * 2) + " influence with the orc culture by completing this challenge.";
         }
 
-        private static void Ch_Subjugate_Orcs_complete_Postfix(Ch_Subjugate_Orcs __instance, UA u)
-        {
-            if (u != null && u.isCommandable() && u.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
-            {
-                if (u.location.settlement is Set_OrcCamp camp && camp.specialism == 0)
-                {
-                    ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Subjugate]), true);
-                    return;
-                }
-
-                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Subjugate] * 2), true);
-            }
-        }
-
         private static bool Ch_Orcs_AccessPlunder_valid_Postfix(bool result, Ch_Orcs_AccessPlunder __instance)
         {
             return __instance.location.settlement is Set_OrcCamp && __instance.cache.charge > 0.0 && __instance.cache.gold > 0;
@@ -866,40 +757,37 @@ namespace Orcs_Plus
             __result += " You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand] + " influence with the orc culture by completing this challenge.";
         }
 
-        private static void Rt_Orcs_ClaimTerritory_complete_Postfix(Ch_Orcs_BuildFortress __instance, UA u)
+        public static bool Rt_Orcs_RecruitRaiders_complete_Prefix(UA u)
         {
-            if (u.location.settlement is Set_OrcCamp camp && camp.subs.Count > 0)
+            SG_Orc orcSociety = u.society as SG_Orc;
+            if (orcSociety != null && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_Perfection perfection && perfection.status < -1 && orcCulture.ophanim_PerfectSociety)
             {
-                List<Sub_OrcWaystation> waystations = new List<Sub_OrcWaystation>();
-                foreach(Subsettlement sub in camp.subs)
+                Pr_Ophanim_Perfection perfectionLocal = u.location.properties.OfType<Pr_Ophanim_Perfection>().FirstOrDefault();
+                if (perfectionLocal != null && perfectionLocal.charge >= 300.0)
                 {
-                    if (sub is Sub_OrcWaystation waystation)
-                    {
-                        waystations.Add(waystation);
-                    }
-                }
+                    UM_PerfectRaiders raiders = new UM_PerfectRaiders(u.location, u.society);
+                    raiders.subsumedUnit = u;
+                    u.person.unit = raiders;
+                    u.isDead = true;
+                    GraphicalMap.selectedUnit = raiders;
+                    u.map.units.Remove(u);
+                    u.location.units.Remove(u);
 
-                if (waystations.Count > 0)
-                {
-                    foreach(Sub_OrcWaystation waystation in waystations)
-                    {
-                        camp.subs.Remove(waystation);
-                    }
+                    u.map.units.Add(raiders);
+                    raiders.location.units.Add(raiders);
+                    raiders.person = u.person;
+                    raiders.assignMaxHP();
+                    raiders.hp = Math.Max(1, raiders.maxHp / 3);
+                    u.map.world.ui.checkData();
+
+                    return true;
                 }
             }
 
-            if (u != null && u.isCommandable() && u.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
-            {
-                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(__instance.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand]), true);
-
-                if (orcSociety.cachedGone)
-                {
-                    orcSociety.cachedGone = false;
-                    orcCulture.cachedGone = false;
-                }
-            }
+            return false;
         }
 
+        // Patches for Orc Upstart
         private static void UAEN_OrcUpstart_ctor_Postfix(UAEN_OrcUpstart __instance)
         {
             if (__instance.getStatCommand() < 3)
@@ -1584,6 +1472,51 @@ namespace Orcs_Plus
             }
 
             return result;
+        }
+
+        // Patches for MA_Orcs_Expand
+        private static void MA_Orcs_Expand_getUtility_Postfix(MA_Orc_Expand __instance, List<ReasonMsg> reasons, ref double __result)
+        {
+            if (ModCore.core.data.orcSGCultureMap.TryGetValue(__instance.soc, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            {
+                int status = orcCulture.tenet_expansionism.status;
+                if (status != 0)
+                {
+                    ReasonMsg msg = null;
+                    if (reasons != null)
+                    {
+                        msg = reasons.FirstOrDefault(msg2 => msg2.msg == "Organisational Difficulty");
+                    }
+
+                    if (status == 1)
+                    {
+                        double val = __instance.soc.lastTurnLocs.Count * -5;
+                        if (msg != null)
+                        {
+                            msg.value += val;
+                        }
+                        __result += val;
+                    }
+                    else if (status == -1)
+                    {
+                        double val = __instance.soc.lastTurnLocs.Count * 2.5;
+                        if (msg != null)
+                        {
+                            msg.value += val;
+                        }
+                        __result += val;
+                    }
+                    else
+                    {
+                        double val = __instance.soc.lastTurnLocs.Count * 5;
+                        if (msg != null)
+                        {
+                            reasons.Remove(msg);
+                        }
+                        __result += val;
+                    }
+                }
+            }
         }
 
         private static IEnumerable<CodeInstruction> MA_Orc_Expand_complete_Transpiler(IEnumerable<CodeInstruction> codeInstructions, ILGenerator ilg)
@@ -2304,20 +2237,6 @@ namespace Orcs_Plus
             }
 
             return result;
-        }
-
-        private static void Mg_EnslaveTheDead_complete_Postfix(UA u)
-        {
-            if (u is UAEN_OrcElder)
-            {
-                foreach (Unit unit in u.location.units)
-                {
-                    if (unit is UM_UntamedDead dead && dead.master == u)
-                    {
-                        dead.master = null;
-                    }
-                }
-            }
         }
 
         // Patches for P_Opha_Crusade

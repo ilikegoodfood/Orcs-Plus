@@ -23,17 +23,17 @@ namespace Orcs_Plus
         }
         public override string getDesc()
         {
-            return "Dontate " + cost + " gold so that the orcs can build, guard and buy stock for a waystation in a neighbouring non-human settlement. You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand] + " influence with the orc culture by completing this challenge.";
+            return "Donate " + cost + " gold so that the orcs can build, guard and buy stock for a waystation in a neighbouring non-human settlement. You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand] + " influence with the orc culture by completing this challenge.";
         }
 
         public override string getCastFlavour()
         {
-            return "Hiddedn deep in the woods, on the edge of coven and ruin alike, a small unobtrusive wooden hut sits jauntily. Every so often, a travelling band of orcs might be observed sliping into and out of the hut, sometimes bearing supplies and sometimes plunder.";
+            return "Hidden deep in the woods, on the edge of coven and ruin alike, a small unobtrusive wooden hut sits jauntily. Every so often, a travelling band of orcs might be observed slipping into and out of the hut, sometimes bearing supplies and sometimes plunder.";
         }
 
         public override string getRestriction()
         {
-            return "Requires " + cost + " gold, and an infiltrated orc camp, or an infiltrated settlement containing an orc waystation, with a wilderness settlement (i.e. witch coven, vinerva manifestation, elder tomb) in a neighbouring location with habilitability > " + ((int)(100.0 * this.map.opt_orcHabMult * this.map.param.orc_habRequirement)).ToString() + "%";
+            return "Costs " + cost + " gold, and, unless performed by an Orc Elder, requires an infiltrated orc camp, or an infiltrated settlement containing an orc waystation, with a wilderness settlement (i.e. witch coven, Vinerva manifestation, elder tomb) in a neighbouring location, with habitability > " + ((int)(100.0 * this.map.opt_orcHabMult * this.map.param.orc_habRequirement)).ToString() + "%";
         }
 
         public override double getProfile()

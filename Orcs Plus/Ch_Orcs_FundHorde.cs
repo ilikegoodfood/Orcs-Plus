@@ -39,7 +39,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Allows you to donate gold to the " + getOrcCulture()?.getName() + ". You will gain influence over their culture equalt to half of the gold donated.";
+            return "Allows you to donate gold to the " + getOrcCulture()?.getName() + ". You will gain influence over their culture equal to half of the gold donated.";
         }
 
         public override string getCastFlavour()

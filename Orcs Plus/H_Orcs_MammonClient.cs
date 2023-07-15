@@ -22,7 +22,8 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "These orcs have been patronized by Mammon. As his influence over them grows, they will begin to produce value from their indusrties, and eventually, they will make use of that gold to hire mercenary armies, and send a tithe to the Mountain and it's agents.";
+            return "These orcs have been patronised by Mammon. As his influence over them grows, they will begin to produce value from their industries and hire mercenary armies to support them in conflicts.";
+
         }
     }
 }

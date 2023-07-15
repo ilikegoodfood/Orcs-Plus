@@ -37,6 +37,8 @@ namespace Orcs_Plus
 
         public H_Orcs_Industrious tenet_industrious;
 
+        public H_Orcs_Expansionism tenet_expansionism;
+
         public HolyTenet tenet_god;
 
         public int vinerva_HealthDuration = 0;
@@ -84,6 +86,8 @@ namespace Orcs_Plus
             tenets.Add(tenet_shadowWeaving);
             tenet_industrious = new H_Orcs_Industrious(this);
             tenets.Add(tenet_industrious);
+            tenet_expansionism = new H_Orcs_Expansionism(this);
+            tenets.Add(tenet_expansionism);
 
             // Function returns immediately. Does not do anything.
             // establishInitialProphecy();
@@ -400,6 +404,11 @@ namespace Orcs_Plus
             return inf;
         }
 
+        public virtual int getAcolyteCost()
+        {
+            return costAcolyte + (acolytes.Count * 10);
+        }
+
         public override void turnTick()
         {
             updateData();
@@ -434,7 +443,7 @@ namespace Orcs_Plus
 
             if (acolyteCount < map.param.holy_maxAcolytes && acolyteSpawnCounter == 0)
             {
-                costAcolyte = acolyteCount * (40 + Eleven.random.Next(11) + Eleven.random.Next(11));
+                costAcolyte = 15 + Math.Max(Eleven.random.Next(11), Eleven.random.Next(11));
             }
             costPreach = (int)(10.0 * Math.Pow(Math.Max(0, settlementCount - 5), 0.75));
             costTemple = 50 * (templeCount + 1);
@@ -442,7 +451,7 @@ namespace Orcs_Plus
             if (acolyteCount < map.param.holy_maxAcolytes)
             {
                 acolyteSpawnCounter++;
-                if (acolyteSpawnCounter >= costAcolyte)
+                if (acolyteSpawnCounter >= getAcolyteCost())
                 {
                     createAcolyte();
                     acolyteSpawnCounter = 0;

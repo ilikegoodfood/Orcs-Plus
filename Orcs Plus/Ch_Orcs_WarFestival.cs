@@ -29,17 +29,17 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Gradually reduces orcish industry to produce death. Increases society menace by 1 each turn.";
+            return "This festival gradually reduces orcish industry, and produces death. The orc society's menace (1) increases each turn.";
         }
 
         public override string getCastFlavour()
         {
-            return "A violant celebration of war, warfare, and martial prowess, the orcs gather in dirt rings and pit-arenas, desperate to proove their strength. Blood soaks the dirt and sand on which they fight and die for prestige.";
+            return "A violent celebration of war, warfare, and martial prowess, the orcs gather in dirt rings and pit-arenas, desperate to prove their strength. Blood soaks the dirt and sand on which they fight and die for prestige.";
         }
 
         public override string getRestriction()
         {
-            return "Can only be performed by an orc shaman within their own borders.";
+            return "Can only be performed by an Orc Elder in a camp belonging to their culture.";
         }
 
         public override challengeStat getChallengeType()

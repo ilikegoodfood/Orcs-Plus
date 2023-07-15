@@ -22,7 +22,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Vinerva is the mother of all natural things, including orcs. She will be worshipped, protected, nurtured, and Vinerva will grant unique gifts to her orc children, which they will accept with reverence.";
+            return "Vinerva is the mother of all natural beings, including orcs. She will be worshipped, protected, nurtured, and Vinerva will grant unique gifts to her orc children, which they will accept with reverence.";
         }
     }
 }

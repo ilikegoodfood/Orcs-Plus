@@ -7,24 +7,24 @@ using System.Threading.Tasks;
 
 namespace Orcs_Plus
 {
-    public class H_Orcs_Industrious :HolyTenet
+    public class H_Orcs_Expansionism : HolyTenet
     {
         public HolyOrder_Orcs orcCulture;
 
-        public H_Orcs_Industrious(HolyOrder_Orcs orcCulture)
-            : base (orcCulture)
+        public H_Orcs_Expansionism(HolyOrder_Orcs orcCulture)
+            : base(orcCulture)
         {
             this.orcCulture = orcCulture;
         }
 
         public override string getName()
         {
-            return "Industrious";
+            return "Expansionism";
         }
 
         public override string getDesc()
         {
-            return "The native smallholdings and household industries of the orc hordes offer little for the fielding of armies. With a little nudge, their elders can be taught how to organise industries that are more conducive to warfare.";
+            return "Orc cultures are traditionally small, loosely organised affairs, that are incapable of mass expansion. When human aligned, the orc culture will avoid expanding to new lands. When elder aligned, they will be able to spread more before they stop expanding.";
         }
 
         public override int getMaxNegativeInfluence()
@@ -34,7 +34,7 @@ namespace Orcs_Plus
 
         public override int getMaxPositiveInfluence()
         {
-            return 0;
+            return 1;
         }
     }
 }

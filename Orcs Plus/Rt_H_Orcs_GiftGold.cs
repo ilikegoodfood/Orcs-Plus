@@ -1,4 +1,5 @@
 ﻿using Assets.Code;
+using DuloGames.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,8 @@ namespace Orcs_Plus
         public int bribeCost = 40;
 
         public double bribeEffect = 4;
+
+        public double relationsBonusPerMenaceReduced = 1.25;
 
         public Rt_H_Orcs_GiftGold(Location loc)
             : base (loc)
@@ -42,7 +45,7 @@ namespace Orcs_Plus
 
         public override Sprite getSprite()
         {
-            return this.map.world.iconStore.bribe;
+            return map.world.iconStore.bribe;
         }
 
         public override double getComplexity()
@@ -85,15 +88,42 @@ namespace Orcs_Plus
 
         public override double getUtility(UA ua, List<ReasonMsg> msgs)
         {
-            double utility = ((ua.society as HolyOrder_Orcs)?.orcSociety.menace ?? -1) * 4;
+            double utility = ((ua.society as HolyOrder_Orcs)?.orcSociety.menace ?? 0) * 4;
 
-            if (utility >= 0)
+            if (utility > 0)
             {
                 msgs?.Add(new ReasonMsg("Society Menace", utility));
-            }
-            else
-            {
-                utility = 0;
+
+                if (ua.location.settlement != null && ua.location.settlement is SettlementHuman settlementHuman && settlementHuman.ruler != null)
+                {
+                    Person ruler = settlementHuman.ruler;
+                    double val;
+                    if (ruler.likes.Contains(Tags.ORC))
+                    {
+                        val = 5;
+                        msgs?.Add(new ReasonMsg("Local ruler likes orcs", val));
+                        utility += val;
+                    }
+                    else if (ruler.extremeLikes.Contains(Tags.ORC))
+                    {
+                        val = 10;
+                        msgs?.Add(new ReasonMsg("Local ruler loves orcs", val));
+                        utility += val;
+                    }
+
+                    if (ruler.likes.Contains(Tags.GOLD))
+                    {
+                        val = 5;
+                        msgs?.Add(new ReasonMsg("Local ruler likes gold", val));
+                        utility += val;
+                    }
+                    else if (ruler.extremeLikes.Contains(Tags.GOLD))
+                    {
+                        val = 10;
+                        msgs?.Add(new ReasonMsg("Local ruler loves gold", val));
+                        utility += val;
+                    }
+                }
             }
 
             return utility;
@@ -101,7 +131,7 @@ namespace Orcs_Plus
 
         public override bool validFor(UA ua)
         {
-            return ua is UAEN_OrcElder elder && elder.person.gold >= bribeCost && elder.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety.menace > 5 && elder.location.settlement is SettlementHuman;
+            return ua is UAEN_OrcElder elder && elder.person.gold >= bribeCost && elder.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety.menace > bribeEffect && elder.location.settlement is SettlementHuman;
         }
 
         public override int getCompletionProfile()
@@ -112,9 +142,43 @@ namespace Orcs_Plus
         public override void complete(UA u)
         {
             HolyOrder_Orcs orcCulture = u.society as HolyOrder_Orcs;
-            if (orcCulture != null && orcCulture.orcSociety.menace > 5)
+            double menaceReduction = bribeEffect;
+            if (orcCulture != null && orcCulture.orcSociety != null)
             {
-                orcCulture.orcSociety.menace -= bribeEffect;
+                SG_Orc orcSociety = orcCulture.orcSociety;
+
+                if (u.location.settlement != null && u.location.settlement is SettlementHuman settlementHuman && settlementHuman.ruler != null)
+                {
+                    Person ruler = settlementHuman.ruler;
+                    if (ruler.likes.Contains(Tags.ORC))
+                    {
+                        menaceReduction += 1;
+                    }
+                    else if (ruler.extremeLikes.Contains(Tags.ORC))
+                    {
+                        menaceReduction += 2;
+                    }
+
+                    if (ruler.likes.Contains(Tags.GOLD))
+                    {
+                        menaceReduction += 1;
+                    }
+                    else if (ruler.extremeLikes.Contains(Tags.GOLD))
+                    {
+                        menaceReduction += 2;
+                    }
+                }
+
+                if (u.location.soc is Society society && society.hasNormalDiplomacy())
+                {
+                    DipRel rel = society.getRel(orcSociety);
+                    if (rel.status < 0.0)
+                    {
+                        rel.status = Math.Min(0.0, rel.status + (relationsBonusPerMenaceReduced * menaceReduction));
+                    }
+                }
+
+                orcSociety.menace = Math.Max(0.0, orcSociety.menace - menaceReduction);
                 u.person.gold -= bribeCost;
             }
         }

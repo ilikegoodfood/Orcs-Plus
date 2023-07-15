@@ -11,13 +11,13 @@ namespace Orcs_Plus
 {
     public class ModCore : ModKernel
     {
+        public static ModCore core;
+
         public static CommunityLib.ModCore comLib;
 
         public AgentAI comLibAI;
 
         private ComLibHooks comLibHooks;
-
-        public static ModCore core;
 
         public ModData data;
 
@@ -78,6 +78,7 @@ namespace Orcs_Plus
                 }
             }
 
+            // Example for non-dependent God Tenet registration
             /*foreach (ModKernel kernel in map.mods)
             {
                 if (kernel.GetType().Namespace == "Orcs_Plus")
@@ -116,7 +117,7 @@ namespace Orcs_Plus
 
             if (!map.options.noOrcs)
             {
-                map.hintSystem.popCustomHint("Orc Cultures", "Orcs Plus introduces cultures to the orc hordes. These cultures can be found in the holy order UI, and use many of the same mechanics, such as tenets, acolytes, and temples, however you gain influence with them in a very different way to other holy orders. Many challenges and rituals that benefit orcs, or that can only be done in orc camps, provide influence upon completion. These challenges specify this in their tooltips. In addition to this, killing an orc agent, or being involved in an army battle in which an opposed orc military unit is destroyed, grants influence over that orc culture. Similarly, killing agents, or being involved in army battles in which military units are destroyed, grants influence over any orc cultures that are at war with those agents or military units. Razing an orc camp, or razing a location belonging to a society that an orc society is at war with also grants influence over the orc culture.");
+                map.hintSystem.popCustomHint("Orc Cultures", "Unlike other holy orders, orc cultures are influenced by the actions of the player and of AI agents. Many challenges state that they provide influence over orcish cultures, and how much, but some actions do not, or cannot.\n\n Orc cultures are broadly isolationist, valuing might above most else. They celebrate the arts of war, and respect those who defeat them, or their enemies, in all forms of combat. They strongly dislike those who settle too close to their borders, and will, as well as respecting others who do, conduct raids against their cities and outposts. \n\n With this information in mind, make sure to check the orc culture's moral influence tab every time you complete an action that you think might grant you influence over them. Experiment, and discover what actions grant influence over orcish cultures, and which ones reduce it.");
             }
         }
 
@@ -432,6 +433,45 @@ namespace Orcs_Plus
             }
 
             return hab;
+        }
+
+        public override void onChallengeComplete(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)
+        {
+            switch (task_PerformChallenge.challenge)
+            {
+                case Ch_Orcs_BuildFortress _:
+                    OnChallengeComplete.Ch_Orcs_BuildFortress(challenge, ua, task_PerformChallenge);
+                    break;
+                case Ch_Orcs_BuildMages _:
+                    OnChallengeComplete.Ch_Orcs_BuildMages(challenge, ua, task_PerformChallenge);
+                    break;
+                case Ch_Orcs_BuildMenagerie _:
+                    OnChallengeComplete.Ch_Orcs_BuildMenagerie(challenge, ua, task_PerformChallenge);
+                    break;
+                case Ch_Orcs_BuildShipyard _:
+                    OnChallengeComplete.Ch_Orcs_BuildShipyard(challenge, ua, task_PerformChallenge);
+                    break;
+                case Rt_Orcs_ClaimTerritory _:
+                    OnChallengeComplete.Rt_Orcs_ClaimTerritory(challenge, ua, task_PerformChallenge);
+                    break;
+                case Ch_Orcs_DevastateOrcishIndustry _:
+                    OnChallengeComplete.Ch_Orcs_DevastateOrcishIndustry(challenge, ua, task_PerformChallenge);
+                    break;
+                case Ch_Orcs_Expand _:
+                    OnChallengeComplete.Ch_Orcs_Expand(challenge, ua, task_PerformChallenge);
+                    break;
+                case Ch_Subjugate_Orcs _:
+                    OnChallengeComplete.Ch_Subjugate_Orcs(challenge, ua, task_PerformChallenge);
+                    break;
+                case Mg_EnslaveTheDead _:
+                    OnChallengeComplete.Mg_EnslaveTheDead(challenge, ua, task_PerformChallenge);
+                    break;
+                case Ch_RaidPeriphery _:
+                    OnChallengeComplete.Ch_RaidPeriphery(challenge, ua, task_PerformChallenge);
+                    break;
+                default:
+                    break;
+            }
         }
 
         public override double sovereignAI(Map map, AN actionNational, Person ruler, List<ReasonMsg> reasons, double initialUtility)

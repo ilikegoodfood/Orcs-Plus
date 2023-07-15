@@ -22,7 +22,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "If under human influence, orcs will purge shadow from their lands. As elder infleunce increases, they will allow shadow to spread through their camps. At maximum, orcs will push shadow to surrounding settlements.";
+            return "If under human influence, orcs will purge shadow from their lands. As elder influence increases, they will allow shadow to spread through their camps. At maximum elder alignment, orcs will generate and push shadow to surrounding settlements.";
         }
 
         public override int getMaxPositiveInfluence()

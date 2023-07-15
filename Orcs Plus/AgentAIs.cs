@@ -172,7 +172,7 @@ namespace Orcs_Plus
                 new AIChallenge(typeof(Ch_Orcs_AccessPlunder), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor }),
                 new AIChallenge(typeof(Ch_H_Orcs_CleansingFestival), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
                 new AIChallenge(typeof(Ch_H_Orcs_DarkFestival), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
-                new AIChallenge(typeof(Rt_H_Orcs_GiftGold), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocalRandomized, AIChallenge.ChallengeTags.ForbidWar }),
+                new AIChallenge(typeof(Rt_H_Orcs_GiftGold), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.PreferLocalRandomized, AIChallenge.ChallengeTags.ForbidWar }),
                 new AIChallenge(typeof(Ch_Orcs_FundWaystation), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
                 new AIChallenge(typeof(Ch_BuyItem), 0.0, new List<AIChallenge.ChallengeTags> {  AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocalRandomized}),
                 new AIChallenge(typeof(Ch_H_Orcs_BuildTemple), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocalRandomized }),
@@ -193,7 +193,8 @@ namespace Orcs_Plus
             aiChallenges_Elder[4].delegates_ValidFor.Add(delegate_ValidFor_AccessPlunder);
             aiChallenges_Elder[4].delegates_Utility.Add(delegate_Utility_AccessPlunder);
 
-            aiChallenges_Elder[7].delegates_ValidFor.Add(delegate_ValidFor_OrcGift);
+            aiChallenges_Elder[7].delegates_Valid.Add(delegate_Valid_OrcGift);
+            aiChallenges_Elder[7].delegates_Utility.Add(delegate_Utility_OrcGift);
 
             aiChallenges_Elder[9].delegates_ValidFor.Add(delegate_ValidFor_BuyItem);
 
@@ -352,16 +353,70 @@ namespace Orcs_Plus
             return utility;
         }
 
-        private bool delegate_ValidFor_OrcGift(AgentAI.ChallengeData challengeData, UA ua)
+        private bool delegate_Valid_OrcGift(AgentAI.ChallengeData challengeData)
         {
             bool result = false;
 
-            if (challengeData.location.settlement is SettlementHuman)
+            if (challengeData.location.settlement is SettlementHuman settlementHuman)
             {
                 result = true;
+
+                if (settlementHuman.ruler != null)
+                {
+                    List<int> allHates = new List<int>();
+                    allHates.AddRange(settlementHuman.ruler.hates);
+                    allHates.AddRange(settlementHuman.ruler.extremeHates);
+                    if (allHates.Contains(Tags.ORC) || allHates.Contains(Tags.GOLD))
+                    {
+                        result = false;
+                    }
+                }
             }
 
             return result;
+        }
+
+        private double delegate_Utility_OrcGift(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
+        {
+            utility = ((ua.society as HolyOrder_Orcs)?.orcSociety.menace ?? 0) * 4;
+
+            if (utility > 0)
+            {
+                reasonMsgs?.Add(new ReasonMsg("Society Menace", utility));
+
+                if (challengeData.location.settlement != null && challengeData.location.settlement is SettlementHuman settlementHuman && settlementHuman.ruler != null)
+                {
+                    Person ruler = settlementHuman.ruler;
+                    double val;
+                    if (ruler.likes.Contains(Tags.ORC))
+                    {
+                        val = 5;
+                        reasonMsgs?.Add(new ReasonMsg("Local ruler likes orcs", val));
+                        utility += val;
+                    }
+                    else if (ruler.extremeLikes.Contains(Tags.ORC))
+                    {
+                        val = 10;
+                        reasonMsgs?.Add(new ReasonMsg("Local ruler loves orcs", val));
+                        utility += val;
+                    }
+
+                    if (ruler.likes.Contains(Tags.GOLD))
+                    {
+                        val = 5;
+                        reasonMsgs?.Add(new ReasonMsg("Local ruler likes gold", val));
+                        utility += val;
+                    }
+                    else if (ruler.extremeLikes.Contains(Tags.GOLD))
+                    {
+                        val = 10;
+                        reasonMsgs?.Add(new ReasonMsg("Local ruler loves gold", val));
+                        utility += val;
+                    }
+                }
+            }
+
+            return utility;
         }
 
         private double delegate_Utility_Organise(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)

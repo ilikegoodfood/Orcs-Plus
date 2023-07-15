@@ -25,7 +25,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Ophanim's will drives these dissorganized orcs to seek a state of harmonic perfection. They work, build and train with a mindless zeal that makes them a force to be recond with. With enough devotion, Ophanim will be able to convert their armies into perfect hordes.";
+            return "Ophanim's will drives these disorganised orcs to seek a state of harmonic perfection. They work, build and train with a mindless zeal that makes them a force to be reckoned with. With enough devotion, Ophanim will be able to convert their armies into perfect hordes.";
         }
     }
 }

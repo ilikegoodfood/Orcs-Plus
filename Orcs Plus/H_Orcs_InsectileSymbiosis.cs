@@ -22,7 +22,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "These orcs exist in a straneg state of symbiosis with Cordyceps and the insects that it controls. When elder aligned, orc armies will gain sensitivity to the vespidic attack pheromone, as well as emit limited pheramones of their own. When fully elder aligned, Cordyceps-infected insects will be allowed to maturate within their bodies, emerging upon the orcs' natural death.";
+            return "These orcs exist in a strange state of symbiosis with Cordyceps and the insects that it controls. When elder aligned, orc armies will gain sensitivity to the vespidic attack pheromone, as well as emit limited pheromones of their own. When fully elder aligned, Cordyceps-infected insects will be allowed to mature within their bodies, emerging upon the orcs' natural death.";
         }
     }
 }

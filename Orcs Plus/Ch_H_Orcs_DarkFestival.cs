@@ -27,17 +27,17 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Gradually enshadows this location and nearby locations and units. The Elder gains profile (1) and menace (2) each turn while performing this challenge.";
+            return "This festival gradually enshadows this location and nearby locations and units. The Elder gains profile (1) and menace (2) each turn while performing this challenge.";
         }
 
         public override string getCastFlavour()
         {
-            return "An elder leads this camp in a great festival celebrating and worshiping the elder god, exposing all those present to its great and terrible influence.";
+            return "An elder leads this camp in a great festival celebrating and worshipping the elder god, exposing all those present to its great and terrible influence.";
         }
 
         public override string getRestriction()
         {
-            return "Can only be performed by a member of an Orc Culture within their own borders. The Orc Culture's Shadow Weaving tenet status must be -2.";
+            return "Can only be performed by an Orc Elder in a camp belonging to their culture. The Orc Culture's Shadow Weaving tenet status must be -2.";
         }
 
         public override challengeStat getChallengeType()
@@ -80,6 +80,21 @@ namespace Orcs_Plus
             val = (1 - ua.person.shadow) * 50;
             msgs?.Add(new ReasonMsg("Potential Self Enshadowment", val));
             utility += val;
+
+            SG_Orc orcSociety = ua.society as SG_Orc;
+            HolyOrder_Orcs orcCulture = ua.society as HolyOrder_Orcs;
+            
+            if (orcCulture != null)
+            {
+                orcSociety = orcCulture.orcSociety;
+            }
+
+            if (orcSociety != null && orcSociety.menace > 0)
+            {
+                val = orcSociety.menace * -3;
+                msgs?.Add(new ReasonMsg("Society Menace", val));
+                utility += val;
+            }
 
             return utility;
         }

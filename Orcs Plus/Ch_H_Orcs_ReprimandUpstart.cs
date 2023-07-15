@@ -28,17 +28,17 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Recalls the upstart to the seat of the elders and reprimands him for his actions. The upstart will rapidly loose menace and profile, and will heal and rest, while they are confined to the camp.";
+            return "An elder recalls the upstart to the seat of the elders and reprimands him for his actions. The upstart will rapidly loose menace and profile, and will heal and rest, while they are confined to the camp.";
         }
 
         public override string getCastFlavour()
         {
-            return "The elders becon and the young come running. The veterans of conflicts passed speak, and the young listen. \"Quite!\", they cry, \"You are too loud. Quite yourself.\". Silence reigns, at least for a time.";
+            return "The elders beckon and the young come running. The veterans of conflicts passed speak, and the young listen. \"Quite!\", they cry, \"You are too loud. Quite yourself.\". Silence reigns, at least for a time.";
         }
 
         public override string getRestriction()
         {
-            return "Requires the camp hosting the seat of the elders or great hall to be infiltrated.";
+            return "Can only be performed by an Orc Elder, in a camp containing a Great Hall or a Seat of the Elders of their culture.";
         }
 
         public override challengeStat getChallengeType()

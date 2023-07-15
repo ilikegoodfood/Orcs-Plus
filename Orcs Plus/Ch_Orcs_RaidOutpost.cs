@@ -37,7 +37,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Raids a nearby human outpost, taking vast sums of gold that the humans had invested in its success, potentially razing it to the ground. Adds " + map.param.ch_orcishRaidingMenaceGain + " menace to the orcish horde. You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.Raiding] + " influence with the orc culture by completing this challenge.";
+            return "Raids a nearby human outpost, taking vast sums of gold that the humans had invested in its success, and potentially razing it to the ground. Adds " + map.param.ch_orcishRaidingMenaceGain + " menace to the orcish horde. You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.Raiding] + " influence with the orc culture by completing this challenge.";
         }
 
         public override string getCastFlavour()
@@ -47,7 +47,7 @@ namespace Orcs_Plus
 
         public override string getRestriction()
         {
-            return "Requires a human outpost in a neighbouring location.";
+            return "Requires a human outpost in a location neighbouring this orc camp.";
         }
 
         public override challengeStat getChallengeType()

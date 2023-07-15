@@ -22,7 +22,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Orcs or notoriously intolerant of outsiders, opportunistically attacking anyone who comes too close. With some influence, they can be discouraged from attacking others.";
+            return "Orcs are notoriously intolerant of outsiders, opportunistically attacking anyone who comes too close. With some influence, they can be discouraged from attacking others.";
         }
 
         public override int getMaxPositiveInfluence()

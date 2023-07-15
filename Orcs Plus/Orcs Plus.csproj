@@ -70,6 +70,7 @@
     <Compile Include="Ch_Orcs_DeathFestival.cs" />
     <Compile Include="Ch_Orcs_FundWaystation.cs" />
     <Compile Include="HarmonyPatches_Conditional.cs" />
+    <Compile Include="H_Orcs_Expansionism.cs" />
     <Compile Include="H_Orcs_GodTenet.cs" />
     <Compile Include="H_Orcs_HarbringersMadness.cs" />
     <Compile Include="H_Orcs_InsectileSymbiosis.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="H_Orcs_SerpentWarriors.cs" />
     <Compile Include="H_Orcs_ShadowWarriors.cs" />
     <Compile Include="MA_Orc_HireMercenaries.cs" />
+    <Compile Include="OnChallengeComplete.cs" />
     <Compile Include="Pr_Ophanim_Perfection.cs" />
     <Compile Include="Pr_Orcs_SacrificialSite.cs" />
     <Compile Include="Pr_Vinerva_Health.cs" />
@@ -133,6 +135,7 @@
     <Compile Include="UM_OrcCorsair.cs" />
     <Compile Include="UM_OrcRabble.cs" />
     <Compile Include="UM_PerfectHorde.cs" />
+    <Compile Include="UM_PerfectRaiders.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

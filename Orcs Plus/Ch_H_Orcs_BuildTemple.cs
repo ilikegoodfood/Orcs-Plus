@@ -29,12 +29,12 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Builds a great hall in this orc camp";
+            return "Builds a great hall in this orc camp.";
         }
 
         public override string getRestriction()
         {
-            return "Can only be performed by a member of an Orc Culture within their own borders. Requires " + cost + " gold.";
+            return "Can only be performed by an Orc Elder in a specialised camp belonging to their culture. Requires " + cost + " gold.";
         }
 
         public override double getProgressPerTurnInner(UA unit, List<ReasonMsg> msgs)

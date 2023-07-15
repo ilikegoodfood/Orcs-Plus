@@ -108,6 +108,13 @@ namespace Orcs_Plus
                             reasons?.Add(new ReasonMsg("Inferior Military", val));
                             utility += val;
                         }
+
+                        if (orcCulture.plunderValue >= 3 * cost)
+                        {
+                            val = ((orcCulture.plunderValue - (cost * 2)) / cost) * 20;
+                            reasons?.Add(new ReasonMsg("Excess Gold", val));
+                            utility += val;
+                        }
                     }
 
                     if (target is Society society)

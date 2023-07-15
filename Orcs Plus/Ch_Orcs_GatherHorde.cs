@@ -28,7 +28,7 @@ namespace Orcs_Plus
 
         public override string getRestriction()
         {
-            return "Requires you to hold a war banner for this orc society, this orc camp to be subjugated, the orc society to be at peace, the society to have a military unit, and the military unit's home camp to be subjugated.";
+            return "Requires an agent holding a war banner for this orc society, this orc camp to be subjugated, the orc society to be at peace, the society to have at least one military unit, and the military unit's home camp to be subjugated.";
         }
 
         public override void complete(UA u)

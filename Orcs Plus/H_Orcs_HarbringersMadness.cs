@@ -17,12 +17,12 @@ namespace Orcs_Plus
 
         public override string getName()
         {
-            return "Harbringers of Madness";
+            return "Harbingers of Madness";
         }
 
         public override string getDesc()
         {
-            return "These orcs have been granted a glimps within Iasturs book, and the knowledge that they gained fortells insanity. Not only will these orcs spread that knowledge to others, driving them mad, but they will, eventually, drive those they interact with insane as well.";
+            return "These orcs have been granted a glimpse within Iasturs book, and the knowledge that they gained foretells insanity. Not only will these orcs spread that knowledge to others, driving them mad, but they will, eventually, drive those they interact with insane as well.";
         }
     }
 }
