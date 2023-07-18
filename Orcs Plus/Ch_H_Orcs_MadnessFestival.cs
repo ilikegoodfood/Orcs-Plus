@@ -27,7 +27,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "This festival gradually drives nearby human and elf rulers and agents mad. The Elder gains profile (2) and menace (4) each turn while performing this challenge.";
+            return "This festival gradually drives nearby human and elf rulers and agents mad. The Elder gains profile (1) and menace (2) each turn while performing this challenge.";
         }
 
         public override string getCastFlavour()
@@ -133,8 +133,8 @@ namespace Orcs_Plus
 
         public override void turnTick(UA ua)
         {
-            ua.addProfile(2);
-            ua.addMenace(4);
+            ua.addProfile(1);
+            ua.addMenace(2);
 
             madnessInflicted += madnessRate * getProgressPerTurnInner(ua, null);
 
@@ -180,6 +180,11 @@ namespace Orcs_Plus
                 }
 
                 madnessInflicted -= Math.Floor(madnessInflicted);
+            }
+
+            if (location.soc is SG_Orc orcSociety)
+            {
+                orcSociety.menace += 0.5;
             }
         }
 

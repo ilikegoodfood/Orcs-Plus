@@ -78,8 +78,8 @@ namespace Orcs_Plus
 
             if (ua is UAEN_OrcShaman shaman && ua.location.settlement is SettlementHuman && ua.location.properties.OfType<Pr_Devastation>().FirstOrDefault()?.charge >= minDevastation)
             {
-                msgs?.Add(new ReasonMsg("Base", 25.0));
-                utility += 25.0;
+                msgs?.Add(new ReasonMsg("Base", 45.0));
+                utility += 45.0;
             }
 
             return utility;

@@ -147,6 +147,7 @@ namespace Orcs_Plus
                     UM_OrcRabble rabble = new UM_OrcRabble(camp.location, camp.location.soc, camp, (int)Math.Ceiling(initHp));
                     camp.location.units.Add(rabble);
                     map.units.Add(rabble);
+                    msgString = u.getName() + " has roused a rabble of " + rabble.maxHp + " orcs.";
                     camp.fallIntoRuin("Camp Abandonned");
                 }
             }

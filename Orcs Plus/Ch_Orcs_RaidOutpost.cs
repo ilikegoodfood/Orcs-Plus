@@ -187,12 +187,14 @@ namespace Orcs_Plus
                     targetOutpost.charge = 0.0;
                     targetOutpost.location.properties.Remove(targetOutpost);
                     u.person.gold += targetOutpost.funding;
+                    msgString = u.getName() + " lead a raid against the outpost of the " + targetOutpost.parent.getName() + ", completely destoying it, and recovering loot worth " + targetOutpost.funding + " gold.";
                     targetOutpost.funding = 0;
                 }
                 else
                 {
                     double dmgPercent = (1.0 - (targetOutpost.charge / initCharge));
                     int goldStolen = (int)Math.Ceiling(targetOutpost.funding * dmgPercent);
+                    msgString = u.getName() + " lead a raid against the outpost of the " + targetOutpost.parent.getName() + ", recovering loot worth " + goldStolen + " gold.";
                     u.person.gold += goldStolen;
                     targetOutpost.funding -= goldStolen;
                 }

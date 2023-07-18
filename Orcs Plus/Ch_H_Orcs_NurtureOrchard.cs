@@ -132,10 +132,8 @@ namespace Orcs_Plus
             {
                 orcSociety = orcCulture.orcSociety;
             }
-            else
-            {
-               ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
-            }
+
+            orcSociety.menace += 0.5;
 
             Pr_Vinerva_Life life = location.properties.OfType<Pr_Vinerva_Life>().FirstOrDefault();
             if (life != null)

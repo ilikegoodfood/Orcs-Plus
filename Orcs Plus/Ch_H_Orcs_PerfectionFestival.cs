@@ -175,6 +175,11 @@ namespace Orcs_Plus
 
             perfection.influences.Add(new ReasonMsg("Festival of Perfection", perfectionRate * getProgressPerTurnInner(ua, null)));
 
+            if (location.soc is SG_Orc orcSociety)
+            {
+                orcSociety.menace += 0.5;
+            }
+
             ModCore.core.TryAddInfluenceGain(location.soc as SG_Orc, new ReasonMsg(getName(), (ModCore.core.data.influenceGain[ModData.influenceGainAction.RecieveGift] / 20) * getProgressPerTurnInner(ua, null)));
         }
 

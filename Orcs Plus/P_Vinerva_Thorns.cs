@@ -19,17 +19,17 @@ namespace Orcs_Plus
 
         public override string getName()
         {
-            return "Wall of Throns";
+            return "Wall of Thorns";
         }
 
         public override string getDesc()
         {
-            return "A wall of throns grows around the orc camp, raising it's defence and dealing a small amount of damage to armies that attempt to raze the camp.";
+            return "A wall of thorns grows around the orc camp, raising its defence and dealing a small amount of damage to armies that attempt to raze the camp.";
         }
 
         public override string getFlavour()
         {
-            return "A thick hedgerow of viscous thorn bushes spring up around the outer perimiter of an orc camp. Almost impenetrably thick, these bushes shift unnaturally, allowing orcs to come and go as they please, but grasping and biting at any who attempt to force their way through.";
+            return "A thick hedgerow of viscous thorn bushes spring up around the outer perimeter of an orc camp. Almost impenetrably thick, these bushes shift unnaturally, allowing orcs to come and go as they please, but grasping and biting at any who attempt to force their way through.";
         }
 
         public override string getRestrictionText()

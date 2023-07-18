@@ -175,7 +175,24 @@ namespace Orcs_Plus
                         plunder.addGold(gold);
                     }
 
-                    //u.society.menace += map.param.ch_orcishRaidingMenaceGain;
+                    if (target.subs.OfType<Sub_Docks>().FirstOrDefault() != null)
+                    {
+                        int wreckRoll = Eleven.random.Next(10);
+
+                        if (wreckRoll < 1)
+                        {
+                            Pr_Shipwreck wreck = target.location.properties.OfType<Pr_Shipwreck>().FirstOrDefault();
+
+                            if (wreck == null)
+                            {
+                                target.location.properties.Add(new Pr_Shipwreck(target.location));
+                            }
+                            else
+                            {
+                                wreck.charge += 25.0;
+                            }
+                        }
+                    }
                 }
             }
         }

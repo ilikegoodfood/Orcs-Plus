@@ -172,7 +172,7 @@ namespace Orcs_Plus
                 new AIChallenge(typeof(Ch_Orcs_AccessPlunder), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor }),
                 new AIChallenge(typeof(Ch_H_Orcs_CleansingFestival), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
                 new AIChallenge(typeof(Ch_H_Orcs_DarkFestival), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
-                new AIChallenge(typeof(Rt_H_Orcs_GiftGold), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.PreferLocalRandomized, AIChallenge.ChallengeTags.ForbidWar }),
+                new AIChallenge(typeof(Rt_H_Orcs_GiftGold), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.PreferLocalRandomized, AIChallenge.ChallengeTags.ForbidWar }),
                 new AIChallenge(typeof(Ch_Orcs_FundWaystation), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
                 new AIChallenge(typeof(Ch_BuyItem), 0.0, new List<AIChallenge.ChallengeTags> {  AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocalRandomized}),
                 new AIChallenge(typeof(Ch_H_Orcs_BuildTemple), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocalRandomized }),
@@ -194,6 +194,7 @@ namespace Orcs_Plus
             aiChallenges_Elder[4].delegates_Utility.Add(delegate_Utility_AccessPlunder);
 
             aiChallenges_Elder[7].delegates_Valid.Add(delegate_Valid_OrcGift);
+            aiChallenges_Elder[7].delegates_ValidFor.Add(delegate_ValidFor_OrcGift);
             aiChallenges_Elder[7].delegates_Utility.Add(delegate_Utility_OrcGift);
 
             aiChallenges_Elder[9].delegates_ValidFor.Add(delegate_ValidFor_BuyItem);
@@ -376,6 +377,12 @@ namespace Orcs_Plus
             return result;
         }
 
+        private bool delegate_ValidFor_OrcGift(AgentAI.ChallengeData challengeData, UA ua)
+        {
+            Rt_H_Orcs_GiftGold ritual = challengeData.challenge as Rt_H_Orcs_GiftGold;
+            return ua is UAEN_OrcElder elder && elder.person.gold >= ritual.bribeCost && elder.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety.menace > ritual.bribeEffect && challengeData.location.settlement is SettlementHuman;
+        }
+
         private double delegate_Utility_OrcGift(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
         {
             utility = ((ua.society as HolyOrder_Orcs)?.orcSociety.menace ?? 0) * 4;
@@ -390,26 +397,26 @@ namespace Orcs_Plus
                     double val;
                     if (ruler.likes.Contains(Tags.ORC))
                     {
-                        val = 5;
+                        val = 10;
                         reasonMsgs?.Add(new ReasonMsg("Local ruler likes orcs", val));
                         utility += val;
                     }
                     else if (ruler.extremeLikes.Contains(Tags.ORC))
                     {
-                        val = 10;
+                        val = 20;
                         reasonMsgs?.Add(new ReasonMsg("Local ruler loves orcs", val));
                         utility += val;
                     }
 
                     if (ruler.likes.Contains(Tags.GOLD))
                     {
-                        val = 5;
+                        val = 10;
                         reasonMsgs?.Add(new ReasonMsg("Local ruler likes gold", val));
                         utility += val;
                     }
                     else if (ruler.extremeLikes.Contains(Tags.GOLD))
                     {
-                        val = 10;
+                        val = 20;
                         reasonMsgs?.Add(new ReasonMsg("Local ruler loves gold", val));
                         utility += val;
                     }
@@ -469,11 +476,15 @@ namespace Orcs_Plus
                 new AIChallenge(typeof(Ch_Orcs_DeathFestival), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.RequiresSociety, AIChallenge.ChallengeTags.PreferLocal, AIChallenge.ChallengeTags.ForbidWar }),
                 new AIChallenge(typeof(Ch_Orcs_AccessPlunder), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor }),
                 new AIChallenge(typeof(Ch_BuyItem), 0.0, new List<AIChallenge.ChallengeTags> {  AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocalRandomized}),
-                new AIChallenge(typeof(Rt_StudyDeath), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.RequiresOwnSociety, AIChallenge.ChallengeTags.PreferLocalRandomized })
+                new AIChallenge(typeof(Rt_StudyDeath), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.RequiresOwnSociety})
             };
 
+            aiChallenges_Shaman[2].delegates_ValidFor.Add(delegate_ValidFor_SecretsOfDeath);
             aiChallenges_Shaman[2].delegates_Utility.Add(delegate_Utility_SecretsOfDeath);
+            aiChallenges_Shaman[2].delegates_ValidFor.Add(delegate_ValidFor_LearnArcaneSecret);
             aiChallenges_Shaman[3].delegates_Utility.Add(delegate_Utility_LearnSecret);
+            aiChallenges_Shaman[4].delegates_ValidFor.Add(delegate_ValidFor_SkeletalServitor);
+            aiChallenges_Shaman[5].delegates_ValidFor.Add(delegate_ValidFor_FacelessServitor);
             aiChallenges_Shaman[6].delegates_ValidFor.Add(delegate_ValidFor_EnslaveDead);
             aiChallenges_Shaman[6].delegates_Utility.Add(delegate_Utility_EnslaveDead);
             aiChallenges_Shaman[7].delegates_ValidFor.Add(delegate_ValidFor_RavenousDead);
@@ -486,6 +497,95 @@ namespace Orcs_Plus
 
             comLibAI.RegisterAgentType(typeof(UAEN_OrcShaman), new AgentAI.ControlParameters(true));
             comLibAI.AddChallengesToAgentType(typeof(UAEN_OrcShaman), aiChallenges_Shaman);
+        }
+
+        private bool delegate_ValidFor_SecretsOfDeath(AgentAI.ChallengeData challengeData, UA ua)
+        {
+            T_MasteryDeath deathMastery = ua.person.traits.OfType<T_MasteryDeath>().FirstOrDefault();
+
+            if (deathMastery == null)
+            {
+                deathMastery = new T_MasteryDeath();
+                deathMastery.level = 2;
+                ua.person.receiveTrait(deathMastery);
+            }
+
+            if (deathMastery.level < deathMastery.getMaxLevel())
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool delegate_ValidFor_SkeletalServitor(AgentAI.ChallengeData challengeData, UA ua)
+        {
+            Pr_Death death = challengeData.location.properties.OfType<Pr_Death>().FirstOrDefault();
+            if (death == null)
+            {
+                return false;
+            }
+
+            int turns = ua.map.getStepDist(ua.location, challengeData.location) + (int)Math.Ceiling(challengeData.challenge.getComplexity() / challengeData.challenge.getProgressPerTurnInner(ua, null)) + 2;
+            double decay = 0.5;
+
+            int catacombCount = 0;
+            foreach (Location neighbour in challengeData.location.getNeighbours())
+            {
+                if (neighbour.settlement != null)
+                {
+                    foreach (Subsettlement sub in neighbour.settlement.subs)
+                    {
+                        if (sub is Sub_Catacombs)
+                        {
+                            catacombCount++;
+                        }
+                    }
+                }
+            }
+            decay += catacombCount * 5;
+
+            if (death.charge - (decay * turns) < ua.map.param.mg_skeletalServitorCost)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool delegate_ValidFor_FacelessServitor(AgentAI.ChallengeData challengeData, UA ua)
+        {
+            Pr_Death death = challengeData.location.properties.OfType<Pr_Death>().FirstOrDefault();
+            if (death == null)
+            {
+                return false;
+            }
+
+            int turns = ua.map.getStepDist(ua.location, challengeData.location) + (int)Math.Ceiling(challengeData.challenge.getComplexity() / challengeData.challenge.getProgressPerTurnInner(ua, null)) + 2;
+            double decay = 0.5;
+
+            int catacombCount = 0;
+            foreach (Location neighbour in challengeData.location.getNeighbours())
+            {
+                if (neighbour.settlement != null)
+                {
+                    foreach (Subsettlement sub in neighbour.settlement.subs)
+                    {
+                        if (sub is Sub_Catacombs)
+                        {
+                            catacombCount++;
+                        }
+                    }
+                }
+            }
+            decay += catacombCount * 5;
+
+            if (death.charge - (decay * turns) < ua.map.param.mg_facelessServitorCost)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private double delegate_Utility_SecretsOfDeath(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
@@ -521,6 +621,25 @@ namespace Orcs_Plus
             return utility;
         }
 
+        private bool delegate_ValidFor_LearnArcaneSecret(AgentAI.ChallengeData challengeData, UA ua)
+        {
+            T_MasteryDeath deathMastery = ua.person.traits.OfType<T_MasteryDeath>().FirstOrDefault();
+
+            if (deathMastery == null)
+            {
+                deathMastery = new T_MasteryDeath();
+                deathMastery.level = 2;
+                ua.person.receiveTrait(deathMastery);
+            }
+
+            if (deathMastery.level < deathMastery.getMaxLevel())
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         private double delegate_Utility_LearnSecret(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
         {
             List<Trait> traits = ua.person.traits;
@@ -546,8 +665,8 @@ namespace Orcs_Plus
                 Rt_StudyDeath studyDeath = ua.rituals.OfType<Rt_StudyDeath>().FirstOrDefault();
                 if (studyDeath != null && arcaneKnowledge.level < studyDeath.getReq(deathMastery.level))
                 {
-                    reasonMsgs?.Add(new ReasonMsg("Requires Arcane Knowledge", 100));
-                    utility += 100;
+                    reasonMsgs?.Add(new ReasonMsg("Requires Arcane Knowledge", 80));
+                    utility += 60;
                 }
             }
 
@@ -576,6 +695,36 @@ namespace Orcs_Plus
                 {
                     return false;
                 }
+            }
+
+            Pr_Death death = challengeData.location.properties.OfType<Pr_Death>().FirstOrDefault();
+            if (death == null)
+            {
+                return false;
+            }
+
+            int turns = ua.map.getStepDist(ua.location, challengeData.location) + (int)Math.Ceiling(challengeData.challenge.getComplexity() / challengeData.challenge.getProgressPerTurnInner(ua, null)) + 2;
+            double decay = 0.5;
+
+            int catacombCount = 0;
+            foreach(Location neighbour in challengeData.location.getNeighbours())
+            {
+                if (neighbour.settlement != null)
+                {
+                    foreach (Subsettlement sub in neighbour.settlement.subs)
+                    {
+                        if (sub is Sub_Catacombs)
+                        {
+                            catacombCount++;
+                        }
+                    }
+                }
+            }
+            decay += catacombCount * 5;
+
+            if (death.charge - (decay * turns) <= 0.0)
+            {
+                return false;
             }
 
             return true;
@@ -609,6 +758,36 @@ namespace Orcs_Plus
                 }
             }
 
+            Pr_Death death = challengeData.location.properties.OfType<Pr_Death>().FirstOrDefault();
+            if (death == null)
+            {
+                return false;
+            }
+
+            int turns = ua.map.getStepDist(ua.location, challengeData.location) + (int)Math.Ceiling(challengeData.challenge.getComplexity() / challengeData.challenge.getProgressPerTurnInner(ua, null)) + 2;
+            double decay = 0.5;
+
+            int catacombCount = 0;
+            foreach (Location neighbour in challengeData.location.getNeighbours())
+            {
+                if (neighbour.settlement != null)
+                {
+                    foreach (Subsettlement sub in neighbour.settlement.subs)
+                    {
+                        if (sub is Sub_Catacombs)
+                        {
+                            catacombCount++;
+                        }
+                    }
+                }
+            }
+            decay += catacombCount * 5;
+
+            if (death.charge - (decay * turns) <= 0.0)
+            {
+                return false;
+            }
+
             return true;
         }
 
@@ -638,12 +817,46 @@ namespace Orcs_Plus
 
         private bool delegate_ValidFor_DeathsShadow(AgentAI.ChallengeData challengeData, UA ua)
         {
+            bool result = false;
             if (ua.society is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && ((orcCulture.tenet_shadowWeaving.status < 0 && ua.person.shadow >= 50) || orcCulture.tenet_shadowWeaving.status == -2))
             {
-                return true;
+                result = true;
             }
 
-            return false;
+            if (result)
+            {
+                Pr_Death death = challengeData.location.properties.OfType<Pr_Death>().FirstOrDefault();
+                if (death == null)
+                {
+                    return false;
+                }
+
+                int turns = ua.map.getStepDist(ua.location, challengeData.location) + (int)Math.Ceiling(challengeData.challenge.getComplexity() / challengeData.challenge.getProgressPerTurnInner(ua, null)) + 2;
+                double decay = 0.5;
+
+                int catacombCount = 0;
+                foreach (Location neighbour in challengeData.location.getNeighbours())
+                {
+                    if (neighbour.settlement != null)
+                    {
+                        foreach (Subsettlement sub in neighbour.settlement.subs)
+                        {
+                            if (sub is Sub_Catacombs)
+                            {
+                                catacombCount++;
+                            }
+                        }
+                    }
+                }
+                decay += catacombCount * 5;
+
+                if (death.charge - (decay * turns) < ua.map.param.mg_deathsShadowDeathModifierReq)
+                {
+                    return false;
+                }
+            }
+
+            return result;
         }
 
         private double delegate_Utility_DeathsShadow(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)

@@ -136,30 +136,13 @@ namespace Orcs_Plus
                     List<bool> endAlignments = new List<bool>();
                     foreach (Location endPoint in endPoints)
                     {
-                        if (endPoint.soc != null)
+                        if (ModCore.core.checkAlignment(u.society as SG_Orc, endPoint))
                         {
-                            SG_Orc orcSociety = u.society as SG_Orc;
-                            if (orcSociety != null && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
-                            {
-                                if (orcCulture.tenet_intolerance.status == -2)
-                                {
-                                    if (endPoint.soc.isDark() || (endPoint.soc is Society society && (society.isDarkEmpire || society.isOphanimControlled)))
-                                    {
-                                        endAlignments.Add(false);
-                                    }
-                                }
-                                else if (orcCulture.tenet_intolerance.status == 2)
-                                {
-                                    if (!endPoint.soc.isDark() || (endPoint.soc is Society society && (!society.isDarkEmpire || !society.isOphanimControlled)))
-                                    {
-                                        endAlignments.Add(false);
-                                    }
-                                }
-                            }
+                            endAlignments.Add(true);
                         }
                     }
 
-                    if (endAlignments.Count < 2)
+                    if (endAlignments.Count > 0)
                     {
                         targetRoutes.Add(tradeRoute);
                     }
@@ -173,6 +156,30 @@ namespace Orcs_Plus
 
                 foreach(TradeRoute target in targetRoutes)
                 {
+                    // Place Shipwreck
+                    int wreckRoll = Eleven.random.Next(10);
+
+                    if (wreckRoll < 1)
+                    {
+                        List<Location> oceanLocations = target.path.FindAll(l => l.isOcean).ToList();
+
+                        if (oceanLocations.Count > 0)
+                        {
+                            Location wreckLocation = oceanLocations[Eleven.random.Next(oceanLocations.Count)];
+                            Pr_Shipwreck wreck = wreckLocation.properties.OfType<Pr_Shipwreck>().FirstOrDefault();
+
+                            if (wreck == null)
+                            {
+                                wreckLocation.properties.Add(new Pr_Shipwreck(wreckLocation));
+                            }
+                            else
+                            {
+                                wreck.charge += 25.0;
+                            }
+                        }
+                    }
+
+                    // Gather Propsperity
                     if (target.start().settlement is SettlementHuman startSettlement)
                     {
                         prosperity += startSettlement.prosperity;

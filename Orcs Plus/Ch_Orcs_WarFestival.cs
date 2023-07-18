@@ -130,6 +130,11 @@ namespace Orcs_Plus
             ua.addProfile(0.5);
             ua.addMenace(1.5);
 
+            if (location.soc is SG_Orc orcSociety)
+            {
+                orcSociety.menace += 0.25;
+            }
+
             Pr_OrcishIndustry industry = location.properties.OfType<Pr_OrcishIndustry>().FirstOrDefault();
             double deltaIndustry = 0;
             double val = industryConsumption * getProgressPerTurnInner(ua, null);

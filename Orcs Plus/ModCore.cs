@@ -1,11 +1,15 @@
 ﻿using Assets.Code;
 using Assets.Code.Modding;
 using CommunityLib;
+using DuloGames.UI;
+using HarmonyLib;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 namespace Orcs_Plus
 {
@@ -24,6 +28,8 @@ namespace Orcs_Plus
         public List<Power> godPowers1 = new List<Power>();
 
         public List<Power> godPowers2 = new List<Power>();
+
+        public List<Location> shipwreckLocations = new List<Location>();
 
         private static bool patched = false;
 
@@ -239,6 +245,19 @@ namespace Orcs_Plus
                             intDataCCC.typeDict.Add("Banner", dominionBanner);
                         }
                         break;
+                    case "LivingCharacter":
+                        ModData.ModIntegrationData intDataLC = new ModData.ModIntegrationData(kernel.GetType().Assembly);
+                        core.data.addModAssembly("LivingCharacters", intDataLC);
+
+                        if (core.data.tryGetModAssembly("LivingCharacters", out intDataLC) && intDataLC.assembly != null)
+                        {
+                            Type vampireNobeType = intDataLC.assembly.GetType("LivingCharacters.UAEN_Chars_VampireNoble", false);
+                            if (vampireNobeType != null)
+                            {
+                                intDataLC.typeDict.Add("Vampire", vampireNobeType);
+                            }
+                        }
+                        break;
                     case "LivingWilds":
                         ModData.ModIntegrationData intDataLW = new ModData.ModIntegrationData(kernel.GetType().Assembly);
                         core.data.addModAssembly("LivingWilds", intDataLW);
@@ -279,6 +298,21 @@ namespace Orcs_Plus
                             }
                         }
                         break;
+                    case "Wonderblunder_DeepOnes":
+                        ModData.ModIntegrationData intDataDOPlus = new ModData.ModIntegrationData(kernel.GetType().Assembly);
+                        core.data.addModAssembly("DeepOnesPlus", intDataDOPlus);
+
+                        if (core.data.tryGetModAssembly("DeepOnesPlus", out intDataDOPlus))
+                        {
+                            Type kernelType = intDataDOPlus.assembly.GetType("Wonderblunder_DeepOnes.Modcore", false);
+                            if (kernelType != null)
+                            {
+                                intDataDOPlus.typeDict.Add("Kernel", kernelType);
+                            }
+
+                            intDataDOPlus.methodInfoDict.Add("getAbyssalItem", AccessTools.Method(kernelType, "getItemFromAbyssalPool", new Type[] { typeof(Map), typeof(UA) }));
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -300,6 +334,15 @@ namespace Orcs_Plus
             {
                 updateGodPowers(map);
             }
+
+            foreach (Location location in shipwreckLocations)
+            {
+                if (location.settlement is Set_CityRuins)
+                {
+                    location.properties.Add(new Pr_Shipwreck(location));
+                }
+            }
+            shipwreckLocations.Clear();
         }
 
         private void updateOrcSGCultureMap(Map map)
@@ -435,6 +478,78 @@ namespace Orcs_Plus
             return hab;
         }
 
+        public override Color mapMask_getColour(Hex hex)
+        {
+            if(hex.map.masker.mask == MapMaskManager.maskType.RELIGION)
+            {
+                if (hex.terrain == Hex.terrainType.SEA)
+                {
+                    return Color.clear;
+                }
+
+                HolyOrder targetOrder = hex.map.world.ui.uiScrollables.scrollable_threats.targetOrder;
+                if (hex.location != null && hex.settlement != null)
+                {
+                    if (hex.settlement is SettlementHuman settlementHuman)
+                    {
+                        if (targetOrder != null)
+                        {
+                            if (settlementHuman.order == targetOrder)
+                            {
+                                return settlementHuman.order.color;
+                            }
+                        }
+                        else
+                        {
+                            if (settlementHuman.order != null)
+                            {
+                                return settlementHuman.order.color;
+                            }
+                        }
+                    }
+                    else if (hex.settlement is Set_MinorHuman minorHuman)
+                    {
+                        foreach (Subsettlement sub in minorHuman.subs)
+                        {
+                            if (sub is Sub_Temple temple && temple.order != null)
+                            {
+                                if (targetOrder != null)
+                                {
+                                    if (temple.order == targetOrder)
+                                    {
+                                        return temple.order.color;
+                                    }
+                                }
+                                else
+                                {
+                                    return temple.order.color;
+                                }
+                            }
+                        }
+                    }
+                    else if (hex.settlement is Set_OrcCamp camp && hex.location.soc is SG_Orc orcSociety)
+                    {
+                        if (core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+                        {
+                            if (targetOrder != null)
+                            {
+                                if (orcCulture == targetOrder)
+                                {
+                                    return orcCulture.color;
+                                }
+                            }
+                            else
+                            {
+                                return orcCulture.color;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return new Color(0f, 0f, 0f, 0.75f);
+        }
+
         public override void onChallengeComplete(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)
         {
             switch (task_PerformChallenge.challenge)
@@ -468,6 +583,12 @@ namespace Orcs_Plus
                     break;
                 case Ch_RaidPeriphery _:
                     OnChallengeComplete.Ch_RaidPeriphery(challenge, ua, task_PerformChallenge);
+                    break;
+                case Rt_RaidPort _:
+                    OnChallengeComplete.Rt_RaidPort(challenge, ua, task_PerformChallenge);
+                    break;
+                case Rt_RaidShipping _:
+                    OnChallengeComplete.Rt_RaidShipping(challenge, ua, task_PerformChallenge);
                     break;
                 default:
                     break;
@@ -804,25 +925,14 @@ namespace Orcs_Plus
                 return;
             }
 
+            onPersonDeath_InfluenceGain(person, v, killer);
+
             //Console.WriteLine("Orcs_Plus: Person with Unit has died.");
             UA uaPerson = uPerson as UA;
             SG_Orc orcSociety = uPerson.society as SG_Orc;
             HolyOrder_Orcs orcCulture = uPerson.society as HolyOrder_Orcs;
 
-            // Person Activity Data
-            Task_PerformChallenge performChallenge = uaPerson?.task as Task_PerformChallenge;
-            Challenge challenge = performChallenge?.challenge;
-
-            Ch_SkirmishAttacking skirmishAtt = null;
-            Ch_SkirmishDefending skirmishDef = null;
-
-            if (challenge != null)
-            {
-                //Console.WriteLine("Orcs_Plus: Person died performing challenge");
-                skirmishAtt = challenge as Ch_SkirmishAttacking;
-                skirmishDef = challenge as Ch_SkirmishDefending;
-            }
-
+            // Cordyceps Symbiosis
             if (uaPerson is UAEN_OrcUpstart || uaPerson is UAEN_OrcElder || uaPerson is UAEN_OrcShaman)
             {
                 SG_Orc orcSociety2 = uaPerson.society as SG_Orc;
@@ -870,6 +980,7 @@ namespace Orcs_Plus
                 uKiller = pKiller.unit;
             }
 
+            // Blood Fued
             if (uKiller != null)
             {
                 if (uaPerson is UAEN_OrcElder && uKiller is UA uaKiller && !uaKiller.person.traits.Any(t => t is T_BloodFeud fued && fued.orcSociety == orcSociety))
@@ -878,356 +989,444 @@ namespace Orcs_Plus
 
                     person.map.addUnifiedMessage(uaPerson, uaKiller, "Blood Feud", uaKiller.getName() + " has become the target of a blood fued by killing an orc elder of the " + uaPerson.society.getName() + ". They must now spend the rest of their days looking over their shoulder for the sudden the appearance of an avenging orc upstart.", "Orc Blood Feud");
                 }
+            }
+        }
 
-                //Console.WriteLine("OrcsPlus: killer is " + uKiller.getName());
-                if (v == "Killed in battle with " + uKiller.getName())
+        public void onPersonDeath_InfluenceGain(Person person, string v, object killer)
+        {
+            Unit uPerson = person.unit;
+            if (uPerson == null)
+            {
+                return;
+            }
+
+            UA uaPerson = uPerson as UA;
+
+            bool isNature = false;
+            bool isVampire = false;
+
+            if (core.data.tryGetModAssembly("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.assembly != null && intDataLW.typeDict.TryGetValue("NatureCritter", out Type natureType) && natureType != null)
+            {
+                if (uPerson.GetType() == natureType || uPerson.GetType().IsSubclassOf(natureType))
                 {
-                    //Console.WriteLine("OrcsPlus: Died in battle");
+                    isNature = true;
+                }
+            }
+
+            if (uaPerson != null)
+            {
+                isVampire = checkIsVampire(uaPerson);
+            }
+
+            SG_Orc orcSociety = uPerson.society as SG_Orc;
+            HolyOrder_Orcs orcCulture = uPerson.society as HolyOrder_Orcs;
+
+            if (orcSociety != null)
+            {
+                core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+            }
+
+            HashSet<SG_Orc> influencedOrcSocietyHasSet = new HashSet<SG_Orc>();
+            HolyOrder_Orcs influencedOrcCulture_Direct = null;
+            List<HolyOrder_Orcs> influencedOrcCultures_Warring = new List<HolyOrder_Orcs>();
+            List<HolyOrder_Orcs> influencedOrcCultures_Regional = new List<HolyOrder_Orcs>();
+
+            if (orcCulture != null)
+            {
+                influencedOrcCulture_Direct = orcCulture;
+                influencedOrcSocietyHasSet.Add(orcCulture.orcSociety);
+            }
+
+            if (uPerson.society != null)
+            {
+                foreach (SocialGroup sg in person.map.socialGroups)
+                {
+                    if (sg is SG_Orc orcSociety2 && sg.getRel(uPerson.society).state == DipRel.dipState.war && !influencedOrcSocietyHasSet.Contains(orcSociety2) && core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null)
+                    {
+                        influencedOrcCultures_Warring.Add(orcCulture2);
+                        influencedOrcSocietyHasSet.Add(orcSociety2);
+                    }
+                }
+            }
+
+            if (uPerson.location.soc is SG_Orc orcSociety3 && !influencedOrcSocietyHasSet.Contains(orcSociety3) && core.data.orcSGCultureMap.TryGetValue(orcSociety3, out HolyOrder_Orcs orcCulture3) && orcCulture3 != null)
+            {
+                influencedOrcCultures_Regional.Add(orcCulture3);
+                influencedOrcSocietyHasSet.Add(orcSociety3);
+            }
+
+            Person pKiller = killer as Person;
+            Unit uKiller = killer as Unit;
+
+            if (pKiller != null)
+            {
+                uKiller = pKiller.unit;
+            }
+
+            if (uKiller != null && v == "Killed in battle with " + uKiller.getName())
+            {
+                if (isVampire)
+                {
                     if (uKiller.isCommandable())
                     {
-                        //Console.WriteLine("OrcsPlus: killer is commandable");
-                        if (orcCulture != null)
+                        if (influencedOrcCulture_Direct != null)
                         {
-                            //Console.WriteLine("OrcsPlus: victim is of orc culture");
-                            TryAddInfluenceGain(orcCulture, new ReasonMsg("Killed orc agent in battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                            core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Slew orc vampire in battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill] * 2), true);
                         }
 
-                        if (orcSociety != null)
+                        foreach (HolyOrder_Orcs orcs in core.data.orcSGCultureMap.Values)
                         {
-                            TryAddInfluenceGain(orcSociety, new ReasonMsg("Killed orc agent in battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
-                        }
-                        //Console.WriteLine("OrcsPlus: Direct influence added");
-                        List<SG_Orc> orcSocieties = core.data.getOrcSocieties(person.map);
-
-                        if (orcSocieties.Count > 0 && uPerson.society != null)
-                        {
-                            //Console.WriteLine("OrcsPlus: Got active orc societies");
-                            foreach (SG_Orc orcs in orcSocieties)
-                            {
-                                if (orcSociety != null && orcs == orcSociety)
-                                {
-                                    continue;
-                                }
-
-                                if (orcs.getRel(uPerson.society).state == DipRel.dipState.war)
-                                {
-                                    TryAddInfluenceGain(orcs, new ReasonMsg("Killed enemy agent in battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
-                                }
-                            }
-                        }
-                        //Console.WriteLine("OrcsPlus: End");
-                    }
-                    else if (!uKiller.society.isDark())
-                    {
-                        if (orcCulture != null)
-                        {
-                            TryAddInfluenceGain(orcCulture, new ReasonMsg("Killed orc agent in battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]));
-                        }
-
-                        if (orcSociety != null)
-                        {
-                            TryAddInfluenceGain(orcSociety, new ReasonMsg("Killed orc agent in battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]));
+                            core.TryAddInfluenceGain(orcs, new ReasonMsg("Slew vampire in battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill] * 2), true);
                         }
                     }
-
-                    if (core.data.godTenetTypes.TryGetValue(person.map.overmind.god.GetType(), out Type tenetType) && tenetType != null && tenetType == typeof(H_Orcs_HarbringersMadness))
+                    else if (uKiller.society != null && !uKiller.society.isDark())
                     {
-                        if (uKiller.society is SG_Orc orcSociety2 && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null && orcCulture2.tenet_god is H_Orcs_HarbringersMadness harbringers && harbringers.status < -1)
+                        if (influencedOrcCulture_Direct != null)
                         {
-                            foreach (RelObj relation in person.relations.Values)
-                            {
-                                if (relation.relation == RelObj.relType.PARENT || relation.relation == RelObj.relType.SPOUSE || relation.relation == RelObj.relType.CHILD)
-                                {
-                                    Person relative = person.map.persons[relation.them];
-
-                                    if (!relative.isDead && relative.unit != null && relative.unit.hp > 0 && !relative.unit.isCommandable())
-                                    {
-                                        person.map.persons[relation.them].sanity -= 2;
-
-                                        if (person.map.persons[relation.them].sanity < 1.0)
-                                        {
-                                            person.map.persons[relation.them].goInsane(-1);
-                                        }
-                                    }
-                                }
-                            }
+                            core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Slew orc vampire in battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill] * 2));
                         }
-                        else if (uKiller.society is HolyOrder_Orcs orcCulture3 && orcCulture3.tenet_god is H_Orcs_HarbringersMadness harbringers2 && harbringers2.status < -1)
+
+                        foreach (HolyOrder_Orcs orcs in core.data.orcSGCultureMap.Values)
                         {
-                            foreach (RelObj relation in person.relations.Values)
-                            {
-                                Person relative = person.map.persons[relation.them];
-
-                                if (!relative.isDead && relative.unit != null && relative.unit.hp > 0 && !relative.unit.isCommandable())
-                                {
-                                    person.map.persons[relation.them].sanity -= 2;
-
-                                    if (person.map.persons[relation.them].sanity < 1.0)
-                                    {
-                                        person.map.persons[relation.them].goInsane(-1);
-                                    }
-                                }
-                            }
+                            core.TryAddInfluenceGain(orcs, new ReasonMsg("Slew vampire in battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill] * 2));
                         }
                     }
                 }
-                else if (v == "Killed by " + uKiller.getName())
+                else if (!isNature)
                 {
                     if (uKiller.isCommandable())
                     {
-                        if (orcCulture != null)
+                        if (influencedOrcCulture_Direct != null)
                         {
-                            TryAddInfluenceGain(orcCulture, new ReasonMsg("Intercepted and killed orc agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                            core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Killed orc agent in battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
                         }
 
-                        if (orcSociety != null)
+                        foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
                         {
-                            TryAddInfluenceGain(orcSociety, new ReasonMsg("Intercepted and killed orc agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                            core.TryAddInfluenceGain(orcs, new ReasonMsg("Killed enemy agent in battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
                         }
 
-                        List<SG_Orc> orcSocieties = core.data.getOrcSocieties(person.map);
-
-                        if (orcSocieties?.Count > 0 && uPerson.society != null)
+                        foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
                         {
-                            foreach (SG_Orc orcs in orcSocieties)
-                            {
-                                if (orcSociety != null && orcs == orcSociety)
-                                {
-                                    continue;
-                                }
-
-                                if (orcs.getRel(uPerson.society).state == DipRel.dipState.war)
-                                {
-                                    TryAddInfluenceGain(orcs, new ReasonMsg("Intercepted and killed enemy agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
-                                }
-                            }
+                            core.TryAddInfluenceGain(orcs, new ReasonMsg("Killed trespassing agent in battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
                         }
                     }
-                    else if (!uKiller.society.isDark())
+                    else if (uKiller.society != null && !uKiller.society.isDark() && influencedOrcCulture_Direct != null)
                     {
-                        if (orcCulture != null)
+                        core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Killed orc agent in battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]));
+
+                        foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
                         {
-                            TryAddInfluenceGain(orcCulture, new ReasonMsg("Intercepted and killed orc agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]));
+                            core.TryAddInfluenceGain(orcs, new ReasonMsg("Killed enemy agent in battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]));
                         }
 
-                        if (orcSociety != null)
+                        foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
                         {
-                            TryAddInfluenceGain(orcSociety, new ReasonMsg("Intercepted and killed orc agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]));
-                        }
-                    }
-                }
-                else if (v == "Killed by a volcano")
-                {
-                    if (uKiller.isCommandable())
-                    {
-                        if (orcCulture != null)
-                        {
-                            TryAddInfluenceGain(orcCulture, new ReasonMsg("Volcanic eruption (geomancy) killed orc agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
-                        }
-
-                        if (orcSociety != null)
-                        {
-                            TryAddInfluenceGain(orcSociety, new ReasonMsg("Volcanic eruption (geomancy) killed orc agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
-                        }
-
-                        List<SG_Orc> orcSocieties = core.data.getOrcSocieties(person.map);
-
-                        if (orcSocieties?.Count > 0 && uPerson.society != null)
-                        {
-                            foreach (SG_Orc orcs in orcSocieties)
-                            {
-                                if (orcSociety != null && orcs == orcSociety)
-                                {
-                                    continue;
-                                }
-
-                                if (orcs.getRel(uPerson.society).state == DipRel.dipState.war)
-                                {
-                                    TryAddInfluenceGain(orcs, new ReasonMsg("Volcanic eruption (geomancy) killed enemy agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
-                                }
-                            }
-                        }
-                    }
-                    else if (!uKiller.society.isDark())
-                    {
-                        if (orcCulture != null)
-                        {
-                            TryAddInfluenceGain(orcCulture, new ReasonMsg("Volcanic eruption (geomancy) killed orc agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]));
-                        }
-
-                        if (orcSociety != null)
-                        {
-                            TryAddInfluenceGain(orcSociety, new ReasonMsg("Volcanic eruption (geomancy) killed orc agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]));
+                            core.TryAddInfluenceGain(orcs, new ReasonMsg("Killed trespassing agent in battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]));
                         }
                     }
                 }
             }
-            else if (v == "Killed by Ophanim's Smite")
+            else if (uKiller is UM && v == "Killed by " + uKiller.getName())
             {
-                if (orcCulture != null)
+                if (isVampire)
                 {
-                    TryAddInfluenceGain(orcCulture, new ReasonMsg("Smote orc agent", core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                    if (uKiller.isCommandable())
+                    {
+                        if (influencedOrcCulture_Direct != null)
+                        {
+                            core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Intercepted and slew orc vampire", core.data.influenceGain[ModData.influenceGainAction.AgentKill] * 2), true);
+                        }
+
+                        foreach (HolyOrder_Orcs orcs in core.data.orcSGCultureMap.Values)
+                        {
+                            core.TryAddInfluenceGain(orcs, new ReasonMsg("Intercepted and slew vampire", core.data.influenceGain[ModData.influenceGainAction.AgentKill] * 2), true);
+                        }
+                    }
+                    else if (uKiller.society != null && !uKiller.society.isDark())
+                    {
+                        if (influencedOrcCulture_Direct != null)
+                        {
+                            core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Intercepted and slew orc vampire", core.data.influenceGain[ModData.influenceGainAction.AgentKill] * 2));
+                        }
+
+                        foreach (HolyOrder_Orcs orcs in core.data.orcSGCultureMap.Values)
+                        {
+                            core.TryAddInfluenceGain(orcs, new ReasonMsg("Intercepted and slew vampire", core.data.influenceGain[ModData.influenceGainAction.AgentKill] * 2));
+                        }
+                    }
                 }
-
-                if (orcSociety != null)
+                else if (!isNature)
                 {
-                    TryAddInfluenceGain(orcSociety, new ReasonMsg("Smote orc agent", core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
-                }
-
-                List<SG_Orc> orcSocieties = core.data.getOrcSocieties(person.map);
-
-                if (orcSocieties?.Count > 0 && uPerson.society != null)
-                {
-                    foreach (SG_Orc orcs in orcSocieties)
+                    if (uKiller.isCommandable())
                     {
-                        if (orcSociety != null && orcs == orcSociety)
+                        if (influencedOrcCulture_Direct != null)
                         {
-                            continue;
+                            core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Intercepted and killed orc agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
                         }
 
-                        if (orcs.getRel(uPerson.society).state == DipRel.dipState.war)
+                        foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
                         {
-                            TryAddInfluenceGain(orcs, new ReasonMsg("Smote enemy agent", core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                            core.TryAddInfluenceGain(orcs, new ReasonMsg("Intercepted and killed enemy agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                        }
+
+                        foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                        {
+                            core.TryAddInfluenceGain(orcs, new ReasonMsg("Intercepted and killed trespassing agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
                         }
                     }
-                }
-            }
-            else if ((skirmishAtt != null && v == "Killed by dangers during challenge: " + skirmishAtt.getName()) || (skirmishDef != null && v == "Killed by dangers during challenge: " + skirmishDef.getName()))
-            {
-                bool infGainElder = false;
-                bool infGainHuman = false;
-
-                if (skirmishAtt != null || skirmishDef != null)
-                {
-                    List<UM> enemies = new List<UM>();
-                    List<UA> enemyComs = new List<UA>();
-
-                    if (skirmishAtt != null)
+                    else if (uKiller.society != null && !uKiller.society.isDark() && influencedOrcCulture_Direct != null)
                     {
-                        core.data.getBattleArmyEnemies(skirmishAtt.battle, uaPerson, out enemies, out enemyComs);
-                    }
+                        core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Intercepted and killed orc agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]));
 
-                    if (skirmishDef != null)
-                    {
-                        core.data.getBattleArmyEnemies(skirmishDef.battle, uaPerson, out enemies, out enemyComs);
-                    }
-
-                    if (enemies.Count > 0)
-                    {
-                        foreach (UM enemy in enemies)
+                        foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
                         {
-                            if (enemy.isCommandable())
-                            {
-                                infGainElder = true;
-                            }
-                            else if (!enemy.society.isDark())
-                            {
-                                infGainHuman = true;
-                            }
-
-                            if (infGainElder && infGainHuman)
-                            {
-                                break;
-                            }
-                        }
-                    }
-
-                    if (enemyComs.Count > 0 && !(infGainElder && infGainHuman))
-                    {
-                        foreach (UA com in enemyComs)
-                        {
-                            if (com.isCommandable())
-                            {
-                                infGainElder = true;
-                            }
-                            else if (!com.society.isDark())
-                            {
-                                infGainHuman = true;
-                            }
-
-                            if (infGainElder && infGainHuman)
-                            {
-                                break;
-                            }
-                        }
-                    }
-
-                    if (infGainElder)
-                    {
-                        if (orcCulture != null)
-                        {
-                            TryAddInfluenceGain(orcCulture, new ReasonMsg("Killed orc agent skirmishing a battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                            core.TryAddInfluenceGain(orcs, new ReasonMsg("Intercepted and killed enemy agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]));
                         }
 
-                        if (orcSociety != null)
+                        foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
                         {
-                            TryAddInfluenceGain(orcSociety, new ReasonMsg("Killed orc agent skirmishing a battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
-                        }
-
-                        List<SG_Orc> orcSocieties = core.data.getOrcSocieties(person.map);
-
-                        if (orcSocieties?.Count > 0)
-                        {
-                            foreach (SG_Orc orcs in orcSocieties)
-                            {
-                                if (orcSociety != null && orcs == orcSociety)
-                                {
-                                    continue;
-                                }
-
-                                if (orcs.getRel(uKiller.society).state == DipRel.dipState.war)
-                                {
-                                    TryAddInfluenceGain(orcs, new ReasonMsg("Killed enemy agent skirmishing a battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
-                                }
-                            }
-                        }
-                    }
-
-                    if (infGainHuman)
-                    {
-                        if (orcCulture != null)
-                        {
-                            TryAddInfluenceGain(orcCulture, new ReasonMsg("Killed orc agent skirmishing a battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]));
-                        }
-
-                        if (orcSociety != null)
-                        {
-                            TryAddInfluenceGain(orcSociety, new ReasonMsg("Killed orc agent skirmishing a battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]));
+                            core.TryAddInfluenceGain(orcs, new ReasonMsg("Intercepted and killed trespassing agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]));
                         }
                     }
                 }
             }
             else if (v == "Killed by a volcano")
             {
-
-                if (orcCulture != null)
+                if (uKiller != null)
                 {
-                    TryAddInfluenceGain(orcCulture, new ReasonMsg("Awakening killed orc agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
-                }
-
-                if (orcSociety != null)
-                {
-                    TryAddInfluenceGain(orcSociety, new ReasonMsg("Awakening killed orc agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
-                }
-
-                List<SG_Orc> orcSocieties = core.data.getOrcSocieties(person.map);
-
-                if (orcSocieties?.Count > 0 && uPerson.society != null)
-                {
-                    foreach (SG_Orc orcs in orcSocieties)
+                    if (isVampire)
                     {
-                        if (orcSociety != null && orcs == orcSociety)
+                        if (uKiller.isCommandable())
                         {
-                            continue;
-                        }
+                            if (influencedOrcCulture_Direct != null)
+                            {
+                                core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Used geomancy to slay orc vampire (volcanic eruption)", core.data.influenceGain[ModData.influenceGainAction.AgentKill] * 2), true);
+                            }
 
-                        if (orcs.getRel(uPerson.society).state == DipRel.dipState.war)
+                            foreach (HolyOrder_Orcs orcs in core.data.orcSGCultureMap.Values)
+                            {
+                                core.TryAddInfluenceGain(orcs, new ReasonMsg("Used geomancy to slay vampire (volcanic eruption)", core.data.influenceGain[ModData.influenceGainAction.AgentKill] * 2), true);
+                            }
+                        }
+                        else if (uKiller.society != null && !uKiller.society.isDark())
                         {
-                            TryAddInfluenceGain(orcs, new ReasonMsg("Awakening killed enemy agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                            if (influencedOrcCulture_Direct != null)
+                            {
+                                core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Used geomancy to slay orc vampire (volcanic eruption)", core.data.influenceGain[ModData.influenceGainAction.AgentKill] * 2));
+                            }
+
+                            foreach (HolyOrder_Orcs orcs in core.data.orcSGCultureMap.Values)
+                            {
+                                core.TryAddInfluenceGain(orcs, new ReasonMsg("Used geomancy to slay vampire (volcanic eruption)", core.data.influenceGain[ModData.influenceGainAction.AgentKill] * 2));
+                            }
+                        }
+                    }
+                    else if (!isNature)
+                    {
+                        if (uKiller.isCommandable())
+                        {
+                            if (influencedOrcCulture_Direct != null)
+                            {
+                                core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Used geomancy to kill orc agent (volcanic eruption)", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                            }
+
+                            foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                            {
+                                core.TryAddInfluenceGain(orcs, new ReasonMsg("Used geomancy to kill enemy agent (volcanic eruption)", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                            }
+
+                            foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                            {
+                                core.TryAddInfluenceGain(orcs, new ReasonMsg("Used geomancy to kill trespassing agent (volcanic eruption)", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                            }
+                        }
+                        else if (uKiller.society != null && !uKiller.society.isDark() && influencedOrcCulture_Direct != null)
+                        {
+                            core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Used geomancy to kill orc agent (volcanic eruption)", core.data.influenceGain[ModData.influenceGainAction.AgentKill]));
+
+                            foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                            {
+                                core.TryAddInfluenceGain(orcs, new ReasonMsg("Used geomancy to kill enemy agent (volcanic eruption)", core.data.influenceGain[ModData.influenceGainAction.AgentKill]));
+                            }
+
+                            foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                            {
+                                core.TryAddInfluenceGain(orcs, new ReasonMsg("Used geomancy to kill trespassing agent (volcanic eruption)", core.data.influenceGain[ModData.influenceGainAction.AgentKill]));
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (influencedOrcCulture_Direct != null)
+                    {
+                        core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Awakening killed orc agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                    }
+
+                    foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                    {
+                        core.TryAddInfluenceGain(orcs, new ReasonMsg("Awakening killed enemy agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                    }
+
+                    foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                    {
+                        core.TryAddInfluenceGain(orcs, new ReasonMsg("Awakening killed trespassing agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                    }
+                }
+            }
+            else if (v == "Killed by Ophanim's Smite")
+            {
+                if (influencedOrcCulture_Direct != null)
+                {
+                    core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Smote orc agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                {
+                    core.TryAddInfluenceGain(orcs, new ReasonMsg("Smote enemy agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                {
+                    core.TryAddInfluenceGain(orcs, new ReasonMsg("Smote trespassing agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                }
+            }
+            else if (uaPerson != null && uaPerson.task is Task_PerformChallenge challengeTask)
+            {
+                Ch_SkirmishAttacking skirmishAtt = challengeTask.challenge as Ch_SkirmishAttacking;
+                Ch_SkirmishDefending skirmishDef = challengeTask.challenge as Ch_SkirmishDefending;
+
+                if (skirmishAtt != null || skirmishDef != null)
+                {
+                    List<UM> enemies;
+                    List<UA> enemyComs;
+
+                    if (skirmishAtt != null)
+                    {
+                        enemies = skirmishAtt.battle.defenders;
+                        enemyComs = skirmishAtt.battle.defComs;
+                    }
+                    else
+                    {
+                        enemies = skirmishDef.battle.attackers;
+                        enemyComs = skirmishDef.battle.attComs;
+                    }
+
+                    bool influenceElder = false;
+                    bool influenceHuman = false;
+
+                    foreach (UM enemy in enemies)
+                    {
+                        if (enemy.isCommandable())
+                        {
+                            influenceElder = true;
+                        }
+                        else if (enemy.society != null && !enemy.society.isDark())
+                        {
+                            influenceHuman = true;
+                        }
+                    }
+
+                    foreach (UA com in enemyComs)
+                    {
+                        if (com.isCommandable())
+                        {
+                            influenceElder = true;
+                        }
+                        else if (com.society != null && !com.society.isDark())
+                        {
+                            influenceHuman = true;
+                        }
+                    }
+
+                    if (influenceElder)
+                    {
+                        if (isVampire)
+                        {
+                            if (influencedOrcCulture_Direct != null)
+                            {
+                                core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Slew orc vampire skirmishing a battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill] * 2), true);
+                            }
+
+                            foreach (HolyOrder_Orcs orcs in core.data.orcSGCultureMap.Values)
+                            {
+                                core.TryAddInfluenceGain(orcs, new ReasonMsg("Slew vampire skirmishing a battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill] * 2), true);
+                            }
+                        }
+                        else if (!isNature)
+                        {
+                            if (influencedOrcCulture_Direct != null)
+                            {
+                                core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Killed orc agent skirmishing a battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                            }
+
+                            foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                            {
+                                core.TryAddInfluenceGain(orcs, new ReasonMsg("Killed enemy agent skirmishing a battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                            }
+
+                            foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                            {
+                                core.TryAddInfluenceGain(orcs, new ReasonMsg("Killed trespassong agent skirmishing a battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                            }
+                        }
+                    }
+
+                    if (influenceHuman)
+                    {
+                        if (isVampire)
+                        {
+                            if (influencedOrcCulture_Direct != null)
+                            {
+                                core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Slew orc vampire skirmishing a battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill] * 2));
+                            }
+
+                            foreach (HolyOrder_Orcs orcs in core.data.orcSGCultureMap.Values)
+                            {
+                                core.TryAddInfluenceGain(orcs, new ReasonMsg("Slew vampire skirmishing a battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill] * 2));
+                            }
+                        }
+                        else if (!isNature && influencedOrcCulture_Direct != null)
+                        {
+                            core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Killed orc agent skirmishing a battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]));
+
+                            foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                            {
+                                core.TryAddInfluenceGain(orcs, new ReasonMsg("Killed enemy agent skirmishing a battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]));
+                            }
+
+                            foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                            {
+                                core.TryAddInfluenceGain(orcs, new ReasonMsg("Killed trespassing agent skirmishing a battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]));
+                            }
                         }
                     }
                 }
             }
+        }
+
+        public bool checkIsVampire(UA ua)
+        {
+            if (ua is UAE_Baroness)
+            {
+                return true;
+            }
+
+            if (ua is UAEN_Vampire)
+            {
+                return true;
+            }
+
+            if (core.data.tryGetModAssembly("LivingCharacters", out ModData.ModIntegrationData intDataLC) && intDataLC.assembly != null && intDataLC.typeDict.TryGetValue("Vampire", out Type vampireNobleType) && vampireNobleType != null)
+            {
+                if (ua.GetType() == vampireNobleType || ua.GetType().IsSubclassOf(vampireNobleType))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public bool checkAlignment(SG_Orc orcSociety, Location loc)

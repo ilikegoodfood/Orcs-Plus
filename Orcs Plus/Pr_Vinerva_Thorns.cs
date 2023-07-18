@@ -23,7 +23,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "A thick hedgerow of viscous thorn bushes protects the outer perimiter of the orc camp at this location. Almost impenetrably thick, these bushes shift unnaturally, allowing orcs to come and go as they please, but grasping and biting at any who attempt to force their way through.";
+            return "A thick hedgerow of viscous thorn bushes protects the outer perimeter of the orc camp at this location. Almost impenetrably thick, these bushes shift unnaturally, allowing orcs to come and go as they please, but grasping and biting at any who attempt to force their way through.";
         }
 
         public override Sprite getSprite(World world)

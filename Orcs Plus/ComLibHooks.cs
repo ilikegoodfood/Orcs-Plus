@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using static HarmonyLib.Code;
 
 namespace Orcs_Plus
 {
@@ -34,7 +35,12 @@ namespace Orcs_Plus
             SG_Orc orcs = u.society as SG_Orc;
             HolyOrder_Orcs orcCulture = u.society as HolyOrder_Orcs;
 
-            if (u is UM um && (orcs != null || orcCulture != null))
+            if (orcs != null)
+            {
+                ModCore.core.data.orcSGCultureMap.TryGetValue(orcs, out orcCulture);
+            }
+
+            if (u is UM um && orcCulture != null)
             {
                 SG_Orc orcSociety = um.society as SG_Orc;
                 HolyOrder_Orcs orcCulture2 = um.society as HolyOrder_Orcs;
@@ -76,235 +82,204 @@ namespace Orcs_Plus
                 }
             }
 
-            Unit uKiller = killer?.unit;
+            onUnitDeath_InfluenceGain(u, v, killer);
+        }
 
-            bool infGainElder = false;
-            bool infGainHuman = false;
+        public void onUnitDeath_InfluenceGain(Unit u, string v, Person killer)
+        {
+            SG_Orc orcSociety = u.society as SG_Orc;
+            HolyOrder_Orcs orcCulture = u.society as HolyOrder_Orcs;
 
-            if (v == "Destroyed in battle")
+            if (orcSociety != null)
             {
-                BattleArmy battle = (u.task as Task_InBattle)?.battle;
+                ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+            }
 
-                if (battle == null)
+            HashSet<SG_Orc> influencedOrcSocietyHasSet = new HashSet<SG_Orc>();
+            HolyOrder_Orcs influencedOrcCulture_Direct = null;
+            List<HolyOrder_Orcs> influencedOrcCultures_Warring = new List<HolyOrder_Orcs>();
+            List<HolyOrder_Orcs> influencedOrcCultures_Regional = new List<HolyOrder_Orcs>();
+
+            if (orcCulture != null)
+            {
+                influencedOrcCulture_Direct = orcCulture;
+                influencedOrcSocietyHasSet.Add(orcCulture.orcSociety);
+            }
+
+            if (u.society != null)
+            {
+                foreach (SocialGroup sg in u.map.socialGroups)
                 {
-                    return;
-                }
-
-                ModCore.core.data.getBattleArmyEnemies(battle, u, out List<UM> enemies, out List<UA> enemyComs);
-
-                if (enemies.Count == 0)
-                {
-                    return;
-                }
-
-                if (enemies.Count > 0)
-                {
-                    foreach (UM enemy in enemies)
+                    if (sg is SG_Orc orcSociety2 && sg.getRel(u.society).state == DipRel.dipState.war && !influencedOrcSocietyHasSet.Contains(orcSociety2) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null)
                     {
-                        if (enemy.isCommandable())
-                        {
-                            infGainElder = true;
-                        }
-                        else if (enemy.society != null && !enemy.society.isDark())
-                        {
-                            infGainHuman = true;
-                        }
+                        influencedOrcCultures_Warring.Add(orcCulture2);
+                        influencedOrcSocietyHasSet.Add(orcSociety2);
 
-                        if (infGainElder && infGainHuman)
-                        {
-                            break;
-                        }
                     }
                 }
+            }
 
-                if (!(infGainElder && infGainHuman))
+            if (u.task is Task_InBattle battleTask)
+            {
+                ModCore.core.data.getBattleArmyEnemies(battleTask.battle, u, out List<UM> enemies, out List<UA> enemyComs);
+
+                foreach (UM enemy in enemies)
                 {
-                    foreach (UA com in enemyComs)
+                    if (enemy.society is SG_Orc orcSociety3 && !influencedOrcSocietyHasSet.Contains(orcSociety3) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety3, out HolyOrder_Orcs orcCulture3) && orcCulture3 != null)
                     {
-                        if (com.isCommandable())
-                        {
-                            infGainElder = true;
-                        }
-                        else if (com.society != null && !com.society.isDark())
-                        {
-                            infGainHuman = true;
-                        }
-
-                        if (infGainElder && infGainHuman)
-                        {
-                            break;
-                        }
+                        influencedOrcCultures_Warring.Add(orcCulture3);
+                        influencedOrcSocietyHasSet.Add(orcSociety3);
                     }
                 }
 
-                if (infGainElder)
+                foreach (UA com in enemyComs)
                 {
-                    if (orcCulture != null)
+                    if (com.society is SG_Orc orcSociety3 && !influencedOrcSocietyHasSet.Contains(orcSociety3) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety3, out HolyOrder_Orcs orcCulture3) && orcCulture3 != null)
                     {
-                        ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Destroyed orc army in batle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                        influencedOrcCultures_Warring.Add(orcCulture3);
+                        influencedOrcSocietyHasSet.Add(orcSociety3);
                     }
+                }
+            }
 
-                    if (orcs != null)
+            if (u.location.soc is SG_Orc orcSociety4 && !influencedOrcSocietyHasSet.Contains(orcSociety4) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety4, out HolyOrder_Orcs orcCulture4) && orcCulture4 != null)
+            {
+                influencedOrcCultures_Regional.Add(orcCulture4);
+                influencedOrcSocietyHasSet.Add(orcSociety4);
+            }
+
+            if (v == "Destroyed in battle" && u.task is Task_InBattle battleTask2)
+            {
+                bool influenceElder = false;
+                bool influenceHuman = false;
+
+                ModCore.core.data.getBattleArmyEnemies(battleTask2.battle, u, out List<UM> enemies, out List<UA> enemyComs);
+
+                foreach (UM enemy in enemies)
+                {
+                    if (enemy.isCommandable())
                     {
-                        ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Destroyed orc army in batle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                        influenceElder = true;
                     }
-
-                    List<SG_Orc> enemySocieties = new List<SG_Orc>();
-                    if (u.society != null)
+                    else if (enemy.society != null && !enemy.society.isDark())
                     {
-                        foreach (SocialGroup sg in u.map.socialGroups)
-                        {
-                            if (sg is SG_Orc orcSociety && orcs != orcSociety && orcSociety.getRel(u.society)?.state == DipRel.dipState.war)
-                            {
-                                enemySocieties.Add(orcSociety);
-                            }
-                        }
-                    }
-
-                    List<HolyOrder_Orcs> enemyCultures = new List<HolyOrder_Orcs>();
-                    foreach (UM enemy in enemies)
-                    {
-                        if (enemy.society is SG_Orc enemySociety && !enemySocieties.Contains(enemySociety))
-                        {
-                            enemySocieties.Add(enemySociety);
-                        }
-                        else if (enemy.society is HolyOrder_Orcs enemyCulture && !enemyCultures.Contains(enemyCulture))
-                        {
-                            enemyCultures.Add(enemyCulture);
-                        }
-                    }
-
-                    foreach (HolyOrder_Orcs enemyCulture in enemyCultures)
-                    {
-                        ModCore.core.TryAddInfluenceGain(enemyCulture, new ReasonMsg("Destroyed enemy army in battle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
-
-                        enemySocieties.Remove(enemyCulture.orcSociety);
-                    }
-
-                    foreach (SG_Orc enemySociety in enemySocieties)
-                    {
-                        ModCore.core.TryAddInfluenceGain(enemySociety, new ReasonMsg("Destroyed enemy army in battle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                        influenceHuman = true;
                     }
                 }
 
-                if (infGainHuman)
+                foreach (UA com in enemyComs)
                 {
-                    if (orcCulture != null)
+                    if (com.isCommandable())
                     {
-                        ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Destroyed orc army in batle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]));
+                        influenceElder = true;
+                    }
+                    else if (com.society != null && !com.society.isDark())
+                    {
+                        influenceHuman = true;
+                    }
+                }
+
+                if (influenceElder)
+                {
+                    if (influencedOrcCulture_Direct != null)
+                    {
+                        ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Destroyed orc army in battle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                     }
 
-                    if (orcs != null)
+                    foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
                     {
-                        ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Destroyed orc army in batle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]));
+                        ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Destroyed enemy army in battle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                    }
+
+                    foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                    {
+                        ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Destroyed tresspassing army in battle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                    }
+                }
+
+                if (influenceHuman && influencedOrcCulture_Direct != null)
+                {
+                    ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Destroyed orc army in battle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]));
+
+                    foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                    {
+                        ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Destroyed enemy army in battle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]));
+                    }
+
+                    foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                    {
+                        ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Destroyed tresspassing army in battle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]));
                     }
                 }
             }
             else if (v == "Killed by Ophanim's Smite")
             {
-                if (orcCulture != null)
+                if (influencedOrcCulture_Direct != null)
                 {
-                    ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Smote orc army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                    ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Smote orc army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                 }
 
-                if (orcs != null)
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
                 {
-                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Smote orc army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Smote enemy army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                 }
 
-                List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(map);
-
-                if (orcSocieties?.Count > 0 && u.society != null)
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
                 {
-                    foreach (SG_Orc orcSociety in orcSocieties)
-                    {
-                        if (orcs != null && orcs == orcSociety)
-                        {
-                            continue;
-                        }
-
-                        if (orcSociety.getRel(u.society).state == DipRel.dipState.war)
-                        {
-                            ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Smote enemy army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
-                        }
-                    }
+                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Smote trespassing army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                 }
             }
             else if (v == "Killed by a volcano")
             {
-                if (uKiller != null)
+                if (killer != null && killer.unit != null)
                 {
-                    if (uKiller.isCommandable())
+                    if (killer.unit.isCommandable())
                     {
-                        if (orcCulture != null)
+                        if (influencedOrcCulture_Direct != null)
                         {
-                            ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Volcanic eruption (geomancy) destroyed orc army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                            ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Used geomancy to destroy orc army (volcanic eruption)", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                         }
 
-                        if (orcs != null)
+                        foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
                         {
-                            ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Volcanic eruption (geomancy) destroyed orc army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                            ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Used geomancy to destroy enemy army (volcanic eruption)", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                         }
 
-                        List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(map);
-
-                        if (orcSocieties?.Count > 0 && u.society != null)
+                        foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
                         {
-                            foreach (SG_Orc orcSociety in orcSocieties)
-                            {
-                                if (orcs != null && orcSociety == orcs)
-                                {
-                                    continue;
-                                }
-
-                                if (orcSociety.getRel(u.society).state == DipRel.dipState.war)
-                                {
-                                    ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Volcanic eruption (geomancy) destroyed enemy army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
-                                }
-                            }
+                            ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Used geomancy to destroy trespassing army (volcanic eruption)", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                         }
                     }
-                    else if (!uKiller.society.isDark())
+                    else if (killer.unit.society != null && !killer.unit.society.isDark() && influencedOrcCulture_Direct != null)
                     {
-                        if (orcCulture != null)
+                        ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Used geomancy to destroy orc army (volcanic eruption)", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]));
+
+                        foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
                         {
-                            ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Volcanic eruption (geomancy) destroyed orc army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]));
+                            ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Used geomancy to destroy enemy army (volcanic eruption)", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]));
                         }
 
-                        if (orcs != null)
+                        foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
                         {
-                            ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Volcanic eruption (geomancy) destroyed orc army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]));
+                            ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Used geomancy to destroy trespassing army (volcanic eruption)", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]));
                         }
                     }
                 }
                 else
                 {
-                    if (orcCulture != null)
+                    if (influencedOrcCulture_Direct != null)
                     {
-                        ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Awakening destroyed orc army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                        ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Awakening destroyed orc army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                     }
 
-                    if (orcs != null)
+                    foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
                     {
-                        ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Awakening destroyed orc army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                        ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Awakening destroyed enemy army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                     }
 
-                    List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(map);
-
-                    if (orcSocieties?.Count > 0 && u.society != null)
+                    foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
                     {
-                        foreach (SG_Orc orcSociety in orcSocieties)
-                        {
-                            if (orcs != null && orcs == orcSociety)
-                            {
-                                continue;
-                            }
-
-                            if (orcSociety.getRel(u.society).state == DipRel.dipState.war)
-                            {
-                                ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Awakening destroyed enemy army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
-                            }
-                        }
+                        ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Awakening destroyed trespassing army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                     }
                 }
             }
@@ -312,8 +287,9 @@ namespace Orcs_Plus
 
         public override void onRazeLocation_StartOfProcess(UM um)
         {
-            Settlement set = um.location?.settlement;
-            SG_Orc orcSociety = um.location.soc as SG_Orc;
+            Settlement set = um.location.settlement;
+
+            onRazeLocation_InfluenceGain(um);
 
             if (set is Set_OrcCamp)
             {
@@ -326,53 +302,6 @@ namespace Orcs_Plus
                 }
 
                 Property.addToProperty("Militray Action", Property.standardProperties.DEATH, 2.0, set.location);
-
-                if (orcSociety != null)
-                {
-                    if (um.isCommandable())
-                    {
-                        ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Razing Orc Camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
-                    }
-                    else if (!um.society.isDark())
-                    {
-                        ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Razing Orc Camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]));
-                    }
-                }
-            }
-
-            if (um.isCommandable() && um.location.soc != null)
-            {
-                List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(um.map);
-
-                if (orcSocieties.Count > 0)
-                {
-                    foreach (SG_Orc orcs in orcSocieties)
-                    {
-                        if (orcs == orcSociety)
-                        {
-                            continue;
-                        }
-
-                        if (orcs.getRel(um.location.soc)?.state == DipRel.dipState.war)
-                        {
-                            ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razing Emeny Settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation] * 2), true);
-                        }
-                    }
-
-                    List<SG_Orc> neighbouringOrcSocieties = new List<SG_Orc>();
-                    foreach(Location neighbour in um.location.getNeighbours())
-                    {
-                        if (neighbour.soc is SG_Orc orcSociety2 && orcSociety2 != um.location.soc && !neighbouringOrcSocieties.Contains(orcSociety2))
-                        {
-                            neighbouringOrcSocieties.Add(orcSociety2);
-                        }
-                    }
-
-                    foreach (SG_Orc neighbouringOrcSociety in neighbouringOrcSocieties)
-                    {
-                        ModCore.core.TryAddInfluenceGain(neighbouringOrcSociety, new ReasonMsg("Razing Encroaching Settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation] * 2), true);
-                    }
-                }
             }
 
             if (ModCore.core.data.godTenetTypes.TryGetValue(map.overmind.god.GetType(), out Type tenetType) && tenetType != null && tenetType == typeof(H_Orcs_HarbringersMadness))
@@ -401,6 +330,81 @@ namespace Orcs_Plus
                             }
                         }
                     }
+                }
+            }
+        }
+
+        public void onRazeLocation_InfluenceGain(UM um)
+        {
+            SG_Orc orcSociety = um.location.soc as SG_Orc;
+            HolyOrder_Orcs orcCulture = um.location.soc as HolyOrder_Orcs;
+
+            if (orcSociety != null)
+            {
+                ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+            }
+
+            HashSet<SG_Orc> influencedOrcSocietyHasSet = new HashSet<SG_Orc>();
+            HolyOrder_Orcs influencedOrcCulture_Direct = null;
+            List<HolyOrder_Orcs> influencedOrcCultures_Warring = new List<HolyOrder_Orcs>();
+            List<HolyOrder_Orcs> influencedOrcCultures_Regional = new List<HolyOrder_Orcs>();
+
+            if (orcCulture != null)
+            {
+                influencedOrcCulture_Direct = orcCulture;
+                influencedOrcSocietyHasSet.Add(orcCulture.orcSociety);
+            }
+
+            if (um.location.soc != null)
+            {
+                foreach (SocialGroup sg in um.map.socialGroups)
+                {
+                    if (sg is SG_Orc orcSociety2 && sg.getRel(um.location.soc).state == DipRel.dipState.war && !influencedOrcSocietyHasSet.Contains(orcSociety2) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null)
+                    {
+                        influencedOrcCultures_Warring.Add(orcCulture2);
+                        influencedOrcSocietyHasSet.Add(orcSociety2);
+                    }
+                }
+            }
+
+            foreach (Location neighbour in um.location.getNeighbours())
+            {
+                if (neighbour.soc is SG_Orc orcSociety3 && !influencedOrcSocietyHasSet.Contains(orcSociety3) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety3, out HolyOrder_Orcs orcCulture3))
+                {
+                    influencedOrcCultures_Regional.Add(orcCulture3);
+                    influencedOrcSocietyHasSet.Add(orcSociety3);
+                }
+            }
+
+            if (um.isCommandable())
+            {
+                if (influencedOrcCulture_Direct != null)
+                {
+                    ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Razing Orc Camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation] * 2), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                {
+                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razing enemy settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation] * 2), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                {
+                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razing encroaching settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation] * 2), true);
+                }
+            }
+            else if (um.society != null && !um.society.isDark() && influencedOrcCulture_Direct != null)
+            {
+                ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Razing Orc Camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                {
+                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razing enemy settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                {
+                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razing encroaching settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
                 }
             }
         }
@@ -647,139 +651,7 @@ namespace Orcs_Plus
 
         public override void onSettlementFallIntoRuin_StartOfProcess(Settlement set, string v, object killer = null)
         {
-            // Settlement Data
-            Set_OrcCamp camp = set as Set_OrcCamp;
-            SG_Orc orcSociety = camp?.location?.soc as SG_Orc;
-
-            // Killer Data
-            Person pKiller = killer as Person;
-            Unit uKiller = killer as Unit;
-
-            if (pKiller != null)
-            {
-                uKiller = pKiller.unit;
-            }
-
-            if (uKiller != null)
-            {
-                if (v == "Razed by " + uKiller.getName())
-                {
-                    if (uKiller.isCommandable())
-                    {
-                        if (orcSociety != null && !orcSociety.isGone())
-                        {
-                            ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Razed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
-                        }
-
-                        List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(map);
-
-                        if (orcSocieties.Count > 0 && set.location?.soc != null)
-                        {
-                            foreach (SG_Orc orcs in orcSocieties)
-                            {
-                                if (orcSociety != null && orcSociety == orcs)
-                                {
-                                    continue;
-                                }
-
-                                if (orcs.getRel(set.location.soc)?.state == DipRel.dipState.war)
-                                {
-                                    ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Razed emeny settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
-                                }
-                            }
-                        }
-                    }
-                    else if (orcSociety != null && !orcSociety.isGone() && !uKiller.society.isDark())
-                    {
-                        ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Razed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]));
-                    }
-                }
-                else if (v == "Destroyed by volcanic eruption")
-                {
-                    if (uKiller.isCommandable())
-                    {
-                        if (orcSociety != null && !orcSociety.isGone())
-                        {
-                            ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Volcanic eruption (geomancy) razed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
-                        }
-
-                        List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(map);
-
-                        if (orcSocieties.Count > 0 && set.location?.soc != null)
-                        {
-                            foreach (SG_Orc orcs in orcSocieties)
-                            {
-                                if (orcSociety != null && orcs == orcSociety)
-                                {
-                                    continue;
-                                }
-
-                                if (orcs.getRel(set.location.soc)?.state == DipRel.dipState.war)
-                                {
-                                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Volcanic eruption (geomancy) razed enemy settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
-                                }
-                            }
-                        }
-                    }
-                    else if (!uKiller.society.isDark())
-                    {
-                        if (orcSociety != null && !orcSociety.isGone())
-                        {
-                            ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Volcanic eruption (geomancy) razed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]));
-                        }
-                    }
-                }
-            }
-            else if (v == "Destroyed by smite")
-            {
-                if (orcSociety != null && !orcSociety.isGone())
-                {
-                    ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Smote orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
-                }
-
-                List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(map);
-
-                if (orcSocieties.Count > 0 && set.location?.soc != null)
-                {
-                    foreach (SG_Orc orcs in orcSocieties)
-                    {
-                        if (orcSociety != null && orcSociety == orcs)
-                        {
-                            continue;
-                        }
-
-                        if (orcs.getRel(set.location.soc)?.state == DipRel.dipState.war)
-                        {
-                            ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Smote emeny settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
-                        }
-                    }
-                }
-            }
-            else if (v == "Destroyed by volcanic eruption")
-            {
-                if (orcSociety != null && !orcSociety.isGone())
-                {
-                    ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Awakening razed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
-                }
-
-                List<SG_Orc> orcSocieties = ModCore.core.data.getOrcSocieties(map);
-
-                if (orcSocieties.Count > 0 && set.location?.soc != null)
-                {
-                    foreach (SG_Orc orcs in orcSocieties)
-                    {
-                        if (orcSociety != null && orcSociety == orcs)
-                        {
-                            continue;
-                        }
-
-                        if (orcs.getRel(set.location.soc)?.state == DipRel.dipState.war)
-                        {
-                            ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Awakening razed enemy settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
-                        }
-                    }
-                }
-            }
+            onSettlementFallIntoRuin_InfluenceGain(set, v, killer);
 
             // Adds death to witches covens when they are raised.
             if (set is Set_MinorOther)
@@ -814,6 +686,188 @@ namespace Orcs_Plus
             }
         }
 
+        public void onSettlementFallIntoRuin_InfluenceGain(Settlement set, string v, object killer = null)
+        {
+            SG_Orc orcSociety = set.location.soc as SG_Orc;
+            HolyOrder_Orcs orcCulture = set.location.soc as HolyOrder_Orcs;
+
+            if (orcSociety != null)
+            {
+                ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+            }
+
+            HashSet<SG_Orc> influencedOrcSocietyHasSet = new HashSet<SG_Orc>();
+            HolyOrder_Orcs influencedOrcCulture_Direct = null;
+            List<HolyOrder_Orcs> influencedOrcCultures_Warring = new List<HolyOrder_Orcs>();
+            List<HolyOrder_Orcs> influencedOrcCultures_Regional = new List<HolyOrder_Orcs>();
+
+            if (orcCulture != null)
+            {
+                influencedOrcCulture_Direct = orcCulture;
+                influencedOrcSocietyHasSet.Add(orcCulture.orcSociety);
+            }
+
+            if (set.location.soc != null)
+            {
+                foreach (SocialGroup sg in set.map.socialGroups)
+                {
+                    if (sg is SG_Orc orcSociety2 && sg.getRel(set.location.soc).state == DipRel.dipState.war && !influencedOrcSocietyHasSet.Contains(orcSociety2) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null)
+                    {
+                        influencedOrcCultures_Warring.Add(orcCulture2);
+                        influencedOrcSocietyHasSet.Add(orcSociety2);
+                    }
+                }
+            }
+
+            foreach (Location neighbour in set.location.getNeighbours())
+            {
+                if (neighbour.soc is SG_Orc orcSociety3 && !influencedOrcSocietyHasSet.Contains(orcSociety3) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety3, out HolyOrder_Orcs orcCulture3))
+                {
+                    influencedOrcCultures_Regional.Add(orcCulture3);
+                    influencedOrcSocietyHasSet.Add(orcSociety3);
+                }
+            }
+
+            Person pKiller = killer as Person;
+            Unit uKiller = killer as Unit;
+
+            if (pKiller != null)
+            {
+                uKiller = pKiller.unit;
+            }
+
+            if (uKiller != null && v == "Razed by " + uKiller.getName())
+            {
+                if (uKiller.isCommandable())
+                {
+                    if (influencedOrcCulture_Direct != null)
+                    {
+                        ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Razed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                    }
+
+                    foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                    {
+                        ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razed enemy settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                    }
+
+                    foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                    {
+                        ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razed encroaching settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                    }
+                }
+                else if (uKiller.society != null && !uKiller.society.isDark() && influencedOrcCulture_Direct != null)
+                {
+                    ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Razed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]));
+
+                    foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                    {
+                        ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razed enemy settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                    }
+
+                    foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                    {
+                        ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razed encroaching settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                    }
+                }
+            }
+            else if (v == "Killed by Ophanim's Smite")
+            {
+                if (influencedOrcCulture_Direct != null)
+                {
+                    ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Smote orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                {
+                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Smote enemy settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                {
+                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Smote encroaching settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                }
+            }
+            else if (v == "Killed by a volcano")
+            {
+                if (uKiller != null)
+                {
+                    if (uKiller.isCommandable())
+                    {
+                        if (influencedOrcCulture_Direct != null)
+                        {
+                            ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Used geomancy to destroy orc camp (volcanic eruption)", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                        }
+
+                        foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                        {
+                            ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Used geomancy to destroy enemy settlement (volcanic eruption)", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                        }
+
+                        foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                        {
+                            ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Used geomancy to destroy encroaching settlement (volcanic eruption)", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                        }
+                    }
+                    else if (uKiller.society != null && !uKiller.society.isDark() && influencedOrcCulture_Direct != null)
+                    {
+                        ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Used geomancy to destroy orc camp (volcanic eruption)", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]));
+
+                        foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                        {
+                            ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Used geomancy to destroy enemy settlement (volcanic eruption)", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]));
+                        }
+
+                        foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                        {
+                            ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Used geomancy to destroy encroaching settlement (volcanic eruption)", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]));
+                        }
+                    }
+                }
+                else
+                {
+                    if (influencedOrcCulture_Direct != null)
+                    {
+                        ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Awakening destroyed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                    }
+
+                    foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                    {
+                        ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Awakening destroyed enemy settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                    }
+
+                    foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                    {
+                        ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Awakening destroyed encroaching settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                    }
+                }
+            }
+        }
+
+        public override void onSettlementFallIntoRuin_EndOfProcess(Settlement set, string v, object killer = null)
+        {
+            //Console.WriteLine("OrcsPlus: Settlement fallen into ruin");
+            if (set is SettlementHuman settlementHuman && settlementHuman.subs.Count > 0 && settlementHuman.location.settlement is Set_CityRuins ruins)
+            {
+                //Console.WriteLine("OrcsPlus: settlment is human settlment and is now city ruin");
+                bool hasDock = false;
+
+                foreach (Subsettlement sub in settlementHuman.subs)
+                {
+                    if (sub is Sub_Docks)
+                    {
+                        hasDock = true;
+                        break;
+                    }
+                }
+
+                if (hasDock)
+                {
+                    //Console.WriteLine("OrcsPlus: settlement has dock");
+                    ModCore.core.shipwreckLocations.Add(set.location);
+                }
+            }
+        }
+
         public override bool interceptGetVisibleUnits(UA ua, List<Unit> visibleUnits)
         {
             switch (ua)
@@ -828,7 +882,7 @@ namespace Orcs_Plus
             return false;
         }
 
-        public override bool interceptAgentAI(UA ua, List<CommunityLib.AgentAI.ChallengeData> validChallengeData, List<CommunityLib.AgentAI.TaskData> taskData, List<Unit> visibleUnits, CommunityLib.AgentAI.ControlParameters controlParams)
+        public override bool interceptAgentAI(UA ua, CommunityLib.AgentAI.AIData aiData, List<CommunityLib.AgentAI.ChallengeData> validChallengeData, List<CommunityLib.AgentAI.TaskData> taskData, List<Unit> visibleUnits)
         {
             switch(ua)
             {

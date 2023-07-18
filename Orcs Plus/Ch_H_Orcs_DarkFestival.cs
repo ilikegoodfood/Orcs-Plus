@@ -174,7 +174,7 @@ namespace Orcs_Plus
                     }
                 }
 
-                orcSociety.menace += 1.0;
+                orcSociety.menace += 0.5;
             }
 
             foreach (Location neighbour in location.getNeighbours())

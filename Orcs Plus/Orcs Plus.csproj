@@ -69,6 +69,8 @@
     <Compile Include="Ch_H_Orcs_PerfectionFestival.cs" />
     <Compile Include="Ch_Orcs_DeathFestival.cs" />
     <Compile Include="Ch_Orcs_FundWaystation.cs" />
+    <Compile Include="Ch_PlunderShipwreck.cs" />
+    <Compile Include="Ch_RecoverShipwreck.cs" />
     <Compile Include="HarmonyPatches_Conditional.cs" />
     <Compile Include="H_Orcs_Expansionism.cs" />
     <Compile Include="H_Orcs_GodTenet.cs" />
@@ -83,6 +85,7 @@
     <Compile Include="OnChallengeComplete.cs" />
     <Compile Include="Pr_Ophanim_Perfection.cs" />
     <Compile Include="Pr_Orcs_SacrificialSite.cs" />
+    <Compile Include="Pr_Shipwreck.cs" />
     <Compile Include="Pr_Vinerva_Health.cs" />
     <Compile Include="Pr_Vinerva_Life.cs" />
     <Compile Include="Pr_Vinerva_LifeBoon.cs" />

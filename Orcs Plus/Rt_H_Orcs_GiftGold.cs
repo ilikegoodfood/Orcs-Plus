@@ -100,26 +100,26 @@ namespace Orcs_Plus
                     double val;
                     if (ruler.likes.Contains(Tags.ORC))
                     {
-                        val = 5;
+                        val = 10;
                         msgs?.Add(new ReasonMsg("Local ruler likes orcs", val));
                         utility += val;
                     }
                     else if (ruler.extremeLikes.Contains(Tags.ORC))
                     {
-                        val = 10;
+                        val = 20;
                         msgs?.Add(new ReasonMsg("Local ruler loves orcs", val));
                         utility += val;
                     }
 
                     if (ruler.likes.Contains(Tags.GOLD))
                     {
-                        val = 5;
+                        val = 10;
                         msgs?.Add(new ReasonMsg("Local ruler likes gold", val));
                         utility += val;
                     }
                     else if (ruler.extremeLikes.Contains(Tags.GOLD))
                     {
-                        val = 10;
+                        val = 20;
                         msgs?.Add(new ReasonMsg("Local ruler loves gold", val));
                         utility += val;
                     }

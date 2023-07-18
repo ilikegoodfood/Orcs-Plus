@@ -29,7 +29,7 @@ namespace Orcs_Plus
 
             if (Harmony.HasAnyPatches(harmonyID))
             {
-                harmony.UnpatchAll(harmonyID);
+                return;
             }
 
             // Patches for Challenges that specialise orc camps
@@ -127,6 +127,9 @@ namespace Orcs_Plus
             // Patches for Ch_LearnSecret
             harmony.Patch(original: AccessTools.Method(typeof(Ch_LearnSecret), nameof(Ch_LearnSecret.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_LearnSecret_validFor_Postfix)));
 
+            // Patches for RT_StudyDeath
+            harmony.Patch(original: AccessTools.Method(typeof(Rt_StudyDeath), nameof(Rt_StudyDeath.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Rt_StudyDeath_Postfix)));
+
             // Patches for P_Opha_Crusade
             harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Crusade), nameof(P_Opha_Crusade.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Crusade_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Crusade), nameof(P_Opha_Crusade.cast), new Type[] { typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Crusade_cast_Postfix)));
@@ -191,7 +194,7 @@ namespace Orcs_Plus
         {
             if (u.isCommandable() && targetShipyard.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
             {
-                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(rt.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
+                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(rt.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildShipyard]), true);
             }
         }
 
@@ -333,9 +336,21 @@ namespace Orcs_Plus
 
         private static bool Ch_OrcRaiding_valid_TranspilerBody(Ch_OrcRaiding ch)
         {
+            SG_Orc orcSociety = ch.location.soc as SG_Orc;
+
+            if (orcSociety == null && ch.location.settlement != null)
+            {
+                Sub_OrcWaystation waystation = ch.location.settlement.subs.OfType<Sub_OrcWaystation>().FirstOrDefault();
+
+                if (waystation != null)
+                {
+                    orcSociety = waystation.orcSociety;
+                }
+            }
+
             foreach (Location neighbour in ch.location.getNeighbours())
             {
-                if (neighbour.soc != null && neighbour.settlement is SettlementHuman && ModCore.core.checkAlignment(ch.location.soc as SG_Orc, neighbour))
+                if (neighbour.soc != null && neighbour.settlement is SettlementHuman && ModCore.core.checkAlignment(orcSociety as SG_Orc, neighbour))
                 {
                     return true;
                 }
@@ -357,8 +372,8 @@ namespace Orcs_Plus
 
         private static void Ch_OrcRaiding_complete_TranspilerBody(Ch_OrcRaiding ch, UA u)
         {
-            Map map = ch.map;
-            Location location = ch.location;
+            Map map = u.map;
+            Location location = u.location;
             Settlement sub = ch.sub;
 
             SG_Orc orcSociety = sub.location.soc as SG_Orc;
@@ -370,6 +385,7 @@ namespace Orcs_Plus
             //Console.WriteLine("OrcsPlus: Running Burn The Fields Complete");
             SettlementHuman target = null;
             double prosperity = 0.0;
+            double prosperityAlt = 0.0;
             List<SettlementHuman> targets = new List<SettlementHuman>();
             List<SettlementHuman> targetsAlt = new List<SettlementHuman>();
 
@@ -379,33 +395,33 @@ namespace Orcs_Plus
                 if (neighbour.soc != null && neighbour.soc is Society && neighbour.settlement is SettlementHuman settlementHuman)
                 {
                     //Console.WriteLine("OrcsPlus: Neighbour has social group and settlement.");
-                    if (ModCore.core.checkAlignment(u.location.soc as SG_Orc, u.location))
+                    if (ModCore.core.checkAlignment(u.location.soc as SG_Orc, neighbour))
                     {
                         Pr_Devastation devastation = settlementHuman.location.properties.OfType<Pr_Devastation>().FirstOrDefault();
                         if (devastation == null || devastation.charge < 150)
                         {
-                            if (targets.Count == 0 || settlementHuman.prosperity >= prosperity)
+                            if (settlementHuman.prosperity >= prosperity)
                             {
                                 if (settlementHuman.prosperity > prosperity)
                                 {
                                     targets.Clear();
-                                    prosperity = settlementHuman.prosperity;
                                 }
 
                                 targets.Add(settlementHuman);
+                                prosperity = settlementHuman.prosperity;
                             }
                         }
-                        else if (targets.Count == 0)
+                        else
                         {
-                            if (targetsAlt.Count == 0 || settlementHuman.prosperity >= prosperity)
+                            if (settlementHuman.prosperity >= prosperityAlt)
                             {
-                                if (settlementHuman.prosperity > prosperity)
+                                if (settlementHuman.prosperity > prosperityAlt)
                                 {
                                     targetsAlt.Clear();
-                                    prosperity = settlementHuman.prosperity;
                                 }
 
                                 targetsAlt.Add(settlementHuman);
+                                prosperityAlt = settlementHuman.prosperity;
                             }
                         }
                     }
@@ -1082,7 +1098,7 @@ namespace Orcs_Plus
                                 reasonMsgs?.Add(new ReasonMsg("Eager for Combat", val));
                                 utility += val;
 
-                                if (target is UAEN_Vampire)
+                                if (ModCore.core.checkIsVampire(target))
                                 {
                                     val = -30;
                                     reasonMsgs?.Add(new ReasonMsg("Fear of Vampires", val));
@@ -1341,6 +1357,17 @@ namespace Orcs_Plus
                         {
                             unitCount++;
                             unit.society = orcSociety;
+
+                            if (unit is UAEN_OrcUpstart)
+                            {
+                                foreach (Item item in unit.person.items)
+                                {
+                                    if (item is I_HordeBanner banner2 && banner2.orcs == orcs)
+                                    {
+                                        banner2.orcs = orcSociety;
+                                    }
+                                }
+                            }
                         }
 
                         if (culture != null && unit.society == culture)
@@ -2237,6 +2264,38 @@ namespace Orcs_Plus
             }
 
             return result;
+        }
+
+        // Patches for Rt_StudyDeath
+
+        private static bool Rt_StudyDeath_Postfix(bool __result, Rt_StudyDeath __instance, UA ua)
+        {
+            if (ua is UAEN_OrcShaman)
+            {
+                T_ArcaneKnowledge t_ArcaneKnowledge = ua.person.traits.OfType<T_ArcaneKnowledge>().FirstOrDefault();
+
+                if (t_ArcaneKnowledge == null || t_ArcaneKnowledge.level == 0)
+                {
+                    return false;
+                }
+
+                int level = 0;
+                T_MasteryDeath t_MasteryDeath = ua.person.traits.OfType<T_MasteryDeath>().FirstOrDefault();
+
+                if (t_MasteryDeath == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    level = t_MasteryDeath.level;
+                }
+
+                int req = __instance.getReq(level);
+                return t_ArcaneKnowledge.level >= req;
+            }
+
+            return __result;
         }
 
         // Patches for P_Opha_Crusade

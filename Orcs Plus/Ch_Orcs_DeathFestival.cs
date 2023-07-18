@@ -132,7 +132,7 @@ namespace Orcs_Plus
 
             if (ua.society is SG_Orc orcSociety)
             {
-                orcSociety.menace += 1.0;
+                orcSociety.menace += 0.5;
             }
         }
 

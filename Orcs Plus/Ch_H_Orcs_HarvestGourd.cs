@@ -133,6 +133,7 @@ namespace Orcs_Plus
 
                 orcCulture.vinerva_HealthDuration += 10;
                 ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Feasted of Gourd of Blood", ModCore.core.data.influenceGain[ModData.influenceGainAction.RecieveGift]), true);
+                orcCulture.orcSociety.menace += 5;
             }
         }
 
