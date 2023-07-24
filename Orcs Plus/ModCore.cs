@@ -337,12 +337,35 @@ namespace Orcs_Plus
 
             foreach (Location location in shipwreckLocations)
             {
-                if (location.settlement is Set_CityRuins)
+                if (location.settlement is Set_CityRuins && !location.properties.Any(p => p is Pr_Shipwreck))
                 {
                     location.properties.Add(new Pr_Shipwreck(location));
                 }
             }
             shipwreckLocations.Clear();
+
+            foreach (Unit unit in map.units)
+            {
+                if (unit is UAEN_OrcUpstart upstart && upstart.society is SG_Orc orcSociety)
+                {
+                    Item[] items = upstart.person.getItems();
+                    if (!items.Any(i => i is I_HordeBanner banner && banner.orcs == upstart.society))
+                    {
+                        int itemIndex = 0;
+                        for (int i = 0; i < items.Length; i++)
+                        {
+                            if (items[i] == null)
+                            {
+                                itemIndex = i;
+                                break;
+                            }
+                        }
+
+                        I_HordeBanner banner = new I_HordeBanner(map, orcSociety, upstart.location);
+                        upstart.person.items[itemIndex] = banner;
+                    }
+                }
+            }
         }
 
         private void updateOrcSGCultureMap(Map map)
@@ -931,6 +954,26 @@ namespace Orcs_Plus
             UA uaPerson = uPerson as UA;
             SG_Orc orcSociety = uPerson.society as SG_Orc;
             HolyOrder_Orcs orcCulture = uPerson.society as HolyOrder_Orcs;
+
+            // Shipwreck Spawning Code
+            if (uaPerson.location.isOcean)
+            {
+                int wreckRoll = Eleven.random.Next(10);
+
+                if (wreckRoll == 0)
+                {
+                    Pr_Shipwreck wreck = uaPerson.location.properties.OfType<Pr_Shipwreck>().FirstOrDefault();
+                    if (wreck == null)
+                    {
+                        wreck = new Pr_Shipwreck(uaPerson.location);
+                        uaPerson.location.properties.Add(wreck);
+                    }
+                    else
+                    {
+                        wreck.charge += 20.0;
+                    }
+                }
+            }
 
             // Cordyceps Symbiosis
             if (uaPerson is UAEN_OrcUpstart || uaPerson is UAEN_OrcElder || uaPerson is UAEN_OrcShaman)

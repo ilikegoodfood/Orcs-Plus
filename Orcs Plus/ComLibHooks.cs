@@ -31,7 +31,27 @@ namespace Orcs_Plus
             {
                 return;
             }
+            // Shipwreck Logic
+            if (u.location.isOcean)
+            {
+                int wreckRoll = Eleven.random.Next(10);
 
+                if (wreckRoll == 0)
+                {
+                    Pr_Shipwreck wreck = u.location.properties.OfType<Pr_Shipwreck>().FirstOrDefault();
+                    if (wreck == null)
+                    {
+                        wreck = new Pr_Shipwreck(u.location);
+                        u.location.properties.Add(wreck);
+                    }
+                    else
+                    {
+                        wreck.charge += 20.0;
+                    }
+                }
+            }
+
+            // Orc Logic
             SG_Orc orcs = u.society as SG_Orc;
             HolyOrder_Orcs orcCulture = u.society as HolyOrder_Orcs;
 
@@ -658,7 +678,6 @@ namespace Orcs_Plus
             {
                 foreach (Subsettlement sub in set.subs)
                 {
-
                     if (sub is Sub_WitchCoven)
                     {
                         Pr_Death death = null;

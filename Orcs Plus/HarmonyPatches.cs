@@ -75,6 +75,7 @@ namespace Orcs_Plus
 
             // Patches for Unit
             harmony.Patch(original: AccessTools.Method(typeof(Unit), nameof(Unit.hostileTo), new Type[] { typeof(Unit), typeof(bool) }), postfix: new HarmonyMethod(patchType, nameof(Unit_hostileTo_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(UAEN_OrcUpstart), nameof(UAEN_OrcUpstart.turnTick), new Type[] { typeof(Map) }), postfix: new HarmonyMethod(patchType, nameof(UAEN_OrcsUpstart_turnTick_POstfix)));
 
             // Patches for UA
             harmony.Patch(original: AccessTools.Method(typeof(UA), nameof(UA.getAttackUtility)), postfix: new HarmonyMethod(patchType, nameof(UA_getAttackUtility_Postfix)));
@@ -938,6 +939,14 @@ namespace Orcs_Plus
 
             //Console.WriteLine("OrcsPlus: returning result: " + result.ToString());
             return result;
+        }
+
+        private static void UAEN_OrcsUpstart_turnTick_POstfix(UAEN_OrcUpstart __instance, Map map)
+        {
+            if (!map.burnInComplete)
+            {
+                __instance.person.XP = Math.Max(0, __instance.person.XP - 5);
+            }
         }
 
         private static double UA_getAttackUtility_Postfix(double utility, UA __instance, Unit other, List<ReasonMsg> reasons, bool includeDangerousFoe)

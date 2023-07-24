@@ -49,7 +49,7 @@ namespace Orcs_Plus
 
         public override void turnTick()
         {
-            influences.Add(new ReasonMsg("Weathering", -0.5));
+            influences.Add(new ReasonMsg("Weathering", -1.0));
 
             if (profile < 100)
             {
