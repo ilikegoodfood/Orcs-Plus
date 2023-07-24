@@ -516,10 +516,18 @@ namespace Orcs_Plus
                 {
                     influenceElder = influenceElderReq;
                 }
+                else if (influenceElder < 0)
+                {
+                    influenceElder = 0;
+                }
 
                 if (influenceHuman > influenceHumanReq)
                 {
                     influenceHuman = influenceHumanReq;
+                }
+                else if (influenceHuman < 0)
+                {
+                    influenceHuman = 0;
                 }
             }
 

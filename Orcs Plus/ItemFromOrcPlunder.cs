@@ -41,18 +41,6 @@ namespace Orcs_Plus
         public void addGold(int delta)
         {
             plunder.gold += delta;
-
-            if (other != null && other.unit != null && other.unit.society != null && plunder.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture))
-            {
-                if (other.unit.isCommandable())
-                {
-                    ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", delta / 2), true);
-                }
-                else if (!other.unit.society.isDark())
-                {
-                    ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", delta / 2));
-                }
-            }
         }
 
         public double getGold()
@@ -113,6 +101,18 @@ namespace Orcs_Plus
         public void endTrading()
         {
             delta -= plunder.gold;
+
+            if (delta > 0 && other != null && other.unit != null && other.unit.society != null && plunder.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture))
+            {
+                if (other.unit.isCommandable())
+                {
+                    ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", -delta / 2), true);
+                }
+                else if (!other.unit.society.isDark())
+                {
+                    ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", -delta / 2));
+                }
+            }
         }
     }
 }

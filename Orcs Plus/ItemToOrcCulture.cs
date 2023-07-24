@@ -16,7 +16,7 @@ namespace Orcs_Plus
 
         HolyOrder_Orcs orcCulture;
 
-        int gold = 0;
+        int gold;
 
         int delta;
 
@@ -28,6 +28,7 @@ namespace Orcs_Plus
             items = new Item[3];
             this.orcCulture = orcCulture;
             other = trader;
+            gold = 0;
             delta = other.gold;
         }
 
@@ -46,19 +47,6 @@ namespace Orcs_Plus
         public void addGold(int delta)
         {
             gold += delta;
-
-            if (other != null && other.unit != null && other.unit.society != null)
-            {
-                if (other.unit.isCommandable())
-                {
-                    ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", delta / 2), true);
-                }
-                else if (!other.unit.society.isDark())
-                {
-                    ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", delta / 2));
-                }
-                
-            }
         }
 
         public double getGold()
@@ -106,7 +94,7 @@ namespace Orcs_Plus
             Item item = items[items.Length - 1];
             for (int i = 0; i < items.Length - 1; i++)
             {
-                items[this.items.Length - 1 - i] = items[items.Length - 2 - i];
+                items[items.Length - 1 - i] = items[items.Length - 2 - i];
             }
             items[0] = item;
         }
@@ -122,6 +110,18 @@ namespace Orcs_Plus
             if (delta > 0)
             {
                 orcCulture.receiveFunding(other, delta);
+
+                if (other != null && other.unit != null && other.unit.society != null)
+                {
+                    if (other.unit.isCommandable())
+                    {
+                        ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", delta / 2), true);
+                    }
+                    else if (!other.unit.society.isDark())
+                    {
+                        ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", delta / 2));
+                    }
+                }
             }
         }
     }

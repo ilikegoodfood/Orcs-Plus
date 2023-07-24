@@ -711,7 +711,7 @@ namespace Orcs_Plus
                 inf += (int)msg.value;
             }
 
-            return inf;
+            return Math.Max(0, Math.Min(inf, order.influenceHumanReq));
         }
 
         public bool TryAddInfluenceGain(HolyOrder_Orcs orcCulture, ReasonMsg msg, bool isElder = false)
@@ -733,6 +733,10 @@ namespace Orcs_Plus
                     {
                         orcCulture.influenceElder = orcCulture.influenceElderReq;
                     }
+                    else if (orcCulture.influenceElder < 0)
+                    {
+                        orcCulture.influenceElder = 0;
+                    }
                 }
 
                 return true;
@@ -747,6 +751,10 @@ namespace Orcs_Plus
                 if (orcCulture.influenceHuman > orcCulture.influenceHumanReq)
                 {
                     orcCulture.influenceHuman = orcCulture.influenceHumanReq;
+                }
+                else if (orcCulture.influenceHuman < 0)
+                {
+                    orcCulture.influenceHuman = 0;
                 }
             }
 
@@ -950,23 +958,18 @@ namespace Orcs_Plus
 
             onPersonDeath_InfluenceGain(person, v, killer);
 
-            //Console.WriteLine("Orcs_Plus: Person with Unit has died.");
-            UA uaPerson = uPerson as UA;
-            SG_Orc orcSociety = uPerson.society as SG_Orc;
-            HolyOrder_Orcs orcCulture = uPerson.society as HolyOrder_Orcs;
-
             // Shipwreck Spawning Code
-            if (uaPerson.location.isOcean)
+            if (uPerson.location != null && uPerson.location.isOcean)
             {
                 int wreckRoll = Eleven.random.Next(10);
 
                 if (wreckRoll == 0)
                 {
-                    Pr_Shipwreck wreck = uaPerson.location.properties.OfType<Pr_Shipwreck>().FirstOrDefault();
+                    Pr_Shipwreck wreck = uPerson.location.properties.FirstOrDefault(pr => pr is Pr_Shipwreck) as Pr_Shipwreck;
                     if (wreck == null)
                     {
-                        wreck = new Pr_Shipwreck(uaPerson.location);
-                        uaPerson.location.properties.Add(wreck);
+                        wreck = new Pr_Shipwreck(uPerson.location);
+                        uPerson.location.properties.Add(wreck);
                     }
                     else
                     {
@@ -974,6 +977,11 @@ namespace Orcs_Plus
                     }
                 }
             }
+
+            //Console.WriteLine("Orcs_Plus: Person with Unit has died.");
+            UA uaPerson = uPerson as UA;
+            SG_Orc orcSociety = uPerson.society as SG_Orc;
+            HolyOrder_Orcs orcCulture = uPerson.society as HolyOrder_Orcs;
 
             // Cordyceps Symbiosis
             if (uaPerson is UAEN_OrcUpstart || uaPerson is UAEN_OrcElder || uaPerson is UAEN_OrcShaman)
