@@ -951,7 +951,7 @@ namespace Orcs_Plus
             // Person Data
             Unit uPerson = person.unit;
 
-            if (uPerson == null)
+            if (uPerson == null || uPerson.location == null || uPerson.homeLocation == -1)
             {
                 return;
             }
@@ -959,7 +959,7 @@ namespace Orcs_Plus
             onPersonDeath_InfluenceGain(person, v, killer);
 
             // Shipwreck Spawning Code
-            if (uPerson.location != null && uPerson.location.isOcean)
+            if (uPerson.location.isOcean)
             {
                 int wreckRoll = Eleven.random.Next(10);
 

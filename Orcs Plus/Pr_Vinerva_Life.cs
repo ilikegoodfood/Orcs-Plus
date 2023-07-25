@@ -120,9 +120,12 @@ namespace Orcs_Plus
                     {
                         orcSociety = ua.society as SG_Orc;
 
-                        if (orcSociety == null && ua.society is HolyOrder_Orcs orcCulture)
+                        if (orcSociety == null)
                         {
-                            orcSociety = orcCulture.orcSociety;
+                            if (ua.society is HolyOrder_Orcs orcCulture)
+                            {
+                                orcSociety = orcCulture.orcSociety;
+                            }
                         }
 
                         if (orcSociety != null)
@@ -152,7 +155,7 @@ namespace Orcs_Plus
                         }
 
                         Sub_OrcWaystation waystation = neighbour.settlement?.subs.OfType<Sub_OrcWaystation>().FirstOrDefault();
-                        if (waystation != null && ModCore.core.data.orcSGCultureMap.TryGetValue(waystation.orcSociety, out HolyOrder_Orcs orcCulture4) && orcCulture4 != null && orcCulture4.tenet_god is H_Orcs_LifeMother life4 && life4.status < 0)
+                        if (waystation != null && waystation.orcSociety != null && ModCore.core.data.orcSGCultureMap.TryGetValue(waystation.orcSociety, out HolyOrder_Orcs orcCulture4) && orcCulture4 != null && orcCulture4.tenet_god is H_Orcs_LifeMother life4 && life4.status < 0)
                         {
                             orcSocieties.Add(waystation.orcSociety);
                             continue;
@@ -164,14 +167,13 @@ namespace Orcs_Plus
                         location.properties.Remove(this);
                         return;
                     }
-
-                    if (orcSocieties.Count == 1)
-                    {
-                        orcSociety = orcSocieties[0];
-                    }
                     else
                     {
-                        orcSociety = orcSocieties[Eleven.random.Next(orcSocieties.Count)];
+                        orcSociety = orcSocieties[0];
+                        if (orcSocieties.Count > 1)
+                        {
+                            orcSociety = orcSocieties[Eleven.random.Next(orcSocieties.Count)];
+                        }
                     }
                 }
 
@@ -187,20 +189,22 @@ namespace Orcs_Plus
         {
             location.soc = orcSociety;
 
-            location.properties.Remove(this);
-
             Settlement set = location.settlement;
             location.settlement = new Set_OrcCamp(location);
-            foreach (Subsettlement sub in set.subs)
+            if (set != null)
             {
-                if (!(sub is Sub_OrcWaystation))
+                foreach (Subsettlement sub in set.subs)
                 {
-                    location.settlement.subs.Add(sub);
+                    if (!(sub is Sub_OrcWaystation))
+                    {
+                        location.settlement.subs.Add(sub);
+                    }
                 }
             }
             location.settlement.isInfiltrated = true;
 
             location.properties.Add(new Pr_Vinerva_LifeBoon(location));
+            location.properties.Remove(this);
 
             ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Nurtured Orchard of Life to Maturity", ModCore.core.data.influenceGain[ModData.influenceGainAction.RecieveGift]), true);
         }
