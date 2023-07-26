@@ -27,17 +27,24 @@ namespace Orcs_Plus
 
         public override void onUnitDeath_StartOfProcess(Unit u, string v, Person killer)
         {
+            //Console.WriteLine("Orcs_Plus: Unit died");
+
             if (u is UA)
             {
+                //Console.WriteLine("Orcs_Plus: Unit is Person");
                 return;
             }
+            //Console.WriteLine("Orcs_Plus: Unit is not Person");
+
             // Shipwreck Logic
             if (u.location.isOcean)
             {
+                //Console.WriteLine("Orcs_Plus: Unit died in ocean");
                 int wreckRoll = Eleven.random.Next(10);
 
                 if (wreckRoll == 0)
                 {
+                    //Console.WriteLine("Orcs_Plus: Spawning shipwreck");
                     Pr_Shipwreck wreck = u.location.properties.OfType<Pr_Shipwreck>().FirstOrDefault();
                     if (wreck == null)
                     {
@@ -60,24 +67,28 @@ namespace Orcs_Plus
                 ModCore.core.data.orcSGCultureMap.TryGetValue(orcs, out orcCulture);
             }
 
-            if (u is UM um && orcCulture != null)
+            if (u is UM um)
             {
+                //Console.WriteLine("Orcs_Plus: Unit is UM");
                 SG_Orc orcSociety = um.society as SG_Orc;
                 HolyOrder_Orcs orcCulture2 = um.society as HolyOrder_Orcs;
 
                 if (um is UM_Mercenary mercenary)
                 {
+                    //Console.WriteLine("Orcs_Plus: UM is Mercenary Company");
                     orcSociety = mercenary.source as SG_Orc;
                     orcCulture2 = mercenary.source as HolyOrder_Orcs;
                 }
 
                 if (orcSociety != null)
                 {
+                    //Console.WriteLine("Orcs_Plus: UM is orc army");
                     ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture2);
                 }
 
                 if (orcCulture2 != null && orcCulture2.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < -1)
                 {
+                    //Console.WriteLine("Orcs_Plus: UM is subject to Insectile Symbiosis");
                     if (ModCore.core.data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("VespidicSwarm", out Type vSwarmType) && vSwarmType != null)
                     {
                         Location loc = um.location;
@@ -107,6 +118,8 @@ namespace Orcs_Plus
 
         public void onUnitDeath_InfluenceGain(Unit u, string v, Person killer)
         {
+            //Console.WriteLine("Orcs_Plus: UM has died");
+
             SG_Orc orcSociety = u.society as SG_Orc;
             HolyOrder_Orcs orcCulture = u.society as HolyOrder_Orcs;
 
@@ -115,61 +128,67 @@ namespace Orcs_Plus
                 ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
             }
 
-            HashSet<SG_Orc> influencedOrcSocietyHasSet = new HashSet<SG_Orc>();
+            HashSet<SG_Orc> influencedOrcSocietyHashSet = new HashSet<SG_Orc>();
             HolyOrder_Orcs influencedOrcCulture_Direct = null;
             List<HolyOrder_Orcs> influencedOrcCultures_Warring = new List<HolyOrder_Orcs>();
             List<HolyOrder_Orcs> influencedOrcCultures_Regional = new List<HolyOrder_Orcs>();
 
             if (orcCulture != null)
             {
+                //Console.WriteLine("Orcs_Plus: UM is orc army");
                 influencedOrcCulture_Direct = orcCulture;
-                influencedOrcSocietyHasSet.Add(orcCulture.orcSociety);
+                influencedOrcSocietyHashSet.Add(orcCulture.orcSociety);
             }
 
             if (u.society != null)
             {
                 foreach (SocialGroup sg in u.map.socialGroups)
                 {
-                    if (sg is SG_Orc orcSociety2 && sg.getRel(u.society).state == DipRel.dipState.war && !influencedOrcSocietyHasSet.Contains(orcSociety2) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null)
+                    if (sg is SG_Orc orcSociety2 && sg.getRel(u.society).state == DipRel.dipState.war && !influencedOrcSocietyHashSet.Contains(orcSociety2) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null)
                     {
+                        //Console.WriteLine("Orcs_Plus: UM is at war with " + sg.getName());
                         influencedOrcCultures_Warring.Add(orcCulture2);
-                        influencedOrcSocietyHasSet.Add(orcSociety2);
-
+                        influencedOrcSocietyHashSet.Add(orcSociety2);
                     }
                 }
             }
 
             if (u.task is Task_InBattle battleTask)
             {
+                //Console.WriteLine("Orcs_Plus: UM died in battle");
                 ModCore.core.data.getBattleArmyEnemies(battleTask.battle, u, out List<UM> enemies, out List<UA> enemyComs);
 
                 foreach (UM enemy in enemies)
                 {
-                    if (enemy.society is SG_Orc orcSociety3 && !influencedOrcSocietyHasSet.Contains(orcSociety3) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety3, out HolyOrder_Orcs orcCulture3) && orcCulture3 != null)
+                    if (enemy.society is SG_Orc orcSociety3 && !influencedOrcSocietyHashSet.Contains(orcSociety3) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety3, out HolyOrder_Orcs orcCulture3) && orcCulture3 != null)
                     {
+                        //Console.WriteLine("Orcs_Plus: UM was in battle against the " + orcSociety3.getName());
                         influencedOrcCultures_Warring.Add(orcCulture3);
-                        influencedOrcSocietyHasSet.Add(orcSociety3);
+                        influencedOrcSocietyHashSet.Add(orcSociety3);
                     }
                 }
 
                 foreach (UA com in enemyComs)
                 {
-                    if (com.society is SG_Orc orcSociety3 && !influencedOrcSocietyHasSet.Contains(orcSociety3) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety3, out HolyOrder_Orcs orcCulture3) && orcCulture3 != null)
+                    if (com.society is SG_Orc orcSociety3 && !influencedOrcSocietyHashSet.Contains(orcSociety3) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety3, out HolyOrder_Orcs orcCulture3) && orcCulture3 != null)
                     {
+                        //Console.WriteLine("Orcs_Plus: UM was in battle against the " + orcSociety3.getName());
                         influencedOrcCultures_Warring.Add(orcCulture3);
-                        influencedOrcSocietyHasSet.Add(orcSociety3);
+                        influencedOrcSocietyHashSet.Add(orcSociety3);
                     }
                 }
             }
 
-            if (u.location.soc is SG_Orc orcSociety4 && !influencedOrcSocietyHasSet.Contains(orcSociety4) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety4, out HolyOrder_Orcs orcCulture4) && orcCulture4 != null)
+            if (u.location.soc is SG_Orc orcSociety4 && !influencedOrcSocietyHashSet.Contains(orcSociety4) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety4, out HolyOrder_Orcs orcCulture4) && orcCulture4 != null)
             {
+                //Console.WriteLine("Orcs_Plus: UM was trespassing in the lands of the " + orcSociety4.getName());
                 influencedOrcCultures_Regional.Add(orcCulture4);
-                influencedOrcSocietyHasSet.Add(orcSociety4);
+                influencedOrcSocietyHashSet.Add(orcSociety4);
             }
 
             if (v == "Destroyed in battle" && u.task is Task_InBattle battleTask2)
             {
+                //Console.WriteLine("Orcs_Plus: UM died in battle");
                 bool influenceElder = false;
                 bool influenceHuman = false;
 
@@ -201,6 +220,7 @@ namespace Orcs_Plus
 
                 if (influenceElder)
                 {
+                    //Console.WriteLine("Orcs_Plus: UM's eath grant elder influence");
                     if (influencedOrcCulture_Direct != null)
                     {
                         ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Destroyed orc army in battle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
@@ -219,6 +239,7 @@ namespace Orcs_Plus
 
                 if (influenceHuman && influencedOrcCulture_Direct != null)
                 {
+                    //Console.WriteLine("Orcs_Plus: UM's death grants human influence");
                     ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Destroyed orc army in battle", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]));
 
                     foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
@@ -234,6 +255,7 @@ namespace Orcs_Plus
             }
             else if (v == "Killed by Ophanim's Smite")
             {
+                //Console.WriteLine("Orcs_Plus: UM was smote");
                 if (influencedOrcCulture_Direct != null)
                 {
                     ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Smote orc army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
@@ -251,6 +273,7 @@ namespace Orcs_Plus
             }
             else if (v == "Killed by a volcano")
             {
+                //Console.WriteLine("Orcs_Plus: UM died to volcanic eruption");
                 if (killer != null && killer.unit != null)
                 {
                     if (killer.unit.isCommandable())
@@ -301,6 +324,24 @@ namespace Orcs_Plus
                     {
                         ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Awakening destroyed trespassing army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                     }
+                }
+            }
+            else if (v == "killed by cheat" || v == "console" || v == "Killed by console")
+            {
+                //Console.WriteLine("Orcs_Plus: UM died to console command");
+                if (influencedOrcCulture_Direct != null)
+                {
+                    ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Killed orc army (console command)", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                {
+                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Killed enemy army (console command)", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                {
+                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Killed trespassing army (console command)", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                 }
             }
         }
@@ -364,7 +405,7 @@ namespace Orcs_Plus
                 ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
             }
 
-            HashSet<SG_Orc> influencedOrcSocietyHasSet = new HashSet<SG_Orc>();
+            HashSet<SG_Orc> influencedOrcSocietyHashSet = new HashSet<SG_Orc>();
             HolyOrder_Orcs influencedOrcCulture_Direct = null;
             List<HolyOrder_Orcs> influencedOrcCultures_Warring = new List<HolyOrder_Orcs>();
             List<HolyOrder_Orcs> influencedOrcCultures_Regional = new List<HolyOrder_Orcs>();
@@ -372,27 +413,27 @@ namespace Orcs_Plus
             if (orcCulture != null)
             {
                 influencedOrcCulture_Direct = orcCulture;
-                influencedOrcSocietyHasSet.Add(orcCulture.orcSociety);
+                influencedOrcSocietyHashSet.Add(orcCulture.orcSociety);
             }
 
             if (um.location.soc != null)
             {
                 foreach (SocialGroup sg in um.map.socialGroups)
                 {
-                    if (sg is SG_Orc orcSociety2 && sg.getRel(um.location.soc).state == DipRel.dipState.war && !influencedOrcSocietyHasSet.Contains(orcSociety2) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null)
+                    if (sg is SG_Orc orcSociety2 && sg.getRel(um.location.soc).state == DipRel.dipState.war && !influencedOrcSocietyHashSet.Contains(orcSociety2) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null)
                     {
                         influencedOrcCultures_Warring.Add(orcCulture2);
-                        influencedOrcSocietyHasSet.Add(orcSociety2);
+                        influencedOrcSocietyHashSet.Add(orcSociety2);
                     }
                 }
             }
 
             foreach (Location neighbour in um.location.getNeighbours())
             {
-                if (neighbour.soc is SG_Orc orcSociety3 && !influencedOrcSocietyHasSet.Contains(orcSociety3) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety3, out HolyOrder_Orcs orcCulture3))
+                if (neighbour.soc is SG_Orc orcSociety3 && !influencedOrcSocietyHashSet.Contains(orcSociety3) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety3, out HolyOrder_Orcs orcCulture3) && orcCulture3 != null)
                 {
                     influencedOrcCultures_Regional.Add(orcCulture3);
-                    influencedOrcSocietyHasSet.Add(orcSociety3);
+                    influencedOrcSocietyHashSet.Add(orcSociety3);
                 }
             }
 
@@ -715,7 +756,7 @@ namespace Orcs_Plus
                 ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
             }
 
-            HashSet<SG_Orc> influencedOrcSocietyHasSet = new HashSet<SG_Orc>();
+            HashSet<SG_Orc> influencedOrcSocietyHashSet = new HashSet<SG_Orc>();
             HolyOrder_Orcs influencedOrcCulture_Direct = null;
             List<HolyOrder_Orcs> influencedOrcCultures_Warring = new List<HolyOrder_Orcs>();
             List<HolyOrder_Orcs> influencedOrcCultures_Regional = new List<HolyOrder_Orcs>();
@@ -723,27 +764,27 @@ namespace Orcs_Plus
             if (orcCulture != null)
             {
                 influencedOrcCulture_Direct = orcCulture;
-                influencedOrcSocietyHasSet.Add(orcCulture.orcSociety);
+                influencedOrcSocietyHashSet.Add(orcCulture.orcSociety);
             }
 
             if (set.location.soc != null)
             {
                 foreach (SocialGroup sg in set.map.socialGroups)
                 {
-                    if (sg is SG_Orc orcSociety2 && sg.getRel(set.location.soc).state == DipRel.dipState.war && !influencedOrcSocietyHasSet.Contains(orcSociety2) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null)
+                    if (sg is SG_Orc orcSociety2 && sg.getRel(set.location.soc).state == DipRel.dipState.war && !influencedOrcSocietyHashSet.Contains(orcSociety2) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null)
                     {
                         influencedOrcCultures_Warring.Add(orcCulture2);
-                        influencedOrcSocietyHasSet.Add(orcSociety2);
+                        influencedOrcSocietyHashSet.Add(orcSociety2);
                     }
                 }
             }
 
             foreach (Location neighbour in set.location.getNeighbours())
             {
-                if (neighbour.soc is SG_Orc orcSociety3 && !influencedOrcSocietyHasSet.Contains(orcSociety3) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety3, out HolyOrder_Orcs orcCulture3))
+                if (neighbour.soc is SG_Orc orcSociety3 && !influencedOrcSocietyHashSet.Contains(orcSociety3) && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety3, out HolyOrder_Orcs orcCulture3) && orcCulture3 != null)
                 {
                     influencedOrcCultures_Regional.Add(orcCulture3);
-                    influencedOrcSocietyHasSet.Add(orcSociety3);
+                    influencedOrcSocietyHashSet.Add(orcSociety3);
                 }
             }
 
@@ -858,6 +899,23 @@ namespace Orcs_Plus
                     {
                         ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Awakening destroyed encroaching settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                     }
+                }
+            }
+            else if (v == "console" || v == "Console" || v == "Cheats")
+            {
+                if (influencedOrcCulture_Direct != null)
+                {
+                    ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Destroyed orc camp (console command)", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                {
+                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Destroyed enemy camp (console command)", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                {
+                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Destroyed encroaching camp (console command)", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                 }
             }
         }

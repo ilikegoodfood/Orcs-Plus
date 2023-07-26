@@ -68,7 +68,8 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OpportunisticEncroachment), nameof(Ch_Orcs_OpportunisticEncroachment.valid), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_valid_Postfix)));
 
             // Patches for Pr_OrcPlunder
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.valid), new Type[] {  }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_valid_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.valid), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_valid_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_validFor_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_complete_Transpiler)));
 
@@ -614,6 +615,25 @@ namespace Orcs_Plus
             __result += " You gain " + (ModCore.core.data.influenceGain[ModData.influenceGainAction.Subjugate] * 2) + " influence with the orc culture by completing this challenge.";
         }
 
+        public static void Ch_Orcs_AccessPlunder_getDesc_Postfix(Ch_Orcs_AccessPlunder __instance, ref string __result)
+        {
+            SG_Orc orcSociety = __instance.location.soc as SG_Orc;
+            HolyOrder_Orcs orcCulture = __instance.location.soc as HolyOrder_Orcs;
+
+            if (orcSociety != null)
+            {
+                ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+            }
+
+            int maxDraw = 0;
+            if (orcCulture != null)
+            {
+                maxDraw = orcCulture.influenceElder * 2;
+            }
+
+            __result = "Opens the trade screen with the orc plunder, allowing you to take or add gold and items from it. When taking gold from the horde, you can only take gold equal to twice the influence you have with that culture (" + maxDraw + ").";
+        }
+
         private static bool Ch_Orcs_AccessPlunder_valid_Postfix(bool result, Ch_Orcs_AccessPlunder __instance)
         {
             return __instance.location.settlement is Set_OrcCamp && __instance.cache.charge > 0.0 && __instance.cache.gold > 0;
@@ -663,13 +683,21 @@ namespace Orcs_Plus
 
             if (ua.isCommandable())
             {
-                if (ch.location.settlement != null && ch.location.settlement.infiltration == 1.0)
+                SG_Orc orcSociety = ua.location.soc as SG_Orc;
+                HolyOrder_Orcs orcCulture = ua.location.soc as HolyOrder_Orcs;
+
+                if (orcSociety != null)
+                {
+                    ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+                }
+
+                if (ch.location.settlement != null && ch.location.settlement.infiltration == 1.0 && orcCulture != null)
                 {
                     double initGold = ch.cache.gold;
 
                     if (!ch.map.automatic)
                     {
-                        ch.map.world.prefabStore.popItemTrade(ua.person, new ItemFromOrcPlunder(ch.map, ch.cache, ua.person), "Swap Items", -1, -1);
+                        ch.map.world.prefabStore.popItemTrade(ua.person, new ItemFromOrcPlunder(ch.map, ch.cache, ua.person), "Access Plunder", orcCulture.influenceElder * 2, -1);
                     }
                     else
                     {
@@ -683,11 +711,6 @@ namespace Orcs_Plus
                                 ua.person.gainItem(ch.cache.items[i], false);
                                 ch.cache.items[i] = null;
                             }
-                        }
-
-                        if (ModCore.core.data.orcSGCultureMap.TryGetValue(ch.location.soc as SG_Orc, out HolyOrder_Orcs orcCulture))
-                        {
-                            ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Gold Taken", -initGold / 2), true);
                         }
 
                         ch.location.properties.Remove(ch.cache);

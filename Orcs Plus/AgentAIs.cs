@@ -385,7 +385,7 @@ namespace Orcs_Plus
 
         private double delegate_Utility_OrcGift(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
         {
-            utility = ((ua.society as HolyOrder_Orcs)?.orcSociety.menace ?? 0) * 4;
+            utility += ((ua.society as HolyOrder_Orcs)?.orcSociety.menace ?? 0) * 4;
 
             if (utility > 0)
             {

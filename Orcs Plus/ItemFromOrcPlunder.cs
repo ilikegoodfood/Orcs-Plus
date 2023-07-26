@@ -22,7 +22,7 @@ namespace Orcs_Plus
         {
             this.map = map;
             this.plunder = plunder;
-            this.other = trader;
+            other = trader;
             delta = plunder.gold;
         }
 
@@ -65,7 +65,7 @@ namespace Orcs_Plus
 
         public string getName()
         {
-            return "Donate To Orc Culture";
+            return "Access Plunder";
         }
 
         public void nullTopItem()
@@ -102,15 +102,30 @@ namespace Orcs_Plus
         {
             delta -= plunder.gold;
 
-            if (delta > 0 && other != null && other.unit != null && other.unit.society != null && plunder.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture))
+            if (other != null && other.unit != null && other.unit.society != null && plunder.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture))
             {
-                if (other.unit.isCommandable())
+                if (delta > 0)
                 {
-                    ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", -delta / 2), true);
+                    if (other.unit.isCommandable())
+                    {
+                        ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Took gold from plunder", -delta / 2), true);
+                    }
+                    else if (!other.unit.society.isDark())
+                    {
+                        ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Took gold from plunder", -delta / 2));
+                    }
                 }
-                else if (!other.unit.society.isDark())
+
+                if (delta < 0)
                 {
-                    ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", -delta / 2));
+                    if (other.unit.isCommandable())
+                    {
+                        ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", -delta / 2), true);
+                    }
+                    else if (!other.unit.society.isDark())
+                    {
+                        ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", -delta / 2));
+                    }
                 }
             }
         }
