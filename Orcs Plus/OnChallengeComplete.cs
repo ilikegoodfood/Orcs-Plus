@@ -321,6 +321,56 @@ namespace Orcs_Plus
             }
         }
 
+        public static void Ch_Orcs_OpportunisticEncroachment(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)
+        {
+            SG_Orc orcSociety = challenge.location.soc as SG_Orc;
+            if (orcSociety == null && challenge.location.settlement != null)
+            {
+                Sub_OrcWaystation waystation = challenge.location.settlement.subs.OfType<Sub_OrcWaystation>().FirstOrDefault();
+                List<Location> targetLocations = new List<Location>();
+                Location target = null;
+
+                if (waystation != null && waystation.orcSociety != null)
+                {
+                    orcSociety = waystation.orcSociety;
+
+                    foreach (Location neighbour in challenge.location.getNeighbours())
+                    {
+                        if (neighbour.settlement is SettlementHuman && !(neighbour.settlement is Set_City) && !(neighbour.settlement is Set_ElvenCity))
+                        {
+                            if (!neighbour.properties.Any(pr => pr is Pr_OrcEncroachment))
+                            {
+                                targetLocations.Add(neighbour);
+                            }
+                        }
+                    }
+                }
+
+                if (targetLocations.Count == 1)
+                {
+                    target = targetLocations[0];
+                }
+                else if (targetLocations.Count > 1)
+                {
+                    target = targetLocations[Eleven.random.Next(targetLocations.Count)];
+                }
+
+                if (target != null)
+                {
+                    target.properties.Add(new Pr_OrcEncroachment(target, orcSociety));
+                    challenge.msgString = "Orcs are beginning to encroach on human settlements in " + target.getName(true) + ", waiting for signs of weakness to make their land grab.";
+                }
+            }
+
+            if (ua.isCommandable() && orcSociety != null)
+            {
+                if (ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+                {
+                    ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(challenge.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand]), true);
+                }
+            }
+        }
+
         // Template Item
         public static void Ch_(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)
         {

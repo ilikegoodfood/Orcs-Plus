@@ -24,6 +24,7 @@ namespace Orcs_Plus
             challenges.Add(new Ch_Orcs_RaidOutpost(settlement.location, orcSociety));
             challenges.Add(new Ch_Rest_InOrcCamp(settlement.location));
             challenges.Add(new Ch_Orcs_FundWaystation(settlement.location));
+            challenges.Add(new Ch_Orcs_OpportunisticEncroachment(settlement, orcSociety));
         }
 
         public override string getName()

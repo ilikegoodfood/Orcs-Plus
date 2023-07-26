@@ -613,6 +613,9 @@ namespace Orcs_Plus
                 case Rt_RaidShipping _:
                     OnChallengeComplete.Rt_RaidShipping(challenge, ua, task_PerformChallenge);
                     break;
+                case Ch_Orcs_OpportunisticEncroachment _:
+                    OnChallengeComplete.Ch_Orcs_OpportunisticEncroachment(challenge, ua, task_PerformChallenge);
+                    break;
                 default:
                     break;
             }
