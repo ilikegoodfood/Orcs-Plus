@@ -54,7 +54,8 @@ namespace Orcs_Plus
             RazeLocation,
             RazingLocation,
             Subjugate,
-            RecieveGift
+            RecieveGift,
+            BuildWaystation
         }
 
         public Dictionary<influenceGainAction, int> influenceGain;
@@ -72,20 +73,21 @@ namespace Orcs_Plus
 
             influenceGain = new Dictionary<influenceGainAction, int>
             {
-                { influenceGainAction.AgentKill, 16 },
-                { influenceGainAction.ArmyKill, 16 },
-                { influenceGainAction.BuildFortress, 35 },
+                { influenceGainAction.AgentKill, 20 },
+                { influenceGainAction.ArmyKill, 20 },
+                { influenceGainAction.BuildFortress, 40 },
                 { influenceGainAction.BuildMages, 40 },
-                { influenceGainAction.BuildMenagerie, 40 },
-                { influenceGainAction.BuildShipyard, 35 },
+                { influenceGainAction.BuildMenagerie, 80 },
+                { influenceGainAction.BuildShipyard, 80 },
                 { influenceGainAction.CommandeerShips, 20 },
                 { influenceGainAction.DevastateIndustry, 20 },
-                { influenceGainAction.Expand, 12 },
+                { influenceGainAction.Expand, 15 },
                 { influenceGainAction.Raiding, 10 },
-                { influenceGainAction.RazeLocation, 16 },
+                { influenceGainAction.RazeLocation, 20 },
                 { influenceGainAction.RazingLocation, 4 },
-                { influenceGainAction.Subjugate, 12},
-                { influenceGainAction.RecieveGift, 20 }
+                { influenceGainAction.Subjugate, 15 },
+                { influenceGainAction.RecieveGift, 20 },
+                { influenceGainAction.BuildWaystation, 30 }
             };
 
             menaceGain = new Dictionary<menaceGainAction, int>

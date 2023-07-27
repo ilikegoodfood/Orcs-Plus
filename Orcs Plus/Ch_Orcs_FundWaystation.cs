@@ -23,7 +23,7 @@ namespace Orcs_Plus
         }
         public override string getDesc()
         {
-            return "Donate " + cost + " gold so that the orcs can build, guard and buy stock for a waystation in a neighbouring non-human settlement. You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand] + " influence with the orc culture by completing this challenge.";
+            return "Donate " + cost + " gold so that the orcs can build, guard and buy stock for a waystation in a neighbouring non-human settlement. You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildWaystation] + " influence with the orc culture by completing this challenge.";
         }
 
         public override string getCastFlavour()
