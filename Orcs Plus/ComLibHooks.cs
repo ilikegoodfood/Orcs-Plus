@@ -36,28 +36,6 @@ namespace Orcs_Plus
             }
             //Console.WriteLine("Orcs_Plus: Unit is not Person");
 
-            // Shipwreck Logic
-            if (u.location.isOcean)
-            {
-                //Console.WriteLine("Orcs_Plus: Unit died in ocean");
-                int wreckRoll = Eleven.random.Next(10);
-
-                if (wreckRoll == 0)
-                {
-                    //Console.WriteLine("Orcs_Plus: Spawning shipwreck");
-                    Pr_Shipwreck wreck = u.location.properties.OfType<Pr_Shipwreck>().FirstOrDefault();
-                    if (wreck == null)
-                    {
-                        wreck = new Pr_Shipwreck(u.location);
-                        u.location.properties.Add(wreck);
-                    }
-                    else
-                    {
-                        wreck.charge += 20.0;
-                    }
-                }
-            }
-
             // Orc Logic
             SG_Orc orcs = u.society as SG_Orc;
             HolyOrder_Orcs orcCulture = u.society as HolyOrder_Orcs;
@@ -916,31 +894,6 @@ namespace Orcs_Plus
                 foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
                 {
                     ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Destroyed encroaching camp (console command)", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
-                }
-            }
-        }
-
-        public override void onSettlementFallIntoRuin_EndOfProcess(Settlement set, string v, object killer = null)
-        {
-            //Console.WriteLine("OrcsPlus: Settlement fallen into ruin");
-            if (set is SettlementHuman settlementHuman && settlementHuman.subs.Count > 0 && settlementHuman.location.settlement is Set_CityRuins ruins)
-            {
-                //Console.WriteLine("OrcsPlus: settlment is human settlment and is now city ruin");
-                bool hasDock = false;
-
-                foreach (Subsettlement sub in settlementHuman.subs)
-                {
-                    if (sub is Sub_Docks)
-                    {
-                        hasDock = true;
-                        break;
-                    }
-                }
-
-                if (hasDock)
-                {
-                    //Console.WriteLine("OrcsPlus: settlement has dock");
-                    ModCore.core.shipwreckLocations.Add(set.location);
                 }
             }
         }

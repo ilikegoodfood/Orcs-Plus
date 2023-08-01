@@ -9,6 +9,51 @@ namespace Orcs_Plus
 {
     public static class OnChallengeComplete
     {
+        public static void processChallenge(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)
+        {
+            switch (task_PerformChallenge.challenge)
+            {
+                case Ch_Orcs_BuildFortress _:
+                    Ch_Orcs_BuildFortress(challenge, ua, task_PerformChallenge);
+                    break;
+                case Ch_Orcs_BuildMages _:
+                    Ch_Orcs_BuildMages(challenge, ua, task_PerformChallenge);
+                    break;
+                case Ch_Orcs_BuildMenagerie _:
+                    Ch_Orcs_BuildMenagerie(challenge, ua, task_PerformChallenge);
+                    break;
+                case Ch_Orcs_BuildShipyard _:
+                    Ch_Orcs_BuildShipyard(challenge, ua, task_PerformChallenge);
+                    break;
+                case Rt_Orcs_ClaimTerritory _:
+                    Rt_Orcs_ClaimTerritory(challenge, ua, task_PerformChallenge);
+                    break;
+                case Ch_Orcs_DevastateOrcishIndustry _:
+                    Ch_Orcs_DevastateOrcishIndustry(challenge, ua, task_PerformChallenge);
+                    break;
+                case Ch_Orcs_Expand _:
+                    Ch_Orcs_Expand(challenge, ua, task_PerformChallenge);
+                    break;
+                case Ch_Subjugate_Orcs _:
+                    Ch_Subjugate_Orcs(challenge, ua, task_PerformChallenge);
+                    break;
+                case Mg_EnslaveTheDead _:
+                    Mg_EnslaveTheDead(challenge, ua, task_PerformChallenge);
+                    break;
+                case Ch_RaidPeriphery _:
+                    Ch_RaidPeriphery(challenge, ua, task_PerformChallenge);
+                    break;
+                case Rt_RaidPort _:
+                    Rt_RaidPort(challenge, ua, task_PerformChallenge);
+                    break;
+                case Ch_Orcs_OpportunisticEncroachment _:
+                    Ch_Orcs_OpportunisticEncroachment(challenge, ua, task_PerformChallenge);
+                    break;
+                default:
+                    break;
+            }
+        }
+
         public static void Ch_Orcs_BuildFortress(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)
         {
             if (ua.isCommandable() && ua.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
@@ -267,56 +312,6 @@ namespace Orcs_Plus
                 foreach (SG_Orc orcSociety in influencedOrcSocieties_Regional)
                 {
                     ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Raided encroaching settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
-                }
-            }
-
-            if (ua.location.settlement.subs.OfType<Sub_Docks>().FirstOrDefault() != null)
-            {
-                int wreckRoll = Eleven.random.Next(10);
-
-                if (wreckRoll < 1)
-                {
-                    Pr_Shipwreck wreck = ua.location.properties.OfType<Pr_Shipwreck>().FirstOrDefault();
-
-                    if (wreck == null)
-                    {
-                        ua.location.properties.Add(new Pr_Shipwreck(ua.location));
-                    }
-                    else
-                    {
-                        wreck.charge += 25.0;
-                    }
-                }
-            }
-        }
-
-        public static void Rt_RaidShipping(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)
-        {
-            foreach (TradeRoute route in ua.map.tradeManager.routes)
-            {
-                if (route.raidingCooldown == ua.map.param.ch_raidShippingCooldown && route.path.Contains(ua.location))
-                {
-                    int wreckRoll = Eleven.random.Next(10);
-
-                    if (wreckRoll < 1)
-                    {
-                        List<Location> oceanLocations = route.path.FindAll(l => l.isOcean).ToList();
-
-                        if (oceanLocations.Count > 0)
-                        {
-                            Location wreckLocation = oceanLocations[Eleven.random.Next(oceanLocations.Count)];
-                            Pr_Shipwreck wreck = wreckLocation.properties.OfType<Pr_Shipwreck>().FirstOrDefault();
-
-                            if (wreck == null)
-                            {
-                                wreckLocation.properties.Add(new Pr_Shipwreck(wreckLocation));
-                            }
-                            else
-                            {
-                                wreck.charge += 25.0;
-                            }
-                        }
-                    }
                 }
             }
         }

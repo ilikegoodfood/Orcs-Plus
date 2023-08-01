@@ -1,4 +1,5 @@
 ﻿using Assets.Code;
+using CommunityLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -179,18 +180,9 @@ namespace Orcs_Plus
                     {
                         int wreckRoll = Eleven.random.Next(10);
 
-                        if (wreckRoll < 1)
+                        if (wreckRoll == 0)
                         {
-                            Pr_Shipwreck wreck = target.location.properties.OfType<Pr_Shipwreck>().FirstOrDefault();
-
-                            if (wreck == null)
-                            {
-                                target.location.properties.Add(new Pr_Shipwreck(target.location));
-                            }
-                            else
-                            {
-                                wreck.charge += 25.0;
-                            }
+                            ModCore.comLib.spawnShipwreck(target.location);
                         }
                     }
                 }

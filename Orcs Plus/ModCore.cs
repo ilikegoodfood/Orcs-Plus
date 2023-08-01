@@ -1,15 +1,12 @@
 ﻿using Assets.Code;
 using Assets.Code.Modding;
 using CommunityLib;
-using DuloGames.UI;
 using HarmonyLib;
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 namespace Orcs_Plus
 {
@@ -28,8 +25,6 @@ namespace Orcs_Plus
         public List<Power> godPowers1 = new List<Power>();
 
         public List<Power> godPowers2 = new List<Power>();
-
-        public List<Location> shipwreckLocations = new List<Location>();
 
         private static bool patched = false;
 
@@ -54,7 +49,7 @@ namespace Orcs_Plus
             {
                 throw new Exception("OrcsPlus: This mod REQUIRES the Community Library mod to be installed and enabled in order to operate.");
             }
-
+            
             HarmonyPatches_Conditional.PatchingInit();
 
             if (core.data.godTenetTypes.TryGetValue(map.overmind.god.GetType(), out Type tenetType) && tenetType != null)
@@ -163,7 +158,9 @@ namespace Orcs_Plus
                         comLib = kernel as CommunityLib.ModCore;
                         comLib.RegisterHooks(comLibHooks);
                         core.comLibAI = comLib.GetAgentAI();
-                        
+
+                        comLib.forceShipwrecks();
+
                         new AgentAIs(map);
                         if (core.data.godTenetTypes.TryGetValue(map.overmind.god.GetType(), out Type tenetType) && tenetType != null)
                         {
@@ -336,15 +333,6 @@ namespace Orcs_Plus
             {
                 updateGodPowers(map);
             }
-
-            foreach (Location location in shipwreckLocations)
-            {
-                if (location.settlement is Set_CityRuins && !location.properties.Any(p => p is Pr_Shipwreck))
-                {
-                    location.properties.Add(new Pr_Shipwreck(location));
-                }
-            }
-            shipwreckLocations.Clear();
 
             foreach (Unit unit in map.units)
             {
@@ -576,50 +564,7 @@ namespace Orcs_Plus
 
         public override void onChallengeComplete(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)
         {
-            switch (task_PerformChallenge.challenge)
-            {
-                case Ch_Orcs_BuildFortress _:
-                    OnChallengeComplete.Ch_Orcs_BuildFortress(challenge, ua, task_PerformChallenge);
-                    break;
-                case Ch_Orcs_BuildMages _:
-                    OnChallengeComplete.Ch_Orcs_BuildMages(challenge, ua, task_PerformChallenge);
-                    break;
-                case Ch_Orcs_BuildMenagerie _:
-                    OnChallengeComplete.Ch_Orcs_BuildMenagerie(challenge, ua, task_PerformChallenge);
-                    break;
-                case Ch_Orcs_BuildShipyard _:
-                    OnChallengeComplete.Ch_Orcs_BuildShipyard(challenge, ua, task_PerformChallenge);
-                    break;
-                case Rt_Orcs_ClaimTerritory _:
-                    OnChallengeComplete.Rt_Orcs_ClaimTerritory(challenge, ua, task_PerformChallenge);
-                    break;
-                case Ch_Orcs_DevastateOrcishIndustry _:
-                    OnChallengeComplete.Ch_Orcs_DevastateOrcishIndustry(challenge, ua, task_PerformChallenge);
-                    break;
-                case Ch_Orcs_Expand _:
-                    OnChallengeComplete.Ch_Orcs_Expand(challenge, ua, task_PerformChallenge);
-                    break;
-                case Ch_Subjugate_Orcs _:
-                    OnChallengeComplete.Ch_Subjugate_Orcs(challenge, ua, task_PerformChallenge);
-                    break;
-                case Mg_EnslaveTheDead _:
-                    OnChallengeComplete.Mg_EnslaveTheDead(challenge, ua, task_PerformChallenge);
-                    break;
-                case Ch_RaidPeriphery _:
-                    OnChallengeComplete.Ch_RaidPeriphery(challenge, ua, task_PerformChallenge);
-                    break;
-                case Rt_RaidPort _:
-                    OnChallengeComplete.Rt_RaidPort(challenge, ua, task_PerformChallenge);
-                    break;
-                case Rt_RaidShipping _:
-                    OnChallengeComplete.Rt_RaidShipping(challenge, ua, task_PerformChallenge);
-                    break;
-                case Ch_Orcs_OpportunisticEncroachment _:
-                    OnChallengeComplete.Ch_Orcs_OpportunisticEncroachment(challenge, ua, task_PerformChallenge);
-                    break;
-                default:
-                    break;
-            }
+            OnChallengeComplete.processChallenge(challenge, ua, task_PerformChallenge);
         }
 
         public override double sovereignAI(Map map, AN actionNational, Person ruler, List<ReasonMsg> reasons, double initialUtility)
@@ -963,28 +908,6 @@ namespace Orcs_Plus
             //Console.WriteLine("Orcs_Plus: Person with Unit has died");
 
             onPersonDeath_InfluenceGain(person, v, killer);
-
-            // Shipwreck Spawning Code
-            if (uPerson.location.isOcean)
-            {
-                //Console.WriteLine("Orcs_Plus: Person has died in ocean");
-                int wreckRoll = Eleven.random.Next(10);
-
-                if (wreckRoll == 0)
-                {
-                    //Console.WriteLine("Orcs_Plus: Spawning Shipwreck");
-                    Pr_Shipwreck wreck = uPerson.location.properties.FirstOrDefault(pr => pr is Pr_Shipwreck) as Pr_Shipwreck;
-                    if (wreck == null)
-                    {
-                        wreck = new Pr_Shipwreck(uPerson.location);
-                        uPerson.location.properties.Add(wreck);
-                    }
-                    else
-                    {
-                        wreck.charge += 20.0;
-                    }
-                }
-            }
 
             UA uaPerson = uPerson as UA;
             SG_Orc orcSociety = uPerson.society as SG_Orc;

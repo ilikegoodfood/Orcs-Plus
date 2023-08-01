@@ -138,6 +138,9 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Crusade), nameof(P_Opha_Crusade.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Crusade_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Crusade), nameof(P_Opha_Crusade.cast), new Type[] { typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Crusade_cast_Postfix)));
 
+            // Community Library Patches
+            harmony.Patch(original: AccessTools.Method(typeof(CommunityLib.Ch_RecoverShipwreck), nameof(CommunityLib.Ch_RecoverShipwreck.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_RecoverShipwreck_complete_Transpiler)));
+
             // Template Patch
             // harmony.Patch(original: AccessTools.Method(typeof(), nameof(), new Type[] { typeof() }), postfix: new HarmonyMethod(patchType, nameof()));
         }
@@ -2395,6 +2398,41 @@ namespace Orcs_Plus
                         }
                     }
                 }
+            }
+        }
+
+        // Community Library Patches
+        private static IEnumerable<CodeInstruction> Ch_RecoverShipwreck_complete_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
+        {
+            List<CodeInstruction> instructionList = codeInstructions.ToList();
+
+            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Ch_RecoverShipwreck_complete_TranspilerBody), new Type[] { typeof(Ch_RecoverShipwreck), typeof(UA), typeof(Set_OrcCamp) });
+
+            int targetIndex = 1;
+            for (int i = 0; i < instructionList.Count; i++)
+            {
+                if (targetIndex > 0)
+                {
+                    if (targetIndex == 1 && instructionList[i].opcode == OpCodes.Ldarg_0 && instructionList[i-1].opcode == OpCodes.Nop && instructionList[i+1].opcode == OpCodes.Ldfld)
+                    {
+                        targetIndex = 0;
+
+                        yield return new CodeInstruction(OpCodes.Ldarg_0);
+                        yield return new CodeInstruction(OpCodes.Ldarg_1);
+                        yield return new CodeInstruction(OpCodes.Ldloc_S, 6);
+                        yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
+                    }
+                }
+
+                yield return instructionList[i];
+            }
+        }
+
+        private static void Ch_RecoverShipwreck_complete_TranspilerBody(Ch_RecoverShipwreck challenge, UA ua, Set_OrcCamp emptyShipyard)
+        {
+            if (ua.isCommandable() && emptyShipyard.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            {
+                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(challenge.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildShipyard]), true);
             }
         }
     }

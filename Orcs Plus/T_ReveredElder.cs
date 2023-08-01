@@ -20,7 +20,7 @@ namespace Orcs_Plus
         public override string getDesc()
         {
             return String.Concat(new string[] {
-                "Killing an Orc Elder will start a blood fued with that tribe, which only ends in the death of the target of the blood fued.",
+                "Killing an Orc Elder will start a blood feud with that tribe, which only ends in the death of the target of the blood feud.",
                 "\n",
                 "Orc Elders periodically choose an `Orc Champion` to guard them. Once every ",
                 respawnInterval.ToString(),
