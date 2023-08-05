@@ -67,6 +67,7 @@
     <Compile Include="Ch_H_Orcs_MadnessFestival.cs" />
     <Compile Include="Ch_H_Orcs_NurtureOrchard.cs" />
     <Compile Include="Ch_H_Orcs_PerfectionFestival.cs" />
+    <Compile Include="Ch_Orcs_BloodMoney.cs" />
     <Compile Include="Ch_Orcs_DeathFestival.cs" />
     <Compile Include="Ch_Orcs_FundWaystation.cs" />
     <Compile Include="HarmonyPatches_Conditional.cs" />

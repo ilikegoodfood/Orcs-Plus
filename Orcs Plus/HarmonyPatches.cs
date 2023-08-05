@@ -112,6 +112,9 @@ namespace Orcs_Plus
             // Patches for Pr_OrcishIndustry
             harmony.Patch(original: AccessTools.Method(typeof(Pr_OrcishIndustry), nameof(Pr_OrcishIndustry.turnTick), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Pr_OrcishIndustry_turnTick_Postfix)));
 
+            // Patches for Pr_OrcFunbding
+            harmony.Patch(original: AccessTools.Method(typeof(Pr_OrcFunding), nameof(Pr_OrcFunding.turnTick), new Type[0]), transpiler: new HarmonyMethod(patchType, nameof(Pr_OrcFunding_turnTick_Transpiler)));
+
             // Patches for UM_OrcArmy
             harmony.Patch(original: AccessTools.Method(typeof(UM_OrcArmy), nameof(UM_OrcArmy.getName), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(UM_OrcArmy_getName_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(UM_OrcArmy), nameof(UM_OrcArmy.turnTickInner), new Type[] { typeof(Map) }), postfix: new HarmonyMethod(patchType, nameof(UM_OrcArmy_turnTickInner_Postfix)));
@@ -1701,6 +1704,7 @@ namespace Orcs_Plus
             __instance.customChallenges.Add(new Ch_Orcs_FundWaystation(__instance.location));
             __instance.customChallenges.Add(new Ch_Orcs_WarFestival(__instance.location));
             __instance.customChallenges.Add(new Ch_H_Orcs_BuildTemple(__instance.location));
+            __instance.customChallenges.Add(new Ch_Orcs_BloodMoney(__instance.location));
 
             if (ModCore.core.data.godTenetTypes.TryGetValue(__instance.map.overmind.god.GetType(), out Type tenetType) && tenetType == typeof(H_Orcs_HarbringersMadness))
             {
@@ -1865,6 +1869,43 @@ namespace Orcs_Plus
                     }
                 }
             }
+        }
+
+        // Patches for Pr_OrcFunbding
+        private static IEnumerable<CodeInstruction> Pr_OrcFunding_turnTick_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
+        {
+            List<CodeInstruction> instructionList = codeInstructions.ToList();
+
+            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Pr_OrcFunding_turnTick_TranspilerBody));
+
+            FieldInfo FI_Fundee = AccessTools.Field(typeof(Pr_OrcFunding), nameof(Pr_OrcFunding.fundees));
+
+            int targetIndex = 1;
+            for (int i = 0; i < instructionList.Count; i++)
+            {
+                if (targetIndex > 0)
+                {
+                    if (targetIndex == 1 && instructionList[i].opcode == OpCodes.Div)
+                    {
+                        targetIndex++;
+                    }
+
+                    if (targetIndex == 2 && instructionList[i].opcode == OpCodes.Ldarg_0)
+                    {
+                        yield return new CodeInstruction(OpCodes.Ldarg_0);
+                        yield return new CodeInstruction(OpCodes.Ldfld, FI_Fundee);
+                        yield return new CodeInstruction(OpCodes.Ldloc_S, 12);
+                        yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
+                    }
+                }
+
+                yield return instructionList[i];
+            }
+        }
+
+        private static void Pr_OrcFunding_turnTick_TranspilerBody(SG_Orc orcSociety, int funding)
+        {
+            ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Recieved funding from the Dark Empire", funding / 4), true);
         }
 
         // Patches for UM_OrcArmy
