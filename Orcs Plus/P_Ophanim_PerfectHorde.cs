@@ -33,7 +33,7 @@ namespace Orcs_Plus
 
         public override string getRestrictionText()
         {
-            return "Must be cast on an orc army whose home location is at 300% perfection, and that is from an orc culture who's Perfection tenet is at maximum elder alignement (-2).";
+            return "Must be cast on an orc army whose home location is at 300% perfection, and that is from an orc culture whose Perfection tenet is at maximum elder alignement (-2).";
         }
 
         public override Sprite getIconFore()
@@ -71,9 +71,10 @@ namespace Orcs_Plus
             {
                 base.cast(unit);
 
-                UM_PerfectHorde perfectHorde = new UM_PerfectHorde(orcArmy.parent.location, orcSociety, orcArmy.parent);
+                UM_PerfectHorde perfectHorde = new UM_PerfectHorde(map.locations[orcArmy.homeLocation], orcSociety, orcArmy.parent);
                 orcArmy.location.units.Add(perfectHorde);
                 orcArmy.map.units.Add(perfectHorde);
+                perfectHorde.location = orcArmy.location;
                 orcArmy.parent.army = perfectHorde;
 
                 double hpPercentage = (double)orcArmy.hp / (double)orcArmy.maxHp;

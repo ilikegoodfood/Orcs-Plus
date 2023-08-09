@@ -71,23 +71,21 @@ namespace Orcs_Plus
 
             if (ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_Perfection perfection)
             {
-                if (orcCulture.ophanim_PerfectSociety && perfection.status < -1)
-                {
-                    if (charge < 300.0)
-                    {
-                        influences.Add(new ReasonMsg("Perfect Society", Math.Min(perfectionRate, 300.0 - charge)));
-                    }
-                }
-                else if (perfection.status < 0)
+                if (perfection.status < 0)
                 {
                     double threshold = perfection.thresholdMinor;
                     if (perfection.status < -1)
                     {
                         threshold = perfection.thresholdMajor;
 
-                        if (charge >= 300.0)
+                        if (charge > 299.0)
                         {
                             orcCulture.ophanim_PerfectSociety = true;
+                        }
+
+                        if (orcCulture.ophanim_PerfectSociety && charge < 300.0)
+                        {
+                            influences.Add(new ReasonMsg("Perfect Society", Math.Min(perfectionRate, 300.0 - charge)));
                         }
                     }
 
@@ -131,10 +129,18 @@ namespace Orcs_Plus
                         {
                             if (neighbour.settlement is SettlementHuman)
                             {
-                                Pr_Opha_Faith neighbouringFaith = neighbour.properties.OfType<Pr_Opha_Faith>().FirstOrDefault();
-                                if (neighbouringFaith != null && neighbouringFaith.charge > 100.0)
+                                Pr_Opha_Faith neighbouringFaith = (Pr_Opha_Faith)neighbour.properties.FirstOrDefault(pr => pr is Pr_Opha_Faith);
+                                if (neighbouringFaith != null)
                                 {
-                                    influences.Add(new ReasonMsg("Driven to perfection", Math.Min(charge * spreadFactor, threshold - neighbouringFaith.charge)));
+                                    if(neighbouringFaith.charge > 100.0 && neighbouringFaith.charge > charge)
+                                    {
+                                        influences.Add(new ReasonMsg("Driven to perfection", Math.Min(charge * spreadFactor, threshold - neighbouringFaith.charge)));
+                                    }
+
+                                    if (neighbouringFaith.charge < 300.0)
+                                    {
+                                        neighbouringFaith.influences.Add(new ReasonMsg("Neighbouring Faith", 1.0));
+                                    }
                                 }
                             }
                         }

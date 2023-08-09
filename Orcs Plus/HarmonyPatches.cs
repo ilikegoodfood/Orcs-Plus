@@ -141,6 +141,11 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Crusade), nameof(P_Opha_Crusade.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Crusade_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Crusade), nameof(P_Opha_Crusade.cast), new Type[] { typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Crusade_cast_Postfix)));
 
+            // Patches for P_Opha_Empower
+            harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Crusade), nameof(P_Opha_Crusade.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Empower_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Crusade), nameof(P_Opha_Crusade.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Empower_getRestrictionText_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Crusade), nameof(P_Opha_Crusade.validTarget), new Type[] { typeof(Unit) }), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Empower_validTarget_Postfix)));
+
             // Community Library Patches
             harmony.Patch(original: AccessTools.Method(typeof(CommunityLib.Ch_RecoverShipwreck), nameof(CommunityLib.Ch_RecoverShipwreck.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_RecoverShipwreck_complete_Transpiler)));
 
@@ -2440,6 +2445,29 @@ namespace Orcs_Plus
                     }
                 }
             }
+        }
+
+        // Patches for P_Opha_Empower
+        private static string P_Opha_Empower_getDesc_Postfix(string desc)
+        {
+            return "Heals a human army from a city which Ophanim's Faith has perfected, or a perfected orc horde. Heals 50% of their missing HP.";
+        }
+
+        private static string P_Opha_Empower_getRestrictionText_Postfix(string desc)
+        {
+            desc = desc.TrimEnd('.');
+
+            return desc + ", or a perfect orc horde.";
+        }
+
+        private static bool P_Opha_Empower_validTarget_Postfix(bool result, Unit unit)
+        {
+            if (unit is UM_PerfectHorde)
+            {
+                return true;
+            }
+
+            return result;
         }
 
         // Community Library Patches

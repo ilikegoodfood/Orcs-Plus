@@ -133,12 +133,12 @@ namespace Orcs_Plus
         {
             if (u.location.settlement is Set_OrcCamp camp)
             {
-                Pr_OrcishIndustry industry = camp.location.properties.OfType<Pr_OrcishIndustry>().FirstOrDefault();
+                Pr_OrcishIndustry industry = (Pr_OrcishIndustry)camp.location.properties.FirstOrDefault(pr => pr is Pr_OrcishIndustry);
                 if (industry != null)
                 {
                     double initHp = industry.charge;
 
-                    Pr_Ophanim_Perfection perfection = u.location.properties.OfType<Pr_Ophanim_Perfection>().FirstOrDefault();
+                    Pr_Ophanim_Perfection perfection = (Pr_Ophanim_Perfection)u.location.properties.FirstOrDefault(pr => pr is Pr_Ophanim_Perfection);
                     if (perfection != null)
                     {
                         initHp *= 1 + (perfection.charge / 1200);

@@ -3,6 +3,7 @@ using Assets.Code.Modding;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace Orcs_Plus
@@ -472,17 +473,21 @@ namespace Orcs_Plus
 
             if (ophanim_PerfectSociety)
             {
-                if (!(tenet_god is H_Orcs_Perfection perfection) || perfection.status > -2)
+                //Console.WriteLine("OrcsPlus: Orc Society is perfect");
+                if (!(tenet_god is H_Orcs_Perfection perfection) || perfection.status >= -1)
                 {
+                    //Console.WriteLine("OrcsPlus: Orc Society cannot be perfect");
                     ophanim_PerfectSociety = false;
                 }
                 else
                 {
                     bool perfect = false;
-
-                    foreach (Set_OrcCamp camp in camps)
+                    List<Set_OrcCamp> allCamps = new List<Set_OrcCamp>();
+                    allCamps.AddRange(camps);
+                    allCamps.AddRange(specializedCamps);
+                    foreach (Set_OrcCamp camp in allCamps)
                     {
-                        if (camp.location.properties.OfType<Pr_Ophanim_Perfection>().FirstOrDefault()?.charge >= 300)
+                        if (camp.location.properties.Any(pr => pr is Pr_Ophanim_Perfection && pr.charge > 299.0))
                         {
                             perfect = true;
                             break;
@@ -491,16 +496,21 @@ namespace Orcs_Plus
 
                     if (perfect)
                     {
+                        //Console.WriteLine("OrcsPlus: Perfection confirmed");
                         foreach (Set_OrcCamp camp in camps)
                         {
-                            if (!camp.location.properties.Any(p => p is Pr_Ophanim_Perfection))
+                            Pr_Ophanim_Perfection perfectionLocal = (Pr_Ophanim_Perfection)camp.location.properties.FirstOrDefault(pr => pr is Pr_Ophanim_Perfection);
+                            if (perfectionLocal == null)
                             {
-                                camp.location.properties.Add(new Pr_Ophanim_Perfection(camp.location));
+                                perfectionLocal = new Pr_Ophanim_Perfection(camp.location);
+                                perfectionLocal.influences.Add(new ReasonMsg("Perfect Society", perfectionLocal.perfectionRate));
+                                camp.location.properties.Add(perfectionLocal);
                             }
                         }
                     }
                     else
                     {
+                        //Console.WriteLine("OrcsPlus: Orc Society is no longer perfect");
                         ophanim_PerfectSociety = false;
                     }
                 }

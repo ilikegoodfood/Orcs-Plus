@@ -585,7 +585,7 @@ namespace Orcs_Plus
                     double val = map.getStepDist(ruler.society, threatWar.target) - 1;
                     if (val > 0)
                     {
-                        val *= Math.Min(map.param.utility_soc_warDistancePenaltyPerStep, map.param.utility_soc_warDistancePenaltyCap);
+                        val = Math.Max(val * map.param.utility_soc_warDistancePenaltyPerStep, map.param.utility_soc_warDistancePenaltyCap);
                         initialUtility += val;
                     }
                 }
@@ -607,7 +607,7 @@ namespace Orcs_Plus
                     double val = map.getStepDist(ruler.society, war.target) - 1;
                     if (val > 0)
                     {
-                        val *= Math.Min(map.param.utility_soc_warDistancePenaltyPerStep, map.param.utility_soc_warDistancePenaltyCap);
+                        val = Math.Max(val * map.param.utility_soc_warDistancePenaltyPerStep, map.param.utility_soc_warDistancePenaltyCap);
                         initialUtility += val;
                     }
                 }
@@ -916,7 +916,7 @@ namespace Orcs_Plus
             //Console.WriteLine("Orcs_Plus: Person with Agent has died");
 
             // Cordyceps Symbiosis
-            if (uaPerson is UAEN_OrcUpstart || uaPerson is UAEN_OrcElder || uaPerson is UAEN_OrcShaman)
+            if (uaPerson is UAEN_OrcUpstart || uaPerson is UAEN_OrcElder || uaPerson is UAEN_OrcShaman || uaPerson is UAE_Warlord)
             {
                 //Console.WriteLine("Orcs_Plus: Orc agent has died");
                 SG_Orc orcSociety2 = uaPerson.society as SG_Orc;
@@ -925,10 +925,6 @@ namespace Orcs_Plus
                 if (orcSociety2 != null)
                 {
                     core.data.orcSGCultureMap.TryGetValue(orcSociety2, out orcCulture2);
-                }
-                else if (orcCulture2 != null)
-                {
-                    orcSociety2 = orcCulture2.orcSociety;
                 }
 
                 if (orcCulture2 != null && orcCulture2.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < -1)
@@ -952,7 +948,7 @@ namespace Orcs_Plus
                             Person_Nonunique.getNonuniquePerson(uaPerson.map.soc_dark)
                             };
 
-                            UA drone = (UA)Activator.CreateInstance(droneType, args);
+                            UAEN drone = (UAEN)Activator.CreateInstance(droneType, args);
                             uaPerson.map.units.Add(drone);
                             loc.units.Add(drone);
                         }

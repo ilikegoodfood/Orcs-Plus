@@ -531,7 +531,7 @@ namespace Orcs_Plus
                     if (unit.homeLocation != -1)
                     {
                         Location home = map.locations[unit.homeLocation];
-                        double shadow = shadow = 1.0 - home.hex.purity;
+                        double shadow = home.getShadow();
 
                         int bonus = 0;
                         if (shadow >= 0.5)
@@ -564,7 +564,7 @@ namespace Orcs_Plus
                     if (target.homeLocation != -1)
                     {
                         Location home = map.locations[target.homeLocation];
-                        double shadow = 1.0 - home.hex.purity;
+                        double shadow = home.getShadow();
 
                         int bonus = 0;
                         if (shadow >= 0.5)
@@ -584,7 +584,7 @@ namespace Orcs_Plus
                             }
                             else
                             {
-                                battle.messages.Add("Elder Influence allowed " + target.getName() + " to shrug off" + bonus + " damage (home location shadow at " + Math.Floor(shadow * 100) + "%)");
+                                battle.messages.Add("Elder Influence allowed " + target.getName() + " to shrug off " + bonus + " damage (home location shadow at " + Math.Floor(shadow * 100) + "%)");
                             }
                             dmg = Math.Max(1, dmg - bonus);
                         }
