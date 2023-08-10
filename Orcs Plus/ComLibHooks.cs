@@ -808,7 +808,7 @@ namespace Orcs_Plus
                     }
                 }
             }
-            else if (v == "Killed by Ophanim's Smite")
+            else if (v == "Destroyed by smite")
             {
                 if (influencedOrcCulture_Direct != null)
                 {
@@ -825,7 +825,7 @@ namespace Orcs_Plus
                     ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Smote encroaching settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                 }
             }
-            else if (v == "Killed by a volcano")
+            else if (v == "Destroyed by volcanic eruption")
             {
                 if (uKiller != null)
                 {
