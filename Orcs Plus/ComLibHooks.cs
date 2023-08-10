@@ -434,16 +434,16 @@ namespace Orcs_Plus
             }
             else if (um.society != null && !um.society.isDark() && influencedOrcCulture_Direct != null)
             {
-                ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Razing Orc Camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
+                ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Razing Orc Camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]));
 
                 foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
                 {
-                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razing enemy settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
+                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razing enemy settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]));
                 }
 
                 foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
                 {
-                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razing encroaching settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
+                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Razing encroaching settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]));
                 }
             }
         }

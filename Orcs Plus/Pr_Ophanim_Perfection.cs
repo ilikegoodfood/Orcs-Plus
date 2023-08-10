@@ -85,17 +85,17 @@ namespace Orcs_Plus
 
                         if (orcCulture.ophanim_PerfectSociety && charge < 300.0)
                         {
-                            influences.Add(new ReasonMsg("Perfect Society", Math.Min(perfectionRate, 300.0 - charge)));
+                            influences.Add(new ReasonMsg("Perfect Society", Math.Max(0, Math.Min(perfectionRate, 300.0 - charge))));
                         }
                     }
 
                     if (charge > threshold)
                     {
-                        influences.Add(new ReasonMsg("Doubt", Math.Max(-5.0, threshold - charge)));
+                        influences.Add(new ReasonMsg("Doubt", Math.Min(0, Math.Max(-5.0, threshold - charge))));
                     }
                     else if (charge < threshold && camp.shadow > 0.0)
                     {
-                        influences.Add(new ReasonMsg("Shadow", Math.Min(camp.shadow * 2, threshold - charge)));
+                        influences.Add(new ReasonMsg("Shadow", Math.Max(0, Math.Min(camp.shadow * 2, threshold - charge))));
                     }
 
                     foreach (Location neighbour in location.getNeighbours())
@@ -110,7 +110,7 @@ namespace Orcs_Plus
                                     threshold2 = perfection2.thresholdMajor;
                                 }
 
-                                Pr_Ophanim_Perfection neighbourPerfection = neighbour.properties.OfType<Pr_Ophanim_Perfection>().FirstOrDefault();
+                                Pr_Ophanim_Perfection neighbourPerfection = (Pr_Ophanim_Perfection)neighbour.properties.FirstOrDefault(pr => pr is Pr_Ophanim_Perfection);
 
                                 if (neighbourPerfection == null)
                                 {
@@ -120,7 +120,7 @@ namespace Orcs_Plus
 
                                 if (neighbourPerfection.charge < charge && neighbourPerfection.charge < threshold2)
                                 {
-                                    neighbourPerfection.influences.Add(new ReasonMsg("Driven to perfection", Math.Min(charge * spreadFactor, threshold - neighbourPerfection.charge)));
+                                    neighbourPerfection.influences.Add(new ReasonMsg("Driven to perfection", Math.Min(Math.Min(charge * spreadFactor, threshold2 - neighbourPerfection.charge), charge - neighbourPerfection.charge)));
                                 }
                             }
                         }
@@ -134,7 +134,7 @@ namespace Orcs_Plus
                                 {
                                     if(neighbouringFaith.charge > 100.0 && neighbouringFaith.charge > charge)
                                     {
-                                        influences.Add(new ReasonMsg("Driven to perfection", Math.Min(charge * spreadFactor, threshold - neighbouringFaith.charge)));
+                                        influences.Add(new ReasonMsg("Driven to perfection", Math.Min(Math.Min(neighbouringFaith.charge * spreadFactor, threshold - charge), neighbouringFaith.charge - charge)));
                                     }
 
                                     if (neighbouringFaith.charge < 300.0)
@@ -155,6 +155,21 @@ namespace Orcs_Plus
             {
                 influences.Add(new ReasonMsg("Doubt", Math.Max(-5.0, -charge)));
             }
+        }
+
+        public override bool hasBackgroundHexView()
+        {
+            return true;
+        }
+
+        public override Sprite getHexBackgroundSprite()
+        {
+            if (charge > 299.0)
+            {
+                return map.world.textureStore.loc_icon_ophaPerfect;
+            }
+
+            return map.world.textureStore.loc_icon_opha;
         }
     }
 }
