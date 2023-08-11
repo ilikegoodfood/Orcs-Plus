@@ -102,9 +102,11 @@ namespace Orcs_Plus
         {
             SG_Orc orcSociety = location.soc as SG_Orc;
 
-            Sub_OrcWaystation waystation = location.settlement.subs.OfType<Sub_OrcWaystation>().FirstOrDefault(s => s.orcSociety == orcSociety);
+            Sub_OrcWaystation waystation = null;
             if (orcSociety == null && location.settlement != null)
             {
+                waystation = (Sub_OrcWaystation)location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation w && w.orcSociety == orcSociety);
+
                 if (waystation == null)
                 {
                     return false;
@@ -169,14 +171,14 @@ namespace Orcs_Plus
 
             if (orcSociety == null && location.settlement != null)
             {
-                Sub_OrcWaystation waystation = location.settlement.subs.OfType<Sub_OrcWaystation>().FirstOrDefault();
+                Sub_OrcWaystation waystation = (Sub_OrcWaystation)location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation);
                 if (waystation != null)
                 {
                     orcSociety = waystation.orcSociety;
                 }
             }
 
-            if (orcSociety != null && location.settlement != null && (location.settlement.infiltration == 1.0 || (u is UAEN_OrcElder elder && (elder.society as HolyOrder_Orcs)?.orcSociety == orcSociety)))
+            if (orcSociety != null && location.settlement != null && (u.isCommandable() && location.settlement.infiltration == 1.0 || (u is UAEN_OrcElder elder && (elder.society as HolyOrder_Orcs)?.orcSociety == orcSociety)))
             {
                 List<Settlement> settlements = new List<Settlement>();
 
@@ -184,7 +186,7 @@ namespace Orcs_Plus
                 {
                     if (neighbour.settlement != null && neighbour.hex.getHabilitability() >= map.opt_orcHabMult * map.param.orc_habRequirement)
                     {
-                        if (ModCore.core.data.getSettlementTypesForWaystation().Contains(neighbour.settlement.GetType()) && neighbour.settlement.subs.OfType<Sub_OrcWaystation>().FirstOrDefault(s => s.orcSociety == location.soc) == null)
+                        if (ModCore.core.data.getSettlementTypesForWaystation().Contains(neighbour.settlement.GetType()) && neighbour.settlement.subs.OfType<Sub_OrcWaystation>().FirstOrDefault(s => s.orcSociety == orcSociety) == null)
                         {
                             settlements.Add(neighbour.settlement);
                         }
@@ -193,7 +195,11 @@ namespace Orcs_Plus
 
                 if (settlements.Count > 0)
                 {
-                    Settlement targetSettlement = settlements[Eleven.random.Next(settlements.Count)];
+                    Settlement targetSettlement = settlements[0];
+                    if (settlements.Count > 1)
+                    {
+                        targetSettlement = settlements[Eleven.random.Next(settlements.Count)];
+                    }
 
                     if (targetSettlement != null)
                     {
