@@ -106,7 +106,8 @@ namespace Orcs_Plus
                 { typeof(God_LaughingKing), typeof(H_Orcs_HarbringersMadness) },
                 { typeof(God_Vinerva), typeof(H_Orcs_LifeMother) },
                 { typeof(God_Ophanim), typeof(H_Orcs_Perfection) },
-                { typeof(God_Mammon), typeof(H_Orcs_MammonClient) }
+                { typeof(God_Mammon), typeof(H_Orcs_MammonClient) },
+                { typeof(God_Cards), typeof(H_Orcs_Lucky) }
             };
 
             settlementTypesForWaystations = new List<Type>
