@@ -194,7 +194,7 @@ namespace Orcs_Plus
 
             if (prosperity > 0)
             {
-                double val = prosperity * 100;
+                double val = prosperity * 50;
                 reasonMsgs?.Add(new ReasonMsg("Prosperity", val));
                 utility += val;
             }
