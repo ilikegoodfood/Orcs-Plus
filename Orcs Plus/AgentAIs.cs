@@ -3,6 +3,7 @@ using CommunityLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static UnityEngine.GraphicsBuffer;
 
 namespace Orcs_Plus
 {
@@ -69,9 +70,28 @@ namespace Orcs_Plus
                 aiChallenges_Upstart[3].delegates_ValidFor.Add(delegate_ValidFor_BuyItem);
 
                 comLibAI.AddChallengesToAgentType(typeof(UAEN_OrcUpstart), aiChallenges_Upstart);
+
+                AIChallenge raiding = comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcUpstart), typeof(Ch_OrcRaiding));
+                if (raiding != null)
+                {
+                    Func<AgentAI.ChallengeData, UA, double, List<ReasonMsg>, double> comLibDelegate = null;
+                    foreach (Func<AgentAI.ChallengeData, UA, double, List<ReasonMsg>, double> delegate_Utility in raiding.delegates_Utility)
+                    {
+                        if (delegate_Utility.GetType().Namespace == "ComLib")
+                        {
+                            comLibDelegate = delegate_Utility;
+                            break;
+                        }
+                    }
+
+                    if (comLibDelegate != null)
+                    {
+                        raiding.delegates_Utility.Remove(comLibDelegate);
+                        raiding.delegates_Utility.Add(delegate_Utility_Ch_OrcRaiding);
+                    }
+                }
             }
         }
-
 
         // Orc Upstarts Delegates
         private bool delegate_ValidFor_RecruitWarband(AgentAI.ChallengeData challengeData, UA ua)
@@ -157,6 +177,27 @@ namespace Orcs_Plus
             double val = ua.person.gold - 100;
             reasonMsgs?.Add(new ReasonMsg("Excess Gold", val));
             utility += val;
+
+            return utility;
+        }
+
+        private double delegate_Utility_Ch_OrcRaiding(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
+        {
+            double prosperity = 0.0;
+            foreach (Location loc in challengeData.location.getNeighbours())
+            {
+                if (loc.settlement is SettlementHuman settlementHuman && settlementHuman.prosperity > prosperity)
+                {
+                    prosperity = settlementHuman.prosperity;
+                }
+            }
+
+            if (prosperity > 0)
+            {
+                double val = prosperity * 100;
+                reasonMsgs?.Add(new ReasonMsg("Prosperity", val));
+                utility += val;
+            }
 
             return utility;
         }
