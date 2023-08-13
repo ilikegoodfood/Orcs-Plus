@@ -31,9 +31,6 @@ namespace Orcs_Plus
                 case Ch_Orcs_DevastateOrcishIndustry _:
                     Ch_Orcs_DevastateOrcishIndustry(challenge, ua, task_PerformChallenge);
                     break;
-                case Ch_Orcs_Expand _:
-                    Ch_Orcs_Expand(challenge, ua, task_PerformChallenge);
-                    break;
                 case Ch_Subjugate_Orcs _:
                     Ch_Subjugate_Orcs(challenge, ua, task_PerformChallenge);
                     break;
@@ -135,76 +132,6 @@ namespace Orcs_Plus
                 {
                     ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.DevastateIndustry]));
                 }
-            }
-        }
-
-        public static void Ch_Orcs_Expand(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)
-        {
-            HolyOrder_Orcs orcCulture = null;
-            if (ua.location.soc is SG_Orc orcSociety)
-            {
-                ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
-            }
-            else
-            {
-                if (ua.location.settlement != null && ua.location.settlement.subs.Count > 0)
-                {
-                    Sub_OrcWaystation waystation = ua.location.settlement.subs.OfType<Sub_OrcWaystation>().FirstOrDefault();
-                    if (waystation != null && waystation.orcSociety != null)
-                    {
-                        orcSociety = waystation.orcSociety;
-                        ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
-
-                        List<Location> targets = new List<Location>();
-                        Location target = null;
-
-                        foreach (Location neighbour in ua.location.getNeighbours())
-                        {
-                            if (orcSociety.canSettle(neighbour))
-                            {
-                                targets.Add(neighbour);
-                            }
-                        }
-
-                        if (targets.Count == 1)
-                        {
-                            target = targets[0];
-                        }
-                        else if (targets.Count > 1)
-                        {
-                            target = targets[Eleven.random.Next(targets.Count)];
-                        }
-
-                        if (target != null)
-                        {
-                            Settlement oldSettlement = target.settlement;
-                            target.soc = orcSociety;
-                            target.settlement = new Set_OrcCamp(target);
-                            if (oldSettlement != null && oldSettlement.subs.Count > 0)
-                            {
-                                foreach (Subsettlement sub in oldSettlement.subs)
-                                {
-                                    if (!(sub is Sub_OrcWaystation))
-                                    {
-                                        target.settlement.subs.Add(sub);
-                                    }
-                                }
-                            }
-
-                            if (ua.isCommandable())
-                            {
-                                target.settlement.isInfiltrated = true;
-                            }
-
-                            orcSociety.expandTarget = -1;
-                        }
-                    }
-                }
-            }
-
-            if (ua.isCommandable() && orcCulture != null)
-            {
-                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand]), true);
             }
         }
 
@@ -319,13 +246,13 @@ namespace Orcs_Plus
         public static void Ch_Orcs_OpportunisticEncroachment(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)
         {
             SG_Orc orcSociety = challenge.location.soc as SG_Orc;
-            if (orcSociety == null && challenge.location.settlement != null)
+            if (challenge.location.settlement != null && challenge.location.settlement.subs.Count > 0)
             {
-                Sub_OrcWaystation waystation = challenge.location.settlement.subs.OfType<Sub_OrcWaystation>().FirstOrDefault();
+                Sub_OrcWaystation waystation = (Sub_OrcWaystation)challenge.location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation w && w.getChallenges().Contains(challenge));
                 List<Location> targetLocations = new List<Location>();
                 Location target = null;
 
-                if (waystation != null && waystation.orcSociety != null)
+                if (waystation != null)
                 {
                     orcSociety = waystation.orcSociety;
 
@@ -341,13 +268,13 @@ namespace Orcs_Plus
                     }
                 }
 
-                if (targetLocations.Count == 1)
+                if (targetLocations.Count > 0)
                 {
                     target = targetLocations[0];
-                }
-                else if (targetLocations.Count > 1)
-                {
-                    target = targetLocations[Eleven.random.Next(targetLocations.Count)];
+                    if (targetLocations.Count > 1)
+                    {
+                        target = targetLocations[Eleven.random.Next(targetLocations.Count)];
+                    }
                 }
 
                 if (target != null)

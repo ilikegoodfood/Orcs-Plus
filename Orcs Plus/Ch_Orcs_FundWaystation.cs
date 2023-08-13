@@ -19,8 +19,35 @@ namespace Orcs_Plus
 
         public override string getName()
         {
+            bool ambigous = false;
+            SG_Orc orcSocity = location.soc as SG_Orc;
+
+            if (location.settlement != null && location.settlement.subs.Count > 0)
+            {
+                List<Sub_OrcWaystation> waystations = location.settlement.subs.OfType<Sub_OrcWaystation>().ToList();
+                if (waystations.Count > 0)
+                {
+                    Sub_OrcWaystation waystation = waystations.FirstOrDefault(sub => sub.getChallenges().Contains(this));
+                    if (waystation != null)
+                    {
+                        orcSocity = waystation.orcSociety;
+                    }
+
+                    if (waystations.Count > 1)
+                    {
+                        ambigous = true;
+                    }
+                }
+            }
+
+            if (ambigous && orcSocity != null)
+            {
+                return "Fund " + orcSocity.getName() + " Waystation";
+            }
+
             return "Fund Waystation";
         }
+
         public override string getDesc()
         {
             return "Donate " + cost + " gold so that the orcs can build, guard and buy stock for a waystation in a neighbouring non-human settlement. You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildWaystation] + " influence with the orc culture by completing this challenge.";
@@ -33,7 +60,7 @@ namespace Orcs_Plus
 
         public override string getRestriction()
         {
-            return "Costs " + cost + " gold, and, unless performed by an Orc Elder, requires an infiltrated orc camp, or an infiltrated settlement containing an orc waystation, with a wilderness settlement (i.e. witch coven, Vinerva manifestation, elder tomb) in a neighbouring location, with habitability > " + ((int)(100.0 * this.map.opt_orcHabMult * this.map.param.orc_habRequirement)).ToString() + "%";
+            return "Costs " + cost + " gold, and, unless performed by an Orc Elder, requires an infiltrated orc camp, or an orc waystation, with a wilderness settlement (i.e. witch coven, Vinerva manifestation, elder tomb) in a neighbouring location, with habitability > " + ((int)(100.0 * this.map.opt_orcHabMult * this.map.param.orc_habRequirement)).ToString() + "%";
         }
 
         public override double getProfile()
@@ -103,16 +130,13 @@ namespace Orcs_Plus
             SG_Orc orcSociety = location.soc as SG_Orc;
 
             Sub_OrcWaystation waystation = null;
-            if (orcSociety == null && location.settlement != null)
+            if (location.settlement != null && location.settlement.subs.Count > 0)
             {
-                waystation = (Sub_OrcWaystation)location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation w && w.orcSociety == orcSociety);
-
-                if (waystation == null)
+                waystation = (Sub_OrcWaystation)location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation w && w.getChallenges().Contains(this));
+                if (waystation != null)
                 {
-                    return false;
+                    orcSociety = waystation.orcSociety;
                 }
-
-                orcSociety = waystation.orcSociety;
             }
 
             if (orcSociety != null && ua.person.gold >= cost && location.settlement != null)
@@ -133,7 +157,7 @@ namespace Orcs_Plus
 
         public override bool valid()
         {
-            if (location.settlement != null && (location.soc is SG_Orc || location.settlement.subs.OfType<Sub_OrcWaystation>().FirstOrDefault() != null))
+            if (location.settlement != null && ((location.soc is SG_Orc && location.settlement is Set_OrcCamp) || location.settlement.subs.Any(sub => sub is Sub_OrcWaystation w && w.getChallenges().Contains(this))))
             {
                 foreach (Location neighbour in location.getNeighbours())
                 {
@@ -169,9 +193,9 @@ namespace Orcs_Plus
         {
             SG_Orc orcSociety = location.soc as SG_Orc;
 
-            if (orcSociety == null && location.settlement != null)
+            if (location.settlement != null && location.settlement.subs.Count > 0)
             {
-                Sub_OrcWaystation waystation = (Sub_OrcWaystation)location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation);
+                Sub_OrcWaystation waystation = (Sub_OrcWaystation)location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation w && w.getChallenges().Contains(this));
                 if (waystation != null)
                 {
                     orcSociety = waystation.orcSociety;

@@ -68,6 +68,7 @@
     <Compile Include="Ch_Orcs_BloodMoney.cs" />
     <Compile Include="Ch_Orcs_DeathFestival.cs" />
     <Compile Include="Ch_Orcs_FundWaystation.cs" />
+    <Compile Include="GetTags.cs" />
     <Compile Include="HarmonyPatches_Conditional.cs" />
     <Compile Include="H_Orcs_Expansionism.cs" />
     <Compile Include="H_Orcs_GodTenet.cs" />

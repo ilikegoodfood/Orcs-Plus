@@ -35,7 +35,7 @@ namespace Orcs_Plus
 
         public override string getRestriction()
         {
-            return "Can only be performed by an Orc Elder in a specialized camp belonging to their culture. The specialised camp's army must not currently exist.";
+            return "Can be performed in an infiltrated specialised camp, or by an Orc Elder in a specialised camp belonging to their culture. The specialised camp's army must not currently exist.";
         }
 
         public override challengeStat getChallengeType()
@@ -148,7 +148,17 @@ namespace Orcs_Plus
 
         public override bool validFor(UA ua)
         {
-            return ua is UAEN_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety == location.soc && elder.person.getGold() >= cost;
+            if (ua.isCommandable() && location.settlement.isInfiltrated && ua.person.getGold() >= cost)
+            {
+                return true;
+            }
+            
+            if (ua is UAEN_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety == location.soc && elder.person.getGold() >= cost)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         public override void complete(UA u)

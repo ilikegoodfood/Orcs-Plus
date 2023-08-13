@@ -7,8 +7,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using UnityEngine;
+using static CommunityLib.AITask;
 
 namespace Orcs_Plus
 {
@@ -34,9 +36,13 @@ namespace Orcs_Plus
 
             // Patches for Challenges that specialise orc camps
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildFortress), nameof(Ch_Orcs_BuildFortress.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildFortress_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildFortress), nameof(Ch_Orcs_BuildFortress.buildNegativeTags)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildSpecialisedCamp_buildNegativeTags_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildMages), nameof(Ch_Orcs_BuildMages.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildMages_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildMages), nameof(Ch_Orcs_BuildMages.buildNegativeTags)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildSpecialisedCamp_buildNegativeTags_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildMenagerie), nameof(Ch_Orcs_BuildMenagerie.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildMenagerie_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildMenagerie), nameof(Ch_Orcs_BuildMenagerie.buildNegativeTags)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildSpecialisedCamp_buildNegativeTags_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildShipyard), nameof(Ch_Orcs_BuildShipyard.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildShipyard_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildShipyard), nameof(Ch_Orcs_BuildShipyard.buildNegativeTags)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildSpecialisedCamp_buildNegativeTags_Postfix)));
 
             // Patches for Warlord rituals
             harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_CommandeerShips), nameof(Rt_Orcs_CommandeerShips.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Rt_Orcs_CommandeerShips_getDesc_Postfix)));
@@ -48,14 +54,18 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_ChallengeTheHorde), nameof(Ch_Orcs_ChallengeTheHorde.getRestriction), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_ChallengeTheHorde_getRestriction_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_ChallengeTheHorde), nameof(Ch_Orcs_ChallengeTheHorde.valid), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_ChallengeTheHorde_valid_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_ChallengeTheHorde), nameof(Ch_Orcs_ChallengeTheHorde.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_ChallengeTheHorde_validFor_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_ChallengeTheHorde), nameof(Ch_Orcs_ChallengeTheHorde.buildPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_ChallengeTheHorde_buildPositiveTags_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_DevastateOrcishIndustry), nameof(Ch_Orcs_DevastateOrcishIndustry.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_DevastateOrcishIndustry_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_DevastateOrcishIndustry), nameof(Ch_Orcs_DevastateOrcishIndustry.complete), new Type[] { typeof(UA) }));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.valid)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_valid_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.getName), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_getName_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.getRestriction), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_getRestriction_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.valid), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_valid_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_complete_Transpiler)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.valid)), transpiler: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_valid_Transpiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.getName), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_getName_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.valid), new Type[0]), transpiler: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_valid_Transpiler)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_complete_Transpiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.buildPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_ChallengeTheHorde_buildPositiveTags_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_RetreatToTheHills), nameof(Ch_Orcs_RetreatToTheHills.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_RetreatToTheHills_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_RetreatToTheHills), nameof(Ch_Orcs_RetreatToTheHills.valid)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_RetreatToTheHills_valid_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_RetreatToTheHills), nameof(Ch_Orcs_RetreatToTheHills.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_RetreatToTheHills_validFor_Postfix)));
@@ -64,14 +74,21 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Subjugate_Orcs), nameof(Ch_Subjugate_Orcs.complete), new Type[] { typeof(UA) }));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OrganiseTheHorde), nameof(Ch_Orcs_OrganiseTheHorde.valid), new Type[] { }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OrganiseTheHorde_valid_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OrganiseTheHorde), nameof(Ch_Orcs_OrganiseTheHorde.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OrganiseTheHorde_validFor_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OpportunisticEncroachment), nameof(Ch_Orcs_OpportunisticEncroachment.getName), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_getName_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OpportunisticEncroachment), nameof(Ch_Orcs_OpportunisticEncroachment.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OpportunisticEncroachment), nameof(Ch_Orcs_OpportunisticEncroachment.valid), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_valid_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OpportunisticEncroachment), nameof(Ch_Orcs_OpportunisticEncroachment.valid), new Type[0]), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_valid_Transpiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OpportunisticEncroachment), nameof(Ch_Orcs_OpportunisticEncroachment.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_complete_Transpiler)));
 
             // Patches for Pr_OrcPlunder
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.valid), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_valid_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_validFor_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_complete_Transpiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.buildNegativeTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_buildNegativeTags_Postfix)));
+
+            // Patch and Branches for getPostiveTags and getNegative Tags
+            harmony.Patch(original: AccessTools.Method(typeof(Challenge), nameof(Challenge.getPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Challenge_getPositiveTags_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Challenge), nameof(Challenge.getNegativeTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Challenge_getNegativeTags_Postfix)));
 
             // Patches for UAEN_OrcUpstart
             harmony.Patch(original: AccessTools.Constructor(typeof(UAEN_OrcUpstart), new Type[] { typeof(Location), typeof(SocialGroup), typeof(Person) }), postfix: new HarmonyMethod(patchType, nameof(UAEN_OrcUpstart_ctor_Postfix)));
@@ -173,6 +190,19 @@ namespace Orcs_Plus
             __result += " You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildShipyard] + " influence with the orc culture by completing this challenge.";
         }
 
+        private static int[] Ch_Orcs_BuildSpecialisedCamp_buildNegativeTags_Postfix(int[] result, Challenge __instance)
+        {
+            //Console.WriteLine("OrcsPlus: Added GOLD to negative tags of " + __instance.getName());
+            int[] output = new int[result.Length + 1];
+            for (int i = 0; i < result.Length; i++)
+            {
+                output[i] = result[i];
+            }
+            output[result.Length] = Tags.GOLD;
+
+            return output;
+        }
+
         private static void Rt_Orcs_CommandeerShips_getDesc_Postfix(ref string __result)
         {
             __result += " You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.CommandeerShips] + " influence with the orc culture by completing this challenge.";
@@ -180,7 +210,7 @@ namespace Orcs_Plus
 
         private static IEnumerable<CodeInstruction> Rt_Orcs_CommandeerShips_complete_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
         {
-            MethodInfo MI_TranspilerBody = AccessTools.Method(typeof(HarmonyPatches), nameof(HarmonyPatches.Rt_Orcs_CommandeerShips_complete_TranspilerBody), new Type[] { typeof(Rt_Orcs_CommandeerShips), typeof(UA), typeof(Set_OrcCamp) });
+            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Rt_Orcs_CommandeerShips_complete_TranspilerBody), new Type[] { typeof(Rt_Orcs_CommandeerShips), typeof(UA), typeof(Set_OrcCamp) });
 
             List<CodeInstruction> instructionList = codeInstructions.ToList();
 
@@ -190,7 +220,7 @@ namespace Orcs_Plus
             {
                 yield return instructionList[i];
 
-                if (!flag && instructionList[i].opcode == OpCodes.Stfld && instructionList[i-1].opcode == OpCodes.Ldc_I4_5)
+                if (!flag && instructionList[i].opcode == OpCodes.Stfld && instructionList[i - 1].opcode == OpCodes.Ldc_I4_5)
                 {
                     flag = true;
 
@@ -235,27 +265,86 @@ namespace Orcs_Plus
             return ua.isCommandable();
         }
 
+        private static int[] Ch_Orcs_ChallengeTheHorde_buildPositiveTags_Postfix(int[] result)
+        {
+            int[] output = new int[result.Length + 2];
+
+            for (int i = 0; i < result.Length; i++)
+            {
+                output[i] = result[i];
+            }
+            output[result.Length] = Tags.ORC;
+            output[result.Length + 1] = Tags.AMBITION;
+
+            return output;
+        }
+
         private static void Ch_Orcs_DevastateOrcishIndustry_getDesc_Postfix(ref string __result)
         {
             __result += " If completed by a human agent, they gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.DevastateIndustry] + " influence with the orc culture.";
         }
 
-        private static void Ch_Orcs_Expand_getDesc_Postfix(ref string __result)
+        private static string Ch_Orcs_Expand_getName_Postfix(string result, Ch_Orcs_Expand __instance)
         {
-            __result += " You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand] + " influence with the orc culture by completing this challenge.";
+            bool ambigous = false;
+            SG_Orc orcSocity = __instance.location.soc as SG_Orc;
+
+            if (__instance.location.settlement != null && __instance.location.settlement.subs.Count > 0)
+            {
+                List<Sub_OrcWaystation> waystations = __instance.location.settlement.subs.OfType<Sub_OrcWaystation>().ToList();
+                if (waystations.Count > 0)
+                {
+                    Sub_OrcWaystation waystation = waystations.FirstOrDefault(sub => sub.getChallenges().Contains(__instance));
+                    if (waystation != null)
+                    {
+                        orcSocity = waystation.orcSociety;
+                    }
+
+                    if (waystations.Count > 1)
+                    {
+                        ambigous = true;
+                    }
+                }
+                
+            }
+
+            if (ambigous && orcSocity != null)
+            {
+                return "Cause " + orcSocity.getName() + " Expansion";
+            }
+
+            return result;
+        }
+
+        private static string Ch_Orcs_Expand_getDesc_Postfix(string result, Ch_Orcs_Expand __instance)
+        {
+            if (__instance.location.settlement != null && __instance.location.settlement.subs.Count > 0)
+            {
+                Sub_OrcWaystation waystation = (Sub_OrcWaystation)__instance.location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation w && w.getChallenges().Contains(__instance));
+                if (waystation != null)
+                {
+                    result = "Causes this " + waystation.orcSociety.getName() + " waystation to spawn a new already-infiltrated orc camp in a neighbouring usable location. The new camp will have low industry, but increase over time. Moving closer to human socities can cause wars.";
+                }
+            }
+
+            result += " You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand] + " influence with the orc culture by completing this challenge.";
+
+            return result;
+        }
+
+        private static string Ch_Orcs_Expand_getRestriction_Postfix(string __result, Ch_Orcs_Expand __instance)
+        {
+            return "Requires an infiltrated orc camp, or an orc waystation, with an empty neighbouring location with habilitability > " + ((int)(100.0 * __instance.map.opt_orcHabMult * __instance.map.param.orc_habRequirement)).ToString() + "%";
         }
 
         private static bool Ch_Orcs_Expand_valid_Postfix(bool result, Ch_Orcs_Expand __instance)
         {
-            if (!result && __instance.location.settlement?.subs.Count > 0)
+            if (__instance.location.settlement != null && __instance.location.settlement.subs.Count > 0)
             {
-                foreach (Subsettlement sub in __instance.location.settlement.subs)
+                Sub_OrcWaystation waystation = (Sub_OrcWaystation)__instance.location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation w && w.getChallenges().Contains(__instance));
+                if (waystation != null)
                 {
-                    if (sub is Sub_OrcWaystation waystation && __instance.location.getNeighbours().FirstOrDefault(l => waystation.orcSociety.canSettle(l)) != null)
-                    {
-                        result = true;
-                        break;
-                    }
+                    result = __instance.location.getNeighbours().Any(l => waystation.orcSociety.canSettle(l));
                 }
             }
 
@@ -264,11 +353,15 @@ namespace Orcs_Plus
 
         private static IEnumerable<CodeInstruction> Ch_Orcs_Expand_complete_Transpiler(IEnumerable<CodeInstruction> codeInstructions, ILGenerator ilg)
         {
-            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Ch_Orcs_Expand_complete_TranspilerBody));
+            MethodInfo MI_TranspilerBody_GetOrcs = AccessTools.Method(patchType, nameof(Ch_Orcs_Expand_complete_TranspilerBody_GetOrcs));
+            MethodInfo MI_TranspilerBody_InfluenceGain = AccessTools.Method(patchType, nameof(Ch_Orcs_Expand_complete_TranspilerBody_InfluenceGain));
+
+            MethodInfo MI_fallIntoRuin = AccessTools.Method(typeof(Settlement), nameof(Settlement.fallIntoRuin), new Type[] { typeof(string), typeof(object) });
 
             List<CodeInstruction> instructionList = codeInstructions.ToList();
 
-            Label label = ilg.DefineLabel();
+            Label orcsLabel = ilg.DefineLabel();
+            Label nullSettlementLabel = ilg.DefineLabel();
 
             int targetIndex = 1;
             for (int i = 0; i < instructionList.Count; i++)
@@ -277,26 +370,47 @@ namespace Orcs_Plus
                 {
                     if (targetIndex == 1)
                     {
-                        if (instructionList[i].opcode == OpCodes.Brfalse_S && instructionList[i + 1].opcode == OpCodes.Nop && instructionList[i + 2].opcode == OpCodes.Nop)
+                        if (instructionList[i].opcode == OpCodes.Stloc_0)
                         {
                             targetIndex++;
-                            label = (Label)instructionList[i].operand;
+
+                            yield return new CodeInstruction(OpCodes.Pop);
+                            yield return new CodeInstruction(OpCodes.Ldarg_0);
+                            yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody_GetOrcs);
                         }
                     }
                     else if (targetIndex == 2)
                     {
-                        if (instructionList[i].opcode == OpCodes.Ldloc_S && instructionList[i].labels.Contains(label))
+                        if (instructionList[i].opcode == OpCodes.Brfalse_S && instructionList[i + 1].opcode == OpCodes.Nop && instructionList[i + 2].opcode == OpCodes.Nop)
+                        {
+                            targetIndex++;
+                            nullSettlementLabel = (Label)instructionList[i].operand;
+                        }
+                    }
+                    else if (targetIndex == 3)
+                    {
+                        if (instructionList[i].opcode == OpCodes.Ldloc_S)
+                        {
+                            targetIndex++;
+
+                            yield return new CodeInstruction(OpCodes.Ldstr, "Overrun by Orcs");
+                            yield return new CodeInstruction(OpCodes.Ldnull);
+                            yield return new CodeInstruction(OpCodes.Ldloc, 10);
+                            yield return new CodeInstruction(OpCodes.Callvirt, MI_fallIntoRuin);
+                        }
+                    }
+                    else if (targetIndex == 4)
+                    {
+                        if (instructionList[i].opcode == OpCodes.Ldloc_S && instructionList[i].labels.Contains(nullSettlementLabel))
                         {
                             targetIndex = 0;
 
                             CodeInstruction code = new CodeInstruction(OpCodes.Ldarg_0);
                             code.labels.AddRange(instructionList[i].labels);
                             yield return code;
-                            yield return new CodeInstruction(OpCodes.Ldloc_3);
-                            yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
-                            yield return new CodeInstruction(OpCodes.Ldloc_S, 9);
-
-                            i++;
+                            yield return new CodeInstruction(OpCodes.Ldarg_1);
+                            yield return new CodeInstruction(OpCodes.Ldloc_0);
+                            yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody_InfluenceGain);
                         }
                     }
                 }
@@ -305,30 +419,60 @@ namespace Orcs_Plus
             }
         }
 
-        private static void Ch_Orcs_Expand_complete_TranspilerBody(Ch_Orcs_Expand ch, Location location)
+        private static SG_Orc Ch_Orcs_Expand_complete_TranspilerBody_GetOrcs(Ch_Orcs_Expand ch)
         {
-            if (location != null)
-            {
-                if (location.settlement is Set_OrcCamp camp && camp.subs.Count > 0)
-                {
-                    List<Sub_OrcWaystation> waystations = new List<Sub_OrcWaystation>();
-                    foreach (Subsettlement sub in camp.subs)
-                    {
-                        if (sub is Sub_OrcWaystation waystation)
-                        {
-                            waystations.Add(waystation);
-                        }
-                    }
+            SG_Orc result = ch.location.soc as SG_Orc;
 
-                    if (waystations.Count > 0)
-                    {
-                        foreach (Sub_OrcWaystation waystation in waystations)
-                        {
-                            camp.subs.Remove(waystation);
-                        }
-                    }
+            if (ch.location.settlement != null && ch.location.settlement.subs.Count > 0)
+            {
+                Sub_OrcWaystation waystation = (Sub_OrcWaystation)ch.location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation w && w.getChallenges().Contains(ch));
+                if (waystation != null)
+                {
+                    result = waystation.orcSociety;
                 }
             }
+
+            return result;
+        }
+
+        private static void Ch_Orcs_Expand_complete_TranspilerBody_InfluenceGain(Ch_Orcs_Expand ch, UA ua, SG_Orc orcSociety)
+        {
+            if (orcSociety != null && ua.isCommandable())
+            {
+                ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg(ch.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand]), true);
+            }
+        }
+
+        private static string Ch_OrcRaiding_getName_Postfix(string result, Ch_Orcs_Expand __instance)
+        {
+            bool ambigous = false;
+            SG_Orc orcSocity = __instance.location.soc as SG_Orc;
+
+            if (__instance.location.settlement != null && __instance.location.settlement.subs.Count > 0)
+            {
+                List<Sub_OrcWaystation> waystations = __instance.location.settlement.subs.OfType<Sub_OrcWaystation>().ToList();
+                if (waystations.Count > 0)
+                {
+                    Sub_OrcWaystation waystation = waystations.FirstOrDefault(sub => sub.getChallenges().Contains(__instance));
+                    if (waystation != null)
+                    {
+                        orcSocity = waystation.orcSociety;
+                    }
+
+                    if (waystations.Count > 1)
+                    {
+                        ambigous = true;
+                    }
+                }
+
+            }
+
+            if (ambigous && orcSocity != null)
+            {
+                return orcSocity.getName() + " Raiding";
+            }
+
+            return result;
         }
 
         private static void Ch_OrcRaiding_getDesc_Postfix(Ch_OrcRaiding __instance, ref string __result)
@@ -350,10 +494,9 @@ namespace Orcs_Plus
         {
             SG_Orc orcSociety = ch.location.soc as SG_Orc;
 
-            if (orcSociety == null && ch.location.settlement != null)
+            if (ch.location.settlement != null && ch.location.settlement.subs.Count > 0)
             {
-                Sub_OrcWaystation waystation = ch.location.settlement.subs.OfType<Sub_OrcWaystation>().FirstOrDefault();
-
+                Sub_OrcWaystation waystation = (Sub_OrcWaystation)ch.location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation w && w.getChallenges().Contains(ch));
                 if (waystation != null)
                 {
                     orcSociety = waystation.orcSociety;
@@ -377,7 +520,7 @@ namespace Orcs_Plus
 
         private static IEnumerable<CodeInstruction> Ch_OrcRaiding_complete_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
         {
-            MethodInfo MI_TranspilerBody = AccessTools.Method(typeof(HarmonyPatches), nameof(HarmonyPatches.Ch_OrcRaiding_complete_TranspilerBody), new Type[] { typeof(Ch_OrcRaiding), typeof(UA) });
+            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Ch_OrcRaiding_complete_TranspilerBody), new Type[] { typeof(Ch_OrcRaiding), typeof(UA) });
 
             yield return new CodeInstruction(OpCodes.Nop);
             yield return new CodeInstruction(OpCodes.Ldarg_0);
@@ -392,10 +535,10 @@ namespace Orcs_Plus
             Location location = ch.location;
 
             SG_Orc orcSociety = location.soc as SG_Orc;
-            if (orcSociety == null && location.settlement != null)
+            if (location.settlement != null && location.settlement.subs.Count > 0)
             {
                 //Console.WriteLine("OrcsPlus: Orc Society is null. Get orc Society from Waystation");
-                Sub_OrcWaystation waystation = location.settlement.subs.OfType<Sub_OrcWaystation>().FirstOrDefault();
+                Sub_OrcWaystation waystation = (Sub_OrcWaystation)location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation w && w.getChallenges().Contains(ch));
                 if (waystation != null)
                 {
                     //Console.WriteLine("OrcsPlus: Got orc Society from Waystation");
@@ -509,6 +652,19 @@ namespace Orcs_Plus
             return;
         }
 
+        private static int[] Ch_OrcRaiding_buildPositiveTags_Postfix(int[] result)
+        {
+            int[] output = new int[result.Length+1];
+
+            for (int i = 0; i < result.Length; i++)
+            {
+                output[i] = result[i];
+            }
+            output[result.Length] = Tags.ORC;
+
+            return output;
+        }
+
         private static void Ch_Orcs_RetreatToTheHills_getDesc_Postfix(ref string __result)
         {
             __result = "Causes half of all orc industry in this orc camp, and neighbouring orc camps, to be turned into defensive positions. Good at quickly reducing threat to avoid war, or surviving one against a powerful foe.";
@@ -535,7 +691,7 @@ namespace Orcs_Plus
 
         private static IEnumerable<CodeInstruction> Ch_Orcs_RetreatToTheHills_complete_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
         {
-            MethodInfo MI_TranspilerBody = AccessTools.Method(typeof(HarmonyPatches), nameof(HarmonyPatches.Ch_Orcs_RetreatToTheHills_complete_TranspilerBody), new Type[] { typeof(Ch_Orcs_RetreatToTheHills), typeof(UA) });
+            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Ch_Orcs_RetreatToTheHills_complete_TranspilerBody), new Type[] { typeof(Ch_Orcs_RetreatToTheHills), typeof(UA) });
 
             yield return new CodeInstruction(OpCodes.Nop);
             yield return new CodeInstruction(OpCodes.Ldarg_0);
@@ -670,7 +826,7 @@ namespace Orcs_Plus
         {
             List<CodeInstruction> instructionList = codeInstructions.ToList();
 
-            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Ch_Orcs_AccessPlunder_complete_TranspilerBody));
+            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Ch_Orcs_AccessPlunder_complete_TranspilerBody), new Type[] { typeof(Ch_Orcs_AccessPlunder), typeof(UA) });
 
             yield return new CodeInstruction(OpCodes.Nop);
             yield return new CodeInstruction(OpCodes.Ldarg_0);
@@ -792,6 +948,29 @@ namespace Orcs_Plus
             }
         }
 
+        private static int[] Ch_Orcs_AccessPlunder_buildNegativeTags_Postfix(int[] result)
+        {
+            int[] output = new int[result.Length + 1];
+
+            for (int i = 0; i < result.Length; i++)
+            {
+                output[i] = result[i];
+            }
+            output[result.Length] = Tags.ORC;
+
+            return output;
+        }
+
+        private static int[] Challenge_getPositiveTags_Postfix(int[] result, Challenge __instance)
+        {
+            return GetTags.getPositiveTags(result, __instance);
+        }
+
+        private static int[] Challenge_getNegativeTags_Postfix(int[] result, Challenge __instance)
+        {
+            return GetTags.getNegativeTags(result, __instance);
+        }
+
         private static bool Ch_Orcs_OrganiseTheHorde_valid_Postfix(bool result, Ch_Orcs_OrganiseTheHorde __instance)
         {
             Pr_OrcishIndustry industry = __instance.location.properties.OfType<Pr_OrcishIndustry>().FirstOrDefault();
@@ -815,28 +994,109 @@ namespace Orcs_Plus
             return false;
         }
 
+        private static string Ch_Orcs_OpportunisticEncroachment_getName_Postfix(string result, Ch_Orcs_Expand __instance)
+        {
+            bool ambigous = false;
+            SG_Orc orcSocity = __instance.location.soc as SG_Orc;
+
+            if (__instance.location.settlement != null && __instance.location.settlement.subs.Count > 0)
+            {
+                List<Sub_OrcWaystation> waystations = __instance.location.settlement.subs.OfType<Sub_OrcWaystation>().ToList();
+                if (waystations.Count > 0)
+                {
+                    Sub_OrcWaystation waystation = waystations.FirstOrDefault(sub => sub.getChallenges().Contains(__instance));
+                    if (waystation != null)
+                    {
+                        orcSocity = waystation.orcSociety;
+                    }
+
+                    if (waystations.Count > 1)
+                    {
+                        ambigous = true;
+                    }
+                }
+
+            }
+
+            if (ambigous && orcSocity != null)
+            {
+                return orcSocity.getName() + " Encroachment";
+            }
+
+            return result;
+        }
+
         private static void Ch_Orcs_OpportunisticEncroachment_getDesc_Postfix(Ch_Subjugate_Orcs __instance, ref string __result)
         {
             __result += " You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand] + " influence with the orc culture by completing this challenge.";
         }
 
-        private static bool Ch_Orcs_OpportunisticEncroachment_valid_Postfix(bool result, Ch_Orcs_OpportunisticEncroachment __instance)
+        private static IEnumerable<CodeInstruction> Ch_Orcs_OpportunisticEncroachment_valid_Transpiler(IEnumerable<CodeInstruction> codeInstructions, ILGenerator ilg)
         {
-            if (!(__instance.location.soc is SG_Orc) && __instance.location.settlement != null)
+            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_TranspilerBody_GetOrcs), new Type[] { typeof(Ch_Orcs_OpportunisticEncroachment) });
+
+            List<CodeInstruction> instructionList = codeInstructions.ToList();
+
+            int targetIndex = 1;
+            for (int i = 0; i < instructionList.Count; i++)
             {
-                Sub_OrcWaystation waystation = __instance.location.settlement.subs.OfType<Sub_OrcWaystation>().FirstOrDefault();
-                if (waystation != null && waystation.orcSociety != null)
+                if (targetIndex > 0)
                 {
-                    foreach (Location neighbour in __instance.location.getNeighbours())
+                    if (targetIndex == 1)
                     {
-                        if (neighbour.settlement is SettlementHuman && !(neighbour.settlement is Set_City) && !(neighbour.settlement is Set_ElvenCity))
+                        if (instructionList[i].opcode == OpCodes.Stloc_0)
                         {
-                            if (!neighbour.properties.Any(pr => pr is Pr_OrcEncroachment))
-                            {
-                                return true;
-                            }
+                            targetIndex = 0;
+
+                            yield return new CodeInstruction(OpCodes.Pop);
+                            yield return new CodeInstruction(OpCodes.Ldarg_0);
+                            yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
                         }
                     }
+                }
+
+                yield return instructionList[i];
+            }
+        }
+
+        private static IEnumerable<CodeInstruction> Ch_Orcs_OpportunisticEncroachment_complete_Transpiler(IEnumerable<CodeInstruction> codeInstructions, ILGenerator ilg)
+        {
+            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_TranspilerBody_GetOrcs), new Type[] { typeof(Ch_Orcs_OpportunisticEncroachment) });
+
+            List<CodeInstruction> instructionList = codeInstructions.ToList();
+
+            int targetIndex = 1;
+            for (int i = 0; i < instructionList.Count; i++)
+            {
+                if (targetIndex > 0)
+                {
+                    if (targetIndex == 1)
+                    {
+                        if (instructionList[i].opcode == OpCodes.Stloc_0)
+                        {
+                            targetIndex = 0;
+
+                            yield return new CodeInstruction(OpCodes.Pop);
+                            yield return new CodeInstruction(OpCodes.Ldarg_0);
+                            yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
+                        }
+                    }
+                }
+
+                yield return instructionList[i];
+            }
+        }
+
+        private static SG_Orc Ch_Orcs_OpportunisticEncroachment_TranspilerBody_GetOrcs(Ch_Orcs_OpportunisticEncroachment ch)
+        {
+            SG_Orc result = ch.location.soc as SG_Orc;
+
+            if (ch.location.settlement != null && ch.location.settlement.subs.Count > 0)
+            {
+                Sub_OrcWaystation waystation = (Sub_OrcWaystation)ch.location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation w && w.getChallenges().Contains(ch));
+                if (waystation != null)
+                {
+                    result = waystation.orcSociety;
                 }
             }
 
@@ -1373,7 +1633,7 @@ namespace Orcs_Plus
 
         private static IEnumerable<CodeInstruction> Rti_Orc_UniteTheHordes_complete_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
         {
-            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Rti_Orc_UniteTheHordes_complete_TranspilerBody));
+            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Rti_Orc_UniteTheHordes_complete_TranspilerBody), new Type[] { typeof(Rti_Orc_UniteTheHordes), typeof(UA) });
 
             yield return new CodeInstruction(OpCodes.Nop);
             yield return new CodeInstruction(OpCodes.Ldarg_0);
@@ -1631,7 +1891,7 @@ namespace Orcs_Plus
 
         private static IEnumerable<CodeInstruction> MA_Orc_Expand_complete_Transpiler(IEnumerable<CodeInstruction> codeInstructions, ILGenerator ilg)
         {
-            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(MA_Orc_Expand_complete_TranspilerBody));
+            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(MA_Orc_Expand_complete_TranspilerBody), new Type[] { typeof(MA_Orc_Expand), typeof(int) });
 
             FieldInfo FI_ExpandTarget = AccessTools.Field(typeof(SG_Orc), nameof(SG_Orc.expandTarget));
             FieldInfo FI_soc = AccessTools.Field(typeof(MA_Orc_Expand), nameof(MA_Orc_Expand.soc));
@@ -1881,7 +2141,7 @@ namespace Orcs_Plus
         {
             List<CodeInstruction> instructionList = codeInstructions.ToList();
 
-            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Pr_OrcFunding_turnTick_TranspilerBody));
+            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Pr_OrcFunding_turnTick_TranspilerBody), new Type[] { typeof(SG_Orc), typeof(int) });
 
             FieldInfo FI_Fundee = AccessTools.Field(typeof(Pr_OrcFunding), nameof(Pr_OrcFunding.fundees));
 
@@ -2029,7 +2289,7 @@ namespace Orcs_Plus
 
         private static IEnumerable<CodeInstruction> UM_OrcArmy_turnTickAI_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
         {
-            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(UM_Orc_army_turnTickAI_TranspilerBody));
+            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(UM_Orc_army_turnTickAI_TranspilerBody), new Type[] { typeof(UM_OrcArmy) });
 
             yield return new CodeInstruction(OpCodes.Nop);
             yield return new CodeInstruction(OpCodes.Ldarg_0);
