@@ -119,6 +119,32 @@ namespace Orcs_Plus
             };
         }
 
+        public void onTurnStart(Map map)
+        {
+            updateOrcSGCultureMap(map);
+        }
+
+        public void updateOrcSGCultureMap(Map map)
+        {
+            //Console.WriteLine("OrcsPlus: updating orcSGCultureMap");
+            orcSGCultureMap.Clear();
+
+            foreach (SocialGroup sg in map.socialGroups)
+            {
+                if (sg is HolyOrder_Orcs orcCulture)
+                {
+                    if (orcCulture.orcSociety == null || orcCulture.checkIsGone())
+                    {
+                        continue;
+                    }
+
+                    orcSGCultureMap.Add(orcCulture.orcSociety, orcCulture);
+                }
+            }
+
+            //Console.WriteLine("OrcsPlus: orcSGCultureMap updated");
+        }
+
         public void getBattleArmyEnemies(BattleArmy battle, Unit u, out List<UM> enemies, out List<UA> enemyComs)
         {
             if (u is UM)

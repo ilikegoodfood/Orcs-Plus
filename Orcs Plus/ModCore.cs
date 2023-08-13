@@ -129,7 +129,7 @@ namespace Orcs_Plus
             {
                 core.data = new ModData();
                 core.data.isPlayerTurn = true;
-                updateOrcSGCultureMap(map);
+                data.updateOrcSGCultureMap(map);
             }
 
             if (comLib == null)
@@ -326,8 +326,7 @@ namespace Orcs_Plus
             }
 
             core.data.isPlayerTurn = true;
-
-            updateOrcSGCultureMap(map);
+            data.onTurnStart(map);
 
             if (core.godPowers1.Count > 0 || core.godPowers2.Count > 0)
             {
@@ -356,27 +355,6 @@ namespace Orcs_Plus
                     }
                 }
             }
-        }
-
-        private void updateOrcSGCultureMap(Map map)
-        {
-            //Console.WriteLine("OrcsPlus: updating orcSGCultureMap");
-            core.data.orcSGCultureMap.Clear();
-
-            foreach (SocialGroup sg in map.socialGroups)
-            {
-                if (sg is HolyOrder_Orcs orcCulture)
-                {
-                    if (orcCulture.orcSociety == null || orcCulture.checkIsGone())
-                    {
-                        continue;
-                    }
-
-                    core.data.orcSGCultureMap.Add(orcCulture.orcSociety, orcCulture);
-                }
-            }
-
-            //Console.WriteLine("OrcsPlus: orcSGCultureMap updated");
         }
 
         public void updateGodPowers(Map map)

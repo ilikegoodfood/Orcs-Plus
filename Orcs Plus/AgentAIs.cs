@@ -1,8 +1,10 @@
 ﻿using Assets.Code;
 using CommunityLib;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using static UnityEngine.GraphicsBuffer;
 
 namespace Orcs_Plus
@@ -74,15 +76,9 @@ namespace Orcs_Plus
                 AIChallenge raiding = comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcUpstart), typeof(Ch_OrcRaiding));
                 if (raiding != null)
                 {
-                    Func<AgentAI.ChallengeData, UA, double, List<ReasonMsg>, double> comLibDelegate = null;
-                    foreach (Func<AgentAI.ChallengeData, UA, double, List<ReasonMsg>, double> delegate_Utility in raiding.delegates_Utility)
-                    {
-                        if (delegate_Utility.GetType().Namespace == "CommunityLib")
-                        {
-                            comLibDelegate = delegate_Utility;
-                            break;
-                        }
-                    }
+                    MethodInfo MI_ComLibDelegate = AccessTools.Method(typeof(UAENOverrideAI), "delegate_Utility_Ch_OrcRaiding");
+
+                    Func<AgentAI.ChallengeData, UA, double, List<ReasonMsg>, double> comLibDelegate = raiding.delegates_Utility.FirstOrDefault(del => del.GetMethodInfo() == MI_ComLibDelegate);
 
                     if (comLibDelegate != null)
                     {
