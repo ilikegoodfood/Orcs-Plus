@@ -77,7 +77,7 @@ namespace Orcs_Plus
                     Func<AgentAI.ChallengeData, UA, double, List<ReasonMsg>, double> comLibDelegate = null;
                     foreach (Func<AgentAI.ChallengeData, UA, double, List<ReasonMsg>, double> delegate_Utility in raiding.delegates_Utility)
                     {
-                        if (delegate_Utility.GetType().Namespace == "ComLib")
+                        if (delegate_Utility.GetType().Namespace == "CommunityLib")
                         {
                             comLibDelegate = delegate_Utility;
                             break;
