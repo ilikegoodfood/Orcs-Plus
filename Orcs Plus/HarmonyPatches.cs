@@ -163,6 +163,9 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Empower), nameof(P_Opha_Empower.getRestrictionText), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Empower_getRestrictionText_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Empower), nameof(P_Opha_Empower.validTarget), new Type[] { typeof(Unit) }), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Empower_validTarget_Postfix)));
 
+            // Patches for PC_Card
+            harmony.Patch(original: AccessTools.Method(typeof(PC_Card), nameof(PC_Card.cast), new Type[] { typeof(Unit) }), postfix: new HarmonyMethod(patchType, nameof(PC_Card_cast_Postfix)), transpiler: new HarmonyMethod(patchType, nameof(PC_Card_cast_Transpiler)));
+
             // Community Library Patches
             harmony.Patch(original: AccessTools.Method(typeof(CommunityLib.Ch_RecoverShipwreck), nameof(CommunityLib.Ch_RecoverShipwreck.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_RecoverShipwreck_complete_Transpiler)));
 
@@ -2728,6 +2731,91 @@ namespace Orcs_Plus
             }
 
             return result;
+        }
+
+        // Patches for PC_Card
+        private static IEnumerable<CodeInstruction> PC_Card_cast_Transpiler(IEnumerable<CodeInstruction> codeInstructions, ILGenerator ilg)
+        {
+            List<CodeInstruction> instructionList = codeInstructions.ToList();
+
+            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(PC_Card_cast_TranspilerBody), new Type[] { typeof(bool), typeof(Unit) });
+
+            int targetIndex = 1;
+            for (int i = 0; i < instructionList.Count; i++)
+            {
+                if (targetIndex > 0)
+                {
+                    if (targetIndex == 1)
+                    {
+                        if (instructionList[i].opcode == OpCodes.Brfalse_S && instructionList[i + 1].opcode == OpCodes.Nop && instructionList[i+2].opcode == OpCodes.Ldarg_0)
+                        {
+                            targetIndex = 0;
+
+                            yield return new CodeInstruction(OpCodes.Ldarg_1);
+                            yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
+                            yield return new CodeInstruction(OpCodes.Stloc_S, 6);
+                            yield return new CodeInstruction(OpCodes.Ldloc_S, 6);
+                        }
+                    }
+                }
+
+                yield return instructionList[i];
+            }
+        }
+
+        // Deals with result AFTER it has been negated.
+        private static bool PC_Card_cast_TranspilerBody(bool result, Unit u)
+        {
+            if (result)
+            {
+                SG_Orc orcSociety = u.society as SG_Orc;
+                HolyOrder_Orcs orcCulture = u.society as HolyOrder_Orcs;
+
+                if (orcSociety != null)
+                {
+                    ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+                }
+
+                if (orcCulture != null && orcCulture.tenet_god is H_Orcs_Lucky lucky)
+                {
+                    if (lucky.status == -1 && Eleven.random.NextDouble() < 0.5)
+                    {
+                        return false;
+                    }
+                    else if (lucky.status == -2 && Eleven.random.NextDouble() < 0.75)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private static void PC_Card_cast_Postfix(PC_Card __instance, Unit u)
+        {
+            bool beneficial = false;
+
+            if (__instance is PC_T1_Coin || __instance is PC_T1_Hammer || __instance is PC_T3_Blindfold)
+            {
+                beneficial = true;
+            }
+
+            if (beneficial)
+            {
+                SG_Orc orcSociety = u.society as SG_Orc;
+                HolyOrder_Orcs orcCulture = u.society as HolyOrder_Orcs;
+
+                if (orcSociety != null)
+                {
+                    ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+                }
+
+                if (orcCulture != null)
+                {
+                    ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("", ModCore.core.data.influenceGain[ModData.influenceGainAction.RecieveGift]), true);
+                }
+            }
         }
 
         // Community Library Patches

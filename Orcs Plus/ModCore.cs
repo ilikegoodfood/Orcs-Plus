@@ -51,6 +51,7 @@ namespace Orcs_Plus
             }
             
             HarmonyPatches_Conditional.PatchingInit();
+            HarmonyPatches_Conditional.PatchingInit();
 
             if (core.data.godTenetTypes.TryGetValue(map.overmind.god.GetType(), out Type tenetType) && tenetType != null)
             {
@@ -1265,6 +1266,23 @@ namespace Orcs_Plus
                 foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
                 {
                     core.TryAddInfluenceGain(orcs, new ReasonMsg("Smote trespassing agent", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                }
+            }
+            else if (v == "Killed by a card")
+            {
+                if (influencedOrcCulture_Direct != null)
+                {
+                    core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Orc agent died in Death's games", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                {
+                    core.TryAddInfluenceGain(orcs, new ReasonMsg("Enemy agent died in death's games", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                {
+                    core.TryAddInfluenceGain(orcs, new ReasonMsg("Trespassing agent died in death's games", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
                 }
             }
             else if (uaPerson != null && uaPerson.task is Task_PerformChallenge challengeTask)

@@ -825,6 +825,23 @@ namespace Orcs_Plus
                     ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Smote encroaching settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                 }
             }
+            else if (v == "Killed by a card")
+            {
+                if (influencedOrcCulture_Direct != null)
+                {
+                    ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Orc agent died in Death's games", ModCore.core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                {
+                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Enemy agent died in death's games", ModCore.core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                {
+                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Trespassing agent died in death's games", ModCore.core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                }
+            }
             else if (v == "Destroyed by volcanic eruption")
             {
                 if (uKiller != null)

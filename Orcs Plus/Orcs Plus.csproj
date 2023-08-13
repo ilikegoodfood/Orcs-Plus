@@ -75,6 +75,7 @@
     <Compile Include="H_Orcs_HarbringersMadness.cs" />
     <Compile Include="H_Orcs_InsectileSymbiosis.cs" />
     <Compile Include="H_Orcs_LifeMother.cs" />
+    <Compile Include="H_Orcs_Lucky.cs" />
     <Compile Include="H_Orcs_MammonClient.cs" />
     <Compile Include="H_Orcs_Perfection.cs" />
     <Compile Include="H_Orcs_SerpentWarriors.cs" />
