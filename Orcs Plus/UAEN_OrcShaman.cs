@@ -125,6 +125,25 @@ namespace Orcs_Plus
             person.skillPoints--;
         }
 
+        public override bool isCommandable()
+        {
+            bool result = corrupted;
+
+            if (!result)
+            {
+                foreach (Trait trait in person.traits)
+                {
+                    if (trait.grantsCommand())
+                    {
+                        result = true;
+                        break;
+                    }
+                }
+            }
+
+            return result;
+        }
+
         public override int[] getPositiveTags()
         {
             int[] tags = new int[2] { Tags.ORC, Tags.UNDEAD };
