@@ -63,7 +63,7 @@ namespace Orcs_Plus
             {
                 foreach (UA agent in orcCulture.agents)
                 {
-                    if (agent is UAEN_OrcUpstart upstart2 && (upstart2.inner_profile > upstart2.inner_profileMin + (10 * map.param.ch_layLoweReductionPerTurnNonhuman) || upstart2.inner_menace > upstart2.inner_menaceMin + (10 * map.param.ch_layLoweReductionPerTurnNonhuman)))
+                    if (agent is UAEN_OrcUpstart upstart2 && !upstart2.isCommandable() && (upstart2.inner_profile > upstart2.inner_profileMin + (10 * map.param.ch_layLoweReductionPerTurnNonhuman) || upstart2.inner_menace > upstart2.inner_menaceMin + (10 * map.param.ch_layLoweReductionPerTurnNonhuman)))
                     {
                         if (!((upstart2.task is Task_PerformChallenge task && task.challenge is Rt_Orcs_Confinement) || (upstart2.task is CommunityLib.Task_GoToPerformChallengeAtLocation task2 && task2.challenge is Rt_Orcs_Confinement) || upstart2.task is Task_Disrupted || upstart2.task is Task_DisruptUA))
                         {
@@ -136,7 +136,7 @@ namespace Orcs_Plus
             {
                 foreach (UA agent in orcCulture.agents)
                 {
-                    if (agent is UAEN_OrcUpstart upstart && (upstart.inner_profile > upstart.inner_profileMin + (10 * map.param.ch_layLoweReductionPerTurnNonhuman) || upstart.inner_menace > upstart.inner_menaceMin + (10 * map.param.ch_layLoweReductionPerTurnNonhuman)))
+                    if (agent is UAEN_OrcUpstart upstart && !upstart.isCommandable() && (upstart.inner_profile > upstart.inner_profileMin + (10 * map.param.ch_layLoweReductionPerTurnNonhuman) || upstart.inner_menace > upstart.inner_menaceMin + (10 * map.param.ch_layLoweReductionPerTurnNonhuman)))
                     {
                         if (!((upstart.task is Task_PerformChallenge task && task.challenge is Rt_Orcs_Confinement) || (upstart.task is CommunityLib.Task_GoToPerformChallengeAtLocation task2 && task2.challenge is Rt_Orcs_Confinement) || upstart.task is Task_Disrupted || upstart.task is Task_DisruptUA))
                         {
@@ -159,9 +159,9 @@ namespace Orcs_Plus
             {
                 foreach (UA agent in orcCulture.agents)
                 {
-                    if (agent is UAEN_OrcUpstart upstart2 && (upstart2.inner_profile > upstart2.inner_profileMin + (10 * map.param.ch_layLoweReductionPerTurnNonhuman) || upstart2.inner_menace > upstart2.inner_menaceMin + (10 * map.param.ch_layLoweReductionPerTurnNonhuman)))
+                    if (agent is UAEN_OrcUpstart upstart2 && !upstart2.isCommandable() && (upstart2.inner_profile > upstart2.inner_profileMin + (10 * map.param.ch_layLoweReductionPerTurnNonhuman) || upstart2.inner_menace > upstart2.inner_menaceMin + (10 * map.param.ch_layLoweReductionPerTurnNonhuman)))
                     {
-                        if (!((upstart2.task is Task_PerformChallenge task && task.challenge is Rt_Orcs_Confinement) || (upstart2.task is CommunityLib.Task_GoToPerformChallengeAtLocation task2 && task2.challenge is Rt_Orcs_Confinement) || upstart2.task is Task_Disrupted || upstart2.task is Task_DisruptUA))
+                        if (!((upstart2.task is Task_PerformChallenge task && task.challenge is Rt_Orcs_Confinement) || (upstart2.task is Task_GoToPerformChallenge task2 && task2.challenge is Rt_Orcs_Confinement) || (upstart2.task is CommunityLib.Task_GoToPerformChallengeAtLocation task3 && task3.challenge is Rt_Orcs_Confinement) || upstart2.task is Task_Disrupted || upstart2.task is Task_DisruptUA))
                         {
                             if (upstart2.inner_profile - upstart2.inner_profileMin + upstart2.inner_menace - upstart2.inner_menaceMin > excessMenaceProfile)
                             {
@@ -175,7 +175,7 @@ namespace Orcs_Plus
 
             if (upstart != null)
             {
-                Rt_Orcs_Confinement confine = upstart.rituals.OfType<Rt_Orcs_Confinement>().FirstOrDefault();
+                Rt_Orcs_Confinement confine = (Rt_Orcs_Confinement)upstart.rituals.FirstOrDefault(rt => rt is Rt_Orcs_Confinement);
 
                 if (confine != null)
                 {
@@ -188,7 +188,8 @@ namespace Orcs_Plus
         {
             return new int[] { 
                 Tags.COOPERATION,
-                Tags.RELIGION
+                Tags.RELIGION,
+                Tags.ORC
             };
         }
 

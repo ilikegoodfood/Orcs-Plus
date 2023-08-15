@@ -1,4 +1,5 @@
 ﻿using Assets.Code;
+using CommunityLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +32,11 @@ namespace Orcs_Plus
             return "The elders becon and the young come running. The veterans of conflicts passed speak, and the young listen. \"Quite!\", they cry, \"You are too loud. Quite yourself.\". Silence reigns, at least for a time.";
         }
 
+        public override string getRestriction()
+        {
+            return "Cannot self-confine.";
+        }
+
         public override challengeStat getChallengeType()
         {
             return challengeStat.OTHER;
@@ -54,7 +60,23 @@ namespace Orcs_Plus
 
         public override bool validFor(UA ua)
         {
-            return ua is UAEN_OrcUpstart && ua.location.settlement is Set_OrcCamp && ua.location.soc is SG_Orc orcSociety && orcSociety == ua.society;
+            SG_Orc orcSociety = ua.society as SG_Orc;
+            HolyOrder_Orcs orcCulture = ua.society as HolyOrder_Orcs;
+
+            if (orcCulture != null)
+            {
+                orcSociety = orcCulture.orcSociety;
+            }
+
+            if (orcSociety != null && ua.location.soc == orcSociety && ua.location.settlement is Set_OrcCamp)
+            { 
+                if ((ua.task is Task_PerformChallenge challenge && challenge.challenge == this) || (ua.task is Task_GoToPerformChallenge goChallenge && goChallenge.challenge == this) || (ua.task is Task_GoToPerformChallengeAtLocation goLocChallenge && goLocChallenge.challenge == this))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public override void turnTick(UA ua)

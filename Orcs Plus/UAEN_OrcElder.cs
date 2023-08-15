@@ -1,4 +1,5 @@
 ﻿using Assets.Code;
+using FullSerializer;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -166,6 +167,25 @@ namespace Orcs_Plus
 
             base.spendSkillPoint();
             person.skillPoints--;
+        }
+
+        public override bool isCommandable()
+        {
+            bool result = corrupted;
+
+            if (!result)
+            {
+                foreach (Trait trait in person.traits)
+                {
+                    if (trait.grantsCommand())
+                    {
+                        result = true;
+                        break;
+                    }
+                }
+            }
+
+            return result;
         }
 
         public override int[] getPositiveTags()
