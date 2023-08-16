@@ -1,0 +1,34 @@
+[h1]Introduction[/h1]
+Orcs Plus is a major expansion to the Orc race in Shadows of Forbidden Gods, inspired by the fantastic Deep Ones Plus mod. It makes numerous changes to the base game's code, giving orcs more opportunities to gain and spend gold, granting new armies, agents, and orc cultures (custom religions).
+
+[h1]Dependency[/h1]
+Orcs Plus is completely dependent on the Community Library to operate. The Community Library must be enabled, and must be before (above), Orcs Plus in the mod load order. Orcs Plus will error if the Community Library is not enabled.
+
+[h1]New Agents[/h1]
+Orcs Plus introduces two new orc agents; Orc Elders and Orcs Spirit Callers.
+
+[list]
+[*]Orc Elders function as Acolytes for the orc cultures, performing many roles both within their boarders, and operating as diplomats with nearby human kingdoms.
+[*]Orc Spirit Callers are powerful necromancers, which spawn from mages camps. They seek to increase their knowledge and power, create death, and use death to raise hordes of undead, which are then unleashed on nearby settlements.
+[/list]
+
+[h1]New Armies[/h1]
+Each type of specialised orc camp now has it's own army: 
+[list]
+[*]Menageries spawn Bestial Hordes, which have special effects when joining an ongoing battle, attacking refugees, or razing settlements.
+[*]Shipyards spawn Orc Corsairs, which are very weak naval armies that plunder trade routes and raid ports. They are a good source of gold for the horde.
+[/list]
+
+[h1]Cultures[/h1]
+The crowning feature of Orcs Plus are Orc Cultures. These operate similarly to, and use the same UI as, holy orders, but instead of gaining influence over them passively, both you and the humans only gain influence over them through your actions. Many base-game challenges that you can perform state how much influence they grant.
+
+[h2]Tenets[/h2]
+[list]
+[*][b]Alignment[/b] - Same as for other holy orders.
+[*][b]Temple Builders[/b] - Orc Elders can spend gold to build Great Halls (temples) in specialised orc camps.
+[*][b]Intolerance[/b] - Orc Upstarts may attack foreign agents passing through their territory, especially if the agent is performing a challenge. They will naturally ignore those who originate from within their lands, and others of their own society.  When elder aligned, they will ignore elder agents. When human aligned, they will ignore good agents (elves and humans).
+[*][b]Shadow Weaving[/b] - Orcs are not as easily brought under your sway as humans. When elder aligned, they will become susceptible to enshadowment, and when fully elder aligned, will celebrate and spread shadow. When human aligned, they will actively purge shadow fro their land, and lands neighbouring them.
+[*][b]Industrious[/b] - When elder aligned, Orc Elders will seek to maintain and increase industry from their Seat of the Elders, and Great Halls.
+[*][b]Expansionism[/b] - Due to their disorganised nature, orcs will not naturally expand above a certain size. When elder aligned, the impact that their society's size has on their desire to expand is reduced, and eventually eliminated entirely. When human aligned, the impact is doubled.
+[*][b]God Specific Tenets[/b] - In addition to the tenets that listed above, which are always available to all orc cultures, each culture will have access to a tenet that is unique to the god that you are playing. This tenet is usually very powerful.
+[/list]

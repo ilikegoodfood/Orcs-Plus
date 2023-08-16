@@ -153,5 +153,13 @@ namespace Orcs_Plus
             }
             return false;
         }
+
+        public override int[] buildPositiveTags()
+        {
+            return new int[]
+                {
+                    Tags.ORC
+                };
+        }
     }
 }
