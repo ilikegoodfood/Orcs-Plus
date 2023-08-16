@@ -20,18 +20,15 @@ namespace Orcs_Plus
             this.orcSociety = orcSociety;
         }
 
-        public HolyOrder_Orcs getOrcCulture()
-        {
-            if (orcSociety != null && ModCore.core.data.orcSGCultureMap.ContainsKey(orcSociety))
-            {
-                orcCulture = ModCore.core.data.orcSGCultureMap[orcSociety];
-            }
-
-            return orcCulture;
-        }
-
         public override string getName()
         {
+            bool ambigous = location.settlement?.subs.OfType<Sub_OrcWaystation>().Count() > 1;
+
+            if (ambigous)
+            {
+                return "Raid Outpost (" + orcSociety.getName() + ")";
+            }
+
             return "Raid Outpost";
         }
 
@@ -163,7 +160,7 @@ namespace Orcs_Plus
 
             if (outposts.Count == 1)
             {
-                targetOutpost= outposts[0];
+                targetOutpost = outposts[0];
             }
             else if (outposts.Count > 1)
             {
@@ -200,16 +197,13 @@ namespace Orcs_Plus
                 }
             }
 
-            if (getOrcCulture() != null)
+            if (u.isCommandable())
             {
-                if (u.isCommandable())
-                {
-                    ModCore.core.TryAddInfluenceGain(getOrcCulture(), new ReasonMsg(getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Raiding]), true);
-                }
-                else if (!u.society.isDark())
-                {
-                    ModCore.core.TryAddInfluenceGain(getOrcCulture(), new ReasonMsg(getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Raiding]));
-                }
+                ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg(getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Raiding]), true);
+            }
+            else if (!u.society.isDark())
+            {
+                ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg(getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Raiding]));
             }
         }
 
