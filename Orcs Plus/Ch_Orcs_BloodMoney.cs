@@ -10,7 +10,7 @@ namespace Orcs_Plus
 {
     public class Ch_Orcs_BloodMoney : Challenge
     {
-        public int cost = 60;
+        public int cost = 40;
 
         public Ch_Orcs_BloodMoney(Location location)
             : base(location)
@@ -193,6 +193,11 @@ namespace Orcs_Plus
             }
 
             u.person.gold -= cost;
+
+            if (u.isCommandable() && location.soc is SG_Orc orcSociety)
+            {
+                ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg(getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BloodMoney]), true);
+            }
         }
 
         public override int getCompletionMenace()

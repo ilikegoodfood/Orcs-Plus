@@ -36,25 +36,26 @@ namespace Orcs_Plus
 
             // Patches for Challenges that specialise orc camps
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildFortress), nameof(Ch_Orcs_BuildFortress.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildFortress_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildFortress), nameof(Ch_Orcs_BuildFortress.buildNegativeTags)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildSpecialisedCamp_buildNegativeTags_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildFortress), nameof(Ch_Orcs_BuildFortress.buildNegativeTags)), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Gold)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildMages), nameof(Ch_Orcs_BuildMages.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildMages_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildMages), nameof(Ch_Orcs_BuildMages.buildNegativeTags)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildSpecialisedCamp_buildNegativeTags_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildMages), nameof(Ch_Orcs_BuildMages.buildNegativeTags)), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Gold)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildMenagerie), nameof(Ch_Orcs_BuildMenagerie.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildMenagerie_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildMenagerie), nameof(Ch_Orcs_BuildMenagerie.buildNegativeTags)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildSpecialisedCamp_buildNegativeTags_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildMenagerie), nameof(Ch_Orcs_BuildMenagerie.buildNegativeTags)), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Gold)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildShipyard), nameof(Ch_Orcs_BuildShipyard.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildShipyard_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildShipyard), nameof(Ch_Orcs_BuildShipyard.buildNegativeTags)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildSpecialisedCamp_buildNegativeTags_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildShipyard), nameof(Ch_Orcs_BuildShipyard.buildNegativeTags)), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Gold)));
 
             // Patches for Warlord rituals
             harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_CommandeerShips), nameof(Rt_Orcs_CommandeerShips.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Rt_Orcs_CommandeerShips_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_CommandeerShips), nameof(Rt_Orcs_CommandeerShips.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Rt_Orcs_CommandeerShips_complete_Transpiler)));
             harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_ClaimTerritory), nameof(Rt_Orcs_ClaimTerritory.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Rt_Orcs_ClaimTerritory_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_RecruitRaiders), nameof(Rt_Orcs_RecruitRaiders.complete), new Type[] { typeof(UA) }), prefix: new HarmonyMethod(patchType, nameof(Rt_Orcs_RecruitRaiders_complete_Prefix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Rt_Orc_ReceiveFunding), nameof(Rt_Orc_ReceiveFunding.buildPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Orc)));
 
             // Patches for Challenges in orc camps
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_ChallengeTheHorde), nameof(Ch_Orcs_ChallengeTheHorde.getRestriction), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_ChallengeTheHorde_getRestriction_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_ChallengeTheHorde), nameof(Ch_Orcs_ChallengeTheHorde.valid), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_ChallengeTheHorde_valid_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_ChallengeTheHorde), nameof(Ch_Orcs_ChallengeTheHorde.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_ChallengeTheHorde_validFor_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_ChallengeTheHorde), nameof(Ch_Orcs_ChallengeTheHorde.buildPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_ChallengeTheHorde_buildPositiveTags_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_ChallengeTheHorde), nameof(Ch_Orcs_ChallengeTheHorde.buildPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_AmbitionOrc)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_DevastateOrcishIndustry), nameof(Ch_Orcs_DevastateOrcishIndustry.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_DevastateOrcishIndustry_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.getName), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_getName_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_getDesc_Postfix)));
@@ -65,7 +66,7 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.valid), new Type[0]), transpiler: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_valid_Transpiler)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_complete_Transpiler)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.buildPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_ChallengeTheHorde_buildPositiveTags_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.buildPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_AmbitionOrc)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_RetreatToTheHills), nameof(Ch_Orcs_RetreatToTheHills.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_RetreatToTheHills_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_RetreatToTheHills), nameof(Ch_Orcs_RetreatToTheHills.valid)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_RetreatToTheHills_valid_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_RetreatToTheHills), nameof(Ch_Orcs_RetreatToTheHills.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_RetreatToTheHills_validFor_Postfix)));
@@ -79,12 +80,17 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OpportunisticEncroachment), nameof(Ch_Orcs_OpportunisticEncroachment.valid), new Type[0]), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_valid_Transpiler)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OpportunisticEncroachment), nameof(Ch_Orcs_OpportunisticEncroachment.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_complete_Transpiler)));
 
-            // Patches for Pr_OrcPlunder
+            // Patches for challenges in Pr_OrcPlunder
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.valid), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_valid_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_validFor_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_complete_Transpiler)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.buildNegativeTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_buildNegativeTags_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.buildNegativeTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Orc)));
+
+            // Patches for challenmges in I_HordeBanner
+            harmony.Patch(original: AccessTools.Method(typeof(Rti_Orc_AttackHere), nameof(Rti_Orc_AttackHere.buildPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Orc)));
+            harmony.Patch(original: AccessTools.Method(typeof(Rti_Orc_CeaseWar), nameof(Rti_Orc_CeaseWar.buildPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Orc)));
+            harmony.Patch(original: AccessTools.Method(typeof(Rti_Orc_UniteTheHordes), nameof(Rti_Orc_UniteTheHordes.buildPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Orc)));
 
             // Patch and Branches for getPostiveTags and getNegative Tags
             harmony.Patch(original: AccessTools.Method(typeof(Challenge), nameof(Challenge.getPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Challenge_getPositiveTags_Postfix)));
@@ -193,7 +199,7 @@ namespace Orcs_Plus
             __result += " You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildShipyard] + " influence with the orc culture by completing this challenge.";
         }
 
-        private static int[] Ch_Orcs_BuildSpecialisedCamp_buildNegativeTags_Postfix(int[] result, Challenge __instance)
+        private static int[] postfix_AppendTag_Gold(int[] result, Challenge __instance)
         {
             //Console.WriteLine("OrcsPlus: Added GOLD to negative tags of " + __instance.getName());
             int[] output = new int[result.Length + 1];
@@ -268,7 +274,7 @@ namespace Orcs_Plus
             return ua.isCommandable();
         }
 
-        private static int[] Ch_Orcs_ChallengeTheHorde_buildPositiveTags_Postfix(int[] result)
+        private static int[] postfix_AppendTag_AmbitionOrc(int[] result)
         {
             int[] output = new int[result.Length + 2];
 
@@ -951,27 +957,27 @@ namespace Orcs_Plus
             }
         }
 
-        private static int[] Ch_Orcs_AccessPlunder_buildNegativeTags_Postfix(int[] result)
+        private static int[] postfix_AppendTag_Orc(int[] __result)
         {
-            int[] output = new int[result.Length + 1];
+            int[] output = new int[__result.Length + 1];
 
-            for (int i = 0; i < result.Length; i++)
+            for (int i = 0; i < __result.Length; i++)
             {
-                output[i] = result[i];
+                output[i] = __result[i];
             }
-            output[result.Length] = Tags.ORC;
+            output[__result.Length] = Tags.ORC;
 
             return output;
         }
 
-        private static int[] Challenge_getPositiveTags_Postfix(int[] result, Challenge __instance)
+        private static int[] Challenge_getPositiveTags_Postfix(int[] __result, Challenge __instance)
         {
-            return GetTags.getPositiveTags(result, __instance);
+            return GetTags.getPositiveTags(__result, __instance);
         }
 
-        private static int[] Challenge_getNegativeTags_Postfix(int[] result, Challenge __instance)
+        private static int[] Challenge_getNegativeTags_Postfix(int[] __result, Challenge __instance)
         {
-            return GetTags.getNegativeTags(result, __instance);
+            return GetTags.getNegativeTags(__result, __instance);
         }
 
         private static bool Ch_Orcs_OrganiseTheHorde_valid_Postfix(bool result, Ch_Orcs_OrganiseTheHorde __instance)
@@ -2796,7 +2802,7 @@ namespace Orcs_Plus
         {
             bool beneficial = false;
 
-            if (__instance is PC_T1_Coin || __instance is PC_T1_Hammer || __instance is PC_T3_Blindfold)
+            if (__instance is PC_T1_Coin || __instance is PC_T1_Hammer || __instance is PC_T3_Blindfold || __instance is PC_T1_Move)
             {
                 beneficial = true;
             }
@@ -2813,7 +2819,7 @@ namespace Orcs_Plus
 
                 if (orcCulture != null)
                 {
-                    ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("", ModCore.core.data.influenceGain[ModData.influenceGainAction.RecieveGift]), true);
+                    ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Benefited from Death's Games", ModCore.core.data.influenceGain[ModData.influenceGainAction.RecieveGift]), true);
                 }
             }
         }

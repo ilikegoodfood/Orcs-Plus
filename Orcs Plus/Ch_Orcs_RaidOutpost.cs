@@ -231,7 +231,8 @@ namespace Orcs_Plus
                 Tags.CRUEL,
                 Tags.DANGER,
                 Tags.DISCORD,
-                Tags.GOLD
+                Tags.GOLD,
+                Tags.ORC
             };
         }
     }

@@ -196,7 +196,8 @@ namespace Orcs_Plus
                 Tags.GOLD,
                 Tags.COMBAT,
                 Tags.DANGER,
-                Tags.CRUEL
+                Tags.CRUEL,
+                Tags.ORC
             };
         }
     }

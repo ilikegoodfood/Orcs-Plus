@@ -240,9 +240,20 @@ namespace Orcs_Plus
         {
             return new int[]
             {
+                Tags.CRUEL,
                 Tags.GOLD,
                 Tags.COMBAT,
-                Tags.DANGER
+                Tags.DANGER,
+                Tags.DISCORD,
+                Tags.ORC
+            };
+        }
+
+        public override int[] buildNegativeTags()
+        {
+            return new int[]
+            {
+                Tags.COOPERATION
             };
         }
     }

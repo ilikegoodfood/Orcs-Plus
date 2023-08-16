@@ -55,7 +55,8 @@ namespace Orcs_Plus
             RazingLocation,
             Subjugate,
             RecieveGift,
-            BuildWaystation
+            BuildWaystation,
+            BloodMoney
         }
 
         public Dictionary<influenceGainAction, int> influenceGain;
@@ -87,7 +88,8 @@ namespace Orcs_Plus
                 { influenceGainAction.RazingLocation, 4 },
                 { influenceGainAction.Subjugate, 15 },
                 { influenceGainAction.RecieveGift, 20 },
-                { influenceGainAction.BuildWaystation, 30 }
+                { influenceGainAction.BuildWaystation, 30 },
+                { influenceGainAction.BloodMoney, 30 }
             };
 
             menaceGain = new Dictionary<menaceGainAction, int>
