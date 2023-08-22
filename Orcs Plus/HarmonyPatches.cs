@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using UnityEngine;
 using static CommunityLib.AITask;
@@ -25,7 +24,7 @@ namespace Orcs_Plus
 
         private static void Patching()
         {
-            Harmony.DEBUG = true;
+            Harmony.DEBUG = false;
             string harmonyID = "ILikeGoodFood.SOFG.OrcsPlus";
             Harmony harmony = new Harmony(harmonyID);
 
