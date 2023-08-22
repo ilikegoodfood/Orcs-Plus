@@ -25,7 +25,7 @@ namespace Orcs_Plus
 
         private static void Patching()
         {
-            Harmony.DEBUG = false;
+            Harmony.DEBUG = true;
             string harmonyID = "ILikeGoodFood.SOFG.OrcsPlus";
             Harmony harmony = new Harmony(harmonyID);
 
@@ -135,7 +135,7 @@ namespace Orcs_Plus
             // Patches for Pr_OrcishIndustry
             harmony.Patch(original: AccessTools.Method(typeof(Pr_OrcishIndustry), nameof(Pr_OrcishIndustry.turnTick), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Pr_OrcishIndustry_turnTick_Postfix)));
 
-            // Patches for Pr_OrcFunbding
+            // Patches for Pr_OrcFunbing
             harmony.Patch(original: AccessTools.Method(typeof(Pr_OrcFunding), nameof(Pr_OrcFunding.turnTick), new Type[0]), transpiler: new HarmonyMethod(patchType, nameof(Pr_OrcFunding_turnTick_Transpiler)));
 
             // Patches for UM_OrcArmy
@@ -1053,7 +1053,7 @@ namespace Orcs_Plus
                 {
                     if (targetIndex == 1)
                     {
-                        if (instructionList[i].opcode == OpCodes.Stloc_0)
+                        if (instructionList[i].opcode == OpCodes.Brfalse)
                         {
                             targetIndex = 0;
 
@@ -2159,17 +2159,22 @@ namespace Orcs_Plus
             {
                 if (targetIndex > 0)
                 {
-                    if (targetIndex == 1 && instructionList[i].opcode == OpCodes.Div)
+                    if (targetIndex == 1)
                     {
-                        targetIndex++;
+                        if (instructionList[i].opcode == OpCodes.Div)
+                        {
+                            targetIndex++;
+                        }
                     }
-
-                    if (targetIndex == 2 && instructionList[i].opcode == OpCodes.Ldarg_0)
+                    else if (targetIndex == 2)
                     {
-                        yield return new CodeInstruction(OpCodes.Ldarg_0);
-                        yield return new CodeInstruction(OpCodes.Ldfld, FI_Fundee);
-                        yield return new CodeInstruction(OpCodes.Ldloc_S, 12);
-                        yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
+                        if (instructionList[i].opcode == OpCodes.Ldarg_0)
+                        {
+                            yield return new CodeInstruction(OpCodes.Ldarg_0);
+                            yield return new CodeInstruction(OpCodes.Ldfld, FI_Fundee);
+                            yield return new CodeInstruction(OpCodes.Ldloc_S, 6);
+                            yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
+                        }
                     }
                 }
 

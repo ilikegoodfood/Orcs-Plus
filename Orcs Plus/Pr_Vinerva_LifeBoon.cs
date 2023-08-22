@@ -33,12 +33,12 @@ namespace Orcs_Plus
 
         public override Sprite getHexBackgroundSprite()
         {
-            return EventManager.getImg("OrcsPlus.Orchard_Hex.png");
+            return EventManager.getImg("OrcsPlus.Hex_Orchard.png");
         }
 
         public override Sprite getSprite(World world)
         {
-            return EventManager.getImg("OrcsPlus.Orchard.png");
+            return EventManager.getImg("OrcsPlus.Icon_Orchard.png");
         }
 
         public override void turnTick()

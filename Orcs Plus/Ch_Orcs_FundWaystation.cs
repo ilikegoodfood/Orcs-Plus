@@ -70,7 +70,7 @@ namespace Orcs_Plus
 
         public override Sprite getSprite()
         {
-            return EventManager.getImg("OrcsPlus.Waystation.png");
+            return EventManager.getImg("OrcsPlus.Icon_Waystation.png");
         }
 
         public override challengeStat getChallengeType()

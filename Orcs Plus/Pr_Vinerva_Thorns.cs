@@ -28,7 +28,7 @@ namespace Orcs_Plus
 
         public override Sprite getSprite(World world)
         {
-            return EventManager.getImg("OrcsPlus.Thorn_Wall.png");
+            return EventManager.getImg("OrcsPlus.Icon_ThornWall.png");
         }
 
         public override void turnTick()

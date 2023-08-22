@@ -38,7 +38,7 @@ namespace Orcs_Plus
 
         public override Sprite getSprite(World world)
         {
-            return EventManager.getImg("OrcsPlus.Sapling_Oak.png");
+            return EventManager.getImg("OrcsPlus.Foreground_SaplingOak.png");
         }
 
         public override void turnTick()
