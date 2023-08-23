@@ -33,7 +33,7 @@ namespace Orcs_Plus
             }
         }
 
-        public override int onAgentBattle_ReceiveDamage(PopupBattleAgent battle, UA defender, Minion minion, int dmg, int row)
+        public override int onAgentBattle_ReceiveDamage(PopupBattleAgent popup, BattleAgents battle, UA defender, Minion minion, int dmg, int row)
         {
             Console.WriteLine("OrcsPlus: ReceiveDamage hook called");
 
