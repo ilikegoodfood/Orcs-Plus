@@ -598,48 +598,50 @@ namespace Orcs_Plus
         public override int adjustHolyInfluenceDark(HolyOrder order, int inf, List<ReasonMsg> msgs)
         {
             HolyOrder_Orcs orcCulture = order as HolyOrder_Orcs;
+            int result = 0;
 
             List<ReasonMsg> influenceGain;
             if (orcCulture == null || !core.data.influenceGainElder.TryGetValue(orcCulture, out influenceGain))
             {
-                return inf;
+                return result;
             }
 
             if (orcCulture.isGone())
             {
                 core.data.influenceGainElder.Remove(orcCulture);
-                return inf;
+                return result;
             }
 
             foreach (ReasonMsg msg in influenceGain)
             { 
                 msgs?.Add(msg);
-                inf += (int)msg.value;
+                result += (int)msg.value;
             }
 
-            return inf;
+            return result;
         }
 
         public override int adjustHolyInfluenceGood(HolyOrder order, int inf, List<ReasonMsg> msgs)
         {
+            int result = 0;
             if (!(order is HolyOrder_Orcs orcCulture) || !core.data.influenceGainHuman.TryGetValue(orcCulture, out List<ReasonMsg> influenceGain) || influenceGain?.Count == 0)
             {
-                return inf;
+                return result;
             }
 
             if (orcCulture.isGone())
             {
                 core.data.influenceGainHuman.Remove(orcCulture);
-                return inf;
+                return result;
             }
 
             foreach (ReasonMsg msg in influenceGain)
             {
                 msgs?.Add(msg);
-                inf += (int)msg.value;
+                result += (int)msg.value;
             }
 
-            return Math.Max(0, Math.Min(inf, order.influenceHumanReq));
+            return result;
         }
 
         public bool TryAddInfluenceGain(HolyOrder_Orcs orcCulture, ReasonMsg msg, bool isElder = false)
