@@ -39,7 +39,7 @@ namespace Orcs_Plus
 
         public override Sprite getIconFore()
         {
-            return EventManager.getImg("OrcsPlus.Thorn_Wall.png");
+            return EventManager.getImg("OrcsPlus.Icon_ThornWall.png");
         }
 
         public override bool validTarget(Location loc)

@@ -1,5 +1,6 @@
 ﻿using Assets.Code;
 using Assets.Code.Modding;
+using CommunityLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,7 +57,8 @@ namespace Orcs_Plus
             Subjugate,
             RecieveGift,
             BuildWaystation,
-            BloodMoney
+            BloodMoney,
+            BuildTemple
         }
 
         public Dictionary<influenceGainAction, int> influenceGain;
@@ -89,7 +91,8 @@ namespace Orcs_Plus
                 { influenceGainAction.Subjugate, 15 },
                 { influenceGainAction.RecieveGift, 20 },
                 { influenceGainAction.BuildWaystation, 30 },
-                { influenceGainAction.BloodMoney, 30 }
+                { influenceGainAction.BloodMoney, 30 },
+                { influenceGainAction.BuildTemple, 40 }
             };
 
             menaceGain = new Dictionary<menaceGainAction, int>
@@ -118,7 +121,9 @@ namespace Orcs_Plus
                 typeof(Set_MinorOther),
                 typeof(Set_MinorVinerva),
                 typeof(Set_VinervaManifestation),
-                typeof(Set_TombOfGods)
+                typeof(Set_TombOfGods),
+                typeof(Set_DeepOneSanctum),
+                typeof(Set_Shipwreck)
             };
         }
 

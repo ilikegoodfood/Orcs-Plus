@@ -38,14 +38,14 @@ namespace Orcs_Plus
             return "Can be performed in an infiltrated specialised camp, or by an Orc Elder in a specialised camp belonging to their culture. The specialised camp's army must not currently exist.";
         }
 
+        public override Sprite getSprite()
+        {
+            return EventManager.getImg("OrcsPlus.Icon_BloodGold.png");
+        }
+
         public override challengeStat getChallengeType()
         {
             return challengeStat.COMMAND;
-        }
-
-        public override Sprite getSprite()
-        {
-            return EventManager.getImg("OrcsPlus.Blood_Gold.png");
         }
 
         public override double getUtility(UA ua, List<ReasonMsg> msgs)

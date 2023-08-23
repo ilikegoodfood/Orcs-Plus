@@ -39,7 +39,7 @@ namespace Orcs_Plus
 
         public override Sprite getIconFore()
         {
-            return EventManager.getImg("OrcsPlus.Sapling_Oak.png");
+            return EventManager.getImg("OrcsPlus.Foreground_SaplingOak.png");
         }
 
         public override Sprite getIconBack()

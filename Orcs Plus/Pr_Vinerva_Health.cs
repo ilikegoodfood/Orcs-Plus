@@ -35,7 +35,7 @@ namespace Orcs_Plus
 
         public override Sprite getSprite(World world)
         {
-            return EventManager.getImg("OrcsPlus.Blood_Gourd.png");
+            return EventManager.getImg("OrcsPlus.Foregrond_BloodGourd.png");
         }
 
         public override void turnTick()

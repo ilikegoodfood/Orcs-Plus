@@ -48,7 +48,8 @@ namespace Orcs_Plus
 
         public List<MonsterAction> monsterActions = new List<MonsterAction>();
 
-        public HolyOrder_Orcs(Map m, Location l, SG_Orc o) : base(m, l)
+        public HolyOrder_Orcs(Map m, Location l, SG_Orc o)
+            : base(m, l)
         {
             //Console.WriteLine("OrcsPlus: HolyOrder_Orcs Ctor");
             orcSociety = o;
@@ -75,8 +76,6 @@ namespace Orcs_Plus
             // Add required base HolyTenets to new list.
             tenet_alignment = new H_Alignment(this);
             tenets.Add(tenet_alignment);
-            priorityTemples = new H_Orcs_TempleBuilders(this);
-            tenets.Add(priorityTemples);
             tenet_dogmatic = new H_Dogmantic(this);
             tenets.Add(tenet_dogmatic);
 
@@ -89,6 +88,8 @@ namespace Orcs_Plus
             tenets.Add(tenet_industrious);
             tenet_expansionism = new H_Orcs_Expansionism(this);
             tenets.Add(tenet_expansionism);
+
+            establishInitialOrcTenentSpread();
 
             // Function returns immediately. Does not do anything.
             // establishInitialProphecy();
@@ -161,6 +162,12 @@ namespace Orcs_Plus
 
         public override void establishInitialTenentSpread()
         {
+            return;
+        }
+
+        public virtual void establishInitialOrcTenentSpread()
+        {
+            tenet_intolerance.status = -1;
             return;
         }
 

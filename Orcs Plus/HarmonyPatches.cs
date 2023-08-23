@@ -2,12 +2,12 @@
 using Assets.Code.Modding;
 using CommunityLib;
 using HarmonyLib;
+using Mono.Cecil.Cil;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using UnityEngine;
 using static CommunityLib.AITask;
@@ -73,7 +73,8 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_RetreatToTheHills), nameof(Ch_Orcs_RetreatToTheHills.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_RetreatToTheHills_complete_Transpiler)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Subjugate_Orcs), nameof(Ch_Subjugate_Orcs.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Subjugate_Orcs_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Subjugate_Orcs), nameof(Ch_Subjugate_Orcs.complete), new Type[] { typeof(UA) }));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OrganiseTheHorde), nameof(Ch_Orcs_OrganiseTheHorde.valid), new Type[] { }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OrganiseTheHorde_valid_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OrganiseTheHorde), nameof(Ch_Orcs_OrganiseTheHorde.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OrganiseTheHorde_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OrganiseTheHorde), nameof(Ch_Orcs_OrganiseTheHorde.valid), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OrganiseTheHorde_valid_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OrganiseTheHorde), nameof(Ch_Orcs_OrganiseTheHorde.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OrganiseTheHorde_validFor_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OpportunisticEncroachment), nameof(Ch_Orcs_OpportunisticEncroachment.getName), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_getName_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OpportunisticEncroachment), nameof(Ch_Orcs_OpportunisticEncroachment.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_getDesc_Postfix)));
@@ -980,6 +981,11 @@ namespace Orcs_Plus
             return GetTags.getNegativeTags(__result, __instance);
         }
 
+        private static string Ch_Orcs_OrganiseTheHorde_getDesc_Postfix(string result)
+        {
+            return result + " You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.Raiding] + " influence with the orc culture by completing this challenge.";
+        }
+
         private static bool Ch_Orcs_OrganiseTheHorde_valid_Postfix(bool result, Ch_Orcs_OrganiseTheHorde __instance)
         {
             Pr_OrcishIndustry industry = __instance.location.properties.OfType<Pr_OrcishIndustry>().FirstOrDefault();
@@ -1150,10 +1156,12 @@ namespace Orcs_Plus
         // Patches for Orc Upstart
         private static void UAEN_OrcUpstart_ctor_Postfix(UAEN_OrcUpstart __instance)
         {
-            if (__instance.getStatCommand() < 3)
+            double roll = Eleven.random.NextDouble();
+            if (roll < 0.7)
             {
-                __instance.person.stat_command = 3;
+                __instance.person.stat_command = 2;
             }
+            __instance.person.stat_might--;
 
             __instance.rituals.Add(new Rt_Orcs_Confinement(__instance.location));
 
@@ -1977,7 +1985,7 @@ namespace Orcs_Plus
             __instance.customChallenges.Add(new Ch_H_Orcs_DarkFestival(__instance.location));
             __instance.customChallenges.Add(new Ch_Orcs_FundWaystation(__instance.location));
             __instance.customChallenges.Add(new Ch_Orcs_WarFestival(__instance.location));
-            __instance.customChallenges.Add(new Ch_H_Orcs_BuildTemple(__instance.location));
+            __instance.customChallenges.Add(new Ch_Orcs_BuildTemple(__instance.location));
             __instance.customChallenges.Add(new Ch_Orcs_BloodMoney(__instance.location));
 
             if (ModCore.core.data.godTenetTypes.TryGetValue(__instance.map.overmind.god.GetType(), out Type tenetType) && tenetType == typeof(H_Orcs_HarbringersMadness))

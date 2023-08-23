@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using static UnityEngine.GraphicsBuffer;
 
 namespace Orcs_Plus
 {
@@ -50,6 +49,30 @@ namespace Orcs_Plus
             return result;
         }
 
+        private bool delegate_ValidFor_DrinkPrimalWaters(AgentAI.ChallengeData challengeData, UA ua)
+        {
+            bool result = !ua.person.traits.Any(t => t is T_PrimalWaters);
+
+            SG_Orc orcSociety = ua.society as SG_Orc;
+            HolyOrder_Orcs orcCulture = ua.society as HolyOrder_Orcs;
+
+            if (orcSociety != null)
+            {
+                ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+            }
+
+            if (orcCulture != null && orcCulture.tenet_alignment.status < 1)
+            {
+                Ch_DrinkPrimalWaters challenge = challengeData.challenge as Ch_DrinkPrimalWaters;
+                if (challenge.font.control > map.param.ch_drinkprimalwaters_parameterValue2)
+                {
+                    result = false;
+                }
+            }
+
+            return result;
+        }
+
         // Orc Upstart
         private void populateOrcUpstarts()
         {
@@ -60,7 +83,10 @@ namespace Orcs_Plus
                     new AIChallenge(typeof(Rti_RecruitWarband), 0.0),
                     new AIChallenge(typeof(Ch_Orcs_FundHorde), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.RequiresOwnSociety }),
                     new AIChallenge(typeof(Ch_Orcs_RaidOutpost), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.RequiresOwnSociety }),
-                    new AIChallenge(typeof(Ch_BuyItem), 0.0, new List<AIChallenge.ChallengeTags> {  AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocalRandomized})
+                    new AIChallenge(typeof(Ch_BuyItem), 0.0, new List<AIChallenge.ChallengeTags> {  AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocalRandomized}),
+                    new AIChallenge(typeof(Ch_Orcs_DrinkGrott), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
+                    new AIChallenge(typeof(Ch_Orcs_RefillDrinkingHorns), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
+                    new AIChallenge(typeof(Ch_DrinkPrimalWaters), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocal })
                 };
 
                 aiChallenges_Upstart[0].delegates_ValidFor.Add(delegate_ValidFor_RecruitWarband);
@@ -70,6 +96,8 @@ namespace Orcs_Plus
                 aiChallenges_Upstart[1].delegates_Utility.Add(delegate_Utility_FundHorde);
 
                 aiChallenges_Upstart[3].delegates_ValidFor.Add(delegate_ValidFor_BuyItem);
+
+                aiChallenges_Upstart[6].delegates_ValidFor.Add(delegate_ValidFor_DrinkPrimalWaters);
 
                 comLibAI.AddChallengesToAgentType(typeof(UAEN_OrcUpstart), aiChallenges_Upstart);
 
@@ -212,9 +240,11 @@ namespace Orcs_Plus
                 new AIChallenge(typeof(Rt_H_Orcs_GiftGold), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.PreferLocalRandomized, AIChallenge.ChallengeTags.ForbidWar }),
                 new AIChallenge(typeof(Ch_Orcs_FundWaystation), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
                 new AIChallenge(typeof(Ch_BuyItem), 0.0, new List<AIChallenge.ChallengeTags> {  AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocalRandomized}),
-                new AIChallenge(typeof(Ch_H_Orcs_BuildTemple), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocalRandomized }),
                 new AIChallenge(typeof(Ch_Orcs_OrganiseTheHorde), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.PreferLocalRandomized }),
-                new AIChallenge(typeof(Ch_Orcs_BloodMoney), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility })
+                new AIChallenge(typeof(Ch_Orcs_BloodMoney), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
+                new AIChallenge(typeof(Ch_Orcs_DrinkGrott), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
+                new AIChallenge(typeof(Ch_Orcs_RefillDrinkingHorns), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
+                new AIChallenge(typeof(Ch_DrinkPrimalWaters), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocal })
             };
 
             aiChallenges_Elder[0].delegates_ValidFor.Add(delegate_ValidFor_OwnCulture);
@@ -237,7 +267,9 @@ namespace Orcs_Plus
 
             aiChallenges_Elder[9].delegates_ValidFor.Add(delegate_ValidFor_BuyItem);
 
-            aiChallenges_Elder[11].delegates_Utility.Add(delegate_Utility_Organise);
+            aiChallenges_Elder[10].delegates_Utility.Add(delegate_Utility_Organise);
+
+            aiChallenges_Elder[14].delegates_ValidFor.Add(delegate_ValidFor_DrinkPrimalWaters);
 
             comLibAI.RegisterAgentType(typeof(UAEN_OrcElder), new AgentAI.ControlParameters(true));
             comLibAI.AddChallengesToAgentType(typeof(UAEN_OrcElder), aiChallenges_Elder);
@@ -514,7 +546,10 @@ namespace Orcs_Plus
                 new AIChallenge(typeof(Ch_Orcs_DeathFestival), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.RequiresSociety, AIChallenge.ChallengeTags.PreferLocal, AIChallenge.ChallengeTags.ForbidWar }),
                 new AIChallenge(typeof(Ch_Orcs_AccessPlunder), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor }),
                 new AIChallenge(typeof(Ch_BuyItem), 0.0, new List<AIChallenge.ChallengeTags> {  AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocalRandomized}),
-                new AIChallenge(typeof(Rt_StudyDeath), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.RequiresOwnSociety})
+                new AIChallenge(typeof(Rt_StudyDeath), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.RequiresOwnSociety}),
+                new AIChallenge(typeof(Ch_Orcs_DrinkGrott), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
+                new AIChallenge(typeof(Ch_Orcs_RefillDrinkingHorns), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
+                new AIChallenge(typeof(Ch_DrinkPrimalWaters), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocal })
             };
 
             aiChallenges_Shaman[2].delegates_ValidFor.Add(delegate_ValidFor_SecretsOfDeath);
@@ -532,6 +567,7 @@ namespace Orcs_Plus
             aiChallenges_Shaman[10].delegates_ValidFor.Add(delegate_ValidFor_SacrificialSite);
             aiChallenges_Shaman[10].delegates_Utility.Add(delegate_Utility_SacrificialSite);
             aiChallenges_Shaman[12].delegates_Utility.Add(delegate_Utility_AccessPlunder_Shaman);
+            aiChallenges_Shaman[17].delegates_ValidFor.Add(delegate_ValidFor_DrinkPrimalWaters);
 
             comLibAI.RegisterAgentType(typeof(UAEN_OrcShaman), new AgentAI.ControlParameters(true));
             comLibAI.AddChallengesToAgentType(typeof(UAEN_OrcShaman), aiChallenges_Shaman);

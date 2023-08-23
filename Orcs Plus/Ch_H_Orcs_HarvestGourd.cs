@@ -33,7 +33,7 @@ namespace Orcs_Plus
 
         public override Sprite getSprite()
         {
-            return EventManager.getImg("OrcsPlus.Blood_Gourd.png");
+            return EventManager.getImg("OrcsPlus.Foreground_BloodGourd.png");
         }
 
         public override challengeStat getChallengeType()
