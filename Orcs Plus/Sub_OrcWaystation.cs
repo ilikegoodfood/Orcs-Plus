@@ -44,7 +44,7 @@ namespace Orcs_Plus
 
         public override Sprite getIcon()
         {
-            return EventManager.getImg("OrcsPlus.Waystation.png");
+            return EventManager.getImg("OrcsPlus.Icon_Waystation.png");
         }
 
         public override List<Challenge> getChallenges()
