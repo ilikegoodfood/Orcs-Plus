@@ -9,7 +9,6 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading.Tasks;
 using UnityEngine;
-using static CommunityLib.AITask;
 
 namespace Orcs_Plus
 {
@@ -222,21 +221,33 @@ namespace Orcs_Plus
 
             List<CodeInstruction> instructionList = codeInstructions.ToList();
 
-            bool flag = false;
+            int targetIndex = 1;
 
             for (int i = 0; i < instructionList.Count; i++)
             {
-                yield return instructionList[i];
-
-                if (!flag && instructionList[i].opcode == OpCodes.Stfld && instructionList[i - 1].opcode == OpCodes.Ldc_I4_5)
+                if (targetIndex > 0)
                 {
-                    flag = true;
+                    if (targetIndex == 1)
+                    {
+                        if (instructionList[i].opcode == OpCodes.Ldarg_0 && instructionList[i-1].opcode == OpCodes.Stfld && instructionList[i - 2].opcode == OpCodes.Ldc_I4_5)
+                        {
+                            targetIndex = 0;
 
-                    yield return new CodeInstruction(OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(OpCodes.Ldarg_1);
-                    yield return new CodeInstruction(OpCodes.Ldloc_1);
-                    yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
+                            yield return new CodeInstruction(OpCodes.Ldarg_0);
+                            yield return new CodeInstruction(OpCodes.Ldarg_1);
+                            yield return new CodeInstruction(OpCodes.Ldloc_1);
+                            yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
+                        }
+                    }
                 }
+
+                yield return instructionList[i];
+            }
+
+            Console.WriteLine("OrcsPlus: Completed Rt_Orcs_CommandeerShips_complete_Transpiler");
+            if (targetIndex != 0)
+            {
+                Console.WriteLine("OrcsPlus: ERROR: Transpiler failed at targetIndex " + targetIndex);
             }
         }
 
@@ -389,7 +400,7 @@ namespace Orcs_Plus
                     }
                     else if (targetIndex == 2)
                     {
-                        if (instructionList[i].opcode == OpCodes.Brfalse_S && instructionList[i + 1].opcode == OpCodes.Nop && instructionList[i + 2].opcode == OpCodes.Nop)
+                        if (instructionList[i].opcode == OpCodes.Brfalse_S && instructionList[i-1].opcode == OpCodes.Ldloc_S && instructionList[i+1].opcode == OpCodes.Ldloc_S)
                         {
                             targetIndex++;
                             nullSettlementLabel = (Label)instructionList[i].operand;
@@ -401,9 +412,9 @@ namespace Orcs_Plus
                         {
                             targetIndex++;
 
+                            yield return new CodeInstruction(OpCodes.Ldloc_S, 6);
                             yield return new CodeInstruction(OpCodes.Ldstr, "Overrun by Orcs");
                             yield return new CodeInstruction(OpCodes.Ldnull);
-                            yield return new CodeInstruction(OpCodes.Ldloc, 10);
                             yield return new CodeInstruction(OpCodes.Callvirt, MI_fallIntoRuin);
                         }
                     }
@@ -415,6 +426,7 @@ namespace Orcs_Plus
 
                             CodeInstruction code = new CodeInstruction(OpCodes.Ldarg_0);
                             code.labels.AddRange(instructionList[i].labels);
+                            instructionList[i].labels.Clear();
                             yield return code;
                             yield return new CodeInstruction(OpCodes.Ldarg_1);
                             yield return new CodeInstruction(OpCodes.Ldloc_0);
@@ -424,6 +436,12 @@ namespace Orcs_Plus
                 }
 
                 yield return instructionList[i];
+            }
+
+            Console.WriteLine("OrcsPlus: Completed Ch_Orcs_Expand_complete_Transpiler");
+            if (targetIndex != 0)
+            {
+                Console.WriteLine("OrcsPlus: ERROR: Transpiler failed at targetIndex " + targetIndex);
             }
         }
 
@@ -496,6 +514,8 @@ namespace Orcs_Plus
             yield return new CodeInstruction(OpCodes.Ldarg_0);
             yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
             yield return new CodeInstruction(OpCodes.Ret);
+
+            Console.WriteLine("OrcsPlus: Completed complete function replacement transpiler Ch_OrcRaiding_getDesc_Postfix");
         }
 
         private static bool Ch_OrcRaiding_valid_TranspilerBody(Ch_OrcRaiding ch)
@@ -535,6 +555,8 @@ namespace Orcs_Plus
             yield return new CodeInstruction(OpCodes.Ldarg_1);
             yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
             yield return new CodeInstruction(OpCodes.Ret);
+
+            Console.WriteLine("OrcsPlus: Completed complete function replaceemnt Ch_OrcRaiding_complete_Transpiler");
         }
 
         private static void Ch_OrcRaiding_complete_TranspilerBody(Ch_OrcRaiding ch, UA u)
@@ -706,6 +728,8 @@ namespace Orcs_Plus
             yield return new CodeInstruction(OpCodes.Ldarg_1);
             yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
             yield return new CodeInstruction(OpCodes.Ret);
+
+            Console.WriteLine("OrcsPlus: Completed complete function replacement transpiler Ch_Orcs_RetreatToTheHills_complete_Transpiler");
         }
 
         private static void Ch_Orcs_RetreatToTheHills_complete_TranspilerBody(Ch_Orcs_RetreatToTheHills ch, UA ua)
@@ -841,6 +865,8 @@ namespace Orcs_Plus
             yield return new CodeInstruction(OpCodes.Ldarg_1);
             yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
             yield return new CodeInstruction(OpCodes.Ret);
+
+            Console.WriteLine("OrcsPlus: Completed complete function replacement Ch_Orcs_AccessPlunder_complete_Transpiler");
         }
 
         private static void Ch_Orcs_AccessPlunder_complete_TranspilerBody(Ch_Orcs_AccessPlunder ch, UA ua)
@@ -1065,6 +1091,12 @@ namespace Orcs_Plus
 
                 yield return instructionList[i];
             }
+
+            Console.WriteLine("OrcsPlus: Completed Ch_Orcs_OpportunisticEncroachment_getDesc_Postfix");
+            if (targetIndex != 0)
+            {
+                Console.WriteLine("OrcsPlus: ERROR: Transpiler failed at targetIndex " + targetIndex);
+            }
         }
 
         private static IEnumerable<CodeInstruction> Ch_Orcs_OpportunisticEncroachment_complete_Transpiler(IEnumerable<CodeInstruction> codeInstructions, ILGenerator ilg)
@@ -1092,6 +1124,12 @@ namespace Orcs_Plus
                 }
 
                 yield return instructionList[i];
+            }
+
+            Console.WriteLine("OrcsPlus: Completed Ch_Orcs_OpportunisticEncroachment_complete_Transpiler");
+            if (targetIndex != 0)
+            {
+                Console.WriteLine("OrcsPlus: ERROR: Transpiler failed at targetIndex " + targetIndex);
             }
         }
 
@@ -1648,6 +1686,8 @@ namespace Orcs_Plus
             yield return new CodeInstruction(OpCodes.Ldarg_1);
             yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
             yield return new CodeInstruction(OpCodes.Ret);
+
+            Console.WriteLine("OrcsPlus: Completed complete function replacement transpiler Rti_Orc_UniteTheHordes_complete_Transpiler");
         }
 
         private static void Rti_Orc_UniteTheHordes_complete_TranspilerBody(Rti_Orc_UniteTheHordes challenge, UA ua)
@@ -1938,6 +1978,12 @@ namespace Orcs_Plus
 
                 yield return instructionList[i];
             }
+
+            Console.WriteLine("OrcsPlus: Completed MA_Orc_Expand_complete_Transpiler");
+            if (targetIndex != 0)
+            {
+                Console.WriteLine("OrcsPlus: ERROR: Transpiler failed at targetIndex " + targetIndex);
+            }
         }
 
         private static void MA_Orc_Expand_complete_TranspilerBody(MA_Orc_Expand ma, int targetIndex)
@@ -2167,8 +2213,10 @@ namespace Orcs_Plus
                     }
                     else if (targetIndex == 2)
                     {
-                        if (instructionList[i].opcode == OpCodes.Ldarg_0)
+                        if (instructionList[i].opcode == OpCodes.Ldarg_0 && instructionList[i-1].opcode == OpCodes.Stloc_S)
                         {
+                            targetIndex = 0;
+
                             yield return new CodeInstruction(OpCodes.Ldarg_0);
                             yield return new CodeInstruction(OpCodes.Ldfld, FI_Fundee);
                             yield return new CodeInstruction(OpCodes.Ldloc_S, 6);
@@ -2179,11 +2227,20 @@ namespace Orcs_Plus
 
                 yield return instructionList[i];
             }
+
+            Console.WriteLine("OrcsPlus: Completed Pr_OrcFunding_turnTick_Transpiler");
+            if (targetIndex != 0)
+            {
+                Console.WriteLine("OrcsPlus: ERROR: Transpiler failed at targetIndex " + targetIndex);
+            }
         }
 
         private static void Pr_OrcFunding_turnTick_TranspilerBody(SG_Orc orcSociety, int funding)
         {
-            ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Recieved funding from the Dark Empire", funding / 4), true);
+            if (orcSociety != null)
+            {
+                ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Recieved funding from the Dark Empire", funding / 4), true);
+            }
         }
 
         // Patches for UM_OrcArmy
@@ -2308,6 +2365,8 @@ namespace Orcs_Plus
             yield return new CodeInstruction(OpCodes.Ldarg_0);
             yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
             yield return new CodeInstruction(OpCodes.Ret);
+
+            Console.WriteLine("OrcsPlus: Completed complete function replacement transpiler UM_OrcArmy_turnTickAI_Transpiler");
         }
 
         private static void UM_Orc_army_turnTickAI_TranspilerBody(UM_OrcArmy um)
@@ -2757,26 +2816,32 @@ namespace Orcs_Plus
                 {
                     if (targetIndex == 1)
                     {
-                        if (instructionList[i].opcode == OpCodes.Brfalse_S && instructionList[i + 1].opcode == OpCodes.Nop && instructionList[i+2].opcode == OpCodes.Ldarg_0)
+                        if (instructionList[i].opcode == OpCodes.Brtrue_S && instructionList[i-1].opcode == OpCodes.Ldloc_0 && instructionList[i+1].opcode == OpCodes.Ldarg_0)
                         {
                             targetIndex = 0;
 
                             yield return new CodeInstruction(OpCodes.Ldarg_1);
                             yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
-                            yield return new CodeInstruction(OpCodes.Stloc_S, 6);
-                            yield return new CodeInstruction(OpCodes.Ldloc_S, 6);
+                            yield return new CodeInstruction(OpCodes.Stloc_0);
+                            yield return new CodeInstruction(OpCodes.Ldloc_0);
                         }
                     }
                 }
 
                 yield return instructionList[i];
             }
+
+            Console.WriteLine("OrcsPlus: Completed PC_Card_cast_Transpiler");
+            if (targetIndex != 0)
+            {
+                Console.WriteLine("OrcsPlus: ERROR: Transpiler failed at targetIndex " + targetIndex);
+            }
         }
 
         // Deals with result AFTER it has been negated.
         private static bool PC_Card_cast_TranspilerBody(bool result, Unit u)
         {
-            if (result)
+            if (!result)
             {
                 SG_Orc orcSociety = u.society as SG_Orc;
                 HolyOrder_Orcs orcCulture = u.society as HolyOrder_Orcs;
@@ -2790,11 +2855,11 @@ namespace Orcs_Plus
                 {
                     if (lucky.status == -1 && Eleven.random.NextDouble() < 0.5)
                     {
-                        return false;
+                        return true;
                     }
                     else if (lucky.status == -2 && Eleven.random.NextDouble() < 0.75)
                     {
-                        return false;
+                        return true;
                     }
                 }
             }
@@ -2852,6 +2917,12 @@ namespace Orcs_Plus
                 }
 
                 yield return instructionList[i];
+            }
+
+            Console.WriteLine("OrcsPlus: Completed Ch_RecoverShipwreck_complete_Transpiler");
+            if (targetIndex != 0)
+            {
+                Console.WriteLine("OrcsPlus: ERROR: Transpiler failed at targetIndex " + targetIndex);
             }
         }
 
