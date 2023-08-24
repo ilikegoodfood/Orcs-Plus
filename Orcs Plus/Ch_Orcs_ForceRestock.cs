@@ -10,7 +10,7 @@ namespace Orcs_Plus
 {
     public class Ch_Orcs_ForceRestock : Challenge
     {
-        Sub_Temple sub;
+        public Sub_Temple sub;
 
         public Ch_Orcs_ForceRestock(Location loc, Sub_Temple temple)
             : base (loc)
