@@ -1433,6 +1433,21 @@ namespace Orcs_Plus
             }
         }
 
+        public override void onGraphicalHexUpdated(GraphicalHex graphicalHex)
+        {
+            if (graphicalHex.map.masker.mask == MapMaskManager.maskType.RELIGION)
+            {
+                Location location = graphicalHex.hex.location;
+                if (location != null && location.settlement is Set_OrcCamp camp && location.soc is SG_Orc orcSociety)
+                {
+                    if (core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture))
+                    {
+                        graphicalHex.mask.color = orcCulture.color;
+                    }
+                }
+            }
+        }
+
         public bool checkIsVampire(UA ua)
         {
             if (ua is UAE_Baroness)
