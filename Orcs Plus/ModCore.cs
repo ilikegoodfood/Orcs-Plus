@@ -1567,6 +1567,35 @@ namespace Orcs_Plus
             }
         }
 
+        public override void onGraphicalHexUpdated(GraphicalHex graphicalHex)
+        {
+            if (graphicalHex.map.masker.mask == MapMaskManager.maskType.RELIGION)
+            {
+                Location location = graphicalHex.hex.location;
+                if (location != null && location.settlement is Set_OrcCamp camp && location.soc is SG_Orc orcSociety)
+                {
+                    if (core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture))
+                    {
+                        HolyOrder targetOrder = graphicalHex.map.world.ui.uiScrollables.scrollable_threats.targetOrder;
+                        if (targetOrder == null || targetOrder == orcCulture)
+                        {
+                            UnityEngine.Color colour = orcCulture.color;
+                            if (colour.a > 0f && colour.r > 0f && colour.g > 0f && colour.b > 0f)
+                            {
+                                graphicalHex.terrainLayer.color = colour;
+                                graphicalHex.locLayer.color = colour;
+                                graphicalHex.mask.enabled = false;
+                            }
+                        }
+                        else
+                        {
+                            graphicalHex.mask.color = new Color(0f, 0f, 0f, 0.75f);
+                        }
+                    }
+                }
+            }
+        }
+
         public bool checkIsVampire(UA ua)
         {
             if (ua is UAE_Baroness)
