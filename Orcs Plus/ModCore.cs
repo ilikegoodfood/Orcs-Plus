@@ -1442,7 +1442,21 @@ namespace Orcs_Plus
                 {
                     if (core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture))
                     {
-                        graphicalHex.mask.color = orcCulture.color;
+                        HolyOrder targetOrder = graphicalHex.map.world.ui.uiScrollables.scrollable_threats.targetOrder;
+                        if (targetOrder == null || targetOrder == orcCulture)
+                        {
+                            UnityEngine.Color colour = orcCulture.color;
+                            if (colour.a > 0f && colour.r > 0f && colour.g > 0f && colour.b > 0f)
+                            {
+                                graphicalHex.terrainLayer.color = colour;
+                                graphicalHex.locLayer.color = colour;
+                                graphicalHex.mask.enabled = false;
+                            }
+                        }
+                        else
+                        {
+                            graphicalHex.mask.color = new Color(0f, 0f, 0f, 0.75f);
+                        }
                     }
                 }
             }
