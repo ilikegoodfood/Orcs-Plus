@@ -5,7 +5,6 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using static HarmonyLib.Code;
 
 namespace Orcs_Plus
 {
@@ -15,6 +14,26 @@ namespace Orcs_Plus
             : base(map)
         {
 
+        }
+
+        public override void onGraphicalUnitUpdated(GraphicalUnit graphicalUnit)
+        {
+            if (graphicalUnit.unit is UAEN_OrcElder elder)
+            {
+                MapMaskManager.maskType mask = graphicalUnit.unit.map.masker.mask;
+                if (mask == MapMaskManager.maskType.RELIGION)
+                {
+                    HolyOrder targetOrder = graphicalUnit.unit.map.world.ui.uiScrollables.scrollable_threats.targetOrder;
+                    if (targetOrder == null || targetOrder == elder.society)
+                    {
+                        graphicalUnit.portraitLayer.color = Color.white;
+                        graphicalUnit.backgroundLayer.color = Color.white;
+                        graphicalUnit.borderLayer1.color = Color.white;
+                        graphicalUnit.borderLayer2.color = Color.white;
+                        graphicalUnit.ringLayer.color = Color.white;
+                    }
+                }
+            }
         }
 
         public override void onPlayerInfluenceTenet(HolyOrder order, HolyTenet tenet)
