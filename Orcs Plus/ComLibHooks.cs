@@ -17,6 +17,26 @@ namespace Orcs_Plus
 
         }
 
+        public override void onGraphicalUnitUpdated(GraphicalUnit graphicalUnit)
+        {
+            if (graphicalUnit.unit is UAEN_OrcElder elder)
+            {
+                MapMaskManager.maskType mask = graphicalUnit.unit.map.masker.mask;
+                if (mask == MapMaskManager.maskType.RELIGION)
+                {
+                    HolyOrder targetOrder = graphicalUnit.unit.map.world.ui.uiScrollables.scrollable_threats.targetOrder;
+                    if (targetOrder == null || targetOrder == elder.society)
+                    {
+                        graphicalUnit.portraitLayer.color = Color.white;
+                        graphicalUnit.backgroundLayer.color = Color.white;
+                        graphicalUnit.borderLayer1.color = Color.white;
+                        graphicalUnit.borderLayer2.color = Color.white;
+                        graphicalUnit.ringLayer.color = Color.white;
+                    }
+                }
+            }
+        }
+
         public override void onPlayerOpensReligionUI(HolyOrder order)
         {
             if (ModCore.core.godPowers1.Count > 0 || ModCore.core.godPowers2.Count > 0)
@@ -35,7 +55,7 @@ namespace Orcs_Plus
 
         public override int onAgentBattle_ReceiveDamage(PopupBattleAgent popup, BattleAgents battle, UA defender, Minion minion, int dmg, int row)
         {
-            Console.WriteLine("OrcsPlus: ReceiveDamage hook called");
+            //Console.WriteLine("OrcsPlus: ReceiveDamage hook called");
 
             if (minion == null && defender.person.items.Any(i => i is I_SnakeskinArmour))
             {
