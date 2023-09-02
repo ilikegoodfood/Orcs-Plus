@@ -19,12 +19,12 @@ namespace Orcs_Plus
 
         public override string getName()
         {
-            return (orcSociety?.getName() ?? "NULL ERROR") + " Blood Fued";
+            return (orcSociety?.getName() ?? "NULL") + " Blood Fued";
         }
 
         public override string getDesc()
         {
-            return "This unit is the target of a blood fued by the " + (orcSociety?.getName() ?? "NULL ERROR") + " as a result of killing one of their Elders. Their armies and upstarts will always view this unit as an enemy.";
+            return "This unit is the target of a blood fued by the " + (orcSociety?.getName() ?? "NULL") + " as a result of killing one of their Elders. Their armies and upstarts will always view this unit as an enemy.";
         }
 
         public override int getMaxLevel()

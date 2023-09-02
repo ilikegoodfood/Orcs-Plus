@@ -1,8 +1,9 @@
 ﻿using Assets.Code;
-using FullSerializer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Orcs_Plus
@@ -39,7 +40,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Allows you to donate gold to the " + getOrcCulture()?.getName() + ". You will gain influence over their culture equal to half of the gold donated.";
+            return "Allows you to donate gold to the " + (getOrcCulture()?.getName() ?? "NULL") + ". You will gain influence over their culture equal to half of the gold donated.";
         }
 
         public override string getCastFlavour()
