@@ -1,8 +1,9 @@
 ﻿using Assets.Code;
-using FullSerializer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Orcs_Plus
@@ -10,6 +11,7 @@ namespace Orcs_Plus
     public class Rt_Orcs_BuildCamp : Ritual
     {
         public int buildCost = 5;
+
         public double boost = 25.0;
 
         public Rt_Orcs_BuildCamp(Location location)

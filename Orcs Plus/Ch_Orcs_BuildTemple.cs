@@ -11,7 +11,7 @@ namespace Orcs_Plus
     {
         public int cost = 60;
 
-        Minion exemplar = null;
+        public Minion exemplar = null;
 
         public Ch_Orcs_BuildTemple(Location location)
             : base(location)

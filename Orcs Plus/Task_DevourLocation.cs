@@ -9,10 +9,11 @@ namespace Orcs_Plus
 {
     public class Task_DevourLocation : Assets.Code.Task
     {
-        bool ignorePeace = false;
+        public bool ignorePeace = false;
 
-        double deathGainFactor;
-        double healthGainFactor;
+        public double deathGainFactor;
+
+        public double healthGainFactor;
 
         public Task_DevourLocation(double deathGainFactor = 2, double healthGainFactor = 2)
         {
