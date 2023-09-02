@@ -12,7 +12,7 @@ namespace Orcs_Plus
     public class Ch_Orcs_DrinkGrott : Challenge
     {
 
-        int damage = 2;
+        public int damage = 2;
 
         public Ch_Orcs_DrinkGrott(Location location)
             : base(location)
@@ -61,6 +61,13 @@ namespace Orcs_Plus
                 double val = -10 * grott.duration;
                 msgs?.Add(new ReasonMsg("Already affected by Orc Grott", val));
                 utility += val;
+
+                if (ua.getStatCommandLimit() <= ua.getCurrentlyUsedCommand())
+                {
+                    val = 30.0;
+                    msgs?.Add(new ReasonMsg("Current Minions Require Grott", val));
+                    utility += val;
+                }
             }
 
             if (ua.person.species != ua.map.species_orc)
@@ -77,13 +84,6 @@ namespace Orcs_Plus
                     msgs?.Add(new ReasonMsg("Danger (vs my HP)", val));
                     utility += val;
                 }
-            }
-
-            if (ua.getStatCommandLimit() <= ua.getCurrentlyUsedCommand())
-            {
-                double val = 30.0;
-                msgs?.Add(new ReasonMsg("Current Minions Require Grott", val));
-                utility += val;
             }
 
             List<Item> emptyHorns = ua.person.items.Where(i => i is I_DrinkingHorn horn && !horn.full).ToList();
@@ -172,8 +172,12 @@ namespace Orcs_Plus
                 }
             }
 
+            msgString = u.getName() + " feels envigortated after their drink. The Grott is hot and tasty.";
+
             if (u.person.species != map.species_orc)
             {
+                msgString = u.getName() + " forces down the hot, foul-tasting drink. They feel envirotaed by it, but suffered serious ill effects from the drinking. " + u.getName() + " suffered 2 damage (current health " + u.hp + "/" + u.maxHp + ").";
+
                 u.hp -= damage;
                 if (u.hp <= 0)
                 {

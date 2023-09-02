@@ -11,9 +11,9 @@ namespace Orcs_Plus
 {
     public class Rti_DrinkGrott : Ritual
     {
-        int damage = 2;
+        public int damage = 2;
 
-        I_DrinkingHorn caster;
+        public I_DrinkingHorn caster;
 
         public Rti_DrinkGrott(Location location, I_DrinkingHorn caster)
             :base(location)
@@ -57,6 +57,13 @@ namespace Orcs_Plus
                 double val = -10 * grott.duration;
                 msgs?.Add(new ReasonMsg("Already affected by Orc Grott", val));
                 utility += val;
+
+                if (ua.getStatCommandLimit() <= ua.getCurrentlyUsedCommand())
+                {
+                    val = 30.0;
+                    msgs?.Add(new ReasonMsg("Current Minions Require Grott", val));
+                    utility += val;
+                }
             }
 
             if (ua.person.species != ua.map.species_orc)
@@ -117,9 +124,12 @@ namespace Orcs_Plus
             }
 
             caster.full = false;
+            msgString = u.getName() + " feels envigortated after their drink. The Grott is hot and tasty.";
 
             if (u.person.species != map.species_orc)
             {
+                msgString = u.getName() + " forces down the hot, foul-tasting drink. They feel envirotaed by it, but suffered serious ill effects from the drinking. " + u.getName() + " suffered 2 damage (current health " + u.hp + "/" + u.maxHp + ").";
+
                 u.hp -= damage;
                 if (u.hp <= 0)
                 {

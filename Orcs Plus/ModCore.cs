@@ -1548,7 +1548,7 @@ namespace Orcs_Plus
 
         public override void onUnitDies(Unit unit, string v)
         {
-            if (unit is UM_OrcRaiders raiders && raiders.person != null && raiders.subsumedUnit != null)
+            if (unit is UM_OrcRaiders raiders && raiders.person != null && raiders.subsumedUnit != null && v != "Gone")
             {
                 if (GraphicalMap.selectedUnit == raiders)
                 {
