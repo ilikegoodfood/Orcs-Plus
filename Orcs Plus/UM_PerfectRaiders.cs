@@ -27,7 +27,7 @@ namespace Orcs_Plus
 
         public override Sprite getPortraitForeground()
         {
-            return EventManager.getImg("OrcsPlus.Foreground_PerfectHorde.png");
+            return EventManager.getImg("OrcsPlus.Icon_PerfectHorde.png");
         }
 
         new public void assignMaxHP()
