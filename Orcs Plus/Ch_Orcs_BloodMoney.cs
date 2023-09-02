@@ -45,7 +45,7 @@ namespace Orcs_Plus
 
         public override Sprite getSprite()
         {
-            return EventManager.getImg("OrcsPlus.Blood_Gold.png");
+            return EventManager.getImg("OrcsPlus.Icon_BloodGold.png");
         }
 
         public override double getUtility(UA ua, List<ReasonMsg> msgs)

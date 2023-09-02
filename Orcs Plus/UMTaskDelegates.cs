@@ -18,10 +18,9 @@ namespace Orcs_Plus
 
         public static void onClick_RazeOutpost(World world, UM um, UIE_Challenge challenge)
         {
-            Task_RazeOutpost task_RazeOutpost = um.task as Task_RazeOutpost;
-            if (task_RazeOutpost != null )
+            if (um.task is Task_RazeOutpost)
             {
-                world.prefabStore.popMsg("Already razing settlement", false, false);
+                world.prefabStore.popMsg("Already razing outpost", false, false);
             }
             else
             {

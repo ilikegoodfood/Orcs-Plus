@@ -38,7 +38,7 @@ namespace Orcs_Plus
 
         public override Sprite getIconFore()
         {
-            return EventManager.getImg("OrcsPlus.Foreground_PerfectHorde.png");
+            return EventManager.getImg("OrcsPlus.Icon_PerfectHorde.png");
         }
 
         public override bool validTarget(Unit unit)

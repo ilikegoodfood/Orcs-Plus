@@ -9,8 +9,9 @@ namespace Orcs_Plus
 {
     public class T_ReveredElder : Trait
     {
-        int respawnInterval = 10;
-        int respawnClock = 10;
+        public int respawnInterval = 10;
+
+        public int respawnClock = 10;
 
         public override string getName()
         {

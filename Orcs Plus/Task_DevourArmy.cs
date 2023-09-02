@@ -9,8 +9,9 @@ namespace Orcs_Plus
 {
     public class Task_DevourArmy : Task_AttackArmy
     {
-        double deathGainFactor;
-        double healthGainFactor;
+        public double deathGainFactor;
+
+        public double healthGainFactor;
 
         public Task_DevourArmy(UM other, UM self, double deathGainFactor = 2, double healthGainFactor = 2)
             : base(other, self)

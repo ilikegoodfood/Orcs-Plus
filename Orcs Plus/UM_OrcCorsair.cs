@@ -34,7 +34,7 @@ namespace Orcs_Plus
 
         public override Sprite getPortraitForeground()
         {
-            return EventManager.getImg("OrcsPlus.Foreground_OrcCorsair.png");
+            return EventManager.getImg("OrcsPlus.Icon_OrcCorsair.png");
         }
 
         public override string getName()

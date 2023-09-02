@@ -69,7 +69,7 @@ namespace Orcs_Plus
 
         public override Sprite getSprite()
         {
-            return map.world.iconStore.bribe;
+            return EventManager.getImg("OrcsPlus.Icon_BloodGold.png");
         }
 
         public override bool valid()
