@@ -1,5 +1,4 @@
 ﻿using Assets.Code;
-using CommunityLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,7 +69,7 @@ namespace Orcs_Plus
 
             if (orcSociety != null && ua.location.soc == orcSociety && ua.location.settlement is Set_OrcCamp)
             { 
-                if ((ua.task is Task_PerformChallenge challenge && challenge.challenge == this) || (ua.task is Task_GoToPerformChallenge goChallenge && goChallenge.challenge == this) || (ua.task is Task_GoToPerformChallengeAtLocation goLocChallenge && goLocChallenge.challenge == this))
+                if ((ua.task is Task_PerformChallenge challenge && challenge.challenge == this) || (ua.task is Task_GoToPerformChallenge goChallenge && goChallenge.challenge == this))
                 {
                     return true;
                 }

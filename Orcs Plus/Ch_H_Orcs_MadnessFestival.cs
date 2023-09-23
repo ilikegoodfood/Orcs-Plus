@@ -107,7 +107,7 @@ namespace Orcs_Plus
 
         public override bool valid()
         {
-            if (location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_HarbringersMadness harbringer && harbringer.status < 0)
+            if (location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_HarbingersMadness harbringer && harbringer.status < 0)
             {
                 foreach (Location neighbour in location.getNeighbours())
                 {

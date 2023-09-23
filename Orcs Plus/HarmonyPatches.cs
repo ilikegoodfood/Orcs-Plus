@@ -86,10 +86,14 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_complete_Transpiler)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.buildNegativeTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Orc)));
 
-            // Patches for challenmges in I_HordeBanner
+            // Patches for I_HordeBanner
+            harmony.Patch(original: AccessTools.Constructor(typeof(I_HordeBanner), new Type[] { typeof(Map), typeof(SG_Orc), typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(I_HordeBanner_ctor_Postfix)));
+
+            // Patches for challenges in I_HordeBanner
             harmony.Patch(original: AccessTools.Method(typeof(Rti_Orc_AttackHere), nameof(Rti_Orc_AttackHere.buildPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Orc)));
             harmony.Patch(original: AccessTools.Method(typeof(Rti_Orc_CeaseWar), nameof(Rti_Orc_CeaseWar.buildPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Orc)));
             harmony.Patch(original: AccessTools.Method(typeof(Rti_Orc_UniteTheHordes), nameof(Rti_Orc_UniteTheHordes.buildPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Orc)));
+            harmony.Patch(original: AccessTools.Method(typeof(Rti_Orc_UniteTheHordes), nameof(Rti_Orc_UniteTheHordes.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Rti_Orc_UniteTheHordes_complete_Transpiler)));
 
             // Patch and Branches for getPostiveTags and getNegative Tags
             harmony.Patch(original: AccessTools.Method(typeof(Challenge), nameof(Challenge.getPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Challenge_getPositiveTags_Postfix)));
@@ -105,12 +109,6 @@ namespace Orcs_Plus
             // Patches for UA
             harmony.Patch(original: AccessTools.Method(typeof(UA), nameof(UA.getAttackUtility)), postfix: new HarmonyMethod(patchType, nameof(UA_getAttackUtility_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(UA), nameof(UA.getVisibleUnits)), postfix: new HarmonyMethod(patchType, nameof(UA_getVisibleUnits_Postfix)));
-
-            // Patches for I_HordeBanner
-            harmony.Patch(original: AccessTools.Constructor(typeof(I_HordeBanner), new Type[] { typeof(Map), typeof(SG_Orc), typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(I_HordeBanner_ctor_Postfix)));
-
-            // Patches for Rti_Orcs_UniteTheHorde
-            harmony.Patch(original: AccessTools.Method(typeof(Rti_Orc_UniteTheHordes), nameof(Rti_Orc_UniteTheHordes.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Rti_Orc_UniteTheHordes_complete_Transpiler)));
 
             // Patches for SocialGroup
             harmony.Patch(original: AccessTools.Method(typeof(SocialGroup), nameof(SocialGroup.checkIsGone), new Type[] { }), postfix: new HarmonyMethod(patchType, nameof(SocialGroup_checkIsGone_Postfix)));
@@ -150,8 +148,11 @@ namespace Orcs_Plus
             // Pathes for UM_UntamedDead
             harmony.Patch(original: AccessTools.Method(typeof(UM_UntamedDead), nameof(UM_UntamedDead.turnTickInner), new Type[] { typeof(Map) }), postfix: new HarmonyMethod(patchType, nameof(UM_UntamedDead_turnTickInner_Postfix)));
 
-            // Patches for Ch_Orcs_StealPlunder
+            // Patches getChallengeUtility
             harmony.Patch(original: AccessTools.Method(typeof(UA), nameof(UA.getChallengeUtility), new Type[] { typeof(Challenge), typeof(List<ReasonMsg>) }), postfix: new HarmonyMethod(patchType, nameof(UA_getChallengeUtility_Postfix)));
+
+            // Patches for Ch_DrinkPrimalWaters
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_DrinkPrimalWaters), nameof(Ch_DrinkPrimalWaters.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_DrinkPrimalWaters_validFor_Postfix)));
 
             // Patches for Ch_LearnSecret
             harmony.Patch(original: AccessTools.Method(typeof(Ch_LearnSecret), nameof(Ch_LearnSecret.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_LearnSecret_validFor_Postfix)));
@@ -984,6 +985,14 @@ namespace Orcs_Plus
             }
         }
 
+        // Patches for I_HordeBanner
+        private static void I_HordeBanner_ctor_Postfix(I_HordeBanner __instance, Location l)
+        {
+            __instance.rituals.Add(new Rti_RecruitWarband(l, __instance));
+            __instance.rituals.Add(new Rti_RouseHorde(l, __instance));
+        }
+
+        // Patches for Challenges in I_HordeBanner
         private static int[] postfix_AppendTag_Orc(int[] __result)
         {
             int[] output = new int[__result.Length + 1];
@@ -995,6 +1004,19 @@ namespace Orcs_Plus
             output[__result.Length] = Tags.ORC;
 
             return output;
+        }
+
+        private static IEnumerable<CodeInstruction> Rti_Orc_UniteTheHordes_complete_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
+        {
+            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Rti_Orc_UniteTheHordes_complete_TranspilerBody), new Type[] { typeof(Rti_Orc_UniteTheHordes), typeof(UA) });
+
+            yield return new CodeInstruction(OpCodes.Nop);
+            yield return new CodeInstruction(OpCodes.Ldarg_0);
+            yield return new CodeInstruction(OpCodes.Ldarg_1);
+            yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
+            yield return new CodeInstruction(OpCodes.Ret);
+
+            Console.WriteLine("OrcsPlus: Completed complete function replacement transpiler Rti_Orc_UniteTheHordes_complete_Transpiler");
         }
 
         private static int[] Challenge_getPositiveTags_Postfix(int[] __result, Challenge __instance)
@@ -1680,25 +1702,6 @@ namespace Orcs_Plus
             return units;
         }
 
-        private static void I_HordeBanner_ctor_Postfix(I_HordeBanner __instance, Location l)
-        {
-            __instance.rituals.Add(new Rti_RecruitWarband(l, __instance));
-            __instance.rituals.Add(new Rti_RouseHorde(l, __instance));
-        }
-
-        private static IEnumerable<CodeInstruction> Rti_Orc_UniteTheHordes_complete_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
-        {
-            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Rti_Orc_UniteTheHordes_complete_TranspilerBody), new Type[] { typeof(Rti_Orc_UniteTheHordes), typeof(UA) });
-
-            yield return new CodeInstruction(OpCodes.Nop);
-            yield return new CodeInstruction(OpCodes.Ldarg_0);
-            yield return new CodeInstruction(OpCodes.Ldarg_1);
-            yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
-            yield return new CodeInstruction(OpCodes.Ret);
-
-            Console.WriteLine("OrcsPlus: Completed complete function replacement transpiler Rti_Orc_UniteTheHordes_complete_Transpiler");
-        }
-
         private static void Rti_Orc_UniteTheHordes_complete_TranspilerBody(Rti_Orc_UniteTheHordes challenge, UA ua)
         {
             challenge.msgString = ua.getName() + " calls all orcs to join them under their horde's banner, coming together against the common enemies of the orcish clans. ";
@@ -2037,10 +2040,11 @@ namespace Orcs_Plus
             __instance.customChallenges.Add(new Ch_H_Orcs_DarkFestival(__instance.location));
             __instance.customChallenges.Add(new Ch_Orcs_FundWaystation(__instance.location));
             __instance.customChallenges.Add(new Ch_Orcs_WarFestival(__instance.location));
-            __instance.customChallenges.Add(new Ch_H_Orcs_BuildTemple(__instance.location));
+            __instance.customChallenges.Add(new Ch_Orcs_BuildTemple(__instance.location));
             __instance.customChallenges.Add(new Ch_Orcs_BloodMoney(__instance.location));
+            __instance.customChallenges.Add(new Ch_Orcs_RecruitCorsair(__instance.location, new M_OrcCorsair(__instance.map), 0, null, __instance));
 
-            if (ModCore.core.data.godTenetTypes.TryGetValue(__instance.map.overmind.god.GetType(), out Type tenetType) && tenetType == typeof(H_Orcs_HarbringersMadness))
+            if (ModCore.core.data.godTenetTypes.TryGetValue(__instance.map.overmind.god.GetType(), out Type tenetType) && tenetType == typeof(H_Orcs_HarbingersMadness))
             {
                 __instance.customChallenges.Add(new Ch_H_Orcs_MadnessFestival(__instance.location));
             }
@@ -2079,14 +2083,26 @@ namespace Orcs_Plus
                 }
             }
 
-            if (__instance.specialism == 1)
+            if (__instance.specialism == 0)
             {
-                Pr_OrcDefences defences = __instance.location.properties.OfType<Pr_OrcDefences>().FirstOrDefault();
+
+            }
+            else if (__instance.specialism == 1)
+            {
+                Pr_OrcDefences defences = (Pr_OrcDefences)__instance.location.properties.FirstOrDefault(pr => pr is Pr_OrcDefences);
                 if (defences == null)
                 {
                     defences = new Pr_OrcDefences(__instance.location);
                     defences.charge = 2.0;
                     __instance.location.properties.Add(defences);
+                }
+            }
+            else if (__instance.specialism == 2)
+            {
+                Pr_GeomanticLocus locus = (Pr_GeomanticLocus)__instance.location.properties.FirstOrDefault(pr => pr is Pr_GeomanticLocus);
+                if (locus != null && locus.charge < 100)
+                {
+                    locus.influences.Add(new ReasonMsg("Orc Mages", 1.0));
                 }
             }
             else if (__instance.specialism == 3 || __instance.specialism == 5)
@@ -2722,6 +2738,42 @@ namespace Orcs_Plus
             return utility;
         }
 
+        private static bool Ch_DrinkPrimalWaters_validFor_Postfix(bool result, Ch_DrinkPrimalWaters __instance, UA ua)
+        {
+            if (!ua.isCommandable() && ua.society is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            {
+                if (orcCulture.tenet_alignment.status < 0 && __instance.font.control >= __instance.map.param.ch_drinkprimalwaters_parameterValue2)
+                {
+                    return true;
+                }
+                else if (orcCulture.tenet_alignment.status > 0 && __instance.font.control <= __instance.map.param.ch_drinkprimalwaters_parameterValue3)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else if (!ua.isCommandable() && ua.society is HolyOrder_Orcs orcCulture2)
+            {
+                if (orcCulture2.tenet_alignment.status < 0 && __instance.font.control >= __instance.map.param.ch_drinkprimalwaters_parameterValue2)
+                {
+                    return true;
+                }
+                else if (orcCulture2.tenet_alignment.status > 0 && __instance.font.control <= __instance.map.param.ch_drinkprimalwaters_parameterValue3)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            return result;
+        }
+
         private static bool Ch_LearnSecret_validFor_Postfix(bool result, Ch_LearnSecret __instance, UA ua)
         {
             if (ua is UAEN_OrcShaman && __instance.secret.library == null)
@@ -2920,7 +2972,7 @@ namespace Orcs_Plus
                 {
                     if (targetIndex == 1)
                     {
-                        if (instructionList[i].opcode == OpCodes.Ldarg_0 && instructionList[i - 1].opcode == OpCodes.Nop && instructionList[i + 1].opcode == OpCodes.Ldfld)
+                        if (instructionList[i].opcode == OpCodes.Ldarg_0 && instructionList[i-1].opcode == OpCodes.Nop && instructionList[i+1].opcode == OpCodes.Ldfld)
                         {
                             targetIndex = 0;
 

@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Orcs_Plus
 {
-    public class H_Orcs_HarbringersMadness : H_Orcs_GodTenet
+    public class H_Orcs_HarbingersMadness : H_Orcs_GodTenet
     {
-        public H_Orcs_HarbringersMadness(HolyOrder_Orcs orcCulture)
+        public H_Orcs_HarbingersMadness(HolyOrder_Orcs orcCulture)
             : base(orcCulture)
         {
 

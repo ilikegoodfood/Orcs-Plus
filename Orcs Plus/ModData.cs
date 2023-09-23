@@ -1,5 +1,5 @@
 ﻿using Assets.Code;
-using Assets.Code.Modding;
+using CommunityLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,7 +56,8 @@ namespace Orcs_Plus
             Subjugate,
             RecieveGift,
             BuildWaystation,
-            BloodMoney
+            BloodMoney,
+            BuildTemple
         }
 
         public Dictionary<influenceGainAction, int> influenceGain;
@@ -68,9 +69,12 @@ namespace Orcs_Plus
 
         public Dictionary<menaceGainAction, int> menaceGain;
 
+        public Dictionary<int, float> orcGeoMageHabitabilityBonus;
+
         public ModData()
         {
             modAssemblies= new Dictionary<string, ModIntegrationData>();
+            orcGeoMageHabitabilityBonus = new Dictionary<int, float>();
 
             influenceGain = new Dictionary<influenceGainAction, int>
             {
@@ -89,7 +93,8 @@ namespace Orcs_Plus
                 { influenceGainAction.Subjugate, 15 },
                 { influenceGainAction.RecieveGift, 20 },
                 { influenceGainAction.BuildWaystation, 30 },
-                { influenceGainAction.BloodMoney, 30 }
+                { influenceGainAction.BloodMoney, 30 },
+                { influenceGainAction.BuildTemple, 40 }
             };
 
             menaceGain = new Dictionary<menaceGainAction, int>
@@ -105,7 +110,7 @@ namespace Orcs_Plus
 
             godTenetTypes = new Dictionary<Type, Type> {
                 { typeof(God_Snake), typeof(H_Orcs_SerpentWarriors) },
-                { typeof(God_LaughingKing), typeof(H_Orcs_HarbringersMadness) },
+                { typeof(God_LaughingKing), typeof(H_Orcs_HarbingersMadness) },
                 { typeof(God_Vinerva), typeof(H_Orcs_LifeMother) },
                 { typeof(God_Ophanim), typeof(H_Orcs_Perfection) },
                 { typeof(God_Mammon), typeof(H_Orcs_MammonClient) },
@@ -118,7 +123,9 @@ namespace Orcs_Plus
                 typeof(Set_MinorOther),
                 typeof(Set_MinorVinerva),
                 typeof(Set_VinervaManifestation),
-                typeof(Set_TombOfGods)
+                typeof(Set_TombOfGods),
+                typeof(Set_DeepOneSanctum),
+                typeof(Set_Shipwreck)
             };
         }
 
@@ -146,6 +153,125 @@ namespace Orcs_Plus
             }
 
             //Console.WriteLine("OrcsPlus: orcSGCultureMap updated");
+        }
+
+        public void onTurnEnd(Map map)
+        {
+            //Console.WriteLine("OrcsPlus: running data.onTurnEnd");
+            isPlayerTurn = false;
+
+            influenceGainElder.Clear();
+            influenceGainHuman.Clear();
+
+            manageGeoMages(map);
+        }
+
+        public void manageGeoMages(Map map)
+        {
+            //Console.WriteLine("OrcsPlus: managing geo mages");
+            float geoMageIncrement = 0.01f;
+            float geoMageMax = (float)(map.param.orc_habRequirement * map.opt_orcHabMult);
+
+            HashSet<int> affectedLocationIndexSet = new HashSet<int>();
+            Dictionary<Location, int> affectedLocations = new Dictionary<Location, int>();
+
+            //Console.WriteLine("OrcsPlus: Trimming dictionary");
+            List<int> mutableKeys = new List<int>();
+            mutableKeys.AddRange(orcGeoMageHabitabilityBonus.Keys);
+            foreach (int index in mutableKeys)
+            {
+                if (index < 0 || index >= map.locations.Count)
+                {
+                    orcGeoMageHabitabilityBonus.Remove(index);
+                    continue;
+                }
+
+                if (!isAffectedByGeoMage(map.locations[index]))
+                {
+                    orcGeoMageHabitabilityBonus[index] -= geoMageIncrement;
+
+                    if (orcGeoMageHabitabilityBonus[index] <= 0f)
+                    {
+                        orcGeoMageHabitabilityBonus.Remove(index);
+                    }
+                }
+                else
+                {
+                    affectedLocationIndexSet.Add(index);
+                    affectedLocations.Add(map.locations[index], 0);
+                }
+            }
+
+            //Console.WriteLine("OrcsPlus: iterating map locations");
+            foreach (Location location in map.locations)
+            {
+                if (location.settlement is Set_OrcCamp camp && camp.specialism == 2 && location.properties.Any(pr => pr is Pr_GeomanticLocus))
+                {
+                    //Console.WriteLine("OrcsPlus: found geo mage at " + location.getName());
+                    if (!affectedLocationIndexSet.Contains(location.index))
+                    {
+                        //Console.WriteLine("OrcsPlus: " + location.getName() + " is not already documented");
+                        affectedLocationIndexSet.Add(location.index);
+                        orcGeoMageHabitabilityBonus.Add(location.index, 0f);
+                        affectedLocations.Add(location, 0);
+                    }
+                    affectedLocations[location]++;
+
+                    //Console.WriteLine("OrcsPlus: processing geo mage neighbours");
+                    foreach (Location neighbour in location.getNeighbours())
+                    {
+                        if (!affectedLocationIndexSet.Contains(neighbour.index))
+                        {
+                            //Console.WriteLine("OrcsPlus: " + neighbour.getName() + " is not already documented");
+                            affectedLocationIndexSet.Add(neighbour.index);
+                            orcGeoMageHabitabilityBonus.Add(neighbour.index, 0f);
+                            affectedLocations.Add(neighbour, 0);
+                        }
+
+                        affectedLocations[neighbour]++;
+                    }
+                }
+            }
+
+            foreach (KeyValuePair<Location, int> pair in affectedLocations)
+            {
+                if (orcGeoMageHabitabilityBonus[pair.Key.index] < geoMageMax * pair.Value)
+                {
+                    orcGeoMageHabitabilityBonus[pair.Key.index] += geoMageIncrement * pair.Value;
+
+                    if (orcGeoMageHabitabilityBonus[pair.Key.index] > geoMageMax * pair.Value)
+                    {
+                        orcGeoMageHabitabilityBonus[pair.Key.index] = geoMageMax * pair.Value;
+                    }
+                }
+                else if (orcGeoMageHabitabilityBonus[pair.Key.index] > geoMageMax * pair.Value)
+                {
+                    orcGeoMageHabitabilityBonus[pair.Key.index] -= geoMageIncrement;
+
+                    if (orcGeoMageHabitabilityBonus[pair.Key.index] < geoMageMax * pair.Value)
+                    {
+                        orcGeoMageHabitabilityBonus[pair.Key.index] = geoMageMax * pair.Value;
+                    }
+                }
+            }
+        }
+
+        public bool isAffectedByGeoMage(Location loc)
+        {
+            if (loc.settlement is Set_OrcCamp camp && camp.specialism == 2 && loc.properties.Any(pr => pr is Pr_GeomanticLocus))
+            {
+                return true;
+            }
+
+            foreach (Location neighbour in loc.getNeighbours())
+            {
+                if (neighbour.settlement is Set_OrcCamp camp2 && camp2.specialism == 2 && neighbour.properties.Any(pr => pr is Pr_GeomanticLocus))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public void getBattleArmyEnemies(BattleArmy battle, Unit u, out List<UM> enemies, out List<UA> enemyComs)

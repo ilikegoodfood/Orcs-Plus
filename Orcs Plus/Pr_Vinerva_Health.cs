@@ -51,8 +51,6 @@ namespace Orcs_Plus
             {
                 Property.addToProperty("Fertilizer for Gourd of Blood", Property.standardProperties.DEATH, -5.0, location);
                 influences.Add(new ReasonMsg("Feeding on Death", Math.Min(4.0, 300.0 - charge)));
-
-                
             }
         }
     }
