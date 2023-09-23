@@ -56,7 +56,7 @@ namespace Orcs_Plus
         {
             //Console.WriteLine("OrcsPlus: ReceiveDamage hook called");
 
-            if (defender.minions[row] == null && defender.person.items.Any(i => i is I_SnakeskinArmour))
+            if ((minion == null || minion.isDead) && defender.person.items.Any(i => i is I_SnakeskinArmour))
             {
                 dmg--;
             }
