@@ -1,9 +1,7 @@
-﻿using System;
+﻿using Assets.Code;
+using CommunityLib;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Assets.Code;
 using UnityEngine;
 
 namespace Orcs_Plus
@@ -42,20 +40,31 @@ namespace Orcs_Plus
             if (orcs != null)
             {
                 List<UM_OrcArmy> armies = ModCore.core.data.getOrcArmies(map, orcs);
-                int stepCount = 0;
+                List<UM_OrcArmy> affectedArmies = new List<UM_OrcArmy>();
+                int travelDuration = 0;
 
                 foreach (UM_OrcArmy army in armies)
                 {
                     if (map.locations[army.homeLocation].settlement.isInfiltrated && !(army.task is Task_InBattle))
                     {
-                        int distance = location.map.getStepDist(location, army.location);
-                        if (distance > stepCount)
+                        Location[] path = ModCore.comLib.pathfinding.getPathTo(army.location, location, army);
+                        if (path != null)
                         {
-                            stepCount = distance;
-                        }
+                            int duration = ModCore.comLib.getTravelTimeTo(army, location);
 
-                        army.task = new Task_GatherAtLocation(location, stepCount + 11);
+                            if (duration > travelDuration)
+                            {
+                                travelDuration = duration;
+                            }
+
+                            affectedArmies.Add(army);
+                        }
                     }
+                }
+
+                foreach (UM_OrcArmy army in affectedArmies)
+                {
+                    army.task = new Task_GatherAtLocation(location, travelDuration + 11);
                 }
             }
         }
