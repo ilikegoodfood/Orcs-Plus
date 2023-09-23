@@ -23,7 +23,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "The Orchard of Life maintains a stable environment in the region around it, offering food, water and shelter to any who dare live under the grarled, wind-warped trees. It is said that those who linger within the orchards can hear the angry whisperings of malaign spirits.";
+            return "The Orchard of Life maintains a stable environment in the region around it, offering food, water and shelter to any who dare live under the gnarled, wind-warped trees. It is said that those who linger within the orchards can hear the angry whisperings of malaign spirits.";
         }
 
         public override bool hasBackgroundHexView()

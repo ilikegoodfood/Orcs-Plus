@@ -9,8 +9,12 @@ namespace Orcs_Plus
 {
     public static class OnChallengeComplete
     {
+        public static Challenge lastChallengeCompleted;
+
         public static void processChallenge(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)
         {
+            lastChallengeCompleted = challenge;
+
             switch (task_PerformChallenge.challenge)
             {
                 case Ch_Orcs_BuildFortress _:
@@ -45,6 +49,9 @@ namespace Orcs_Plus
                     break;
                 case Ch_Orcs_OpportunisticEncroachment _:
                     Ch_Orcs_OpportunisticEncroachment(challenge, ua, task_PerformChallenge);
+                    break;
+                case Ch_Orcs_OrganiseTheHorde _:
+                    Ch_Orcs_OrganiseTheHorde(challenge, ua, task_PerformChallenge);
                     break;
                 default:
                     break;
@@ -290,6 +297,14 @@ namespace Orcs_Plus
                 {
                     ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(challenge.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand]), true);
                 }
+            }
+        }
+
+        public static void Ch_Orcs_OrganiseTheHorde(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)
+        {
+            if (ua.isCommandable() && ua.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            {
+                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Raiding]), true);
             }
         }
 

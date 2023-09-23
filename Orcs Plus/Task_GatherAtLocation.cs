@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
 namespace Orcs_Plus
 {
     public class Task_GatherAtLocation : Assets.Code.Task

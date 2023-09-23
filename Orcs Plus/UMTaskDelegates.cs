@@ -9,7 +9,7 @@ namespace Orcs_Plus
 {
     public class UMTaskDelegates
     {
-        Map map;
+        public Map map;
 
         public UMTaskDelegates(Map map)
         {

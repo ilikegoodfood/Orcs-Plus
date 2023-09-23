@@ -12,6 +12,7 @@ namespace Orcs_Plus
         public bool ignorePeace = false;
 
         public double deathGainFactor;
+
         public double healthGainFactor;
 
         public Task_DevourLocation(double deathGainFactor = 2, double healthGainFactor = 2)
