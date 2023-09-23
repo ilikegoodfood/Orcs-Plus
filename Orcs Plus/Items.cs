@@ -11,7 +11,7 @@ namespace Orcs_Plus
     {
         public static Item getOrcItemFromPool2(Map map, SG_Orc orcSociety, Location location)
         {
-            int index = Eleven.random.Next(10);
+            int index = Eleven.random.Next(4);
 
             if (index == 0)
             {
@@ -21,6 +21,14 @@ namespace Orcs_Plus
             {
                 return new I_SnakeskinArmour(map);
             }
+            else if (index == 2)
+            {
+                return new I_SpiritCallerStaff(map);
+            }
+            else if (index == 3)
+            {
+                return new I_OrcHeaddress(map);
+            }
             else
             {
                 return new I_SnakeskinArmour(map);
@@ -29,11 +37,19 @@ namespace Orcs_Plus
 
         public static Item getOrcItemFromPool3(Map map, SG_Orc orcSociety, Location location)
         {
-            int index = Eleven.random.Next(10);
+            int index = Eleven.random.Next(3);
 
             if (index == 0)
             {
-                return new I_SacrificialDagger(map);
+                return new I_BloodGourd(map);
+            }
+            else if (index == 1)
+            {
+                return new I_ShamanStaff(map);
+            }
+            else if (index == 2)
+            {
+                return new I_IdolOfMadness(map);
             }
             else
             {

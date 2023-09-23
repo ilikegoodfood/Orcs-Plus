@@ -176,9 +176,9 @@ namespace Orcs_Plus
 
             if (u.person.species != map.species_orc)
             {
+                u.hp -= damage;
                 msgString = u.getName() + " forces down the hot, foul-tasting drink. They feel envirotaed by it, but suffered serious ill effects from the drinking. " + u.getName() + " suffered 2 damage (current health " + u.hp + "/" + u.maxHp + ").";
 
-                u.hp -= damage;
                 if (u.hp <= 0)
                 {
                     map.addUnifiedMessage(u, null, "Hero killed by danger", u.getName() + " has been killed by the dangers encountered while performing quest " + getName() + ".", UnifiedMessage.messageType.KILLED_BY_DANGER, false);

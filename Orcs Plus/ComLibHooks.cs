@@ -56,7 +56,7 @@ namespace Orcs_Plus
         {
             //Console.WriteLine("OrcsPlus: ReceiveDamage hook called");
 
-            if (minion == null && defender.person.items.Any(i => i is I_SnakeskinArmour))
+            if (defender.minions[row] == null && defender.person.items.Any(i => i is I_SnakeskinArmour))
             {
                 dmg--;
             }
@@ -411,9 +411,9 @@ namespace Orcs_Plus
                 Property.addToProperty("Militray Action", Property.standardProperties.DEATH, 2.0, set.location);
             }
 
-            if (ModCore.core.data.godTenetTypes.TryGetValue(map.overmind.god.GetType(), out Type tenetType) && tenetType != null && tenetType == typeof(H_Orcs_HarbringersMadness))
+            if (ModCore.core.data.godTenetTypes.TryGetValue(map.overmind.god.GetType(), out Type tenetType) && tenetType != null && tenetType == typeof(H_Orcs_HarbingersMadness))
             {
-                if (um.society is SG_Orc orcSociety2 && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null && orcCulture2.tenet_god is H_Orcs_HarbringersMadness harbringers && harbringers.status < -1)
+                if (um.society is SG_Orc orcSociety2 && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null && orcCulture2.tenet_god is H_Orcs_HarbingersMadness harbringers && harbringers.status < -1)
                 {
                     if (um.location.settlement is SettlementHuman settlementHuman && settlementHuman.ruler != null)
                     {
@@ -1025,12 +1025,12 @@ namespace Orcs_Plus
 
                 foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
                 {
-                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Destroyed enemy camp (console command)", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Destroyed enemy settlement (console command)", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                 }
 
                 foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
                 {
-                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Destroyed encroaching camp (console command)", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Destroyed encroaching settlement (console command)", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                 }
             }
         }

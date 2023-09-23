@@ -5,7 +5,6 @@ using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
 
 namespace Orcs_Plus
@@ -188,7 +187,7 @@ namespace Orcs_Plus
                         {
                             switch (tenetType.Name)
                             {
-                                case nameof(H_Orcs_HarbringersMadness):
+                                case nameof(H_Orcs_HarbingersMadness):
                                     core.comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcElder), new AIChallenge(typeof(Ch_H_Orcs_MadnessFestival), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }));
                                     break;
                                 case nameof(H_Orcs_LifeMother):
@@ -588,22 +587,23 @@ namespace Orcs_Plus
                 return;
             }
 
-            core.data.isPlayerTurn = false;
-
-            core.data.influenceGainElder.Clear();
-            core.data.influenceGainHuman.Clear();
+            core.data.onTurnEnd(map);
         }
 
         public override float hexHabitability(Hex hex, float hab)
         {
-            if (core.data.godTenetTypes.TryGetValue(hex.map.overmind.god.GetType(), out Type tenet) && tenet != null)
+            if (hex.location != null)
             {
-                if (tenet == typeof(H_Orcs_LifeMother))
+                if (hex.settlement is Set_OrcCamp && hex.location.properties.Any(pr => pr is Pr_Vinerva_LifeBoon))
                 {
-                    if (hex.location != null && hex.location.settlement is Set_OrcCamp && hex.location.properties.OfType<Pr_Vinerva_LifeBoon>().FirstOrDefault() != null)
-                    {
-                        hab += (float)(hex.map.opt_orcHabMult * hex.map.param.orc_habRequirement);
-                    }
+                    //Console.WriteLine("OrcsPlus: Adding effect of vinerva life boon");
+                    hab += (float)(hex.map.opt_orcHabMult * hex.map.param.orc_habRequirement);
+                }
+
+                if (core.data.orcGeoMageHabitabilityBonus.TryGetValue(hex.location.index, out float geoMageHab))
+                {
+                    Console.WriteLine("OrcsPlus: Got geo mage data for " + hex.location.getName() + " with modifier value of " + geoMageHab);
+                    hab += geoMageHab;
                 }
             }
 
@@ -888,12 +888,12 @@ namespace Orcs_Plus
 
         public override void onAgentBattleTerminate(BattleAgents battleAgents)
         {
-            if (core.data.godTenetTypes.TryGetValue(battleAgents.att.map.overmind.god.GetType(), out Type tenetType) && tenetType != null && tenetType == typeof(H_Orcs_HarbringersMadness))
+            if (core.data.godTenetTypes.TryGetValue(battleAgents.att.map.overmind.god.GetType(), out Type tenetType) && tenetType != null && tenetType == typeof(H_Orcs_HarbingersMadness))
             {
                 UA att = battleAgents.att;
                 UA def = battleAgents.def;
 
-                if (att.society is SG_Orc orcSociety && core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_HarbringersMadness harbringers && harbringers.status < -1)
+                if (att.society is SG_Orc orcSociety && core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_HarbingersMadness harbringers && harbringers.status < -1)
                 {
                     if (!def.isDead && def.hp > 0 && !def.isCommandable() && (def.person.species is Species_Human || def.person.species is Species_Elf))
                     {
@@ -905,7 +905,7 @@ namespace Orcs_Plus
                         }
                     }
                 }
-                else if (att.society is HolyOrder_Orcs orcCulture2 && orcCulture2.tenet_god is H_Orcs_HarbringersMadness harbringers2 && harbringers2.status < -1)
+                else if (att.society is HolyOrder_Orcs orcCulture2 && orcCulture2.tenet_god is H_Orcs_HarbingersMadness harbringers2 && harbringers2.status < -1)
                 {
                     if (!def.isDead && def.hp > 0 && !def.isCommandable() && (def.person.species is Species_Human || def.person.species is Species_Elf))
                     {
@@ -918,7 +918,7 @@ namespace Orcs_Plus
                     }
                 }
 
-                if (def.society is SG_Orc orcSociety3 && core.data.orcSGCultureMap.TryGetValue(orcSociety3, out HolyOrder_Orcs orcCulture3) && orcCulture3 != null && orcCulture3.tenet_god is H_Orcs_HarbringersMadness harbringers3 && harbringers3.status < -1)
+                if (def.society is SG_Orc orcSociety3 && core.data.orcSGCultureMap.TryGetValue(orcSociety3, out HolyOrder_Orcs orcCulture3) && orcCulture3 != null && orcCulture3.tenet_god is H_Orcs_HarbingersMadness harbringers3 && harbringers3.status < -1)
                 {
                     if (!att.isDead && att.hp > 0 && !att.isCommandable() && (att.person.species is Species_Human || att.person.species is Species_Elf))
                     {
@@ -930,7 +930,7 @@ namespace Orcs_Plus
                         }
                     }
                 }
-                else if (def.society is HolyOrder_Orcs orcCulture4 && orcCulture4.tenet_god is H_Orcs_HarbringersMadness harbringers4 && harbringers4.status < -1)
+                else if (def.society is HolyOrder_Orcs orcCulture4 && orcCulture4.tenet_god is H_Orcs_HarbingersMadness harbringers4 && harbringers4.status < -1)
                 {
                     if (!att.isDead && att.hp > 0 && !def.isCommandable() && (att.person.species is Species_Human || att.person.species is Species_Elf))
                     {
@@ -944,6 +944,30 @@ namespace Orcs_Plus
                 }
             }
         }
+
+        /*public override bool interceptDeath(Person person, string v, object killer)
+        {
+            if (person.items.Any(i => i is I_BloodGourd))
+            {
+                int index = -1;
+                for (int i = 0; i < person.items.Length; i++)
+                {
+                    if (person.items[i] is I_BloodGourd)
+                    {
+                        index = i;
+                        break;
+                    }
+                }
+
+                if (index != -1)
+                {
+                    person.items[index] = null;
+                    person.map.addUnifiedMessage();
+                }
+            }
+
+            return false;
+        }*/
 
         public override void onPersonDeath_StartOfProcess(Person person, string v, object killer)
         {
@@ -1031,6 +1055,26 @@ namespace Orcs_Plus
                     uaKiller.person.receiveTrait(new T_BloodFeud(orcCulture.orcSociety));
 
                     person.map.addUnifiedMessage(uaPerson, uaKiller, "Blood Feud", uaKiller.getName() + " has become the target of a blood fued by killing an orc elder of the " + uaPerson.society.getName() + ". They must now spend the rest of their days looking over their shoulder for the sudden the appearance of an avenging orc upstart.", "Orc Blood Feud");
+                }
+
+                if (uKiller.person.items.Any(i => i is I_IdolOfMadness))
+                {
+                    foreach (KeyValuePair<int, RelObj> pair in person.relations)
+                    {
+                        Person them = person.map.persons[pair.Key];
+                        if (them != null && !them.isDead)
+                        {
+                            if (pair.Value.isCloseFamily())
+                            {
+                                them.sanity -= 5;
+
+                                if (them.sanity <= 0)
+                                {
+                                    them.goInsane();
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

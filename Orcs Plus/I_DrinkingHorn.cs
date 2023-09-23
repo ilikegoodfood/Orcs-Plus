@@ -14,13 +14,11 @@ namespace Orcs_Plus
 
         public Rti_DrinkGrott rti_DrinkGrott;
 
-        public List<Ritual> rituals = new List<Ritual>();
-
         public I_DrinkingHorn(Map map, Location location)
             :base (map)
         {
             rti_DrinkGrott = new Rti_DrinkGrott(location, this);
-            rituals.Add(rti_DrinkGrott);
+            challenges.Add(rti_DrinkGrott);
         }
 
         public override string getName()
@@ -55,7 +53,7 @@ namespace Orcs_Plus
 
         public override List<Ritual> getRituals(UA ua)
         {
-            return rituals;
+            return challenges;
         }
 
         public override int getLevel()

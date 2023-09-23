@@ -9,8 +9,12 @@ namespace Orcs_Plus
 {
     public static class OnChallengeComplete
     {
+        public static Challenge lastChallengeCompleted;
+
         public static void processChallenge(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)
         {
+            lastChallengeCompleted = challenge;
+
             switch (task_PerformChallenge.challenge)
             {
                 case Ch_Orcs_BuildFortress _:

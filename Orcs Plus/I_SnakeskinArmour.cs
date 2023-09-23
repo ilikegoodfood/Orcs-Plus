@@ -11,6 +11,7 @@ namespace Orcs_Plus
     public class I_SnakeskinArmour : Item
     {
         public bool doublesHeld = false;
+
         public I_SnakeskinArmour(Map map)
             : base (map)
         {
@@ -24,7 +25,7 @@ namespace Orcs_Plus
 
         public override string getShortDesc()
         {
-            return "A wooden cuirass coating in hardened Snakeskin. This armour is often favoured by elite orc warriors, who claim that it is embued with an ancient protective power, which will reduce the damage the wearer suffers from attacks by 1, minimum 1. (max of only one will have effect per agent)." + (doublesHeld ? "[DISABLED]" : "");
+            return "A wooden cuirass coated in hardened Snakeskin. This armour is often favoured by elite orc warriors, who claim that it is embued with an ancient protective power, which will reduce the damage the wearer suffers from attacks by 1, minimum 1. (max of only one will have effect per agent)." + (doublesHeld ? "[DISABLED]" : "");
         }
 
         public override Sprite getIconBack()

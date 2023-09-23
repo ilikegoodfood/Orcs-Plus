@@ -47,19 +47,32 @@ namespace Orcs_Plus
                         {
                             p.traits.Remove(this);
 
-                            EventManager.ActiveEvent activeEvent = EventManager.events.Values.FirstOrDefault(e => e.data.id.Contains("drinkGrott") && e.type == EventData.Type.INERT);
+                            List<EventManager.ActiveEvent> activeEvents = EventManager.events.Values.Where(e => e.data.id.Contains("drinkGrott") && e.type == EventData.Type.INERT).ToList();
+                            EventManager.ActiveEvent orcEvent = activeEvents.FirstOrDefault(e => e.data.id.Contains("drinkGrott_Orc"));
+                            EventManager.ActiveEvent otherEvent = activeEvents.FirstOrDefault(e => !e.data.id.Contains("drinkGrott_Orc"));
                             EventContext ctx = EventContext.withUnit(p.map, ua);
 
-                            if (activeEvent == null)
+                            if (activeEvents.Count == 0)
                             {
                                 p.map.world.prefabStore.popMsg("UNABLE TO FIND DRINK GROTT EVENT", true, true);
                             }
                             else
                             {
-                                p.map.world.prefabStore.popEvent(activeEvent.data, ctx, null, false);
+                                if (p.species == p.map.species_orc && orcEvent != null)
+                                {
+                                    p.map.world.prefabStore.popEvent(orcEvent.data, ctx, null, false);
+                                }
+                                else if (p.species != p.map.species_orc && otherEvent != null)
+                                {
+                                    p.map.world.prefabStore.popEvent(otherEvent.data, ctx, null, false);
+                                }
+                                else
+                                {
+                                    p.map.world.prefabStore.popMsg("UNABLE TO FIND DRINK GROTT EVENT", true, true);
+                                }
                             }
                         }
-                        else if (horn.rti_DrinkGrott.getUtility(ua, null) > 0.0)
+                        else if (ua.getChallengeUtility(horn.rti_DrinkGrott, null) > 0.0)
                         {
                             duration = p.map.param.ch_primalWatersDur;
                             horn.full = false;

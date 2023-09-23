@@ -83,10 +83,8 @@ namespace Orcs_Plus
 
                     buy[index].restock();
                 }
-                else
-                {
-                    restockTimer = 1;
-                }
+                
+                restockTimer = 25;
             }
         }
 
