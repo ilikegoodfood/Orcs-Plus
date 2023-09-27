@@ -21,9 +21,9 @@ namespace Orcs_Plus
 
         public ModData data;
 
-        public List<Power> godPowers1 = new List<Power>();
+        public List<Power> godPowers1;
 
-        public List<Power> godPowers2 = new List<Power>();
+        public List<Power> godPowers2;
 
         private static bool patched = false;
 
@@ -53,6 +53,8 @@ namespace Orcs_Plus
 
             eventModifications(map);
 
+            core.godPowers1 = new List<Power>();
+            core.godPowers2 = new List<Power>();
             if (core.data.godTenetTypes.TryGetValue(map.overmind.god.GetType(), out Type tenetType) && tenetType != null)
             {
                 switch (tenetType.Name)
@@ -382,7 +384,7 @@ namespace Orcs_Plus
             }
 
             core.data.isPlayerTurn = true;
-            data.onTurnStart(map);
+            core.data.onTurnStart(map);
 
             if (core.godPowers1.Count > 0 || core.godPowers2.Count > 0)
             {
