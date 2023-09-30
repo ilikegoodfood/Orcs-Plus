@@ -115,15 +115,15 @@ namespace Orcs_Plus
                     }
                 }
 
-                if (minionCount == 3)
+                if (minionCount == ua.minions.Length)
                 {
                     hasFullMinions = true;
                 }
             }
 
-            I_HordeBanner banner = ua.person.items.OfType<I_HordeBanner>().FirstOrDefault();
+            I_HordeBanner banner = (I_HordeBanner)ua.person.items.FirstOrDefault(i => i is I_HordeBanner);
 
-            return !hasFullMinions && challengeData.location.soc != null && banner != null && challengeData.location.soc == banner.orcs && challengeData.location.settlement is Set_OrcCamp;
+            return !hasFullMinions && banner != null && challengeData.location.soc == banner.orcs && challengeData.location.settlement is Set_OrcCamp;
         }
 
         private double delegate_Utility_RecruitWarband(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)

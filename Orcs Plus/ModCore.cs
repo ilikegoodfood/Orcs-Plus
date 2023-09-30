@@ -978,6 +978,11 @@ namespace Orcs_Plus
                 return;
             }
 
+            if (person == null)
+            {
+                return;
+            }
+
             // Person Data
             Unit uPerson = person.unit;
 
@@ -994,21 +999,22 @@ namespace Orcs_Plus
             SG_Orc orcSociety = uPerson.society as SG_Orc;
             HolyOrder_Orcs orcCulture = uPerson.society as HolyOrder_Orcs;
 
+            if (orcSociety != null)
+            {
+                core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+            }
+            else if (orcCulture != null)
+            {
+                orcSociety = orcCulture.orcSociety;
+            }
+
             //Console.WriteLine("Orcs_Plus: Person with Agent has died");
 
             // Cordyceps Symbiosis
             if (uaPerson is UAEN_OrcUpstart || uaPerson is UAEN_OrcElder || uaPerson is UAEN_OrcShaman || uaPerson is UAE_Warlord)
             {
                 //Console.WriteLine("Orcs_Plus: Orc agent has died");
-                SG_Orc orcSociety2 = uaPerson.society as SG_Orc;
-                HolyOrder_Orcs orcCulture2 = uaPerson.society as HolyOrder_Orcs;
-
-                if (orcSociety2 != null)
-                {
-                    core.data.orcSGCultureMap.TryGetValue(orcSociety2, out orcCulture2);
-                }
-
-                if (orcCulture2 != null && orcCulture2.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < -1)
+                if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < -1)
                 {
                     //Console.WriteLine("Orcs_Plus: Orc agent is subject to Insectile Symbiosis");
                     if (core.data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("Drone", out Type droneType) && droneType != null && intDataCord.typeDict.TryGetValue("Swarm", out Type swarmType) && swarmType != null && intDataCord.typeDict.TryGetValue("Hive", out Type hiveType) && hiveType != null)
@@ -1037,42 +1043,49 @@ namespace Orcs_Plus
                 }
             }
 
-            // Killer Data
-            Person pKiller = killer as Person;
-            Unit uKiller = killer as Unit;
-
-            if (pKiller != null)
+            if (killer != null)
             {
-                //Console.WriteLine("Orcs_Plus: Person was killed by another person.");
-                uKiller = pKiller.unit;
-            }
+                // Killer Data
+                Person pKiller = killer as Person;
+                Unit uKiller = killer as Unit;
 
-            // Blood Fued
-            if (uKiller != null)
-            {
-                //Console.WriteLine("Orcs_Plus: Killer has Unit");
-                if (uaPerson is UAEN_OrcElder && uKiller is UA uaKiller && !uaKiller.person.traits.Any(t => t is T_BloodFeud fued && fued.orcSociety == orcSociety))
+                if (pKiller != null)
                 {
-                    //Console.WriteLine("Orcs_Plus: Killer gained blood fued by killing orc elder");
-                    uaKiller.person.receiveTrait(new T_BloodFeud(orcCulture.orcSociety));
-
-                    person.map.addUnifiedMessage(uaPerson, uaKiller, "Blood Feud", uaKiller.getName() + " has become the target of a blood fued by killing an orc elder of the " + uaPerson.society.getName() + ". They must now spend the rest of their days looking over their shoulder for the sudden the appearance of an avenging orc upstart.", "Orc Blood Feud");
+                    //Console.WriteLine("Orcs_Plus: Person was killed by another person.");
+                    uKiller = pKiller.unit;
+                }
+                else if (uKiller != null)
+                {
+                    pKiller = uKiller.person;
                 }
 
-                if (uKiller.person.items.Any(i => i is I_IdolOfMadness))
+                // Blood Fued
+                if (uKiller != null && pKiller != null)
                 {
-                    foreach (KeyValuePair<int, RelObj> pair in person.relations)
+                    //Console.WriteLine("Orcs_Plus: Killer has Unit");
+                    if (uaPerson is UAEN_OrcElder && uKiller is UA uaKiller && !pKiller.traits.Any(t => t is T_BloodFeud fued && fued.orcSociety == orcSociety))
                     {
-                        Person them = person.map.persons[pair.Key];
-                        if (them != null && !them.isDead)
-                        {
-                            if (pair.Value.isCloseFamily())
-                            {
-                                them.sanity -= 5;
+                        //Console.WriteLine("Orcs_Plus: Killer gained blood fued by killing orc elder");
+                        uaKiller.person.receiveTrait(new T_BloodFeud(orcSociety));
 
-                                if (them.sanity <= 0)
+                        person.map.addUnifiedMessage(uaPerson, uaKiller, "Blood Feud", uaKiller.getName() + " has become the target of a blood fued by killing an orc elder of the " + uaPerson.society.getName() + ". They must now spend the rest of their days looking over their shoulder for the sudden the appearance of an avenging orc upstart.", "Orc Blood Feud");
+                    }
+
+                    if (pKiller.items.Any(i => i is I_IdolOfMadness))
+                    {
+                        foreach (KeyValuePair<int, RelObj> pair in person.relations)
+                        {
+                            Person them = person.map.persons[pair.Key];
+                            if (them != null && !them.isDead)
+                            {
+                                if (pair.Value.isCloseFamily())
                                 {
-                                    them.goInsane();
+                                    them.sanity -= 5;
+
+                                    if (them.sanity <= 0)
+                                    {
+                                        them.goInsane();
+                                    }
                                 }
                             }
                         }
