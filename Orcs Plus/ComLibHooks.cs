@@ -76,34 +76,31 @@ namespace Orcs_Plus
             //Console.WriteLine("Orcs_Plus: Unit is not Person");
 
             // Orc Logic
-            SG_Orc orcs = u.society as SG_Orc;
+            SG_Orc orcSociety = u.society as SG_Orc;
             HolyOrder_Orcs orcCulture = u.society as HolyOrder_Orcs;
 
-            if (orcs != null)
+            if (orcSociety != null)
             {
-                ModCore.core.data.orcSGCultureMap.TryGetValue(orcs, out orcCulture);
+                ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
             }
 
             if (u is UM um)
             {
                 //Console.WriteLine("Orcs_Plus: Unit is UM");
-                SG_Orc orcSociety = um.society as SG_Orc;
-                HolyOrder_Orcs orcCulture2 = um.society as HolyOrder_Orcs;
-
                 if (um is UM_Mercenary mercenary)
                 {
                     //Console.WriteLine("Orcs_Plus: UM is Mercenary Company");
                     orcSociety = mercenary.source as SG_Orc;
-                    orcCulture2 = mercenary.source as HolyOrder_Orcs;
+                    orcCulture = mercenary.source as HolyOrder_Orcs;
                 }
 
                 if (orcSociety != null)
                 {
                     //Console.WriteLine("Orcs_Plus: UM is orc army");
-                    ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture2);
+                    ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
                 }
 
-                if (orcCulture2 != null && orcCulture2.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < -1)
+                if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < -1)
                 {
                     //Console.WriteLine("Orcs_Plus: UM is subject to Insectile Symbiosis");
                     if (ModCore.core.data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("VespidicSwarm", out Type vSwarmType) && vSwarmType != null)
@@ -793,25 +790,17 @@ namespace Orcs_Plus
                 {
                     if (sub is Sub_WitchCoven)
                     {
-                        Pr_Death death = null;
-
-                        foreach (Property p in set.location.properties)
-                        {
-                            death = p as Pr_Death;
-
-                            if (death != null)
-                            {
-                                break;
-                            }
-                        }
+                        Pr_Death death = (Pr_Death)set.location.properties.FirstOrDefault(pr => pr is Pr_Death);
 
                         if (death == null)
                         {
-                            death = new Pr_Death(set.location);
-                            death.charge = 0;
+                            death = new Pr_Death(set.location)
+                            {
+                                charge = 0
+                            };
                         }
 
-                        Property.addToPropertySingleShot("Militray Action", Property.standardProperties.DEATH, 25.0, set.location);
+                        death.influences.Add(new ReasonMsg("Militray Action", 25.0));
                         break;
                     }
                 }
@@ -1088,27 +1077,31 @@ namespace Orcs_Plus
         {
             List<TaskData> tasks = new List<TaskData>();
 
-            if (um.location.properties.OfType<Pr_HumanOutpost>().FirstOrDefault() != null)
+            if (um.location.properties.FirstOrDefault(pr => pr is Pr_HumanOutpost) != null)
             {
-                TaskData task_RazeOutpost = new TaskData();
-                task_RazeOutpost.onClick = UMTaskDelegates.onClick_RazeOutpost;
-                task_RazeOutpost.title = "Raze Outpost at " + um.location.getName();
-                task_RazeOutpost.icon = um.map.world.iconStore.raze;
-                task_RazeOutpost.menaceGain = um.map.param.um_menaceGainFromRaze;
-                task_RazeOutpost.backColor = new Color(0.8f, 0f, 0f);
-                task_RazeOutpost.enabled = true;
+                TaskData task_RazeOutpost = new TaskData
+                {
+                    onClick = UMTaskDelegates.onClick_RazeOutpost,
+                    title = "Raze Outpost at " + um.location.getName(),
+                    icon = um.map.world.iconStore.raze,
+                    menaceGain = um.map.param.um_menaceGainFromRaze,
+                    backColor = new Color(0.8f, 0f, 0f),
+                    enabled = true
+                };
 
                 tasks.Add(task_RazeOutpost);
             }
 
             if (um is UM_OrcRaiders orcRaiders)
             {
-                Rt_Orcs_BuildCamp challenge = orcRaiders.rituals.OfType<Rt_Orcs_BuildCamp>().FirstOrDefault();
+                Rt_Orcs_BuildCamp challenge = (Rt_Orcs_BuildCamp)orcRaiders.rituals.FirstOrDefault(c => c is Rt_Orcs_BuildCamp);
 
                 if (challenge != null)
                 {
-                    TaskData task_Orcs_BuildCamp = new TaskData();
-                    task_Orcs_BuildCamp.challenge = challenge;
+                    TaskData task_Orcs_BuildCamp = new TaskData
+                    {
+                        challenge = challenge
+                    };
                 }
             }
 
