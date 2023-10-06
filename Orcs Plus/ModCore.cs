@@ -393,10 +393,10 @@ namespace Orcs_Plus
 
             foreach (Unit unit in map.units)
             {
-                if (unit is UAEN_OrcUpstart upstart && upstart.society is SG_Orc orcSociety)
+                if (unit is UAEN_OrcUpstart upstart && upstart.society is SG_Orc orcSociety && !upstart.isDead)
                 {
-                    Item[] items = upstart.person.getItems();
-                    if (!items.Any(i => i is I_HordeBanner banner && banner.orcs == upstart.society))
+                    Item[] items = upstart.person.items;
+                    if (items != null && !items.Any(i => i is I_HordeBanner banner && banner.orcs == upstart.society))
                     {
                         int itemIndex = 0;
                         for (int i = 0; i < items.Length; i++)
