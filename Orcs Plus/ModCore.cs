@@ -150,23 +150,23 @@ namespace Orcs_Plus
             if (core.data == null)
             {
                 core.data = new ModData();
-                core.data.isPlayerTurn = true;
-                data.updateOrcSGCultureMap(map);
             }
+            core.data.isPlayerTurn = true;
+            core.data.updateOrcSGCultureMap(map);
+
+            getModKernels(map);
 
             if (comLib == null)
+            {
+                throw new Exception("OrcsPlus: This mod REQUIRES the Community Library mod to be installed and enabled in order to operate. The Community Library mod must come before (above) this mod in the mod load order.");
+            }
+            else
             {
                 core.comLibHooks = new ComLibHooks(map);
             }
 
-            getModKernels(map);
             HarmonyPatches_Conditional.PatchingInit();
             eventModifications(map);
-
-            if (comLib == null)
-            {
-                throw new Exception("OrcsPlus: This mod REQUIRES the Community Library mod to be installed and enabled in order to operate.");
-            }
         }
 
         private void getModKernels(Map map)
@@ -393,10 +393,10 @@ namespace Orcs_Plus
 
             foreach (Unit unit in map.units)
             {
-                if (unit is UAEN_OrcUpstart upstart && upstart.society is SG_Orc orcSociety)
+                if (unit is UAEN_OrcUpstart upstart && upstart.society is SG_Orc orcSociety && !upstart.isDead)
                 {
-                    Item[] items = upstart.person.getItems();
-                    if (!items.Any(i => i is I_HordeBanner banner && banner.orcs == upstart.society))
+                    Item[] items = upstart.person.items;
+                    if (items != null && !items.Any(i => i is I_HordeBanner banner && banner.orcs == upstart.society))
                     {
                         int itemIndex = 0;
                         for (int i = 0; i < items.Length; i++)

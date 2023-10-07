@@ -45,12 +45,15 @@ namespace Orcs_Plus
                 charge = 300.0;
             }
 
-            Pr_Death death = location.properties.OfType<Pr_Death>().FirstOrDefault();
-
-            if (death != null && charge < 300.0)
+            if (charge < 300.0)
             {
-                Property.addToProperty("Fertilizer for Gourd of Blood", Property.standardProperties.DEATH, -5.0, location);
-                influences.Add(new ReasonMsg("Feeding on Death", Math.Min(4.0, 300.0 - charge)));
+                Pr_Death death = (Pr_Death)location.properties.FirstOrDefault(pr => pr is Pr_Death);
+
+                if (death != null)
+                {
+                    Property.addToProperty("Fertilizer for Gourd of Blood", Property.standardProperties.DEATH, -5.0, location);
+                    influences.Add(new ReasonMsg("Feeding on Death", Math.Min(4.0, 300.0 - charge)));
+                }
             }
         }
     }

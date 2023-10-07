@@ -48,7 +48,7 @@ namespace Orcs_Plus
 
         public override bool validTarget(Location loc)
         {
-            Pr_Vinerva_Health giftHealth = loc.properties.OfType<Pr_Vinerva_Health>().FirstOrDefault();
+            Pr_Vinerva_Health giftHealth = (Pr_Vinerva_Health)loc.properties.FirstOrDefault(pr => pr is Pr_Vinerva_Health);
             return loc.settlement is Set_OrcCamp && loc.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_LifeMother life && life.status < 0 && (giftHealth == null || giftHealth.charge <= 250.0);
         }
 
@@ -61,12 +61,11 @@ namespace Orcs_Plus
         {
             base.cast(loc);
 
-            Pr_Vinerva_Health giftHealth = loc.properties.OfType<Pr_Vinerva_Health>().FirstOrDefault();
+            Pr_Vinerva_Health giftHealth = (Pr_Vinerva_Health)loc.properties.FirstOrDefault(pr => pr is Pr_Vinerva_Health);
 
             if (giftHealth == null)
             {
-                giftHealth = new Pr_Vinerva_Health(loc);
-                loc.properties.Add(giftHealth);
+                loc.properties.Add(new Pr_Vinerva_Health(loc));
             }
             else
             {

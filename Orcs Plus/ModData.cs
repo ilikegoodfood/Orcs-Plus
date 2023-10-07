@@ -143,11 +143,6 @@ namespace Orcs_Plus
             {
                 if (sg is HolyOrder_Orcs orcCulture)
                 {
-                    if (orcCulture.orcSociety == null || orcCulture.checkIsGone())
-                    {
-                        continue;
-                    }
-
                     orcSGCultureMap.Add(orcCulture.orcSociety, orcCulture);
                 }
             }
