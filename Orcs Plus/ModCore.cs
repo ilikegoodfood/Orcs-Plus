@@ -154,6 +154,8 @@ namespace Orcs_Plus
             core.data.isPlayerTurn = true;
             core.data.updateOrcSGCultureMap(map);
 
+            getModKernels(map);
+
             if (comLib == null)
             {
                 throw new Exception("OrcsPlus: This mod REQUIRES the Community Library mod to be installed and enabled in order to operate. The Community Library mod must come before (above) this mod in the mod load order.");
@@ -163,7 +165,6 @@ namespace Orcs_Plus
                 core.comLibHooks = new ComLibHooks(map);
             }
 
-            getModKernels(map);
             HarmonyPatches_Conditional.PatchingInit();
             eventModifications(map);
         }
