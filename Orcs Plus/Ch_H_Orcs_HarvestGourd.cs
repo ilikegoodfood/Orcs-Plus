@@ -43,10 +43,10 @@ namespace Orcs_Plus
 
         public override int getInherentDanger()
         {
-            Pr_Vinerva_Health giftHealth = location.properties.OfType<Pr_Vinerva_Health>().FirstOrDefault();
+            Pr_Vinerva_Health giftHealth = (Pr_Vinerva_Health)location.properties.FirstOrDefault(pr => pr is Pr_Vinerva_Health);
             if (giftHealth != null)
             {
-                return Math.Min(2, (int)Math.Ceiling(giftHealth.charge / 25));
+                return Math.Min(2, (int)Math.Ceiling(giftHealth.charge / 25.0));
             }
 
             return 2;
