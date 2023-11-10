@@ -52,35 +52,7 @@ namespace Orcs_Plus
             HarmonyPatches_Conditional.PatchingInit();
 
             eventModifications(map);
-
-            core.godPowers1 = new List<Power>();
-            core.godPowers2 = new List<Power>();
-            if (core.data.godTenetTypes.TryGetValue(map.overmind.god.GetType(), out Type tenetType) && tenetType != null)
-            {
-                switch (tenetType.Name)
-                {
-                    case nameof(H_Orcs_LifeMother):
-                        godPowers1 = new List<Power>()
-                        {
-                            new P_Vinerva_Life(map),
-                            new P_Vinerva_Health(map)
-                        };
-
-                        godPowers2 = new List<Power>()
-                        {
-                            new P_Vinerva_Thorns(map)
-                        };
-                        break;
-                    case nameof(H_Orcs_Perfection):
-                        godPowers2 = new List<Power>()
-                        {
-                            new P_Ophanim_PerfectHorde(map)
-                        };
-                        break;
-                    default:
-                        break;
-                }
-            }
+            setDynamicPowers(map);
 
             // Example for non-dependent God Tenet registration
             /*foreach (ModKernel kernel in map.mods)
@@ -167,6 +139,7 @@ namespace Orcs_Plus
 
             HarmonyPatches_Conditional.PatchingInit();
             eventModifications(map);
+            setDynamicPowers(map);
         }
 
         private void getModKernels(Map map)
@@ -376,6 +349,38 @@ namespace Orcs_Plus
             }
         }
 
+        public void setDynamicPowers(Map map)
+        {
+            core.godPowers1 = new List<Power>();
+            core.godPowers2 = new List<Power>();
+            if (core.data.godTenetTypes.TryGetValue(map.overmind.god.GetType(), out Type tenetType) && tenetType != null)
+            {
+                switch (tenetType.Name)
+                {
+                    case nameof(H_Orcs_LifeMother):
+                        core.godPowers1 = new List<Power>()
+                        {
+                            new P_Vinerva_Life(map),
+                            new P_Vinerva_Health(map)
+                        };
+
+                        core.godPowers2 = new List<Power>()
+                        {
+                            new P_Vinerva_Thorns(map)
+                        };
+                        break;
+                    case nameof(H_Orcs_Perfection):
+                        core.godPowers2 = new List<Power>()
+                        {
+                            new P_Ophanim_PerfectHorde(map)
+                        };
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
         public override void onTurnStart(Map map)
         {
             if (comLib == null)
@@ -438,7 +443,7 @@ namespace Orcs_Plus
             string msg2 = "";
             if (status >= 0)
             {
-                foreach (Power p in godPowers1)
+                foreach (Power p in core.godPowers1)
                 {
                     int index = map.overmind.god.powers.FindIndex(pow => pow == p);
                     if (index != -1)
@@ -449,7 +454,7 @@ namespace Orcs_Plus
                     }
                 }
 
-                foreach (Power p in godPowers2)
+                foreach (Power p in core.godPowers2)
                 {
                     int index = map.overmind.god.powers.FindIndex(pow => pow == p);
                     if (index != -1)
@@ -485,7 +490,7 @@ namespace Orcs_Plus
             }
             else if (status == -1)
             {
-                foreach (Power p in godPowers1)
+                foreach (Power p in core.godPowers1)
                 {
                     if (!map.overmind.god.powers.Contains(p))
                     {
@@ -495,7 +500,7 @@ namespace Orcs_Plus
                     }
                 }
 
-                foreach (Power p in godPowers2)
+                foreach (Power p in core.godPowers2)
                 {
                     int index = map.overmind.god.powers.FindIndex(pow => pow == p);
                     if (index != -1)
@@ -537,7 +542,7 @@ namespace Orcs_Plus
             }
             else if (status == -2)
             {
-                foreach (Power p in godPowers1)
+                foreach (Power p in core.godPowers1)
                 {
                     if (!map.overmind.god.powers.Contains(p))
                     {
@@ -547,7 +552,7 @@ namespace Orcs_Plus
                     }
                 }
 
-                foreach (Power p in godPowers2)
+                foreach (Power p in core.godPowers2)
                 {
                     if (!map.overmind.god.powers.Contains(p))
                     {
