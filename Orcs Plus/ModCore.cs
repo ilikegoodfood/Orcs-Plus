@@ -1686,7 +1686,7 @@ namespace Orcs_Plus
             }
 
             bool result = true;
-            if (orcSociety != null && core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            if (orcSociety != null && core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && loc.soc != null)
             {
                 if (orcCulture.tenet_intolerance.status == -2)
                 {

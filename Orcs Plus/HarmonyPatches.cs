@@ -136,6 +136,7 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Method(typeof(Pr_OrcFunding), nameof(Pr_OrcFunding.turnTick), new Type[0]), transpiler: new HarmonyMethod(patchType, nameof(Pr_OrcFunding_turnTick_Transpiler)));
 
             // Patches for UM_OrcArmy
+            harmony.Patch(original: AccessTools.Constructor(typeof(UM_OrcArmy), new Type[] { typeof(Location), typeof(SocialGroup), typeof(Set_OrcCamp) }), postfix: new HarmonyMethod(patchType, nameof(UM_OrcArmy_ctor_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(UM_OrcArmy), nameof(UM_OrcArmy.getName), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(UM_OrcArmy_getName_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(UM_OrcArmy), nameof(UM_OrcArmy.turnTickInner), new Type[] { typeof(Map) }), postfix: new HarmonyMethod(patchType, nameof(UM_OrcArmy_turnTickInner_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(UM_OrcArmy), nameof(UM_OrcArmy.updateMaxHP), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(UM_OrcArmy_updateMaxHP_Postfix)));
@@ -2273,6 +2274,14 @@ namespace Orcs_Plus
         }
 
         // Patches for UM_OrcArmy
+        private static void UM_OrcArmy_ctor_Postfix(UM_OrcArmy __instance)
+        {
+            if (__instance.homeLocation != -1)
+            {
+                __instance.rituals.Add(new Rt_Orcs_BuildCamp(__instance.map.locations[__instance.homeLocation]));
+            }
+        }
+
         private static string UM_OrcArmy_getName_Postfix(string name, UM_OrcArmy __instance)
         {
             if (__instance.parent.specialism == 1)
@@ -2483,19 +2492,31 @@ namespace Orcs_Plus
                 }
             }
 
-            if (targets.Count == 1)
+            
+            if (targets.Count > 0)
             {
                 target = targets[0];
-            }
-            else if (targets.Count > 1)
-            {
-                target = targets[Eleven.random.Next(targets.Count)];
+
+                if (targets.Count > 1)
+                {
+                    target = targets[Eleven.random.Next(targets.Count)];
+                }
             }
 
             if (target != null)
             {
                 um.task = new Task_AttackArmy(target, um);
                 return;
+            }
+
+            if (orcCulture?.tenet_expansionism?.status < -1)
+            {
+                Rt_Orcs_BuildCamp cBuildCamp = (Rt_Orcs_BuildCamp)um.rituals.FirstOrDefault(rt => rt is Rt_Orcs_BuildCamp);
+                if (cBuildCamp != null && cBuildCamp.validFor(um))
+                {
+                    um.task = new Task_PerformChallenge(cBuildCamp);
+                    return;
+                }
             }
 
             if (um.society.isAtWar())

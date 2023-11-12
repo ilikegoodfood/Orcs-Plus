@@ -43,14 +43,9 @@ namespace Orcs_Plus
                 charge = 300.0;
             }
 
-            if (location.properties.OfType<Pr_Devastation>().FirstOrDefault()?.charge >= 100.0)
+            if (location.properties.FirstOrDefault(pr => pr is Pr_Devastation)?.charge >= 100.0)
             {
                 influences.Add(new ReasonMsg("Thorns Dying Back", Math.Max(-2.0, -charge)));
-
-                if (charge <= 0.0)
-                {
-                    location.properties.Remove(this);
-                }
             }
             else if (charge < 300.0)
             {
@@ -61,20 +56,26 @@ namespace Orcs_Plus
                 }
             }
 
+            List<UM> deadUnits = new List<UM>();
             foreach (Unit unit in location.units)
             {
                 if (unit is UM um && um.task is Task_RazeLocation)
                 {
-                    um.hp -= (int)Math.Ceiling(charge / 50.0);
+                    um.hp -= (int)Math.Ceiling(charge / 25.0);
 
                     if (um.hp <= 0)
                     {
-                        um.die(map, "Destroyed in Seige");
-                        if (location.soc is SG_Orc orcSociety)
-                        {
-                            ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Vinerva's wall of thorns destroyed enemy army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]));
-                        }
+                        deadUnits.Add(um);
                     }
+                }
+            }
+
+            foreach (UM deadUnit in deadUnits)
+            {
+                deadUnit.die(map, "Destroyed in Seige");
+                if (location.soc is SG_Orc orcSociety)
+                {
+                    ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Vinerva's wall of thorns destroyed enemy army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]));
                 }
             }
         }

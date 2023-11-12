@@ -49,67 +49,100 @@ namespace Orcs_Plus
 
         public override bool validTarget(Location loc)
         {
-            if (loc.properties.OfType<Pr_Vinerva_Life>().FirstOrDefault() != null)
+            if (loc.properties.Any(pr => pr is Pr_Vinerva_Life || pr is Pr_Vinerva_LifeBoon))
             {
                 return false;
             }
 
-            bool result = loc.hex.getHabilitability() < map.opt_orcHabMult * map.param.orc_habRequirement;
+            // Location is only valid if habitability is too low for orcs to settle normally
+            bool valid = loc.hex.getHabilitability() < map.opt_orcHabMult * map.param.orc_habRequirement;
 
-            if (result)
+            // Checks if arget is within range of vinerva heart
+            if (valid)
+            {
+                valid = false;
+                if (map.overmind.god is God_Vinerva vinerva)
+                {
+                    foreach (int heartLocIndex in vinerva.hearts)
+                    {
+                        if (map.getStepDist(loc, map.locations[heartLocIndex]) <= map.param.power_vinerva_growthMaxDist)
+                        {
+                            valid = true;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    valid = true;
+                }
+            }
+
+            // Checks if the location is valid for orcish expansion, ignoring habitability
+            if (valid)
             {
                 if (loc.isOcean || loc.soc != null)
                 {
-                    result = false;
+                    valid = false;
                 }
                 else if (loc.settlement != null)
                 {
                     if (ModCore.comLib.tryGetSettlementTypeForOrcExpansion(loc.settlement.GetType(), out List<Type> subsettlementBlacklist))
                     {
-
                         foreach (Subsettlement sub in loc.settlement.subs)
                         {
                             if (subsettlementBlacklist.Contains(sub.GetType()))
                             {
-                                result = false;
+                                valid = false;
                             }
                         }
                     }
                     else
                     {
-                        result = false;
+                        valid = false;
                     }
                 }
             }
 
-            if (result)
+            // If location is uninhabvitable to orcs, and is otherwise valid for orcish expansion, checks if location is neighbouring orc settlement of a culture with the tenet at the required alignment level
+            if (valid)
             {
-                result = false;
-
                 foreach (Location neighbour in loc.getNeighbours())
                 {
-                    if (neighbour.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_LifeMother life && life.status < 0)
+                    if (neighbour.settlement is Set_OrcCamp && neighbour.soc is SG_Orc orcSociety)
                     {
-                        result = true;
-                        break;
+                        if (ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_LifeMother life && life.status < 0)
+                        {
+                            return true;
+                        }
+                    }
+                    else if (neighbour.soc is HolyOrder_Orcs orcCulture2)
+                    {
+                        if (orcCulture2.tenet_god is H_Orcs_LifeMother life && life.status < 0)
+                        {
+                            return true;
+                        }
                     }
 
-                    if (neighbour.soc is HolyOrder_Orcs orcCulture2 && orcCulture2.tenet_god is H_Orcs_LifeMother life2 && life2.status < 0)
+                    // Regardless of neighbouring orc socities or cultures, checks for orc waystaions and validates against the culture of each waystation
+                    if (neighbour.settlement != null && neighbour.settlement.subs.Count > 0)
                     {
-                        result = true;
-                        break;
-                    }
-
-                    Sub_OrcWaystation waystation = neighbour.settlement?.subs.OfType<Sub_OrcWaystation>().FirstOrDefault();
-                    if (waystation != null && ModCore.core.data.orcSGCultureMap.TryGetValue(waystation.orcSociety, out HolyOrder_Orcs orcCulture3) && orcCulture3 != null && orcCulture3.tenet_god is H_Orcs_LifeMother life3 && life3.status < 0)
-                    {
-                        result = true;
-                        break;
+                        List<Subsettlement> waystations = neighbour.settlement.subs.FindAll(sub => sub is Sub_OrcWaystation);
+                        foreach (Subsettlement subsettlement in waystations)
+                        {
+                            if (subsettlement is Sub_OrcWaystation waystation)
+                            {
+                                if (ModCore.core.data.orcSGCultureMap.TryGetValue(waystation.orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_LifeMother life && life.status < 0)
+                                {
+                                    return true;
+                                }
+                            }
+                        }
                     }
                 }
             }
 
-            return result;
+            return false;
         }
 
         public override int getCost()

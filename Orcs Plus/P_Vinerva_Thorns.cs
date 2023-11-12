@@ -44,8 +44,39 @@ namespace Orcs_Plus
 
         public override bool validTarget(Location loc)
         {
-            Pr_Vinerva_Thorns giftThorns = loc.properties.OfType<Pr_Vinerva_Thorns>().FirstOrDefault();
-            return loc.settlement is Set_OrcCamp && loc.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_LifeMother life && life.status < -1 && (giftThorns == null || giftThorns.charge <= 250.0);
+            Pr_Vinerva_Thorns giftThorns = (Pr_Vinerva_Thorns)loc.properties.FirstOrDefault(pr => pr is Pr_Vinerva_Thorns);
+            if (giftThorns != null && giftThorns.charge > 250.0)
+            {
+                return false;
+            }
+
+            // Checks if arget is within range of vinerva heart
+            bool valid = false;
+            if (map.overmind.god is God_Vinerva vinerva)
+            {
+                foreach (int heartLocIndex in vinerva.hearts)
+                {
+                    if (map.getStepDist(loc, map.locations[heartLocIndex]) <= map.param.power_vinerva_growthMaxDist)
+                    {
+                        valid = true;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                valid = true;
+            }
+
+            if (valid)
+            {
+                if (loc.settlement is Set_OrcCamp && loc.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_LifeMother life && life.status < -1)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public override int getCost()

@@ -52,38 +52,35 @@ namespace Orcs_Plus
 
         public override bool validFor(UM um)
         {
-            bool result = false;
-
             if (um.hp <= buildCost)
             {
                 return false;
             }
 
             SG_Orc orcSociety = um.society as SG_Orc;
-
             if (orcSociety == null)
             {
-                return result;
+                return false;
             }
 
+            // Check location is habitable
             if (um.location.isOcean || um.location.hex.getHabilitability() < um.location.map.opt_orcHabMult * um.location.map.param.orc_habRequirement)
             {
-                return result;
+                return false;
             }
 
-            result = true;
-
+            bool valid = true;
             if (um.location.settlement != null)
             {
                 if (ModCore.comLib.tryGetSettlementTypeForOrcExpansion(um.location.settlement.GetType(), out List<Type> subsettlementBlacklist))
                 {
-                    if (subsettlementBlacklist?.Count > 0)
+                    if (subsettlementBlacklist != null)
                     {
                         foreach (Subsettlement sub in um.location.settlement.subs)
                         {
                             if (subsettlementBlacklist.Contains(sub.GetType()))
                             {
-                                result = false;
+                                valid = false;
                                 break;
                             }
                         }
@@ -91,26 +88,53 @@ namespace Orcs_Plus
                 }
                 else
                 {
-                    result = false;
+                    valid = false;
                 }
             }
 
-            if (result && orcSociety.lastTurnLocs.Count == 0)
+            if (valid)
             {
-                return result;
-            }
-
-            if (result && um.location.getNeighbours().FirstOrDefault(l => l.soc == orcSociety) != null)
-            {
-                return result;
-            }
-            else if (result && um.location.isCoastal)
-            {
-                foreach (Location location in um.map.locations)
+                if (orcSociety.lastTurnLocs.Count == 0)
                 {
-                    if (location.soc == orcSociety && location.settlement is Set_OrcCamp camp && camp.specialism == 5)
+                    return true;
+                }
+
+                HolyOrder_Orcs orcCulture;
+                ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+
+                foreach (Location neighbour in um.location.getNeighbours())
+                {
+                    if (neighbour.settlement is Set_OrcCamp && neighbour.soc == orcSociety)
                     {
-                        return result;
+                        return true;
+                    }
+
+                    if (orcCulture != null && neighbour.soc == orcCulture)
+                    {
+                        return true;
+                    }
+
+                    if (neighbour.settlement != null)
+                    {
+                        List<Subsettlement> waystations = neighbour.settlement.subs.FindAll(sub => sub is Sub_OrcWaystation);
+                        foreach (Subsettlement subsettlement in waystations)
+                        {
+                            if (subsettlement is Sub_OrcWaystation waystation && waystation.orcSociety == orcSociety)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+                if (um.location.isCoastal)
+                {
+                    foreach (Location location in um.map.locations)
+                    {
+                        if (location.soc == orcSociety && location.settlement is Set_OrcCamp camp && camp.specialism == 5)
+                        {
+                            return true;
+                        }
                     }
                 }
             }

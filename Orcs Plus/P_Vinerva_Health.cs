@@ -49,7 +49,53 @@ namespace Orcs_Plus
         public override bool validTarget(Location loc)
         {
             Pr_Vinerva_Health giftHealth = (Pr_Vinerva_Health)loc.properties.FirstOrDefault(pr => pr is Pr_Vinerva_Health);
-            return loc.settlement is Set_OrcCamp && loc.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_LifeMother life && life.status < 0 && (giftHealth == null || giftHealth.charge <= 250.0);
+            if (giftHealth != null && giftHealth.charge > 250.0)
+            {
+                return false;
+            }
+
+            bool valid = false;
+            if (map.overmind.god is God_Vinerva vinerva)
+            {
+                foreach (int heartLocIndex in vinerva.hearts)
+                {
+                    if (map.getStepDist(loc, map.locations[heartLocIndex]) <= map.param.power_vinerva_growthMaxDist)
+                    {
+                        valid = true;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                valid = true;
+            }
+
+            if (valid)
+            {
+                if (loc.settlement is Set_OrcCamp && loc.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+                {
+                    if (orcCulture.tenet_god is H_Orcs_LifeMother life && life.status < 0)
+                    {
+                        if (map.overmind.god is God_Vinerva vinerva2)
+                        {
+                            foreach (int heartLocIndex in vinerva2.hearts)
+                            {
+                                if (map.getStepDist(loc, map.locations[heartLocIndex]) <= map.param.power_vinerva_growthMaxDist)
+                                {
+                                    return true;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
 
         public override int getCost()

@@ -1,4 +1,5 @@
 ﻿using Assets.Code;
+using CommunityLib;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -171,6 +172,15 @@ namespace Orcs_Plus
                 //Console.WriteLine("OrcsPlus: Raze outpost at current location");
                 task = new Task_RazeOutpost();
                 return;
+            }
+
+            if (orcCulture?.tenet_expansionism?.status < -1)
+            {
+                Rt_Orcs_BuildCamp cBuildCamp = (Rt_Orcs_BuildCamp)rituals.FirstOrDefault(rt => rt is Rt_Orcs_BuildCamp);
+                if (cBuildCamp != null && cBuildCamp.validFor(this))
+                {
+                    task = new Task_PerformChallenge(cBuildCamp);
+                }
             }
 
             bool atWar = society.isAtWar();
