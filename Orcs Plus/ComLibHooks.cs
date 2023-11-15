@@ -1073,6 +1073,16 @@ namespace Orcs_Plus
             return false;
         }
 
+        public override HolyOrder onLocationViewFaithButton_GetHolyOrder(Location loc)
+        {
+            if (loc.settlement is Set_OrcCamp && loc.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            {
+                return orcCulture;
+            }
+
+            return null;
+        }
+
         public override List<TaskData> onUIScroll_Unit_populateUM(UM um)
         {
             List<TaskData> tasks = new List<TaskData>();
