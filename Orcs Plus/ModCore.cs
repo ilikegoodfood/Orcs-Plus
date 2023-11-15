@@ -160,10 +160,6 @@ namespace Orcs_Plus
             {
                 throw new Exception("OrcsPlus: This mod REQUIRES the Community Library mod to be installed and enabled in order to operate. The Community Library mod must come before (above) this mod in the mod load order.");
             }
-            else
-            {
-                core.comLibHooks = new ComLibHooks(map);
-            }
 
             HarmonyPatches_Conditional.PatchingInit();
             eventModifications(map);
@@ -179,7 +175,8 @@ namespace Orcs_Plus
                 {
                     case "CommunityLib":
                         comLib = kernel as CommunityLib.ModCore;
-                        comLib.RegisterHooks(comLibHooks);
+                        core.comLibHooks = new ComLibHooks(map);
+                        comLib.RegisterHooks(core.comLibHooks);
                         core.comLibAI = comLib.GetAgentAI();
 
                         comLib.forceShipwrecks();
