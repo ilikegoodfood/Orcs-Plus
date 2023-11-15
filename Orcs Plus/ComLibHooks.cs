@@ -1137,6 +1137,7 @@ namespace Orcs_Plus
             //Console.WriteLine("OrcsPlus: populatingMonsterActions");
             if (atMonster is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
             {
+                // Remove attack actions against elder aligned societies if intolerance is at -2.
                 //Console.WriteLine("OrcsPlus: Monster is orcSociety with associated orcCulture");
                 List<MonsterAction> actionsToRemove = new List<MonsterAction>();
 
@@ -1179,13 +1180,33 @@ namespace Orcs_Plus
                 }
                 //Console.WriteLine("OrcsPlus: Finished processing orcSociety");
 
+                // Add Great Contruction action to orc societies
+                bool present = false;
+                foreach (MonsterAction action in orcCulture.monsterActions)
+                {
+                    if (action is MA_Orcs_GreatConstruction gConstruction)
+                    {
+                        present = true;
+                        actions.Add(gConstruction);
+                        break;
+                    }
+                }
+
+                if (!present)
+                {
+                    MA_Orcs_GreatConstruction gConstruction = new MA_Orcs_GreatConstruction(orcSociety);
+                    orcCulture.monsterActions.Add(gConstruction);
+                    actions.Add(gConstruction);
+                }
+
+                // Add Hire Mercinaries action to orc societies if mammon god tenet is elder aligned.
                 if (orcCulture.tenet_god is H_Orcs_MammonClient client && client.status < 0)
                 {
                     foreach (SocialGroup neighbour in orcSociety.getNeighbours())
                     {
                         if (neighbour is Society society && !(society is HolyOrder) && orcSociety.getRel(society).state != DipRel.dipState.war && society.capital != -1)
                         {
-                            bool present = false;
+                            present = false;
                             foreach(MonsterAction action in orcCulture.monsterActions)
                             {
                                 if (action is MA_Orc_HireMercenaries hire && hire.target == society)
@@ -1206,7 +1227,7 @@ namespace Orcs_Plus
 
                         if (neighbour is SG_Orc orcs && orcSociety.getRel(orcs).state != DipRel.dipState.war && orcs.capital != -1)
                         {
-                            bool present = false;
+                            present = false;
                             foreach (MonsterAction action in orcCulture.monsterActions)
                             {
                                 if (action is MA_Orc_HireMercenaries hire && hire.target == orcs)
@@ -1225,6 +1246,20 @@ namespace Orcs_Plus
                             }
                         }
                     }
+                }
+            }
+        }
+
+        public override void onActionTakingMonsterAIDecision(SG_ActionTakingMonster monster)
+        {
+            if (monster.actionUnderway is MA_Orcs_GreatConstruction gConstruction && gConstruction.specialism == 3)
+            {
+                PrWM_Manticore manticore = (PrWM_Manticore)gConstruction.target.location.properties.FirstOrDefault(pr => pr is PrWM_Manticore);
+
+                if (manticore != null)
+                {
+                    gConstruction.target.location.properties.Add(new PrWM_CagedManticore(gConstruction.target.location));
+                    gConstruction.target.location.properties.Remove(manticore);
                 }
             }
         }

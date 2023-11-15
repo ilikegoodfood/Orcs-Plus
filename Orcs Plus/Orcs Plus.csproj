@@ -92,11 +92,14 @@
     <Compile Include="I_ShamanStaff.cs" />
     <Compile Include="I_SnakeskinArmour.cs" />
     <Compile Include="I_SpiritCallerStaff.cs" />
+    <Compile Include="MA_Orcs_GreatConstruction.cs" />
     <Compile Include="MA_Orc_HireMercenaries.cs" />
     <Compile Include="Mt_DockyardBrawler.cs" />
     <Compile Include="M_OrcCorsair.cs" />
     <Compile Include="OnChallengeComplete.cs" />
+    <Compile Include="PrWM_CagedManticore.cs" />
     <Compile Include="Pr_Ophanim_Perfection.cs" />
+    <Compile Include="Pr_Orcs_GreatConstruction.cs" />
     <Compile Include="Pr_Orcs_SacrificialSite.cs" />
     <Compile Include="Pr_Vinerva_Health.cs" />
     <Compile Include="Pr_Vinerva_Life.cs" />

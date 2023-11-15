@@ -619,7 +619,7 @@ namespace Orcs_Plus
 
         public override double sovereignAI(Map map, AN actionNational, Person ruler, List<ReasonMsg> reasons, double initialUtility)
         {
-            if (actionNational is AN_WarOnThreat threatWar && threatWar.target is SG_Orc)
+            if (actionNational is AN_WarOnThreat threatWar && threatWar.target is SG_Orc orcSociety)
             {
                 if (reasons != null)
                 {
@@ -628,6 +628,18 @@ namespace Orcs_Plus
                     {
                         initialUtility += distanceReason.value;
                         distanceReason.value *= 2;
+                    }
+
+                    if (map.locations[ruler.rulerOf].soc is Society society && (society.isDarkEmpire || society.isOphanimControlled))
+                    {
+                        if (core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+                        {
+                            if (orcCulture.tenet_alignment.status < 1 && orcCulture.tenet_intolerance.status < 0)
+                            {
+                                initialUtility -= 1000;
+                                reasons.Add(new ReasonMsg("Mutual interests", -1000));
+                            }
+                        }
                     }
                 }
                 else
@@ -638,10 +650,21 @@ namespace Orcs_Plus
                         val = Math.Max(val * map.param.utility_soc_warDistancePenaltyPerStep, map.param.utility_soc_warDistancePenaltyCap);
                         initialUtility += val;
                     }
+
+                    if (map.locations[ruler.rulerOf].soc is Society society && (society.isDarkEmpire || society.isOphanimControlled))
+                    {
+                        if (core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+                        {
+                            if (orcCulture.tenet_alignment.status < 1 && orcCulture.tenet_intolerance.status < 0)
+                            {
+                                initialUtility -= 1000;
+                            }
+                        }
+                    }
                 }
             }
 
-            if (actionNational is AN_DeclareWar war && war.target is SG_Orc)
+            if (actionNational is AN_DeclareWar war && war.target is SG_Orc orcSociety2)
             {
                 if (reasons != null)
                 {
@@ -651,6 +674,18 @@ namespace Orcs_Plus
                         initialUtility += distanceReason.value;
                         distanceReason.value *= 2;
                     }
+
+                    if (map.locations[ruler.rulerOf].soc is Society society && (society.isDarkEmpire || society.isOphanimControlled))
+                    {
+                        if (core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+                        {
+                            if (orcCulture.tenet_alignment.status < 1 && orcCulture.tenet_intolerance.status < 0)
+                            {
+                                initialUtility -= 1000;
+                                reasons.Add(new ReasonMsg("Mutual interests", -1000));
+                            }
+                        }
+                    }
                 }
                 else
                 {
@@ -659,6 +694,17 @@ namespace Orcs_Plus
                     {
                         val = Math.Max(val * map.param.utility_soc_warDistancePenaltyPerStep, map.param.utility_soc_warDistancePenaltyCap);
                         initialUtility += val;
+                    }
+
+                    if (map.locations[ruler.rulerOf].soc is Society society && (society.isDarkEmpire || society.isOphanimControlled))
+                    {
+                        if (core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+                        {
+                            if (orcCulture.tenet_alignment.status < 1 && orcCulture.tenet_intolerance.status < 0)
+                            {
+                                initialUtility -= 1000;
+                            }
+                        }
                     }
                 }
             }
