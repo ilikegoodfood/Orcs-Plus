@@ -51,7 +51,25 @@ namespace Orcs_Plus
 
         public override string getName()
         {
-            return "Great Construction";
+            string result = "Great Construction";
+            if (specialism == 1)
+            {
+                result += " (Fortress)";
+            }
+            else if (specialism == 2)
+            {
+                result += " (Mage Camp)";
+            }
+            else if (specialism == 3)
+            {
+                result += " (Menagerie)";
+            }
+            else if (specialism == 5)
+            {
+                result += " (Shipyard)";
+            }
+
+            return result;
         }
 
         public override string getDesc()
@@ -225,8 +243,6 @@ namespace Orcs_Plus
 
         public override void endProperty()
         {
-            bool valid = true;
-
             if (specialism == 3)
             {
                 PrWM_CagedManticore manticore = (PrWM_CagedManticore)location.properties.FirstOrDefault(pr => pr is PrWM_CagedManticore);
@@ -236,7 +252,7 @@ namespace Orcs_Plus
                 }
                 else
                 {
-                    valid = false;
+                    specialism = 1;
                 }
             }
             else if (specialism == 5)
@@ -248,18 +264,11 @@ namespace Orcs_Plus
                 }
                 else
                 {
-                    valid = false;
+                    specialism = 4;
                 }
             }
 
-            if (valid)
-            {
-                orcCamp.specialism = specialism;
-            }
-            else
-            {
-                orcCamp.specialism = 1;
-            }
+            orcCamp.specialism = specialism;
 
             location.properties.Remove(this);
         }

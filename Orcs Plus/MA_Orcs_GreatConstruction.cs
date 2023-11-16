@@ -54,7 +54,7 @@ namespace Orcs_Plus
 
         public override int getTurnsRequired()
         {
-            return 4;
+            return 8;
         }
 
         public override double getUtility(List<ReasonMsg> reasons)
@@ -133,7 +133,7 @@ namespace Orcs_Plus
                 testReasonMsgs = new List<ReasonMsg>();
             }
 
-            int targetFortressCount = (int)Math.Floor((orcCulture.camps.Count - orcCulture.specializedCamps.Count) / 6.0);
+            int targetFortressCount = (int)Math.Ceiling((orcCulture.camps.Count - orcCulture.specializedCamps.Count) / 4.0);
             int fortressCount = orcCulture.specializedCamps.FindAll(c => c.specialism == 1).Count;
             bool needFortress = fortressCount < targetFortressCount;
 
@@ -418,6 +418,8 @@ namespace Orcs_Plus
                 orcCulture.spendGold(10.0);
                 greatConstruction = new Pr_Orcs_GreatConstruction(target, orcSociety, specialism);
                 target.location.properties.Add(greatConstruction);
+
+                map.addUnifiedMessage(orcSociety, target.location, "Great Construction", "The orcs of the" + orcSociety.getName() + " have begun a great construction project in " + target.getName(), "Great Construction");
             }
         }
     }
