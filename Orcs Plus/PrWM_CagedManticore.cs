@@ -28,29 +28,17 @@ namespace Orcs_Plus
 
         public override void turnTick()
         {
-            bool escape = false;
-
-            if (!(location.settlement is Set_OrcCamp camp) || camp.specialism != 0)
+            if (location.settlement is Set_OrcCamp camp && camp.specialism == 0)
             {
-                escape = true;
+                if (location.soc is SG_Orc orcs && ((orcs.actionUnderway is MA_Orcs_GreatConstruction gConstruction && gConstruction.target == location.settlement) || location.properties.Any(pr => pr is Pr_Orcs_GreatConstruction gConstruct && gConstruct.orcSociety == location.soc)))
+                {
+                    return;
+                }
             }
 
-            if (!(location.soc is SG_Orc))
-            {
-                escape = true;
-            }
-
-            if (!location.properties.Any(pr => pr is Pr_Orcs_GreatConstruction gConstruct && gConstruct.orcSociety == location.soc))
-            {
-                escape = true;
-            }
-
-            if (escape)
-            {
-                location.properties.Remove(this);
-                location.properties.Add(new PrWM_Manticore(location));
-                return;
-            }
+            location.properties.Remove(this);
+            location.properties.Add(new PrWM_Manticore(location));
+            return;
         }
     }
 }

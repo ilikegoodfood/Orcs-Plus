@@ -82,7 +82,7 @@ namespace Orcs_Plus
                 }
                 else if (specialism == 3)
                 {
-                    if (!target.location.properties.Any(pr => pr is PrWM_CagedManticore))
+                    if (!target.location.properties.Any(pr => pr is PrWM_Manticore || pr is PrWM_CagedManticore))
                     {
                         clearTarget();
                     }
@@ -211,7 +211,7 @@ namespace Orcs_Plus
                     {
                         testSpecialism = 3;
                         testUtility = getMenagerieUtility(camp, testReasonMsgs);
-                        testUtility = getNeighbourCampUtility(camp, targetReasonMsgs);
+                        testUtility += getNeighbourCampUtility(camp, targetReasonMsgs);
 
                         if (testUtility > targetUtility)
                         {
