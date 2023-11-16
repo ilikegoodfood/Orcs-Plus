@@ -177,7 +177,14 @@ namespace Orcs_Plus
 
             if (charge >= 300.0)
             {
+                charge = 300.0;
                 endProperty();
+                return;
+            }
+            else if (charge <= 0.0)
+            {
+                charge = 0.0;
+                location.properties.Remove(this);
                 return;
             }
 
