@@ -104,15 +104,9 @@ namespace Orcs_Plus
 
             SG_Orc orcSociety = location.soc as SG_Orc;
 
-            Sub_OrcWaystation waystation = location.settlement.subs.OfType<Sub_OrcWaystation>().FirstOrDefault(s => s.orcSociety == orcSociety);
-            if (orcSociety == null && location.settlement != null)
+            Sub_OrcWaystation waystation = (Sub_OrcWaystation)location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation w && w.getChallenges().Contains(this));
+            if (waystation != null)
             {
-                if (waystation == null)
-                {
-                    msgs?.Add(new ReasonMsg("Invalid Location", -10000.0));
-                    return -10000.0;
-                }
-
                 orcSociety = waystation.orcSociety;
             }
 
@@ -202,7 +196,15 @@ namespace Orcs_Plus
                 }
             }
 
-            if (orcSociety != null && location.settlement != null && (u.isCommandable() && location.settlement.infiltration == 1.0 || (u is UAEN_OrcElder elder && (elder.society as HolyOrder_Orcs)?.orcSociety == orcSociety)))
+            bool infiltrated = true;
+            bool infiltratable = (location.settlement is Set_OrcCamp || location.settlement.subs.Any(sub => sub.canBeInfiltrated()));
+            if (infiltratable)
+            {
+                infiltrated = location.settlement.isInfiltrated;
+            }
+
+
+            if (orcSociety != null && location.settlement != null && (u.isCommandable() && infiltrated) || (u is UAEN_OrcElder elder && (elder.society as HolyOrder_Orcs)?.orcSociety == orcSociety))
             {
                 List<Settlement> settlements = new List<Settlement>();
 
