@@ -225,7 +225,7 @@ namespace Orcs_Plus
 
         public override void endProperty()
         {
-            orcCamp.specialism = specialism;
+            bool valid = true;
 
             if (specialism == 3)
             {
@@ -234,12 +234,33 @@ namespace Orcs_Plus
                 {
                     location.properties.Remove(manticore);
                 }
+                else
+                {
+                    valid = false;
+                }
             }
             else if (specialism == 5)
             {
                 Sub_Shipwreck shipwreck = (Sub_Shipwreck)orcCamp.subs.FirstOrDefault(sub => sub is Sub_Shipwreck wreck && !wreck.isReinforced());
-                shipwreck?.removeWreck();
+                if (shipwreck != null)
+                {
+                    shipwreck.removeWreck();
+                }
+                else
+                {
+                    valid = false;
+                }
             }
+
+            if (valid)
+            {
+                orcCamp.specialism = specialism;
+            }
+            else
+            {
+                orcCamp.specialism = 1;
+            }
+
             location.properties.Remove(this);
         }
     }

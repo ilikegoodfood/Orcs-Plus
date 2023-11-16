@@ -63,7 +63,7 @@ namespace Orcs_Plus
             }
         }
 
-        new void updateMaxHP()
+        new public void updateMaxHP()
         {
             if (homeLocation != -1 && map.locations[homeLocation].soc is SG_Orc)
             {

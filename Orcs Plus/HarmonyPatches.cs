@@ -1744,6 +1744,11 @@ namespace Orcs_Plus
                         }
 
                         culture.cachedGone = true;
+
+                        if (!orcCulture.ophanim_PerfectSociety && culture.ophanim_PerfectSociety)
+                        {
+                            orcCulture.ophanim_PerfectSociety = true;
+                        }
                     }
 
                     foreach (Location loc in challenge.map.locations)
@@ -2509,7 +2514,7 @@ namespace Orcs_Plus
                 return;
             }
 
-            if (orcCulture?.tenet_expansionism?.status < -1)
+            if (orcCulture?.tenet_expansionism?.status < -1 && !um.location.units.Any(u => u is UM_OrcArmy army && army.society == um.society && army.task is Task_PerformChallenge tChallenge && tChallenge.challenge is Rt_Orcs_BuildCamp))
             {
                 Rt_Orcs_BuildCamp cBuildCamp = (Rt_Orcs_BuildCamp)um.rituals.FirstOrDefault(rt => rt is Rt_Orcs_BuildCamp);
                 if (cBuildCamp != null && cBuildCamp.validFor(um))
