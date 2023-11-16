@@ -196,47 +196,50 @@ namespace Orcs_Plus
                 }
             }
 
-            bool infiltrated = true;
-            bool infiltratable = (location.settlement is Set_OrcCamp || location.settlement.subs.Any(sub => sub.canBeInfiltrated()));
-            if (infiltratable)
+            if (location.settlement != null)
             {
-                infiltrated = location.settlement.isInfiltrated;
-            }
-
-
-            if (orcSociety != null && location.settlement != null && (u.isCommandable() && infiltrated) || (u is UAEN_OrcElder elder && (elder.society as HolyOrder_Orcs)?.orcSociety == orcSociety))
-            {
-                List<Settlement> settlements = new List<Settlement>();
-
-                foreach (Location neighbour in location.getNeighbours())
+                bool infiltrated = true;
+                bool infiltratable = (location.settlement is Set_OrcCamp || location.settlement.subs.Any(sub => sub.canBeInfiltrated()));
+                if (infiltratable)
                 {
-                    if (neighbour.settlement != null && neighbour.hex.getHabilitability() >= map.opt_orcHabMult * map.param.orc_habRequirement)
-                    {
-                        if (ModCore.core.data.getSettlementTypesForWaystation().Contains(neighbour.settlement.GetType()) && neighbour.settlement.subs.OfType<Sub_OrcWaystation>().FirstOrDefault(s => s.orcSociety == orcSociety) == null)
-                        {
-                            settlements.Add(neighbour.settlement);
-                        }
-                    }
+                    infiltrated = location.settlement.isInfiltrated;
                 }
 
-                if (settlements.Count > 0)
+
+                if (orcSociety != null && (u.isCommandable() && infiltrated) || (u is UAEN_OrcElder elder && (elder.society as HolyOrder_Orcs)?.orcSociety == orcSociety))
                 {
-                    Settlement targetSettlement = settlements[0];
-                    if (settlements.Count > 1)
+                    List<Settlement> settlements = new List<Settlement>();
+
+                    foreach (Location neighbour in location.getNeighbours())
                     {
-                        targetSettlement = settlements[Eleven.random.Next(settlements.Count)];
+                        if (neighbour.settlement != null && neighbour.hex.getHabilitability() >= map.opt_orcHabMult * map.param.orc_habRequirement)
+                        {
+                            if (ModCore.core.data.getSettlementTypesForWaystation().Contains(neighbour.settlement.GetType()) && neighbour.settlement.subs.OfType<Sub_OrcWaystation>().FirstOrDefault(s => s.orcSociety == orcSociety) == null)
+                            {
+                                settlements.Add(neighbour.settlement);
+                            }
+                        }
                     }
 
-                    if (targetSettlement != null)
+                    if (settlements.Count > 0)
                     {
-                        Sub_OrcWaystation waystation = new Sub_OrcWaystation(targetSettlement, orcSociety);
-                        targetSettlement.subs.Add(waystation);
-                        u.person.gold -= cost;
-                    }
+                        Settlement targetSettlement = settlements[0];
+                        if (settlements.Count > 1)
+                        {
+                            targetSettlement = settlements[Eleven.random.Next(settlements.Count)];
+                        }
 
-                    if (u.isCommandable() && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
-                    {
-                        ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand]), true);
+                        if (targetSettlement != null)
+                        {
+                            Sub_OrcWaystation waystation = new Sub_OrcWaystation(targetSettlement, orcSociety);
+                            targetSettlement.subs.Add(waystation);
+                            u.person.gold -= cost;
+                        }
+
+                        if (u.isCommandable() && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+                        {
+                            ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand]), true);
+                        }
                     }
                 }
             }
