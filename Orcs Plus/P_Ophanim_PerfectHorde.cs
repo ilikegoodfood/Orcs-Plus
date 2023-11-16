@@ -83,6 +83,10 @@ namespace Orcs_Plus
 
                 ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Made Perfect", ModCore.core.data.influenceGain[ModData.influenceGainAction.RecieveGift]), true);
 
+                if (GraphicalMap.selectedUnit == unit)
+                {
+                    GraphicalMap.selectedUnit = perfectHorde;
+                }
                 orcArmy.disband(unit.map, "Remade into Perfect Horde");
             }
         }
