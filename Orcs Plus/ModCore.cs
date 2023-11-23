@@ -152,7 +152,8 @@ namespace Orcs_Plus
                 core.data = new ModData();
             }
             core.data.isPlayerTurn = true;
-            core.data.updateOrcSGCultureMap(map);
+            core.data = data;
+            //core.data.updateOrcSGCultureMap(map);
 
             getModKernels(map);
 
@@ -390,7 +391,7 @@ namespace Orcs_Plus
 
             foreach (Unit unit in map.units)
             {
-                if (unit is UAEN_OrcUpstart upstart && upstart.society is SG_Orc orcSociety && !upstart.isDead)
+                if (!unit.isDead && unit is UAEN_OrcUpstart upstart && upstart.society is SG_Orc orcSociety)
                 {
                     Item[] items = upstart.person.items;
                     if (items != null && !items.Any(i => i is I_HordeBanner banner && banner.orcs == upstart.society))
@@ -586,7 +587,255 @@ namespace Orcs_Plus
                 return;
             }
 
+            if (map.acceleratedTime != core.data.acceleratedTime)
+            {
+                core.data.acceleratedTime = map.acceleratedTime;
+                core.data.brokenMakerSleeping = true;
+                if (core.data.acceleratedTime)
+                {
+                    onBrokenMakerSleep_StartOfSleep(map);
+                }
+            }
+
+            if (core.data.brokenMakerSleeping)
+            {
+                core.data.sleepDuration--;
+                onBrokenMakerSleep_TurnTick(map);
+
+                if (core.data.sleepDuration == 0)
+                {
+                    core.data.brokenMakerSleeping = false;
+                    onBrokenMakerSleep_EndOfSleep(map);
+                    core.data.sleepDuration = 50;
+                }
+            }
+
             core.data.onTurnEnd(map);
+        }
+
+        public void onBrokenMakerSleep_StartOfSleep(Map map)
+        {
+            foreach(SocialGroup sg in map.socialGroups)
+            {
+                if (sg is HolyOrder_Orcs orcCulture)
+                {
+                    orcCulture.tenet_alignment.status = 0;
+                    orcCulture.tenet_intolerance.status = -1;
+
+                    int targetCamps = orcCulture.civilWar_TargetCampCount;
+                    if (targetCamps == 0)
+                    {
+                        targetCamps = 8;
+                    }
+                    if (orcCulture.camps.Count > targetCamps)
+                    {
+                        orcCulture.triggerCivilWar();
+                    }
+                }
+            }
+
+            AIChallenge secretsOfDeath = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Ch_SecretsOfDeath));
+            secretsOfDeath?.tags.Add(AIChallenge.ChallengeTags.Forbidden);
+
+            AIChallenge learnArcaneSecret = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Ch_LearnSecret));
+            learnArcaneSecret?.tags.Add(AIChallenge.ChallengeTags.Forbidden);
+
+            AIChallenge enslaveDead = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Mg_EnslaveTheDead));
+            enslaveDead?.tags.Add(AIChallenge.ChallengeTags.Forbidden);
+
+            AIChallenge ravenousDead = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Mg_RavenousDead));
+            ravenousDead?.tags.Add(AIChallenge.ChallengeTags.Forbidden);
+
+            AIChallenge warFestival = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Ch_Orcs_WarFestival));
+            warFestival?.tags.Add(AIChallenge.ChallengeTags.Forbidden);
+
+            AIChallenge deathFestival = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Ch_Orcs_DeathFestival));
+            deathFestival?.tags.Add(AIChallenge.ChallengeTags.Forbidden);
+        }
+
+        public void onBrokenMakerSleep_TurnTick(Map map)
+        {
+            foreach (Unit unit in map.units)
+            {
+                if (unit is UM_RavenousDead || unit is UM_UntamedDead)
+                {
+                    unit.addMenace(3.0);
+                }
+                else if (unit is UAEN_OrcUpstart upstart)
+                {
+                    for (int i = 0; i < upstart.minions.Length; i++)
+                    {
+                        if (upstart.minions[i] != null && !(upstart.minions[i] is M_Goblin) && Eleven.random.Next(100) == 0)
+                        {
+                            upstart.minions[i] = new M_Goblin(map);
+                        }
+                    }
+                }
+            }
+
+            foreach (SocialGroup sg in map.socialGroups)
+            {
+                if (!sg.isGone() && sg is HolyOrder_Orcs orcCulture)
+                {
+                    SG_Orc orcSociety = orcCulture.orcSociety;
+
+                    manageCampDecay(map, orcSociety, orcCulture);
+                }
+            }
+        }
+
+        public void manageCampDecay(Map map, SG_Orc orcSociety, HolyOrder_Orcs orcCulture)
+        {
+            orcCulture.updateData();
+
+            Dictionary<Location, int> stepDistances = new Dictionary<Location, int> { { map.locations[orcCulture.capital], 0 } };
+            HashSet<Location> searchedLocations = new HashSet<Location> { map.locations[orcCulture.capital] };
+            HashSet<Location> stepLocations = new HashSet<Location> { map.locations[orcCulture.capital] };
+
+            for (int i = 1; i < 128; i++)
+            {
+                HashSet<Location> newStepLocations = new HashSet<Location>();
+                foreach (Location loc in stepLocations)
+                {
+                    foreach (Location neighbour in loc.getNeighbours())
+                    {
+                        if (!searchedLocations.Contains(neighbour))
+                        {
+                            searchedLocations.Add(neighbour);
+
+                            if (neighbour.soc == orcSociety || (neighbour.settlement != null && neighbour.settlement.subs.Any(sub => sub is Sub_OrcWaystation waystation && waystation.orcSociety == orcSociety)))
+                            {
+                                newStepLocations.Add(neighbour);
+                                stepDistances.Add(neighbour, i);
+                            }
+                        }
+                    }
+                }
+
+                stepLocations = newStepLocations;
+
+                if (newStepLocations.Count == 0)
+                {
+                    break;
+                }
+            }
+
+            List<Set_OrcCamp>[] specialisedCamps = new List<Set_OrcCamp>[5];
+            int capitalSpecialism = 0;
+
+            for (int i = 0; i < specialisedCamps.Length; i++)
+            {
+                specialisedCamps[i] = new List<Set_OrcCamp>();
+            }
+
+            foreach (Set_OrcCamp specialisedCamp in orcCulture.specializedCamps)
+            {
+                if (specialisedCamp == orcCulture.seat.settlement)
+                {
+                    capitalSpecialism = specialisedCamp.specialism;
+                    continue;
+                }
+
+                specialisedCamps[specialisedCamp.specialism].Add(specialisedCamp);
+            }
+
+            for (int i = 0; i < specialisedCamps.Length; i++)
+            {
+                if (specialisedCamps[i].Count == 0)
+                {
+                    continue;
+                }
+
+                int targetCount = 1;
+                if (i == capitalSpecialism)
+                {
+                    targetCount--;
+                }
+
+                List<Set_OrcCamp> targetSpecialisedCamps = new List<Set_OrcCamp>();
+                targetSpecialisedCamps.AddRange(specialisedCamps[i]);
+                while (targetCount > 0)
+                {
+                    targetSpecialisedCamps.RemoveAt(Eleven.random.Next(targetSpecialisedCamps.Count));
+                    targetCount--;
+                }
+
+                foreach (Set_OrcCamp specialisedCamp in targetSpecialisedCamps)
+                {
+                    if (Eleven.random.Next(100) < 0.5 * stepDistances[specialisedCamp.location])
+                    {
+                        specialisedCamps[specialisedCamp.specialism].Remove(specialisedCamp);
+                        specialisedCamp.specialism = 0;
+                        if (specialisedCamp.army != null)
+                        {
+                            specialisedCamp.army.die(map, "Desertion");
+                            specialisedCamp.army = null;
+                        }
+                        Sub_Temple temple = (Sub_Temple)specialisedCamp.subs.FirstOrDefault(sub => sub is Sub_OrcTemple);
+                        specialisedCamp.subs.Remove(temple);
+                    }
+                }
+            }
+
+            foreach (KeyValuePair<Location, int> pair in stepDistances)
+            {
+                Location loc = pair.Key;
+                int dist = pair.Value;
+
+                if (!loc.getNeighbours().Any(n => stepDistances.TryGetValue(n, out int i) && i > dist))
+                {
+                    if (Eleven.random.Next(100) < 0.5 * stepDistances[loc])
+                    {
+                        if (loc.settlement is Set_OrcCamp camp && camp.specialism == 0)
+                        {
+                            camp.fallIntoRuin("Decayed over time");
+                        }
+                        
+                        if (loc.settlement != null)
+                        {
+                            Sub_OrcWaystation waystation = (Sub_OrcWaystation)loc.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation way && way.orcSociety == orcSociety);
+                            if (waystation != null)
+                            {
+                                loc.settlement.subs.Remove(waystation);
+                            }
+                        }
+
+                        if (loc.soc == orcSociety)
+                        {
+                            Sub_OrcWaystation waystation = (Sub_OrcWaystation)loc.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation way && way.orcSociety != orcSociety);
+                            if (waystation != null)
+                            {
+                                loc.soc = waystation.orcSociety;
+                            }
+                            else
+                            {
+                                loc.soc = null;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public void onBrokenMakerSleep_EndOfSleep(Map map)
+        {
+            AIChallenge secretsOfDeath = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Ch_SecretsOfDeath));
+            secretsOfDeath?.tags.Remove(AIChallenge.ChallengeTags.Forbidden);
+
+            AIChallenge learnArcaneSecret = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Ch_LearnSecret));
+            learnArcaneSecret?.tags.Remove(AIChallenge.ChallengeTags.Forbidden);
+
+            AIChallenge enslaveDead = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Mg_EnslaveTheDead));
+            enslaveDead?.tags.Remove(AIChallenge.ChallengeTags.Forbidden);
+
+            AIChallenge ravenousDead = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Mg_RavenousDead));
+            ravenousDead?.tags.Remove(AIChallenge.ChallengeTags.Forbidden);
+
+            AIChallenge warFestival = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Ch_Orcs_WarFestival));
+            warFestival?.tags.Remove(AIChallenge.ChallengeTags.Forbidden);
+
+            AIChallenge deathFestival = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Ch_Orcs_DeathFestival));
+            deathFestival?.tags.Remove(AIChallenge.ChallengeTags.Forbidden);
         }
 
         public override float hexHabitability(Hex hex, float hab)
@@ -607,6 +856,15 @@ namespace Orcs_Plus
             }
 
             return hab;
+        }
+
+        public override void onCheatEntered(string command)
+        {
+            Location selectedLocation = GraphicalMap.selectedHex?.location;
+            if (command == "civilWar" && selectedLocation?.soc is SG_Orc orcSociety && core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            {
+                orcCulture.triggerCivilWar();
+            }
         }
 
         public override void onChallengeComplete(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)

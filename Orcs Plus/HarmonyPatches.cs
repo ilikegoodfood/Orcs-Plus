@@ -85,6 +85,7 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_validFor_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_complete_Transpiler)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.buildNegativeTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Orc)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_StealPlunder), nameof(Ch_Orcs_StealPlunder.getInherentDanger), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_StealPlunder_getInherentDanger_Postfix)));
 
             // Patches for I_HordeBanner
             harmony.Patch(original: AccessTools.Constructor(typeof(I_HordeBanner), new Type[] { typeof(Map), typeof(SG_Orc), typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(I_HordeBanner_ctor_Postfix)));
@@ -983,6 +984,30 @@ namespace Orcs_Plus
 
                 ch.map.addUnifiedMessage(ua, null, "Cache Looted", ua.getName() + " has looted the orc plunder at " + ua.location.getName(true) + " and taken or destroyed all the items therein", UnifiedMessage.messageType.CACHE_GONE, false);
                 ch.location.properties.Remove(ch.cache);
+            }
+        }
+
+        private static void Ch_Orcs_StealPlunder_getInherentDanger_Postfix(Ch_Orcs_StealPlunder __instance, ref int __result)
+        {
+            if (__instance.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            {
+                switch (orcCulture.tenet_intolerance.status)
+                {
+                    case 2:
+                        __result /= 4;
+                        break;
+                    case 1:
+                        __result /= 2;
+                        break;
+                    case -1:
+                        __result *= 2;
+                        break;
+                    case -2:
+                        __result *= 3;
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static HarmonyLib.Code;
 
 namespace Orcs_Plus
 {
@@ -45,6 +46,8 @@ namespace Orcs_Plus
 
         public bool ophanim_PerfectSociety = false;
 
+        public int civilWar_TargetCampCount = 8;
+
         public List<MonsterAction> monsterActions = new List<MonsterAction>();
 
         public HolyOrder_Orcs(Map m, Location l, SG_Orc o)
@@ -53,12 +56,14 @@ namespace Orcs_Plus
             //Console.WriteLine("OrcsPlus: HolyOrder_Orcs Ctor");
             orcSociety = o;
             capital = l.index;
+            if (!ModCore.core.data.orcSGCultureMap.ContainsKey(orcSociety))
+            {
+                ModCore.core.data.orcSGCultureMap.Add(orcSociety, this);
+            }
 
             genderExclusive = 1 - Eleven.random.Next(3);
 
             generateName(l);
-            updateData();
-            CreateSeat();
 
             houseOrc = new House(map);
 
@@ -261,7 +266,7 @@ namespace Orcs_Plus
 
             foreach (Set_OrcCamp camp in allCamps)
             {
-                Sub_Temple temple = camp.subs.OfType<Sub_Temple>().FirstOrDefault();
+                Sub_Temple temple = (Sub_Temple)camp.subs.FirstOrDefault(sub => sub is Sub_OrcCultureCapital || sub is Sub_OrcTemple);
                 if (temple != null)
                 {
                     temples.Add(temple);
@@ -420,7 +425,7 @@ namespace Orcs_Plus
         {
             updateData();
 
-            if (seat == null || seat.settlement == null || seat.settlement.location?.settlement != seat.settlement || !seat.settlement.subs.Contains(seat))
+            if (seat == null || seat.settlement == null || seat.settlement.location == null || seat.settlement.location.settlement != seat.settlement || !seat.settlement.subs.Contains(seat))
             {
                 seat = null;
                 CreateSeat();
@@ -819,6 +824,520 @@ namespace Orcs_Plus
         public override void locationStolen(HolyOrder order, UA u)
         {
 
+        }
+
+        public override void triggerCivilWar()
+        {
+            // Ensure all data is up to date.
+            updateData();
+
+            if (seat == null || seat.settlement == null || seat.settlement.location == null || seat.settlement.location.settlement != seat.settlement || !seat.settlement.subs.Contains(seat))
+            {
+                seat = null;
+                CreateSeat();
+            }
+
+            Location hordeCapital = map.locations[capital];
+            Set_OrcCamp capitalCamp = hordeCapital.settlement as Set_OrcCamp;
+            List<Set_OrcCamp> capitals = new List<Set_OrcCamp>();
+
+            HashSet<Location> locationSet = new HashSet<Location>();
+            List<List<Location>> chunks = new List<List<Location>>();
+
+            // Builds Location lists, named "chunk", where all locations are orc camps or waystations of target social group, are contigous with each other, and where each location is included only once.
+            // Uses bredth-first search algorithm.
+            foreach(Location loc in map.locations)
+            {
+                if (loc.soc == orcSociety && loc.settlement is Set_OrcCamp)
+                {
+                    if (locationSet.Contains(loc))
+                    {
+                        continue;
+                    }
+
+                    List<Location> chunkLocations = new List<Location> { loc };
+                    List<Location> outerChunkLocations = new List<Location> { loc };
+                    locationSet.Add(loc);
+                    int i = 0;
+
+                    while (i < 128)
+                    {
+                        i++;
+                        List<Location> newChunkLocations = new List<Location>();
+
+                        foreach (Location chunkLocation in outerChunkLocations)
+                        {
+                            foreach( Location neighbour in chunkLocation.getNeighbours())
+                            {
+                                if (locationSet.Contains(neighbour))
+                                {
+                                    continue;
+                                }
+
+                                if (neighbour.soc == orcSociety || (neighbour.settlement != null && neighbour.settlement.subs.Any(sub => sub is Sub_OrcWaystation waystation && waystation.orcSociety == orcSociety)))
+                                {
+                                    newChunkLocations.Add(neighbour);
+                                    locationSet.Add(neighbour);
+                                }
+                            }
+                        }
+
+                        if (newChunkLocations.Count == 0)
+                        {
+                            chunks.Add(chunkLocations);
+                            break;
+                        }
+
+                        chunkLocations.AddRange(newChunkLocations);
+                        outerChunkLocations = newChunkLocations;
+                    }
+                }
+            }
+
+
+            foreach (List<Location> chunk in chunks)
+            {
+                Set_OrcCamp chunkCapital = null;
+                List<Set_OrcCamp> chunkCamps = new List<Set_OrcCamp>();
+                List<Set_OrcCamp> chunkFortresses = new List<Set_OrcCamp>();
+                List<Set_OrcCamp> chunkSpecialisedCamps = new List<Set_OrcCamp>();
+                foreach (Location loc in chunk)
+                {
+                    if (loc.settlement is Set_OrcCamp camp)
+                    {
+                        chunkCamps.Add(camp);
+                        if (camp.specialism != 0 && camp.specialism != 4 && camp.specialism != 5)
+                        {
+                            chunkSpecialisedCamps.Add(camp);
+                            if (camp.specialism == 1)
+                            {
+                                chunkFortresses.Add(camp);
+                            }
+                        }
+                    }
+                }
+
+                if (chunkCamps.Contains(capitalCamp))
+                {
+                    chunkCapital = capitalCamp;
+                }
+                else
+                {
+                    if (chunkCamps.Count == 1)
+                    {
+                        chunkCapital = chunkCamps[0];
+                    }
+
+                    if (chunkCapital == null)
+                    {
+                        if (chunkFortresses.Count > 0)
+                        {
+                            chunkCapital = chunkFortresses[0];
+
+                            if (chunkFortresses.Count > 1)
+                            {
+                                chunkCapital = chunkFortresses[Eleven.random.Next(chunkFortresses.Count)];
+                            }
+                        }
+
+                        if (chunkCapital == null)
+                        {
+                            if (chunkSpecialisedCamps.Count > 0)
+                            {
+                                chunkCapital = chunkSpecialisedCamps[0];
+                                if (chunkSpecialisedCamps.Count > 1)
+                                {
+                                    chunkCapital = chunkSpecialisedCamps[Eleven.random.Next(chunkSpecialisedCamps.Count)];
+                                }
+                            }
+
+                            if (chunkCapital == null)
+                            {
+                                chunkCapital = chunkCamps[Eleven.random.Next(chunkCamps.Count)];
+                            }
+                        }
+                    }
+
+                    if (chunkCapital == null)
+                    {
+                        continue;
+                    }
+                }
+
+                // Integer division truncates.
+                if (civilWar_TargetCampCount == 0)
+                {
+                    civilWar_TargetCampCount = 8;
+                }
+                int targetCapitalCount = Math.Max(1, chunkCamps.Count / civilWar_TargetCampCount);
+                if (chunks.Count == 1 && targetCapitalCount == 1)
+                {
+                    targetCapitalCount++;
+                }
+
+                List<Set_OrcCamp> chunkCapitals = new List<Set_OrcCamp>();
+                if (chunkCapital != null)
+                {
+                    chunkCapitals.Add(chunkCapital);
+                }
+
+                if (targetCapitalCount > chunkCapitals.Count)
+                {
+                    int i = 3;
+                    while (i > 0)
+                    {
+                        for (int j = targetCapitalCount - chunkCapitals.Count; j > 0; j--)
+                        {
+                            Set_OrcCamp newRebelCapital = null;
+                            List<Set_OrcCamp> availableChunkFortresses = chunkFortresses.FindAll(cf => !chunkCapitals.Any(cc => map.getStepDist(cc.location, cf.location) < i) && map.getStepDist(cf.location, hordeCapital) >= i);
+                            List<Set_OrcCamp> availableSpecialisedCamps = chunkSpecialisedCamps.FindAll(csc => !chunkCapitals.Any(cc => map.getStepDist(cc.location, csc.location) < i) && map.getStepDist(csc.location, hordeCapital) >= i);
+                            List<Set_OrcCamp> availableChunkCamps = chunkCamps.FindAll(camp => !chunkCapitals.Any(cc => map.getStepDist(cc.location, camp.location) < i) && map.getStepDist(camp.location, hordeCapital) >= i);
+
+                            if (availableChunkFortresses.Count > 0)
+                            {
+                                newRebelCapital = availableChunkFortresses[0];
+
+                                if (availableChunkFortresses.Count > 1)
+                                {
+                                    newRebelCapital = availableChunkFortresses[Eleven.random.Next(availableChunkFortresses.Count)];
+                                }
+                            }
+
+                            if (newRebelCapital == null)
+                            {
+                                if (availableSpecialisedCamps.Count > 0)
+                                {
+                                    newRebelCapital = availableSpecialisedCamps[0];
+                                    if (availableSpecialisedCamps.Count > 1)
+                                    {
+                                        newRebelCapital = availableSpecialisedCamps[Eleven.random.Next(availableSpecialisedCamps.Count)];
+                                    }
+                                }
+
+                                if (newRebelCapital == null)
+                                {
+                                    if (availableChunkCamps.Count > 0)
+                                    {
+                                        newRebelCapital = availableChunkCamps[Eleven.random.Next(availableChunkCamps.Count)];
+                                    }
+                                }
+                            }
+
+                            if (newRebelCapital != null)
+                            {
+                                chunkCapitals.Add(newRebelCapital);
+                            }
+                        }
+
+                        if (chunkCapitals.Count >= targetCapitalCount)
+                        {
+                            break;
+                        }
+
+                        i--;
+                    }
+                }
+
+                capitals.AddRange(chunkCapitals);
+            }
+
+            Dictionary<Set_OrcCamp, List<Location>> hordeLocations = new Dictionary<Set_OrcCamp, List<Location>>();
+            Dictionary<Set_OrcCamp, HashSet<Location>> hordeLocationSets = new Dictionary<Set_OrcCamp, HashSet<Location>>();
+            Dictionary<Set_OrcCamp, HashSet<Location>> hordeSearchedSets = new Dictionary<Set_OrcCamp, HashSet<Location>>();
+            Dictionary<Set_OrcCamp, HashSet<Location>> stepLocations = new Dictionary<Set_OrcCamp, HashSet<Location>>();
+
+            foreach (Set_OrcCamp capital in capitals)
+            {
+                hordeLocations.Add(capital, new List<Location> { capital.location });
+                hordeLocationSets.Add(capital, new HashSet<Location> { capital.location });
+                hordeSearchedSets.Add(capital, new HashSet<Location> { capital.location });
+                stepLocations.Add(capital, new HashSet<Location> { capital.location });
+            }
+
+            for (int i = 1; i < 128; i++)
+            {
+                Dictionary<Set_OrcCamp, HashSet<Location>> newStepLocations = new Dictionary<Set_OrcCamp, HashSet<Location>>();
+                HashSet<Location> conflicts = new HashSet<Location>();
+
+                foreach (Set_OrcCamp capital in capitals)
+                {
+                    newStepLocations.Add(capital, new HashSet<Location>());
+                    foreach (Location loc in stepLocations[capital])
+                    {
+                        foreach (Location neighbour in loc.getNeighbours())
+                        {
+                            if (!hordeSearchedSets[capital].Contains(neighbour))
+                            {
+                                hordeSearchedSets[capital].Add(neighbour);
+
+                                if (!hordeLocationSets.Any(p => p.Value.Contains(neighbour)))
+                                {
+                                    if (neighbour.soc == orcSociety || (neighbour.settlement != null && neighbour.settlement.subs.Any(sub => sub is Sub_OrcWaystation waystation && waystation.orcSociety == orcSociety)))
+                                    {
+                                        if (!conflicts.Contains(neighbour) && newStepLocations.Any(p => p.Key != capital && p.Value.Contains(neighbour)))
+                                        {
+                                            conflicts.Add(neighbour);
+                                        }
+                                        newStepLocations[capital].Add(neighbour);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                foreach (Location conflict in conflicts)
+                {
+                    List<Set_OrcCamp> conflictCapitals = new List<Set_OrcCamp>();
+                    foreach (KeyValuePair<Set_OrcCamp, HashSet<Location>> pair in newStepLocations)
+                    {
+                        if (pair.Value.Contains(conflict))
+                        {
+                            conflictCapitals.Add(pair.Key);
+                        }
+                    }
+
+                    Set_OrcCamp conflictWinner = conflictCapitals[Eleven.random.Next(conflictCapitals.Count)];
+                    foreach (Set_OrcCamp capital in conflictCapitals)
+                    {
+                        if (capital == conflictWinner)
+                        {
+                            continue;
+                        }
+
+                        newStepLocations[capital].Remove(conflict);
+                    }
+                }
+
+                stepLocations = newStepLocations;
+
+                foreach (KeyValuePair<Set_OrcCamp, HashSet<Location>> pair in stepLocations)
+                {
+                    hordeLocations[pair.Key].AddRange(pair.Value);
+                    hordeLocationSets[pair.Key].UnionWith(pair.Value);
+                }
+
+                if (stepLocations.All(p => p.Value.Count == 0))
+                {
+                    break;
+                }
+            }
+
+            Dictionary<Set_OrcCamp, Tuple<SG_Orc, HolyOrder_Orcs>> rebelData = new Dictionary<Set_OrcCamp, Tuple<SG_Orc, HolyOrder_Orcs>>();
+            hordeLocationSets.Remove(capitalCamp);
+            foreach (Set_OrcCamp rebelCapital in capitals)
+            {
+                if (rebelCapital.locationIndex == capital)
+                {
+                    continue;
+                }
+
+                SG_Orc rebelSociety = new SG_Orc(map, rebelCapital.location);
+                ModCore.core.data.orcSGCultureMap.TryGetValue(rebelSociety, out HolyOrder_Orcs rebelCulture);
+
+                rebelData.Add(rebelCapital, new Tuple<SG_Orc, HolyOrder_Orcs>(rebelSociety, rebelCulture));
+
+                foreach (HolyTenet tenet in rebelCulture.tenets)
+                {
+                    HolyTenet matching = tenets.FirstOrDefault(t => t.GetType() == tenet.GetType() || tenet.GetType().IsSubclassOf(t.GetType()));
+                    if (matching != null)
+                    {
+                        tenet.status = matching.status;
+                    }
+                }
+
+                rebelCapital.location.soc = rebelSociety;
+                if (rebelCapital.specialism != 1 && rebelCapital.specialism != 2 && rebelCapital.specialism != 3)
+                {
+                    if (rebelCapital.army != null)
+                    {
+                        rebelCapital.army.die(map, "Desertion");
+                        rebelCapital.army = null;
+                    }
+
+                    rebelCapital.specialism = 1;
+                }
+
+                if (rebelCapital.army != null)
+                {
+                    rebelCapital.army.society = rebelSociety;
+                    rebelCapital.army.task = null;
+                }
+                else
+                {
+                    UM_OrcArmy army = null;
+                    if (rebelCapital.specialism == 3)
+                    {
+                        army = new UM_OrcBeastArmy(rebelCapital.location, rebelSociety, rebelCapital);
+                    }
+                    else
+                    {
+                        army = new UM_OrcArmy(rebelCapital.location, rebelSociety, rebelCapital);
+                    }
+
+                    rebelCapital.army = army;
+                    rebelCapital.location.units.Add(army);
+                    rebelCapital.armyRebuildTimer = 0;
+                    map.units.Add(army);
+
+                    if (army is UM_OrcBeastArmy bestialHorde)
+                    {
+                        bestialHorde.updateMaxHP();
+                        bestialHorde.hp = bestialHorde.maxHp;
+                    }
+                    else
+                    {
+                        army.updateMaxHP();
+                        army.hp = army.maxHp;
+                    }
+                }
+
+                Sub_Temple temple = (Sub_Temple)rebelCapital.subs.FirstOrDefault(sub => sub is Sub_OrcCultureCapital || sub is Sub_OrcTemple);
+                rebelCapital.subs.Remove(temple);
+
+                Sub_OrcCultureCapital rebelSeat = new Sub_OrcCultureCapital(rebelCapital, rebelCulture);
+                rebelCapital.subs.Add(rebelSeat);
+                rebelCulture.seat = rebelSeat;
+
+                for (int i = 1; i < hordeLocations[rebelCapital].Count; i++)
+                {
+                    Location loc = hordeLocations[rebelCapital][i];
+                    if (loc.soc == orcSociety)
+                    {
+                        loc.soc = rebelSociety;
+                    }
+                    else if (loc.soc == this)
+                    {
+                        loc.soc = rebelCulture;
+                    }
+                    
+                    if (loc.settlement != null)
+                    {
+                        Sub_OrcWaystation waystation = (Sub_OrcWaystation)loc.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation way && way.orcSociety == orcSociety);
+                        if (waystation != null)
+                        {
+                            waystation.orcSociety = rebelSociety;
+                        }
+
+                        if (loc.settlement is Set_OrcCamp camp)
+                        {
+                            rebelCulture.camps.Add(camp);
+                            camps.Remove(camp);
+
+                            if (camp.specialism > 0)
+                            {
+                                rebelCulture.specializedCamps.Add(camp);
+                                specializedCamps.Remove(camp);
+                            }
+
+                            if (camp.army != null)
+                            {
+                                camp.army.society = rebelSociety;
+                                camp.army.task = null;
+                            }
+
+                            temple = (Sub_Temple)camp.subs.FirstOrDefault(sub => sub is Sub_OrcCultureCapital || sub is Sub_OrcTemple);
+                            if (temple != null)
+                            {
+                                camp.subs.Remove(temple);
+                                camp.subs.Add(new Sub_OrcTemple(camp, rebelCulture));
+                            }
+                        }
+                    }
+                }
+            }
+
+            foreach (Unit unit in map.units)
+            {
+                if (!unit.isDead && !unit.isCommandable() && (unit.society == orcSociety || unit.society == this) && unit.homeLocation != -1)
+                {
+                    Location homeLocation = map.locations[unit.homeLocation];
+
+                    Set_OrcCamp rebelCapital = null;
+                    SG_Orc rebelSociety = null;
+                    HolyOrder_Orcs rebelCulture = null;
+                    foreach (KeyValuePair<Set_OrcCamp, HashSet<Location>> pair in hordeLocationSets)
+                    {
+                        if (pair.Value.Contains(homeLocation))
+                        {
+                            rebelCapital = pair.Key;
+                            rebelSociety = rebelData[pair.Key].Item1;
+                            rebelCulture = rebelData[pair.Key].Item2;
+                            break;
+                        }
+                    }
+
+                    if (rebelCapital != null)
+                    {
+                        if (unit.society == orcSociety)
+                        {
+                            unit.society = rebelSociety;
+
+                            if (unit is UAEN_OrcUpstart upstart)
+                            {
+                                upstart.task = new Task_Disrupted(1);
+
+                                for(int i = 0; i < upstart.person.items.Length; i++)
+                                {
+                                    if (upstart.person.items[i] is I_HordeBanner banner && banner.orcs == orcSociety)
+                                    {
+                                        banner.orcs = rebelSociety;
+                                    }
+                                }
+
+                                if (rebelSociety.upstart == null)
+                                {
+                                    rebelSociety.upstart = upstart;
+                                }
+                            }
+                            else
+                            {
+                                unit.task = null;
+                            }
+                        }
+                        else
+                        {
+                            unit.society = rebelCulture;
+                            unit.task = null;
+                        }
+                    }
+                }
+            }
+
+            updateData();
+            foreach (KeyValuePair<Set_OrcCamp, Tuple<SG_Orc, HolyOrder_Orcs>> pair in rebelData)
+            {
+                SG_Orc rebelSociety = pair.Value.Item1;
+                HolyOrder_Orcs rebelCulture = pair.Value.Item2;
+
+                rebelCulture.updateData();
+                rebelCulture.manageShamans();
+
+                if (rebelSociety.upstart == null)
+                {
+                    UAEN_OrcUpstart upstart = rebelSociety.placeUpstart(pair.Key.location);
+                    upstart.task = new Task_Disrupted(1);
+                }
+
+                if (rebelCulture.nAcolytes == 0)
+                {
+                    rebelCulture.createAcolyte();
+                }
+
+                map.declareWar(rebelSociety, orcSociety);
+                foreach (KeyValuePair<Set_OrcCamp, Tuple<SG_Orc, HolyOrder_Orcs>> pair2 in rebelData)
+                {
+                    if (pair2.Value.Item1 == rebelSociety)
+                    {
+                        continue;
+                    }
+
+                    map.declareWar(rebelSociety, pair2.Value.Item1);
+                }
+            }
+
+            World.log("Civil war triggered for " + orcSociety.getName() + " hostile capitals " + rebelData.Count.ToString());
+            map.addUnifiedMessage(orcSociety, null, "Civil War", orcSociety.getName() + " descends into civil war, with remote territories raising their armies against the horde.\n\nRebels and loyalists will now fight to destroy the other in the hopes that they can rebuild.", UnifiedMessage.messageType.CIVIL_WAR, false);
         }
 
         public override bool isDark()

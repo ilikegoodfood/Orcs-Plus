@@ -71,6 +71,12 @@ namespace Orcs_Plus
 
         public Dictionary<int, float> orcGeoMageHabitabilityBonus;
 
+        public bool acceleratedTime = false;
+
+        public bool brokenMakerSleeping = false;
+
+        public int sleepDuration = 50;
+
         public ModData()
         {
             modAssemblies= new Dictionary<string, ModIntegrationData>();

@@ -306,7 +306,7 @@ namespace Orcs_Plus
                 {
                     if (unit is UM && unit.task is Task_RazeLocation)
                     {
-                        Pr_OrcishIndustry industry = challengeData.location.properties.OfType<Pr_OrcishIndustry>().FirstOrDefault();
+                        Pr_OrcishIndustry industry = (Pr_OrcishIndustry)challengeData.location.properties.FirstOrDefault(pr => pr is Pr_OrcishIndustry);
                         if (industry?.charge > 10)
                         {
                             attackerCount++;
@@ -327,7 +327,7 @@ namespace Orcs_Plus
                         {
                             if (unit is UM && unit.task is Task_RazeLocation)
                             {
-                                Pr_OrcishIndustry industry = neighbour.properties.OfType<Pr_OrcishIndustry>().FirstOrDefault();
+                                Pr_OrcishIndustry industry = (Pr_OrcishIndustry)neighbour.properties.FirstOrDefault(pr => pr is Pr_OrcishIndustry);
                                 if (industry?.charge > 10)
                                 {
                                     attackerCount++;
@@ -471,12 +471,12 @@ namespace Orcs_Plus
 
         private double delegate_Utility_Organise(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
         {
-            if (ua is UAEN_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture)
+            if (ua is UAEN_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture && challengeData.location.settlement != null)
             {
-                Sub_OrcTemple hall = challengeData.location.settlement?.subs.OfType<Sub_OrcTemple>().FirstOrDefault();
+                Sub_OrcTemple hall = (Sub_OrcTemple)challengeData.location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcTemple);
                 if (hall != null && hall.order == orcCulture)
                 {
-                    Pr_OrcishIndustry industry = challengeData.location.properties.OfType<Pr_OrcishIndustry>().FirstOrDefault();
+                    Pr_OrcishIndustry industry = (Pr_OrcishIndustry)challengeData.location.properties.FirstOrDefault(pr => pr is Pr_OrcishIndustry);
                     double charge = 0.0;
                     if (industry != null)
                     {
@@ -547,7 +547,7 @@ namespace Orcs_Plus
 
         private bool delegate_ValidFor_SecretsOfDeath(AgentAI.ChallengeData challengeData, UA ua)
         {
-            T_MasteryDeath deathMastery = ua.person.traits.OfType<T_MasteryDeath>().FirstOrDefault();
+            T_MasteryDeath deathMastery = (T_MasteryDeath)ua.person.traits.FirstOrDefault(t => t is T_MasteryDeath);
 
             if (deathMastery == null)
             {
@@ -566,7 +566,7 @@ namespace Orcs_Plus
 
         private bool delegate_ValidFor_SkeletalServitor(AgentAI.ChallengeData challengeData, UA ua)
         {
-            Pr_Death death = challengeData.location.properties.OfType<Pr_Death>().FirstOrDefault();
+            Pr_Death death = (Pr_Death)challengeData.location.properties.FirstOrDefault(pr => pr is Pr_Death);
             if (death == null)
             {
                 return false;
@@ -601,7 +601,7 @@ namespace Orcs_Plus
 
         private bool delegate_ValidFor_FacelessServitor(AgentAI.ChallengeData challengeData, UA ua)
         {
-            Pr_Death death = challengeData.location.properties.OfType<Pr_Death>().FirstOrDefault();
+            Pr_Death death = (Pr_Death)challengeData.location.properties.FirstOrDefault(pr => pr is Pr_Death);
             if (death == null)
             {
                 return false;
@@ -637,8 +637,8 @@ namespace Orcs_Plus
         private double delegate_Utility_SecretsOfDeath(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
         {
             List<Trait> traits = ua.person.traits;
-            T_ArcaneKnowledge arcaneKnowledge = traits.OfType<T_ArcaneKnowledge>().FirstOrDefault();
-            T_MasteryDeath deathMastery = traits.OfType<T_MasteryDeath>().FirstOrDefault();
+            T_ArcaneKnowledge arcaneKnowledge = (T_ArcaneKnowledge)traits.FirstOrDefault(t => t is T_ArcaneKnowledge);
+            T_MasteryDeath deathMastery = (T_MasteryDeath)traits.FirstOrDefault(t => t is T_MasteryDeath);
 
             if (arcaneKnowledge == null)
             {
@@ -656,7 +656,7 @@ namespace Orcs_Plus
 
             if (deathMastery.level < deathMastery.getMaxLevel())
             {
-                Rt_StudyDeath studyDeath = ua.rituals.OfType<Rt_StudyDeath>().FirstOrDefault();
+                Rt_StudyDeath studyDeath = (Rt_StudyDeath)ua.rituals.FirstOrDefault(rt => rt is Rt_StudyDeath);
                 if (studyDeath != null && arcaneKnowledge.level < studyDeath.getReq(deathMastery.level))
                 {
                     reasonMsgs?.Add(new ReasonMsg("Requires Arcane Knowledge", 60));
@@ -669,8 +669,7 @@ namespace Orcs_Plus
 
         private bool delegate_ValidFor_LearnArcaneSecret(AgentAI.ChallengeData challengeData, UA ua)
         {
-            T_MasteryDeath deathMastery = ua.person.traits.OfType<T_MasteryDeath>().FirstOrDefault();
-
+            T_MasteryDeath deathMastery = (T_MasteryDeath)ua.person.traits.FirstOrDefault(t => t is T_MasteryDeath);
             if (deathMastery == null)
             {
                 deathMastery = new T_MasteryDeath();
@@ -689,8 +688,8 @@ namespace Orcs_Plus
         private double delegate_Utility_LearnSecret(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
         {
             List<Trait> traits = ua.person.traits;
-            T_ArcaneKnowledge arcaneKnowledge = traits.OfType<T_ArcaneKnowledge>().FirstOrDefault();
-            T_MasteryDeath deathMastery = traits.OfType<T_MasteryDeath>().FirstOrDefault();
+            T_ArcaneKnowledge arcaneKnowledge = (T_ArcaneKnowledge)traits.FirstOrDefault(t => t is T_ArcaneKnowledge);
+            T_MasteryDeath deathMastery = (T_MasteryDeath)traits.FirstOrDefault(t => t is T_MasteryDeath);
 
             if (arcaneKnowledge == null)
             {
@@ -708,7 +707,7 @@ namespace Orcs_Plus
 
             if (deathMastery.level < deathMastery.getMaxLevel())
             {
-                Rt_StudyDeath studyDeath = ua.rituals.OfType<Rt_StudyDeath>().FirstOrDefault();
+                Rt_StudyDeath studyDeath = (Rt_StudyDeath)ua.rituals.FirstOrDefault(rt => rt is Rt_StudyDeath);
                 if (studyDeath != null && arcaneKnowledge.level < studyDeath.getReq(deathMastery.level))
                 {
                     reasonMsgs?.Add(new ReasonMsg("Requires Arcane Knowledge", 80));
@@ -721,7 +720,7 @@ namespace Orcs_Plus
 
         private bool delegate_ValidFor_EnslaveDead(AgentAI.ChallengeData challengeData, UA ua)
         {
-            T_MasteryDeath deathMastery = ua.person.traits.OfType<T_MasteryDeath>().FirstOrDefault();
+            T_MasteryDeath deathMastery = (T_MasteryDeath)ua.person.traits.FirstOrDefault(t => t is T_MasteryDeath);
 
             if (deathMastery == null)
             {
@@ -743,7 +742,7 @@ namespace Orcs_Plus
                 }
             }
 
-            Pr_Death death = challengeData.location.properties.OfType<Pr_Death>().FirstOrDefault();
+            Pr_Death death = (Pr_Death)challengeData.location.properties.FirstOrDefault(pr => pr is Pr_Death);
             if (death == null)
             {
                 return false;
@@ -778,7 +777,7 @@ namespace Orcs_Plus
 
         private double delegate_Utility_EnslaveDead(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
         {
-            Pr_Death death = challengeData.location.properties.OfType<Pr_Death>().FirstOrDefault();
+            Pr_Death death = (Pr_Death)challengeData.location.properties.FirstOrDefault(pr => pr is Pr_Death);
             if (death != null)
             {
                 double val = Math.Min(death.charge, map.param.ch_releaseFromDeathMax);
@@ -804,7 +803,7 @@ namespace Orcs_Plus
                 }
             }
 
-            Pr_Death death = challengeData.location.properties.OfType<Pr_Death>().FirstOrDefault();
+            Pr_Death death = (Pr_Death)challengeData.location.properties.FirstOrDefault(pr => pr is Pr_Death);
             if (death == null)
             {
                 return false;
@@ -845,7 +844,7 @@ namespace Orcs_Plus
                 location = challengeData.location;
             }
 
-            Pr_Death death = location.properties.OfType<Pr_Death>().FirstOrDefault();
+            Pr_Death death = (Pr_Death)location.properties.FirstOrDefault(pr => pr is Pr_Death);
             if (death != null)
             {
                 double val = Math.Min(death.charge, map.param.mg_ravenousDeadMax);
@@ -871,7 +870,7 @@ namespace Orcs_Plus
 
             if (result)
             {
-                Pr_Death death = challengeData.location.properties.OfType<Pr_Death>().FirstOrDefault();
+                Pr_Death death = (Pr_Death)challengeData.location.properties.FirstOrDefault(pr => pr is Pr_Death);
                 if (death == null)
                 {
                     return false;
@@ -913,7 +912,7 @@ namespace Orcs_Plus
                 location = challengeData.location;
             }
 
-            Pr_Death death = location.properties.OfType<Pr_Death>().FirstOrDefault();
+            Pr_Death death = (Pr_Death)location.properties.FirstOrDefault(pr => pr is Pr_Death);
             if (death != null)
             {
                 double val = Math.Min(Math.Min(death.charge, 1), 1 - location.settlement.shadow) * 100;
@@ -931,7 +930,7 @@ namespace Orcs_Plus
 
         private bool delegate_ValidFor_SacrificialSite(AgentAI.ChallengeData challengeData, UA ua)
         {
-            return challengeData.location.settlement is SettlementHuman && challengeData.location.properties.OfType<Pr_Orcs_SacrificialSite>().FirstOrDefault() == null && challengeData.location.properties.OfType<Pr_Devastation>().FirstOrDefault()?.charge >= (challengeData.challenge as Rt_Orcs_SacrificialSite)?.minDevastation;
+            return challengeData.location.settlement is SettlementHuman && challengeData.location.properties.FirstOrDefault(pr => pr is Pr_Orcs_SacrificialSite) == null && challengeData.location.properties.FirstOrDefault(pr => pr is Pr_Devastation)?.charge >= (challengeData.challenge as Rt_Orcs_SacrificialSite)?.minDevastation;
         }
 
         private double delegate_Utility_SacrificialSite(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
