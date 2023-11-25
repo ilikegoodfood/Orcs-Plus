@@ -2,6 +2,7 @@
 using Assets.Code.Modding;
 using CommunityLib;
 using HarmonyLib;
+using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,8 @@ namespace Orcs_Plus
         private ComLibHooks comLibHooks;
 
         public ModData data;
+
+        public AgentAIs agentAI;
 
         public List<Power> godPowers1;
 
@@ -182,7 +185,7 @@ namespace Orcs_Plus
 
                         comLib.forceShipwrecks();
 
-                        new AgentAIs(map);
+                        agentAI = new AgentAIs(map);
                         if (core.data.godTenetTypes.TryGetValue(map.overmind.god.GetType(), out Type tenetType) && tenetType != null)
                         {
                             switch (tenetType.Name)
@@ -196,6 +199,11 @@ namespace Orcs_Plus
                                     break;
                                 case nameof(H_Orcs_Perfection):
                                     core.comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcElder), new AIChallenge(typeof(Ch_H_Orcs_PerfectionFestival), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }));
+                                    break;
+                                case nameof(H_Orcs_GlorySeeker):
+                                    AIChallenge spreadCurse = new AIChallenge(typeof(Rt_H_Orcs_SpreadCurseOfGlory), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocalRandomized });
+                                    spreadCurse.delegates_ValidFor.Add(agentAI.delegate_ValidFor_SpreadCurse);
+                                    core.comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcElder), spreadCurse);
                                     break;
                                 default:
                                     break;
@@ -394,7 +402,7 @@ namespace Orcs_Plus
                 if (!unit.isDead && unit is UAEN_OrcUpstart upstart && upstart.society is SG_Orc orcSociety)
                 {
                     Item[] items = upstart.person.items;
-                    if (items != null && !items.Any(i => i is I_HordeBanner banner && banner.orcs == upstart.society))
+                    if (!items.Any(i => i is I_HordeBanner banner && banner.orcs == upstart.society))
                     {
                         int itemIndex = 0;
                         for (int i = 0; i < items.Length; i++)
@@ -615,42 +623,25 @@ namespace Orcs_Plus
 
         public void onBrokenMakerSleep_StartOfSleep(Map map)
         {
-            foreach(SocialGroup sg in map.socialGroups)
-            {
-                if (sg is HolyOrder_Orcs orcCulture)
-                {
-                    orcCulture.tenet_alignment.status = 0;
-                    orcCulture.tenet_intolerance.status = -1;
+            manageAISleepRestrictions();
 
-                    int targetCamps = orcCulture.civilWar_TargetCampCount;
-                    if (targetCamps == 0)
-                    {
-                        targetCamps = 8;
-                    }
-                    if (orcCulture.camps.Count > targetCamps)
-                    {
-                        orcCulture.triggerCivilWar();
-                    }
+            List<HolyOrder_Orcs> mutableCultures = new List<HolyOrder_Orcs>();
+            mutableCultures.AddRange(core.data.orcSGCultureMap.Values);
+            foreach (HolyOrder_Orcs orcCulture in mutableCultures)
+            {
+                orcCulture.tenet_alignment.status = 0;
+                orcCulture.tenet_intolerance.status = -1;
+
+                if (orcCulture.tenet_god is H_Orcs_GlorySeeker glory)
+                {
+                    glory.cursed = false;
+                }
+
+                if (orcCulture.camps.Count + orcCulture.specializedCamps.Count > 8)
+                {
+                    orcCulture.triggerCivilWar();
                 }
             }
-
-            AIChallenge secretsOfDeath = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Ch_SecretsOfDeath));
-            secretsOfDeath?.tags.Add(AIChallenge.ChallengeTags.Forbidden);
-
-            AIChallenge learnArcaneSecret = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Ch_LearnSecret));
-            learnArcaneSecret?.tags.Add(AIChallenge.ChallengeTags.Forbidden);
-
-            AIChallenge enslaveDead = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Mg_EnslaveTheDead));
-            enslaveDead?.tags.Add(AIChallenge.ChallengeTags.Forbidden);
-
-            AIChallenge ravenousDead = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Mg_RavenousDead));
-            ravenousDead?.tags.Add(AIChallenge.ChallengeTags.Forbidden);
-
-            AIChallenge warFestival = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Ch_Orcs_WarFestival));
-            warFestival?.tags.Add(AIChallenge.ChallengeTags.Forbidden);
-
-            AIChallenge deathFestival = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Ch_Orcs_DeathFestival));
-            deathFestival?.tags.Add(AIChallenge.ChallengeTags.Forbidden);
         }
 
         public void onBrokenMakerSleep_TurnTick(Map map)
@@ -673,13 +664,13 @@ namespace Orcs_Plus
                 }
             }
 
-            foreach (SocialGroup sg in map.socialGroups)
+            Dictionary<SG_Orc, HolyOrder_Orcs> mutableSGCultureMap = new Dictionary<SG_Orc, HolyOrder_Orcs>();
+            mutableSGCultureMap.AddRange(core.data.orcSGCultureMap);
+            foreach (KeyValuePair<SG_Orc, HolyOrder_Orcs> pair in mutableSGCultureMap)
             {
-                if (!sg.isGone() && sg is HolyOrder_Orcs orcCulture)
+                if (!pair.Key.isGone())
                 {
-                    SG_Orc orcSociety = orcCulture.orcSociety;
-
-                    manageCampDecay(map, orcSociety, orcCulture);
+                    manageCampDecay(map, pair.Key, pair.Value);
                 }
             }
         }
@@ -718,6 +709,15 @@ namespace Orcs_Plus
                 {
                     break;
                 }
+            }
+
+            bool contiguous = true;
+            List<Set_OrcCamp> allCamps = new List<Set_OrcCamp>();
+            allCamps.AddRange(orcCulture.camps);
+            allCamps.AddRange(orcCulture.specializedCamps);
+            if (allCamps.Any(c => !stepDistances.ContainsKey(c.location)))
+            {
+                contiguous = false;
             }
 
             List<Set_OrcCamp>[] specialisedCamps = new List<Set_OrcCamp>[5];
@@ -762,6 +762,11 @@ namespace Orcs_Plus
 
                 foreach (Set_OrcCamp specialisedCamp in targetSpecialisedCamps)
                 {
+                    if (!stepDistances.ContainsKey(specialisedCamp.location))
+                    {
+                        continue;
+                    }
+
                     if (Eleven.random.Next(100) < 0.5 * stepDistances[specialisedCamp.location])
                     {
                         specialisedCamps[specialisedCamp.specialism].Remove(specialisedCamp);
@@ -800,7 +805,7 @@ namespace Orcs_Plus
                             }
                         }
 
-                        if (loc.soc == orcSociety)
+                        if (loc.soc == orcSociety && !(loc.settlement is Set_OrcCamp))
                         {
                             Sub_OrcWaystation waystation = (Sub_OrcWaystation)loc.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation way && way.orcSociety != orcSociety);
                             if (waystation != null)
@@ -815,27 +820,59 @@ namespace Orcs_Plus
                     }
                 }
             }
+
+            if (!contiguous)
+            {
+                orcCulture.triggerCivilWar();
+            }
         }
 
         public void onBrokenMakerSleep_EndOfSleep(Map map)
         {
+            manageAISleepRestrictions(true);
+        }
+
+        public void manageAISleepRestrictions(bool unlock = false)
+        {
             AIChallenge secretsOfDeath = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Ch_SecretsOfDeath));
-            secretsOfDeath?.tags.Remove(AIChallenge.ChallengeTags.Forbidden);
+            forbidAIChallenge(secretsOfDeath, unlock);
 
             AIChallenge learnArcaneSecret = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Ch_LearnSecret));
-            learnArcaneSecret?.tags.Remove(AIChallenge.ChallengeTags.Forbidden);
+            forbidAIChallenge(learnArcaneSecret, unlock);
 
             AIChallenge enslaveDead = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Mg_EnslaveTheDead));
-            enslaveDead?.tags.Remove(AIChallenge.ChallengeTags.Forbidden);
+            forbidAIChallenge(enslaveDead, unlock);
 
             AIChallenge ravenousDead = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Mg_RavenousDead));
-            ravenousDead?.tags.Remove(AIChallenge.ChallengeTags.Forbidden);
+            forbidAIChallenge(ravenousDead, unlock);
 
             AIChallenge warFestival = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Ch_Orcs_WarFestival));
-            warFestival?.tags.Remove(AIChallenge.ChallengeTags.Forbidden);
+            forbidAIChallenge(warFestival, unlock);
 
             AIChallenge deathFestival = core.comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcShaman), typeof(Ch_Orcs_DeathFestival));
-            deathFestival?.tags.Remove(AIChallenge.ChallengeTags.Forbidden);
+            forbidAIChallenge(deathFestival, unlock);
+        }
+
+        public void forbidAIChallenge(AIChallenge aiChallenge, bool unlock = false)
+        {
+            if (aiChallenge != null)
+            {
+                if (!unlock)
+                {
+                    if (aiChallenge.tags.Contains(AIChallenge.ChallengeTags.Forbidden))
+                    {
+                        core.data.forbiddenChallenges.Add(aiChallenge);
+                    }
+                    else
+                    {
+                        aiChallenge.tags.Add(AIChallenge.ChallengeTags.Forbidden);
+                    }
+                }
+                else if (!core.data.forbiddenChallenges.Contains(aiChallenge))
+                {
+                    aiChallenge.tags.Remove(AIChallenge.ChallengeTags.Forbidden);
+                }
+            }
         }
 
         public override float hexHabitability(Hex hex, float hab)

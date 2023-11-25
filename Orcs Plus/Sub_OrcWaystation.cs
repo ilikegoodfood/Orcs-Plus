@@ -61,7 +61,8 @@ namespace Orcs_Plus
         {
             if (settlement.location.settlement != settlement)
             {
-                settlement = settlement.location.settlement;
+                settlement.subs.Remove(this);
+                return;
             }
 
             if (settlement == null)
@@ -81,27 +82,15 @@ namespace Orcs_Plus
                 return;
             }
 
-            bool neighbouring = false;
-            if (settlement.location.soc == orcSociety)
-            {
-                neighbouring = true;
-            }
-            else
-            {
-                foreach (Location neighbour in settlement.location.getNeighbours())
-                {
-                    if (neighbour.soc == orcSociety)
-                    {
-                        neighbouring = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!neighbouring)
+            if (!settlement.location.getNeighbours().Any(n => n.soc == orcSociety || (n.settlement != null && n.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == orcSociety))))
             {
                 settlement.subs.Remove(this);
                 return;
+            }
+
+            if (settlement.location.soc == null && !orcSociety.isAtWar())
+            {
+                settlement.location.soc = orcSociety;
             }
         }
     }

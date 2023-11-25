@@ -1024,20 +1024,6 @@ namespace Orcs_Plus
             }
         }
 
-        public override bool interceptGetVisibleUnits(UA ua, List<Unit> visibleUnits)
-        {
-            switch (ua)
-            {
-                case UAEN_OrcElder elder:
-                    visibleUnits = elder.getVisibleUnits();
-                    return true;
-                default:
-                    break;
-            }
-
-            return false;
-        }
-
         public override bool interceptAgentAI(UA ua, CommunityLib.AgentAI.AIData aiData, List<CommunityLib.AgentAI.ChallengeData> validChallengeData, List<CommunityLib.AgentAI.TaskData> taskData, List<Unit> visibleUnits)
         {
             switch(ua)
@@ -1087,7 +1073,7 @@ namespace Orcs_Plus
         {
             List<TaskData> tasks = new List<TaskData>();
 
-            if (um.location.properties.FirstOrDefault(pr => pr is Pr_HumanOutpost) != null)
+            if (um.location.properties.Any(pr => pr is Pr_HumanOutpost))
             {
                 TaskData task_RazeOutpost = new TaskData
                 {
@@ -1272,6 +1258,22 @@ namespace Orcs_Plus
                     gConstruction.target.location.properties.Remove(manticore);
                 }
             }
+        }
+
+        public override string onBrokenMakerPowerCreatesAgent_ProcessCurse(Curse curse, Person person, Location location, string text)
+        {
+            if (curse is Curse_EGlory)
+            {
+                text = string.Concat(new string[]
+                {
+                    text,
+                    "\n\n",
+                    person.getName(),
+                    " gains the Blessing of Glory as a trait from the Curse of Glory"
+                });
+                person.receiveTrait(new T_Et_Glory());
+            }
+            return text;
         }
     }
 }

@@ -419,7 +419,7 @@ namespace Orcs_Plus
                 greatConstruction = new Pr_Orcs_GreatConstruction(target, orcSociety, specialism);
                 target.location.properties.Add(greatConstruction);
 
-                map.addUnifiedMessage(orcSociety, target.location, "Great Construction", "The orcs of the" + orcSociety.getName() + " have begun a great construction project in " + target.getName(), "Great Construction");
+                map.addUnifiedMessage(orcSociety, target.location, "Great Construction", "The orcs of the " + orcSociety.getName() + " have begun a great construction project in " + target.getName(), "Great Construction");
             }
         }
     }

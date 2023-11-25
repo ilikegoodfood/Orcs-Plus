@@ -120,7 +120,8 @@ namespace Orcs_Plus
                 { typeof(God_Vinerva), typeof(H_Orcs_LifeMother) },
                 { typeof(God_Ophanim), typeof(H_Orcs_Perfection) },
                 { typeof(God_Mammon), typeof(H_Orcs_MammonClient) },
-                { typeof(God_Cards), typeof(H_Orcs_Lucky) }
+                { typeof(God_Cards), typeof(H_Orcs_Lucky) },
+                { typeof(God_Eternity), typeof(H_Orcs_GlorySeeker) }
             };
 
             settlementTypesForWaystations = new List<Type>
@@ -134,6 +135,8 @@ namespace Orcs_Plus
                 typeof(Set_Shipwreck)
             };
         }
+
+        public List<AIChallenge> forbiddenChallenges = new List<AIChallenge>();
 
         public void onTurnStart(Map map)
         {
@@ -413,25 +416,21 @@ namespace Orcs_Plus
 
         public void getOrcCamps(Map map, HolyOrder_Orcs orcCulture, out List<Set_OrcCamp> orcCamps, out List<Set_OrcCamp> specializedOrcCamps)
         {
-            SG_Orc orcSociety = orcCulture?.orcSociety;
+            SG_Orc orcSociety = orcCulture.orcSociety;
             orcCamps = new List<Set_OrcCamp>();
             specializedOrcCamps = new List<Set_OrcCamp>();
 
             foreach (Location loc in map.locations)
             {
-                if (loc.settlement != null && loc.soc == orcSociety)
+                if (loc.soc == orcSociety && loc.settlement is Set_OrcCamp camp )
                 {
-                    Set_OrcCamp camp = loc.settlement as Set_OrcCamp;
-                    if (camp != null)
+                    if (camp.specialism == 0)
                     {
-                        if (camp.specialism == 0)
-                        {
-                            orcCamps.Add(camp);
-                        }
-                        else
-                        {
-                            specializedOrcCamps.Add(camp);
-                        }
+                        orcCamps.Add(camp);
+                    }
+                    else
+                    {
+                        specializedOrcCamps.Add(camp);
                     }
                 }
             }

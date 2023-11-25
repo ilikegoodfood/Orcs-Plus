@@ -63,7 +63,8 @@ namespace Orcs_Plus
                     new AIChallenge(typeof(Ch_Orcs_DrinkGrott), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
                     new AIChallenge(typeof(Ch_Orcs_RefillDrinkingHorns), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
                     new AIChallenge(typeof(Ch_DrinkPrimalWaters), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocal }),
-                    new AIChallenge(typeof(Ch_Orcs_RecruitCorsair), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.RequiresOwnSociety,})
+                    new AIChallenge(typeof(Ch_Orcs_RecruitCorsair), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.RequiresOwnSociety,}),
+                    new AIChallenge(typeof(Rti_RouseHorde), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden })
                 };
 
                 aiChallenges_Upstart[0].delegates_ValidFor.Add(delegate_ValidFor_RecruitWarband);
@@ -499,6 +500,27 @@ namespace Orcs_Plus
             }
 
             return utility;
+        }
+
+        public bool delegate_ValidFor_SpreadCurse(AgentAI.ChallengeData challengeData, UA ua)
+        {
+            bool result = false;
+
+            if (ua is UAEN_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture && orcCulture.tenet_god is H_Orcs_GlorySeeker glory && glory.status < -1 && !glory.cursed)
+            {
+                if (!orcCulture.acolytes.Any(a => a != ua && ((a.task is Task_PerformChallenge performChallenge && performChallenge.challenge is Rt_H_Orcs_SpreadCurseOfGlory) || (a.task is Task_GoToPerformChallenge goPerformChallenge && goPerformChallenge.challenge is Rt_H_Orcs_SpreadCurseOfGlory))))
+                {
+                    if (challengeData.location.soc != null && orcCulture.getRel(challengeData.location.soc).state == DipRel.dipState.war)
+                    {
+                        if (challengeData.location.settlement is SettlementHuman humanSettlement && humanSettlement.ruler != null && !humanSettlement.ruler.house.curses.Any(curse => curse is Curse_EGlory))
+                        {
+                            result = true;
+                        }
+                    }
+                }
+            }
+
+            return result;
         }
 
         private void populateOrcShamans()

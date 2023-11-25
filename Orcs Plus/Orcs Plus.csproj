@@ -72,9 +72,11 @@
     <Compile Include="Ch_Orcs_ForceRestock.cs" />
     <Compile Include="Ch_Orcs_FundWaystation.cs" />
     <Compile Include="Ch_Orcs_RecruitCorsair.cs" />
+    <Compile Include="Curse_EGlory.cs" />
     <Compile Include="GetTags.cs" />
     <Compile Include="HarmonyPatches_Conditional.cs" />
     <Compile Include="H_Orcs_Expansionism.cs" />
+    <Compile Include="H_Orcs_GlorySeeker.cs" />
     <Compile Include="H_Orcs_GodTenet.cs" />
     <Compile Include="H_Orcs_HarbingersMadness.cs" />
     <Compile Include="H_Orcs_InsectileSymbiosis.cs" />
@@ -116,6 +118,7 @@
     <Compile Include="Ch_Orcs_WarFestival.cs" />
     <Compile Include="H_Orcs_Industrious.cs" />
     <Compile Include="H_Orcs_ShadowWeaving.cs" />
+    <Compile Include="Rt_H_Orcs_SpreadCurseOfGlory.cs" />
     <Compile Include="Rt_Orcs_EndBloodFeud.cs" />
     <Compile Include="Ch_Orcs_FundHorde.cs" />
     <Compile Include="Ch_Orcs_GatherHorde.cs" />
@@ -146,6 +149,7 @@
     <Compile Include="Task_GatherAtLocation.cs" />
     <Compile Include="Task_RazeOutpost.cs" />
     <Compile Include="T_BloodFeud.cs" />
+    <Compile Include="T_Et_Glory.cs" />
     <Compile Include="T_Grott.cs" />
     <Compile Include="T_ReveredElder.cs" />
     <Compile Include="UAEN_OrcElder.cs" />

@@ -205,7 +205,6 @@ namespace Orcs_Plus
                     infiltrated = location.settlement.isInfiltrated;
                 }
 
-
                 if (orcSociety != null && (u.isCommandable() && infiltrated) || (u is UAEN_OrcElder elder && (elder.society as HolyOrder_Orcs)?.orcSociety == orcSociety))
                 {
                     List<Settlement> settlements = new List<Settlement>();
@@ -214,7 +213,7 @@ namespace Orcs_Plus
                     {
                         if (neighbour.settlement != null && neighbour.hex.getHabilitability() >= map.opt_orcHabMult * map.param.orc_habRequirement)
                         {
-                            if (ModCore.core.data.getSettlementTypesForWaystation().Contains(neighbour.settlement.GetType()) && neighbour.settlement.subs.OfType<Sub_OrcWaystation>().FirstOrDefault(s => s.orcSociety == orcSociety) == null)
+                            if (ModCore.core.data.getSettlementTypesForWaystation().Contains(neighbour.settlement.GetType()) && !neighbour.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == orcSociety))
                             {
                                 settlements.Add(neighbour.settlement);
                             }
@@ -229,12 +228,13 @@ namespace Orcs_Plus
                             targetSettlement = settlements[Eleven.random.Next(settlements.Count)];
                         }
 
-                        if (targetSettlement != null)
+                        Sub_OrcWaystation waystation = new Sub_OrcWaystation(targetSettlement, orcSociety);
+                        targetSettlement.subs.Add(waystation);
+                        if (targetSettlement.location.soc == null)
                         {
-                            Sub_OrcWaystation waystation = new Sub_OrcWaystation(targetSettlement, orcSociety);
-                            targetSettlement.subs.Add(waystation);
-                            u.person.gold -= cost;
+                            targetSettlement.location.soc = orcSociety;
                         }
+                        u.person.gold -= cost;
 
                         if (u.isCommandable() && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
                         {
