@@ -1895,6 +1895,23 @@ namespace Orcs_Plus
                     core.TryAddInfluenceGain(orcs, new ReasonMsg("Trespassing agent died in death's games", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
                 }
             }
+            else if (v == "Warped Into a Demon")
+            {
+                if (influencedOrcCulture_Direct != null)
+                {
+                    core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Orc agent warped into a demon", core.data.influenceGain[ModData.influenceGainAction.RecieveGift]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                {
+                    core.TryAddInfluenceGain(orcs, new ReasonMsg("Enemy agent warped into a demon", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                {
+                    core.TryAddInfluenceGain(orcs, new ReasonMsg("Trespassing agent warped into a demon", core.data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                }
+            }
             else if (uaPerson != null && uaPerson.task is Task_PerformChallenge challengeTask)
             {
                 Ch_SkirmishAttacking skirmishAtt = challengeTask.challenge as Ch_SkirmishAttacking;

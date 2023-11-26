@@ -1005,6 +1005,23 @@ namespace Orcs_Plus
                     }
                 }
             }
+            else if (v == "Consumed by Kishi's tide")
+            {
+                if (influencedOrcCulture_Direct != null)
+                {
+                    ModCore.core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Kishi's tide consumed orc camp", ModCore.core.data.influenceGain[ModData.influenceGainAction.RecieveGift]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                {
+                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Kishi's tide consumed enemy settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                {
+                    ModCore.core.TryAddInfluenceGain(orcs, new ReasonMsg("Kishi's tide consumed encroaching settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                }
+            }
             else if (v == "console" || v == "Console" || v == "Cheats")
             {
                 if (influencedOrcCulture_Direct != null)
