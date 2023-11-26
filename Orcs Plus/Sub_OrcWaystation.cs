@@ -59,20 +59,8 @@ namespace Orcs_Plus
 
         public override void turnTick()
         {
-            if (settlement.location.settlement != settlement)
-            {
-                settlement.subs.Remove(this);
-                return;
-            }
-
             if (settlement == null)
             {
-                return;
-            }
-
-            if (orcSociety == null || orcSociety.isGone())
-            {
-                settlement.subs.Remove(this);
                 return;
             }
 
@@ -82,7 +70,19 @@ namespace Orcs_Plus
                 return;
             }
 
+            if (settlement.location.settlement != settlement)
+            {
+                settlement.subs.Remove(this);
+                return;
+            }
+
             if (!settlement.location.getNeighbours().Any(n => n.soc == orcSociety || (n.settlement != null && n.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == orcSociety))))
+            {
+                settlement.subs.Remove(this);
+                return;
+            }
+
+            if (orcSociety == null || orcSociety.isGone())
             {
                 settlement.subs.Remove(this);
                 return;

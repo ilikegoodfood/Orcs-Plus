@@ -1547,7 +1547,10 @@ namespace Orcs_Plus
 
                             if (target.location.soc == orcSociety || (((target.society != null && orcSociety.getRel(target.society).state == DipRel.dipState.war) || feud != null) && (target.location.soc == null || orcSociety.getRel(target.location.soc).state == DipRel.dipState.war)))
                             {
-                                double val;
+                                double val = 20;
+                                reasonMsgs?.Add(new ReasonMsg("Eager for Combat", val));
+                                utility += val;
+
                                 if (target.location.soc != orcSociety)
                                 {
                                     val = -25;
@@ -1589,14 +1592,16 @@ namespace Orcs_Plus
                                 }, new int[0], reasonMsgs);
                                 utility += ua.person.getTagUtility(target.getPositiveTags(), target.getNegativeTags(), reasonMsgs);
 
-                                val = 20;
-                                reasonMsgs?.Add(new ReasonMsg("Eager for Combat", val));
-                                utility += val;
-
                                 if (orcCulture.tenet_god is H_Orcs_GlorySeeker glory2 && glory2.status < 0)
                                 {
                                     val = 10;
                                     reasonMsgs?.Add(new ReasonMsg("Glory Seeker", val));
+                                    utility += val;
+                                }
+                                else if (target.person.hasSoul && orcCulture.tenet_god is H_Orcs_BloodOffering blood && blood.status < 0)
+                                {
+                                    val = 20;
+                                    reasonMsgs?.Add(new ReasonMsg("Blood for the Blood God", val));
                                     utility += val;
                                 }
 

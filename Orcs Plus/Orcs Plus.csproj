@@ -75,6 +75,7 @@
     <Compile Include="Curse_EGlory.cs" />
     <Compile Include="GetTags.cs" />
     <Compile Include="HarmonyPatches_Conditional.cs" />
+    <Compile Include="H_Orcs_BloodOffering.cs" />
     <Compile Include="H_Orcs_Expansionism.cs" />
     <Compile Include="H_Orcs_GlorySeeker.cs" />
     <Compile Include="H_Orcs_GodTenet.cs" />

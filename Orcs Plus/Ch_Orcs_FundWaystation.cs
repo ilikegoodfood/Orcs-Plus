@@ -151,15 +151,26 @@ namespace Orcs_Plus
 
         public override bool valid()
         {
-            if (location.settlement != null && ((location.soc is SG_Orc && location.settlement is Set_OrcCamp) || location.settlement.subs.Any(sub => sub is Sub_OrcWaystation w && w.getChallenges().Contains(this))))
+            SG_Orc orcSociety = location.soc as SG_Orc;
+
+            if (location.settlement != null)
             {
-                foreach (Location neighbour in location.getNeighbours())
+                Sub_OrcWaystation waystaion = (Sub_OrcWaystation)location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation way && way.getChallenges().Contains(this));
+                if (waystaion != null)
                 {
-                    if (!neighbour.isOcean && neighbour.settlement != null && neighbour.hex.getHabilitability() >= map.opt_orcHabMult * map.param.orc_habRequirement)
+                    orcSociety = waystaion.orcSociety;
+                }
+
+                if (orcSociety != null && ((location.soc == orcSociety && location.settlement is Set_OrcCamp) || waystaion != null))
+                {
+                    foreach (Location neighbour in location.getNeighbours())
                     {
-                        if (ModCore.core.data.getSettlementTypesForWaystation().Contains(neighbour.settlement.GetType()) && neighbour.settlement.subs.OfType<Sub_OrcWaystation>().FirstOrDefault(s => s.orcSociety == location.soc) == null)
+                        if (!neighbour.isOcean && neighbour.settlement != null && neighbour.hex.getHabilitability() >= map.opt_orcHabMult * map.param.orc_habRequirement)
                         {
-                            return true;
+                            if (ModCore.core.data.getSettlementTypesForWaystation().Contains(neighbour.settlement.GetType()) && !neighbour.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == orcSociety))
+                            {
+                                return true;
+                            }
                         }
                     }
                 }

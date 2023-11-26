@@ -6,6 +6,7 @@ using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 namespace Orcs_Plus
@@ -185,10 +186,10 @@ namespace Orcs_Plus
 
                         comLib.forceShipwrecks();
 
-                        agentAI = new AgentAIs(map);
-                        if (core.data.godTenetTypes.TryGetValue(map.overmind.god.GetType(), out Type tenetType) && tenetType != null)
+                        core.agentAI = new AgentAIs(map);
+                        if (core.data.godTenetTypes.TryGetValue(map.overmind.god.GetType(), out Type tenet) && tenet != null)
                         {
-                            switch (tenetType.Name)
+                            switch (tenet.Name)
                             {
                                 case nameof(H_Orcs_HarbingersMadness):
                                     core.comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcElder), new AIChallenge(typeof(Ch_H_Orcs_MadnessFestival), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }));
@@ -202,7 +203,7 @@ namespace Orcs_Plus
                                     break;
                                 case nameof(H_Orcs_GlorySeeker):
                                     AIChallenge spreadCurse = new AIChallenge(typeof(Rt_H_Orcs_SpreadCurseOfGlory), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocalRandomized });
-                                    spreadCurse.delegates_ValidFor.Add(agentAI.delegate_ValidFor_SpreadCurse);
+                                    spreadCurse.delegates_ValidFor.Add(core.agentAI.delegate_ValidFor_SpreadCurse);
                                     core.comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcElder), spreadCurse);
                                     break;
                                 default:
@@ -269,8 +270,8 @@ namespace Orcs_Plus
 
                         if (core.data.tryGetModAssembly("CovensCursesCurios", out intDataCCC) && intDataCCC.assembly != null)
                         {
-                            Type dominionBanner = intDataCCC.assembly.GetType("CovenExpansion.I_BarbDominion", false);
-                            intDataCCC.typeDict.Add("Banner", dominionBanner);
+                            Type dominionBannerType = intDataCCC.assembly.GetType("CovenExpansion.I_BarbDominion", false);
+                            intDataCCC.typeDict.Add("Banner", dominionBannerType);
                         }
                         break;
                     case "LivingCharacter":
@@ -292,24 +293,47 @@ namespace Orcs_Plus
 
                         if (core.data.tryGetModAssembly("LivingWilds", out intDataLW))
                         {
-                            Type natureCritter = intDataLW.assembly.GetType("LivingWilds.UAEN_Nature_Critter", false);
-                            if (natureCritter != null)
+                            Type natureCritterType = intDataLW.assembly.GetType("LivingWilds.UAEN_Nature_Critter", false);
+                            if (natureCritterType != null)
                             {
-                                intDataLW.typeDict.Add("NatureCritter", natureCritter);
+                                intDataLW.typeDict.Add("NatureCritter", natureCritterType);
                             }
 
-                            Type natureSanctuary = intDataLW.assembly.GetType("LivingWilds.Set_Nature_NatureSanctuary", false);
-                            if (natureSanctuary != null)
+                            Type natureSanctuaryType = intDataLW.assembly.GetType("LivingWilds.Set_Nature_NatureSanctuary", false);
+                            if (natureSanctuaryType != null)
                             {
-                                intDataLW.typeDict.Add("NatureSanctuary", natureSanctuary);
-                                comLib.registerSettlementTypeForOrcExpansion(natureSanctuary);
+                                intDataLW.typeDict.Add("NatureSanctuary", natureSanctuaryType);
+                                comLib.registerSettlementTypeForOrcExpansion(natureSanctuaryType);
                             }
 
-                            Type wolfRun = intDataLW.assembly.GetType("LivingWilds.Set_Nature_WolfRun", false);
-                            if (wolfRun != null)
+                            Type wolfRunType = intDataLW.assembly.GetType("LivingWilds.Set_Nature_WolfRun", false);
+                            if (wolfRunType != null)
                             {
-                                intDataLW.typeDict.Add("WolfRun", wolfRun);
-                                core.data.tryAddSettlementTypeForWaystation(wolfRun);
+                                intDataLW.typeDict.Add("WolfRun", wolfRunType);
+                                core.data.tryAddSettlementTypeForWaystation(wolfRunType);
+                            }
+                        }
+                        break;
+                    case "ShadowsBloodshedGod":
+                        ModData.ModIntegrationData intDataKishi = new ModData.ModIntegrationData(kernel.GetType().Assembly);
+                        core.data.addModAssembly("Kishi", intDataKishi);
+
+                        if (core.data.tryGetModAssembly("Kishi", out intDataKishi))
+                        {
+                            Type godType = intDataKishi.assembly.GetType("ShadowsBloodshedGod.God_Bloodshed", false);
+                            if (godType != null)
+                            {
+                                intDataKishi.typeDict.Add("Kishi", godType);
+
+                                core.registerGodTenet(godType, typeof(H_Orcs_BloodOffering));
+                            }
+
+                            Type traitType = intDataKishi.assembly.GetType("ShadowsBloodshedGod.T_Bloodstain");
+                            if (traitType != null)
+                            {
+                                intDataKishi.typeDict.Add("Bloodstain", traitType);
+
+                                intDataKishi.methodInfoDict.Add("addBloodstain", AccessTools.Method(traitType, "addBloodstain", new Type[] { typeof(Person), typeof(int) }));
                             }
                         }
                         break;
@@ -319,10 +343,10 @@ namespace Orcs_Plus
 
                         if (core.data.tryGetModAssembly("Ixthus", out intDataIx))
                         {
-                            Type tenet = intDataIx.assembly.GetType("ShadowsLib.H_expeditionPatrons", false);
-                            if (tenet != null)
+                            Type tenetType = intDataIx.assembly.GetType("ShadowsLib.H_expeditionPatrons", false);
+                            if (tenetType != null)
                             {
-                                intDataIx.typeDict.Add("Tenet", tenet);
+                                intDataIx.typeDict.Add("Tenet", tenetType);
                             }
                         }
                         break;
@@ -336,9 +360,9 @@ namespace Orcs_Plus
                             if (kernelType != null)
                             {
                                 intDataDOPlus.typeDict.Add("Kernel", kernelType);
-                            }
 
-                            intDataDOPlus.methodInfoDict.Add("getAbyssalItem", AccessTools.Method(kernelType, "getItemFromAbyssalPool", new Type[] { typeof(Map), typeof(UA) }));
+                                intDataDOPlus.methodInfoDict.Add("getAbyssalItem", AccessTools.Method(kernelType, "getItemFromAbyssalPool", new Type[] { typeof(Map), typeof(UA) }));
+                            }
                         }
                         break;
                     default:
@@ -1349,34 +1373,30 @@ namespace Orcs_Plus
             //Console.WriteLine("Orcs_Plus: Person with Agent has died");
 
             // Cordyceps Symbiosis
-            if (uaPerson is UAEN_OrcUpstart || uaPerson is UAEN_OrcElder || uaPerson is UAEN_OrcShaman || uaPerson is UAE_Warlord)
+            if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < -1)
             {
-                //Console.WriteLine("Orcs_Plus: Orc agent has died");
-                if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < -1)
+                //Console.WriteLine("Orcs_Plus: Orc agent is subject to Insectile Symbiosis");
+                if (core.data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("Drone", out Type droneType) && droneType != null && intDataCord.typeDict.TryGetValue("Swarm", out Type swarmType) && swarmType != null && intDataCord.typeDict.TryGetValue("Hive", out Type hiveType) && hiveType != null)
                 {
-                    //Console.WriteLine("Orcs_Plus: Orc agent is subject to Insectile Symbiosis");
-                    if (core.data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("Drone", out Type droneType) && droneType != null && intDataCord.typeDict.TryGetValue("Swarm", out Type swarmType) && swarmType != null && intDataCord.typeDict.TryGetValue("Hive", out Type hiveType) && hiveType != null)
+                    if (uaPerson.map.locations.Any(l => l.settlement != null && (l.settlement.GetType() == hiveType || l.settlement.GetType().IsSubclassOf(hiveType))))
                     {
-                        if (uaPerson.map.locations.Any(l => l.settlement != null && (l.settlement.GetType() == hiveType || l.settlement.GetType().IsSubclassOf(hiveType))))
+                        //Console.WriteLine("Orcs_Plus: Spawning Drone");
+                        Location loc = uaPerson.location;
+                        SocialGroup soc = uaPerson.map.soc_dark;
+                        if (loc.soc.GetType() == swarmType || loc.soc.GetType().IsSubclassOf(swarmType))
                         {
-                            //Console.WriteLine("Orcs_Plus: Spawning Drone");
-                            Location loc = uaPerson.location;
-                            SocialGroup soc = uaPerson.map.soc_dark;
-                            if (loc.soc.GetType() == swarmType || loc.soc.GetType().IsSubclassOf(swarmType))
-                            {
-                                soc = loc.soc;
-                            }
-
-                            object[] args = new object[] {
-                            loc,
-                            soc,
-                            Person_Nonunique.getNonuniquePerson(uaPerson.map.soc_dark)
-                            };
-
-                            UAEN drone = (UAEN)Activator.CreateInstance(droneType, args);
-                            uaPerson.map.units.Add(drone);
-                            loc.units.Add(drone);
+                            soc = loc.soc;
                         }
+
+                        object[] args = new object[] {
+                        loc,
+                        soc,
+                        Person_Nonunique.getNonuniquePerson(uaPerson.map.soc_dark)
+                        };
+
+                        UAEN drone = (UAEN)Activator.CreateInstance(droneType, args);
+                        uaPerson.map.units.Add(drone);
+                        loc.units.Add(drone);
                     }
                 }
             }
@@ -1386,27 +1406,30 @@ namespace Orcs_Plus
                 // Killer Data
                 Person pKiller = killer as Person;
                 Unit uKiller = killer as Unit;
+                UA uaKiller = killer as UA;
 
                 if (pKiller != null)
                 {
                     //Console.WriteLine("Orcs_Plus: Person was killed by another person.");
                     uKiller = pKiller.unit;
+                    uaKiller = pKiller.unit as UA;
                 }
                 else if (uKiller != null)
                 {
                     pKiller = uKiller.person;
                 }
 
-                // Blood Fued
-                if (uKiller != null && pKiller != null)
+                
+                if (pKiller != null)
                 {
+                    // Blood Fued
                     //Console.WriteLine("Orcs_Plus: Killer has Unit");
-                    if (uaPerson is UAEN_OrcElder && uKiller is UA uaKiller && !pKiller.traits.Any(t => t is T_BloodFeud fued && fued.orcSociety == orcSociety))
+                    if (uaPerson is UAEN_OrcElder && !pKiller.traits.Any(t => t is T_BloodFeud fued && fued.orcSociety == orcSociety))
                     {
                         //Console.WriteLine("Orcs_Plus: Killer gained blood fued by killing orc elder");
-                        uaKiller.person.receiveTrait(new T_BloodFeud(orcSociety));
+                        pKiller.receiveTrait(new T_BloodFeud(orcSociety));
 
-                        person.map.addUnifiedMessage(uaPerson, uaKiller, "Blood Feud", uaKiller.getName() + " has become the target of a blood fued by killing an orc elder of the " + uaPerson.society.getName() + ". They must now spend the rest of their days looking over their shoulder for the sudden the appearance of an avenging orc upstart.", "Orc Blood Feud");
+                        person.map.addUnifiedMessage(uaPerson, pKiller.unit ?? pKiller as object, "Blood Feud", pKiller.getName() + " has become the target of a blood fued by killing an orc elder of the " + uaPerson.society.getName() + ". They must now spend the rest of their days looking over their shoulder for the sudden the appearance of an avenging orc upstart.", "Orc Blood Feud");
                     }
 
                     if (pKiller.items.Any(i => i is I_IdolOfMadness))
@@ -1428,6 +1451,43 @@ namespace Orcs_Plus
                             }
                         }
                     }
+
+                    // Blood Stains
+                    if (orcCulture != null && (uKiller == null || !uKiller.isCommandable()))
+                    {
+                        if (orcCulture.tenet_god is H_Orcs_BloodOffering blood && blood.status < 0)
+                        {
+                            if (core.data.tryGetModAssembly("Kishi", out ModData.ModIntegrationData intDataKishi) && intDataKishi.assembly != null && intDataKishi.methodInfoDict.TryGetValue("addBloodstain", out MethodInfo MI_AddBloodstain) && MI_AddBloodstain != null)
+                            {
+                                object[] parameters = new object[] { pKiller, Math.Abs(blood.status) };
+                                MI_AddBloodstain.Invoke(null, parameters);
+                            }
+                        }
+                    }
+                    else if (uKiller != null && !uKiller.isCommandable())
+                    {
+                        SG_Orc killerOrcSociety = uKiller.society as SG_Orc;
+                        HolyOrder_Orcs killerOrcCulture = uKiller.society as HolyOrder_Orcs;
+
+                        if (killerOrcSociety != null)
+                        {
+                            core.data.orcSGCultureMap.TryGetValue(killerOrcSociety, out killerOrcCulture);
+                        }
+                        else if (killerOrcCulture != null)
+                        {
+                            killerOrcSociety = killerOrcCulture.orcSociety;
+                        }
+
+                        if (killerOrcCulture != null && killerOrcCulture.tenet_god is H_Orcs_BloodOffering blood && blood.status < 0 && person.hasSoul)
+                        {
+                            int gainAmount = Math.Abs(blood.status) - 1;
+                            if (gainAmount > 0 && core.data.tryGetModAssembly("Kishi", out ModData.ModIntegrationData intDataKishi) && intDataKishi.assembly != null && intDataKishi.methodInfoDict.TryGetValue("addBloodstain", out MethodInfo MI_AddBloodstain) && MI_AddBloodstain != null)
+                            {
+                                object[] parameters = new object[] { pKiller, gainAmount };
+                                MI_AddBloodstain.Invoke(null, parameters);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -1435,80 +1495,118 @@ namespace Orcs_Plus
         public void onPersonDeath_InfluenceGain(Person person, string v, object killer)
         {
             Unit uPerson = person.unit;
-            if (uPerson == null)
-            {
-                return;
-            }
-            //Console.WriteLine("Orcs_Plus: Person with unit has died");
-            UA uaPerson = uPerson as UA;
+            UA uaPerson = person.unit as UA;
 
+            Person pKiller = killer as Person;
+            Unit uKiller = killer as Unit;
+            UA uaKiller = killer as UA;
+
+            if (pKiller != null)
+            {
+                uKiller = pKiller.unit;
+                uaKiller = pKiller.unit as UA;
+            }
+
+            //Console.WriteLine("Orcs_Plus: Person with unit has died");
             bool isNature = false;
             bool isVampire = false;
 
-            if (core.data.tryGetModAssembly("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.assembly != null && intDataLW.typeDict.TryGetValue("NatureCritter", out Type natureType) && natureType != null)
-            {
-                if (uPerson.GetType() == natureType || uPerson.GetType().IsSubclassOf(natureType))
-                {
-                    //Console.WriteLine("Orcs_Plus: Person is nature critter");
-                    isNature = true;
-                }
-            }
-
-            if (uaPerson != null)
-            {
-                isVampire = checkIsVampire(uaPerson);
-                /*if (isVampire)
-                {
-                    Console.WriteLine("Orcs_Plus: Person isVampire");
-                }*/
-            }
-
-            SG_Orc orcSociety = uPerson.society as SG_Orc;
-            HolyOrder_Orcs orcCulture = uPerson.society as HolyOrder_Orcs;
-
-            if (orcSociety != null)
-            {
-                core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
-            }
+            SG_Orc orcSociety = null;
+            HolyOrder_Orcs orcCulture = null;
 
             HashSet<SG_Orc> influencedOrcSocietyHashSet = new HashSet<SG_Orc>();
             HolyOrder_Orcs influencedOrcCulture_Direct = null;
             List<HolyOrder_Orcs> influencedOrcCultures_Warring = new List<HolyOrder_Orcs>();
             List<HolyOrder_Orcs> influencedOrcCultures_Regional = new List<HolyOrder_Orcs>();
 
-            if (orcCulture != null)
+            if (uPerson != null)
             {
-                //Console.WriteLine("Orcs_Plus: Person is member of orcSociety");
-                influencedOrcCulture_Direct = orcCulture;
-                influencedOrcSocietyHashSet.Add(orcCulture.orcSociety);
-            }
-
-            if (uPerson.society != null)
-            {
-                foreach (SocialGroup sg in person.map.socialGroups)
+                if (core.data.tryGetModAssembly("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.assembly != null && intDataLW.typeDict.TryGetValue("NatureCritter", out Type natureType) && natureType != null)
                 {
-                    if (sg is SG_Orc orcSociety2 && sg.getRel(uPerson.society).state == DipRel.dipState.war && !influencedOrcSocietyHashSet.Contains(orcSociety2) && core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null)
+                    if (uPerson.GetType() == natureType || uPerson.GetType().IsSubclassOf(natureType))
                     {
-                        //Console.WriteLine("Orcs_Plus: Person is at war with the " + sg.getName());
-                        influencedOrcCultures_Warring.Add(orcCulture2);
-                        influencedOrcSocietyHashSet.Add(orcSociety2);
+                        //Console.WriteLine("Orcs_Plus: Person is nature critter");
+                        isNature = true;
                     }
                 }
+
+                if (uaPerson != null)
+                {
+                    isVampire = checkIsVampire(uaPerson);
+                    /*if (isVampire)
+                    {
+                        Console.WriteLine("Orcs_Plus: Person isVampire");
+                    }*/
+                }
+
+                orcSociety = uPerson.society as SG_Orc;
+                orcCulture = uPerson.society as HolyOrder_Orcs;
+
+                if (orcSociety != null)
+                {
+                    core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+                }
+                else if (orcCulture != null)
+                {
+                    orcSociety = orcCulture.orcSociety;
+                }
+
+                if (orcCulture != null)
+                {
+                    //Console.WriteLine("Orcs_Plus: Person is member of orcSociety");
+                    influencedOrcCulture_Direct = orcCulture;
+                    influencedOrcSocietyHashSet.Add(orcCulture.orcSociety);
+                }
+
+                if (uPerson.society != null)
+                {
+                    foreach (SocialGroup sg in person.map.socialGroups)
+                    {
+                        if (sg is SG_Orc orcSociety2 && sg.getRel(uPerson.society).state == DipRel.dipState.war && !influencedOrcSocietyHashSet.Contains(orcSociety2) && core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null)
+                        {
+                            //Console.WriteLine("Orcs_Plus: Person is at war with the " + sg.getName());
+                            influencedOrcCultures_Warring.Add(orcCulture2);
+                            influencedOrcSocietyHashSet.Add(orcSociety2);
+                        }
+                    }
+                }
+
+                if (uPerson.location.soc is SG_Orc orcSociety3 && !influencedOrcSocietyHashSet.Contains(orcSociety3) && core.data.orcSGCultureMap.TryGetValue(orcSociety3, out HolyOrder_Orcs orcCulture3) && orcCulture3 != null)
+                {
+                    //Console.WriteLine("Orcs_Plus: Person is trespassing in the lands of the " + orcSociety3.getName());
+                    influencedOrcCultures_Regional.Add(orcCulture3);
+                    influencedOrcSocietyHashSet.Add(orcSociety3);
+                }
             }
-
-            if (uPerson.location.soc is SG_Orc orcSociety3 && !influencedOrcSocietyHashSet.Contains(orcSociety3) && core.data.orcSGCultureMap.TryGetValue(orcSociety3, out HolyOrder_Orcs orcCulture3) && orcCulture3 != null)
+            else
             {
-                //Console.WriteLine("Orcs_Plus: Person is trespassing in the lands of the " + orcSociety3.getName());
-                influencedOrcCultures_Regional.Add(orcCulture3);
-                influencedOrcSocietyHashSet.Add(orcSociety3);
-            }
+                if (person.society != null)
+                {
+                    foreach (SocialGroup sg in person.map.socialGroups)
+                    {
+                        if (sg is SG_Orc orcSociety2 && sg.getRel(person.society).state == DipRel.dipState.war && !influencedOrcSocietyHashSet.Contains(orcSociety2) && core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null)
+                        {
+                            //Console.WriteLine("Orcs_Plus: Person is at war with the " + sg.getName());
+                            influencedOrcCultures_Warring.Add(orcCulture2);
+                            influencedOrcSocietyHashSet.Add(orcSociety2);
+                        }
+                    }
+                }
 
-            Person pKiller = killer as Person;
-            Unit uKiller = killer as Unit;
+                if (person.rulerOf != -1)
+                {
+                    List<Location> neighbours = person.map.locations[person.rulerOf].getNeighbours().FindAll(n => n.soc is SG_Orc);
 
-            if (pKiller != null)
-            {
-                uKiller = pKiller.unit;
+                    foreach (Location neighbour in neighbours)
+                    {
+                        if (neighbour.soc is SG_Orc orcSociety3 && !influencedOrcSocietyHashSet.Contains(orcSociety3) && core.data.orcSGCultureMap.TryGetValue(orcSociety3, out HolyOrder_Orcs orcCulture3) && orcCulture3 != null)
+                        {
+                            //Console.WriteLine("Orcs_Plus: Person is trespassing in the lands of the " + orcSociety3.getName());
+                            influencedOrcCultures_Regional.Add(orcCulture3);
+                            influencedOrcSocietyHashSet.Add(orcSociety3);
+                        }
+                    }
+                }
             }
 
             if (uKiller != null && v == "Killed in battle with " + uKiller.getName())
@@ -1574,8 +1672,8 @@ namespace Orcs_Plus
                             core.TryAddInfluenceGain(orcs, new ReasonMsg("Killed trespassing agent in battle", core.data.influenceGain[ModData.influenceGainAction.AgentKill]));
                         }
                     }
-                    
-                    if (uaPerson.society != null && !uaPerson.society.isDark() && (uKiller.society is SG_Orc || uKiller.society is HolyOrder_Orcs))
+
+                    if (uaPerson != null && uaPerson.society != null && !uaPerson.society.isDark() && (uKiller.society is SG_Orc || uKiller.society is HolyOrder_Orcs))
                     {
                         SG_Orc orcSociety2 = uKiller.society as SG_Orc;
                         HolyOrder_Orcs orcCulture2 = uKiller.society as HolyOrder_Orcs;
@@ -1587,7 +1685,7 @@ namespace Orcs_Plus
 
                         if (orcCulture2 != null && !influencedOrcSocietyHashSet.Contains(orcCulture2.orcSociety))
                         {
-                            core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Orcs razing human settlement", -1 * core.data.influenceGain[ModData.influenceGainAction.RazingLocation]));
+                            core.TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Orcs killed hero in battle", -1 * core.data.influenceGain[ModData.influenceGainAction.RazingLocation]));
                         }
 
                         foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
@@ -1665,7 +1763,7 @@ namespace Orcs_Plus
                         }
                     }
                     
-                    if (uaPerson.society != null && !uaPerson.society.isDark() && (uKiller.society is SG_Orc || uKiller.society is HolyOrder_Orcs))
+                    if (uaPerson != null && uaPerson.society != null && !uaPerson.society.isDark() && (uKiller.society is SG_Orc || uKiller.society is HolyOrder_Orcs))
                     {
                         foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
                         {
