@@ -720,7 +720,7 @@ namespace Orcs_Plus
                 contiguous = false;
             }
 
-            List<Set_OrcCamp>[] specialisedCamps = new List<Set_OrcCamp>[5];
+            List<Set_OrcCamp>[] specialisedCamps = new List<Set_OrcCamp>[6];
             int capitalSpecialism = 0;
 
             for (int i = 0; i < specialisedCamps.Length; i++)
