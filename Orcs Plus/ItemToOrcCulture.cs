@@ -115,11 +115,11 @@ namespace Orcs_Plus
                 {
                     if (other.unit.isCommandable())
                     {
-                        ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", delta / 2), true);
+                        ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", delta / 2), true);
                     }
                     else if (!other.unit.society.isDark())
                     {
-                        ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", delta / 2));
+                        ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", delta / 2));
                     }
                 }
             }

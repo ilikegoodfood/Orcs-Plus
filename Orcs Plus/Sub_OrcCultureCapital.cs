@@ -30,7 +30,7 @@ namespace Orcs_Plus
             challenges.Add(new Ch_Orcs_RefillDrinkingHorns(settlement.location));
             challenges.Add(new Ch_Orcs_ForceRestock(settlement.location, this));
 
-            if (ModCore.core.data.godTenetTypes.TryGetValue(order.map.overmind.god.GetType(), out Type tenetType) && tenetType != null && tenetType == typeof(H_Orcs_Perfection))
+            if (ModCore.Get().data.godTenetTypes.TryGetValue(order.map.overmind.god.GetType(), out Type tenetType) && tenetType != null && tenetType == typeof(H_Orcs_Perfection))
             {
                 challenges.Add(new Ch_H_Orcs_PerfectionFestival(settlement.location));
             }
@@ -59,7 +59,7 @@ namespace Orcs_Plus
 
             if (settlement.isInfiltrated)
             {
-                ModCore.core.TryAddInfluenceGain(order as HolyOrder_Orcs, new ReasonMsg("Infiltrated Seat of the Elders (Per Turn)", 2.0), true);
+                ModCore.Get().TryAddInfluenceGain(order as HolyOrder_Orcs, new ReasonMsg("Infiltrated Seat of the Elders (Per Turn)", 2.0), true);
             }
 
             restockTimer--;

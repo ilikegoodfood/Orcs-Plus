@@ -23,7 +23,7 @@ namespace Orcs_Plus
         public AgentAIs(Map map)
         {
             this.map = map;
-            comLibAI = ModCore.core.comLibAI;
+            comLibAI = ModCore.Get().comLibAI;
 
             populateOrcUpstarts();
 
@@ -885,7 +885,7 @@ namespace Orcs_Plus
         private bool delegate_ValidFor_DeathsShadow(AgentAI.ChallengeData challengeData, UA ua)
         {
             bool result = false;
-            if (ua.society is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && ((orcCulture.tenet_shadowWeaving.status < 0 && ua.person.shadow >= 50) || orcCulture.tenet_shadowWeaving.status == -2))
+            if (ua.society is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && ((orcCulture.tenet_shadowWeaving.status < 0 && ua.person.shadow >= 50) || orcCulture.tenet_shadowWeaving.status == -2))
             {
                 result = true;
             }

@@ -38,7 +38,7 @@ namespace Orcs_Plus
         {
             orcCamp = camp;
             orcSociety = orcs;
-            ModCore.core.data.orcSGCultureMap.TryGetValue(orcs, out orcCulture);
+            ModCore.Get().data.orcSGCultureMap.TryGetValue(orcs, out orcCulture);
             this.specialism = specialism;
 
             baseCost = 2.0 * map.param.ch_orc_buildFortressCostPerNeighbour;

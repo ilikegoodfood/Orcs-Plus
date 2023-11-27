@@ -102,17 +102,17 @@ namespace Orcs_Plus
         {
             delta -= plunder.gold;
 
-            if (other != null && other.unit != null && other.unit.society != null && plunder.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture))
+            if (other != null && other.unit != null && other.unit.society != null && plunder.location.soc is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture))
             {
                 if (delta > 0)
                 {
                     if (other.unit.isCommandable())
                     {
-                        ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Took gold from plunder", -delta / 2), true);
+                        ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Took gold from plunder", -delta / 2), true);
                     }
                     else if (!other.unit.society.isDark())
                     {
-                        ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Took gold from plunder", -delta / 2));
+                        ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Took gold from plunder", -delta / 2));
                     }
                 }
 
@@ -120,11 +120,11 @@ namespace Orcs_Plus
                 {
                     if (other.unit.isCommandable())
                     {
-                        ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", -delta / 2), true);
+                        ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", -delta / 2), true);
                     }
                     else if (!other.unit.society.isDark())
                     {
-                        ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", -delta / 2));
+                        ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", -delta / 2));
                     }
                 }
             }

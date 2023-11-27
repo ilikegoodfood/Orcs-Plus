@@ -70,7 +70,7 @@ namespace Orcs_Plus
 
             if (valid)
             {
-                if (loc.settlement is Set_OrcCamp && loc.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_LifeMother life && life.status < -1)
+                if (loc.settlement is Set_OrcCamp && loc.soc is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_LifeMother life && life.status < -1)
                 {
                     return true;
                 }
@@ -109,7 +109,7 @@ namespace Orcs_Plus
 
             if (orcSociety != null)
             {
-                ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Granted Vinerva's Protection", ModCore.core.data.influenceGain[ModData.influenceGainAction.RecieveGift]), true);
+                ModCore.Get().TryAddInfluenceGain(orcSociety, new ReasonMsg("Granted Vinerva's Protection", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RecieveGift]), true);
             }
         }
     }

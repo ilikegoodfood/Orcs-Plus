@@ -129,7 +129,7 @@ namespace Orcs_Plus
 
             if (orcSociety != null)
             {
-                ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+                ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
             }
 
             //Console.WriteLine("OrcsPlus: Start Corsair AI");
@@ -213,7 +213,7 @@ namespace Orcs_Plus
             {
                 if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
                 {
-                    if (ModCore.core.data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("God", out Type t) && t != null)
+                    if (ModCore.Get().data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("God", out Type t) && t != null)
                     {
                         if (map.overmind.god.GetType() == t || map.overmind.god.GetType().IsSubclassOf(t))
                         {
@@ -290,7 +290,7 @@ namespace Orcs_Plus
                             if (loc.soc != null && loc.settlement is SettlementHuman settlementHuman)
                             {
                                 //Console.WriteLine("OrcsPlus: loc is settlement human");
-                                if (ModCore.core.checkAlignment(society as SG_Orc, loc))
+                                if (ModCore.Get().checkAlignment(society as SG_Orc, loc))
                                 {
                                     //Console.WriteLine("OrcsPlus: loc alignment is valid");
                                     if (checkPath(loc, out _))
@@ -324,7 +324,7 @@ namespace Orcs_Plus
                     {
                         if (tradeRoute.raidingCooldown == 0)
                         {
-                            if (!ModCore.core.checkAlignment(society as SG_Orc, tradeRoute.start()) && !ModCore.core.checkAlignment(society as SG_Orc, tradeRoute.end()))
+                            if (!ModCore.Get().checkAlignment(society as SG_Orc, tradeRoute.start()) && !ModCore.Get().checkAlignment(society as SG_Orc, tradeRoute.end()))
                             {
                                 //Console.WriteLine("OrcsPlus: Trade route alignment is valid");
                                 foreach (Location loc in tradeRoute.path)

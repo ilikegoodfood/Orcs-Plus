@@ -93,7 +93,7 @@ namespace Orcs_Plus
             if (orcSociety != null && !orcSociety.isGone() && orcCulture != null)
             {
                 Type dominionBanner = null;
-                if (ModCore.core.data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC) && intDataCCC.assembly != null)
+                if (ModCore.Get().data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC) && intDataCCC.assembly != null)
                 {
                     intDataCCC.typeDict.TryGetValue("Banner", out dominionBanner);
                 }
@@ -252,7 +252,7 @@ namespace Orcs_Plus
                         if (otherIsTarget)
                         {
                             Type dominionBanner = null;
-                            if (ModCore.core.data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC) && intDataCCC.assembly != null)
+                            if (ModCore.Get().data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC) && intDataCCC.assembly != null)
                             {
                                 intDataCCC.typeDict.TryGetValue("Banner", out dominionBanner);
                             }
@@ -324,14 +324,14 @@ namespace Orcs_Plus
                                 }, new int[0], reasons);
                                 utility += person.getTagUtility(target.getPositiveTags(), target.getNegativeTags(), reasons);
 
-                                if (ModCore.core.checkIsVampire(target))
+                                if (ModCore.Get().checkIsVampire(target))
                                 {
                                     val = -35;
                                     reasons?.Add(new ReasonMsg("Fear of Vampires", val));
                                     utility += val;
                                 }
 
-                                if (ModCore.core.data.tryGetModAssembly("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.assembly != null && intDataLW.typeDict.TryGetValue("NatureCritter", out Type t))
+                                if (ModCore.Get().data.tryGetModAssembly("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.assembly != null && intDataLW.typeDict.TryGetValue("NatureCritter", out Type t))
                                 {
                                     if (t != null && target.GetType().IsSubclassOf(t))
                                     {
@@ -504,7 +504,7 @@ namespace Orcs_Plus
                             if (otherIsTarget)
                             {
                                 Type dominionBanner = null;
-                                if (ModCore.core.data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC) && intDataCCC.assembly != null)
+                                if (ModCore.Get().data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC) && intDataCCC.assembly != null)
                                 {
                                     intDataCCC.typeDict.TryGetValue("Banner", out dominionBanner);
                                 }
@@ -588,14 +588,14 @@ namespace Orcs_Plus
                                     }, new int[0], reasons);
                                     utility += person.getTagUtility(target.getPositiveTags(), target.getNegativeTags(), reasons);
 
-                                    if (ModCore.core.checkIsVampire(target))
+                                    if (ModCore.Get().checkIsVampire(target))
                                     {
                                         val = -35;
                                         reasons?.Add(new ReasonMsg("Fear of Vampires", val));
                                         utility += val;
                                     }
 
-                                    if (ModCore.core.data.tryGetModAssembly("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.assembly != null && intDataLW.typeDict.TryGetValue("NatureCritter", out Type t))
+                                    if (ModCore.Get().data.tryGetModAssembly("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.assembly != null && intDataLW.typeDict.TryGetValue("NatureCritter", out Type t))
                                     {
                                         if (t != null && target.GetType().IsSubclassOf(t))
                                         {
@@ -717,7 +717,7 @@ namespace Orcs_Plus
 
         public override void turnTickAI()
         {
-            ModCore.core.comLibAI.turnTickAI(this);
+            ModCore.Get().comLibAI.turnTickAI(this);
         }
 
         public override bool definesName()

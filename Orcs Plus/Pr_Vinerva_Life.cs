@@ -83,7 +83,7 @@ namespace Orcs_Plus
 
                 foreach (Location neighbour in location.getNeighbours())
                 {
-                    if (neighbour.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_LifeMother life && life.status < 0)
+                    if (neighbour.soc is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_LifeMother life && life.status < 0)
                     {
                         valid = true;
                         break;
@@ -96,7 +96,7 @@ namespace Orcs_Plus
                     }
 
                     Sub_OrcWaystation waystation = neighbour.settlement?.subs.OfType<Sub_OrcWaystation>().FirstOrDefault();
-                    if (waystation != null && ModCore.core.data.orcSGCultureMap.TryGetValue(waystation.orcSociety, out HolyOrder_Orcs orcCulture3) && orcCulture3 != null && orcCulture3.tenet_god is H_Orcs_LifeMother life3 && life3.status < 0)
+                    if (waystation != null && ModCore.Get().data.orcSGCultureMap.TryGetValue(waystation.orcSociety, out HolyOrder_Orcs orcCulture3) && orcCulture3 != null && orcCulture3.tenet_god is H_Orcs_LifeMother life3 && life3.status < 0)
                     {
                         valid = true;
                         break;
@@ -142,7 +142,7 @@ namespace Orcs_Plus
 
                     foreach (Location neighbour in location.getNeighbours())
                     {
-                        if (neighbour.soc is SG_Orc orcSociety2 && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null && orcCulture2.tenet_god is H_Orcs_LifeMother life && life.status < 0)
+                        if (neighbour.soc is SG_Orc orcSociety2 && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null && orcCulture2.tenet_god is H_Orcs_LifeMother life && life.status < 0)
                         {
                             orcSocieties.Add(orcSociety2);
                             continue;
@@ -155,7 +155,7 @@ namespace Orcs_Plus
                         }
 
                         Sub_OrcWaystation waystation = neighbour.settlement?.subs.OfType<Sub_OrcWaystation>().FirstOrDefault();
-                        if (waystation != null && waystation.orcSociety != null && ModCore.core.data.orcSGCultureMap.TryGetValue(waystation.orcSociety, out HolyOrder_Orcs orcCulture4) && orcCulture4 != null && orcCulture4.tenet_god is H_Orcs_LifeMother life4 && life4.status < 0)
+                        if (waystation != null && waystation.orcSociety != null && ModCore.Get().data.orcSGCultureMap.TryGetValue(waystation.orcSociety, out HolyOrder_Orcs orcCulture4) && orcCulture4 != null && orcCulture4.tenet_god is H_Orcs_LifeMother life4 && life4.status < 0)
                         {
                             orcSocieties.Add(waystation.orcSociety);
                             continue;
@@ -206,7 +206,7 @@ namespace Orcs_Plus
             location.properties.Add(new Pr_Vinerva_LifeBoon(location));
             location.properties.Remove(this);
 
-            ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Nurtured Orchard of Life to Maturity", ModCore.core.data.influenceGain[ModData.influenceGainAction.RecieveGift]), true);
+            ModCore.Get().TryAddInfluenceGain(orcSociety, new ReasonMsg("Nurtured Orchard of Life to Maturity", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RecieveGift]), true);
         }
 
         public override bool canTriggerCrisis()

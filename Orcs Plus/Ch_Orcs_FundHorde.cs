@@ -24,9 +24,9 @@ namespace Orcs_Plus
         {
             orcSociety = camp.location.soc as SG_Orc;
 
-            if (orcSociety != null && ModCore.core.data.orcSGCultureMap.ContainsKey(orcSociety))
+            if (orcSociety != null && ModCore.Get().data.orcSGCultureMap.ContainsKey(orcSociety))
             {
-                orcCulture = ModCore.core.data.orcSGCultureMap[orcSociety];
+                orcCulture = ModCore.Get().data.orcSGCultureMap[orcSociety];
             }
 
             return orcCulture;
@@ -109,7 +109,7 @@ namespace Orcs_Plus
                 else
                 {
                     getOrcCulture()?.receiveFunding(u.person, u.person.gold);
-                    ModCore.core.TryAddInfluenceGain(getOrcCulture(), new ReasonMsg("Gifted gold", u.person.gold / 2), true);
+                    ModCore.Get().TryAddInfluenceGain(getOrcCulture(), new ReasonMsg("Gifted gold", u.person.gold / 2), true);
                     u.person.gold = 0;
                 }
             }
@@ -124,7 +124,7 @@ namespace Orcs_Plus
 
                 if (u.society != null && !u.society.isDark() && !u.corrupted)
                 {
-                    ModCore.core.TryAddInfluenceGain(getOrcCulture(), new ReasonMsg("Gifted gold", u.person.gold / 2));
+                    ModCore.Get().TryAddInfluenceGain(getOrcCulture(), new ReasonMsg("Gifted gold", u.person.gold / 2));
                 }
 
                 u.person.gold = 0;
@@ -133,7 +133,7 @@ namespace Orcs_Plus
 
         public override bool valid()
         {
-            return camp.location.settlement == camp && camp.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.ContainsKey(orcSociety) && ModCore.core.data.orcSGCultureMap[orcSociety] != null;
+            return camp.location.settlement == camp && camp.location.soc is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.ContainsKey(orcSociety) && ModCore.Get().data.orcSGCultureMap[orcSociety] != null;
         }
 
         public override int getSimplificationLevel()

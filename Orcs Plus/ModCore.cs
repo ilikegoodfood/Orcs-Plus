@@ -13,7 +13,7 @@ namespace Orcs_Plus
 {
     public class ModCore : ModKernel
     {
-        public static ModCore core;
+        private static ModCore core;
 
         public static CommunityLib.ModCore comLib;
 
@@ -30,6 +30,8 @@ namespace Orcs_Plus
         public List<Power> godPowers2;
 
         private static bool patched = false;
+
+        public static ModCore Get() => core;
 
         public override void onModsInitiallyLoaded()
         {
@@ -1215,12 +1217,12 @@ namespace Orcs_Plus
             SG_Orc attOrcSociety = att as SG_Orc;
             SG_Orc defOrcSociety = def as SG_Orc;
 
-            if (attOrcSociety != null && ModCore.core.data.orcSGCultureMap.TryGetValue(attOrcSociety, out HolyOrder_Orcs attOrcCulture) && attOrcCulture != null)
+            if (attOrcSociety != null && ModCore.Get().data.orcSGCultureMap.TryGetValue(attOrcSociety, out HolyOrder_Orcs attOrcCulture) && attOrcCulture != null)
             {
                 att.map.declarePeace(attOrcCulture, def);
             }
 
-            if (defOrcSociety != null && ModCore.core.data.orcSGCultureMap.TryGetValue(defOrcSociety, out HolyOrder_Orcs defOrcCulture) && defOrcCulture != null)
+            if (defOrcSociety != null && ModCore.Get().data.orcSGCultureMap.TryGetValue(defOrcSociety, out HolyOrder_Orcs defOrcCulture) && defOrcCulture != null)
             {
                 att.map.declarePeace(att, defOrcCulture);
             }
@@ -1234,12 +1236,12 @@ namespace Orcs_Plus
             HolyOrder_Orcs attOrcCulture = null;
             HolyOrder_Orcs defOrcCulture = null;
 
-            if (attOrcSociety != null && ModCore.core.data.orcSGCultureMap.TryGetValue(attOrcSociety, out attOrcCulture) && attOrcCulture != null)
+            if (attOrcSociety != null && ModCore.Get().data.orcSGCultureMap.TryGetValue(attOrcSociety, out attOrcCulture) && attOrcCulture != null)
             {
                 attacker.map.declareWar(attOrcCulture, target, true, reasons, war.attackerObjective);
             }
 
-            if (defOrcSociety != null && ModCore.core.data.orcSGCultureMap.TryGetValue(defOrcSociety, out defOrcCulture) && defOrcCulture != null)
+            if (defOrcSociety != null && ModCore.Get().data.orcSGCultureMap.TryGetValue(defOrcSociety, out defOrcCulture) && defOrcCulture != null)
             {
                 attacker.map.declareWar(attacker, defOrcCulture, true, reasons, war.attackerObjective);
             }

@@ -34,7 +34,7 @@ namespace Orcs_Plus
             : base(orcs.map)
         {
             orcSociety = orcs;
-            ModCore.core.data.orcSGCultureMap.TryGetValue(orcs, out orcCulture);
+            ModCore.Get().data.orcSGCultureMap.TryGetValue(orcs, out orcCulture);
         }
 
         public override string getName()
@@ -342,7 +342,7 @@ namespace Orcs_Plus
                     {
                         groups.Add(neighbour.soc);
 
-                        if (ModCore.core.checkAlignment(orcSociety, neighbour))
+                        if (ModCore.Get().checkAlignment(orcSociety, neighbour))
                         {
                             double milStrengthFactor = orcSociety.currentMilitary / neighbour.soc.currentMilitary;
 

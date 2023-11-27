@@ -34,7 +34,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Raids a nearby human outpost, taking vast sums of gold that the humans had invested in its success, and potentially razing it to the ground. Adds " + map.param.ch_orcishRaidingMenaceGain + " menace to the orcish horde. You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.Raiding] + " influence with the orc culture by completing this challenge.";
+            return "Raids a nearby human outpost, taking vast sums of gold that the humans had invested in its success, and potentially razing it to the ground. Adds " + map.param.ch_orcishRaidingMenaceGain + " menace to the orcish horde. You gain " + ModCore.Get().data.influenceGain[ModData.influenceGainAction.Raiding] + " influence with the orc culture by completing this challenge.";
         }
 
         public override string getCastFlavour()
@@ -199,11 +199,11 @@ namespace Orcs_Plus
 
             if (u.isCommandable())
             {
-                ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg(getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Raiding]), true);
+                ModCore.Get().TryAddInfluenceGain(orcSociety, new ReasonMsg(getName(), ModCore.Get().data.influenceGain[ModData.influenceGainAction.Raiding]), true);
             }
             else if (!u.society.isDark())
             {
-                ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg(getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Raiding]));
+                ModCore.Get().TryAddInfluenceGain(orcSociety, new ReasonMsg(getName(), ModCore.Get().data.influenceGain[ModData.influenceGainAction.Raiding]));
             }
         }
 

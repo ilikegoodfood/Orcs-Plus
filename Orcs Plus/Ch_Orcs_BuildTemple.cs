@@ -31,7 +31,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Builds a great hall in this orc camp, which acts as a cultural hub. A local orc champion will pledge themselves to your service if you, and you will gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildTemple] + " influence over the orc culture, by building this great hall.";
+            return "Builds a great hall in this orc camp, which acts as a cultural hub. A local orc champion will pledge themselves to your service if you, and you will gain " + ModCore.Get().data.influenceGain[ModData.influenceGainAction.BuildTemple] + " influence over the orc culture, by building this great hall.";
         }
 
         public override string getRestriction()
@@ -83,7 +83,7 @@ namespace Orcs_Plus
 
             if (orcSociety != null)
             {
-                ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+                ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
             }
 
             if (orcCulture != null && location.settlement is Set_OrcCamp camp && camp.specialism != 0 && !camp.subs.Any(sub => sub is Sub_Temple))
@@ -93,7 +93,7 @@ namespace Orcs_Plus
 
                 u.person.gold -= cost;
 
-                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildTemple]), true);
+                ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg(getName(), ModCore.Get().data.influenceGain[ModData.influenceGainAction.BuildTemple]), true);
 
                 int commandCost = exemplar.getCommandCost();
                 int commandLimit = u.getStatCommandLimit();

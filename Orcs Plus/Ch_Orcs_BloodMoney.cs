@@ -196,7 +196,7 @@ namespace Orcs_Plus
 
             if (u.isCommandable() && location.soc is SG_Orc orcSociety)
             {
-                ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg(getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BloodMoney]), true);
+                ModCore.Get().TryAddInfluenceGain(orcSociety, new ReasonMsg(getName(), ModCore.Get().data.influenceGain[ModData.influenceGainAction.BloodMoney]), true);
             }
         }
 

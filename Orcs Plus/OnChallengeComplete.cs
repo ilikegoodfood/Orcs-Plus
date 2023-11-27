@@ -60,33 +60,33 @@ namespace Orcs_Plus
 
         public static void Ch_Orcs_BuildFortress(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)
         {
-            if (ua.isCommandable() && ua.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            if (ua.isCommandable() && ua.location.soc is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
             {
-                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
+                ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.Get().data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
             }
         }
 
         public static void Ch_Orcs_BuildMages(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)
         {
-            if (ua.isCommandable() && ua.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            if (ua.isCommandable() && ua.location.soc is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
             {
-                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
+                ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.Get().data.influenceGain[ModData.influenceGainAction.BuildFortress]), true);
             }
         }
 
         public static void Ch_Orcs_BuildMenagerie(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)
         {
-            if (ua.isCommandable() && ua.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            if (ua.isCommandable() && ua.location.soc is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
             {
-                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildMenagerie]), true);
+                ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.Get().data.influenceGain[ModData.influenceGainAction.BuildMenagerie]), true);
             }
         }
 
         public static void Ch_Orcs_BuildShipyard(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)
         {
-            if (ua.isCommandable() && ua.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            if (ua.isCommandable() && ua.location.soc is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
             {
-                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildShipyard]), true);
+                ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.Get().data.influenceGain[ModData.influenceGainAction.BuildShipyard]), true);
             }
         }
 
@@ -112,11 +112,11 @@ namespace Orcs_Plus
                 }
             }
 
-            if (ua.society is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            if (ua.society is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
             {
                 if (ua.isCommandable())
                 {
-                    ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand]), true);
+                    ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.Get().data.influenceGain[ModData.influenceGainAction.Expand]), true);
                 }
 
                 if (orcSociety.cachedGone)
@@ -129,32 +129,32 @@ namespace Orcs_Plus
 
         public static void Ch_Orcs_DevastateOrcishIndustry(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)
         {
-            if (ua.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            if (ua.location.soc is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
             {
                 if (ua.isCommandable())
                 {
-                    ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.DevastateIndustry]), true);
+                    ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.Get().data.influenceGain[ModData.influenceGainAction.DevastateIndustry]), true);
                 }
                 else
                 {
-                    ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.DevastateIndustry]));
+                    ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.Get().data.influenceGain[ModData.influenceGainAction.DevastateIndustry]));
                 }
             }
         }
 
         public static void Ch_Subjugate_Orcs(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)
         {
-            if (ua.isCommandable() && ua.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            if (ua.isCommandable() && ua.location.soc is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
             {
                 if (ua.location.settlement is Set_OrcCamp camp)
                 {
                     if (camp.specialism == 0)
                     {
-                        ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Subjugate]), true);
+                        ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.Get().data.influenceGain[ModData.influenceGainAction.Subjugate]), true);
                     }
                     else
                     {
-                        ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Subjugate] * 2), true);
+                        ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.Get().data.influenceGain[ModData.influenceGainAction.Subjugate] * 2), true);
                     }
                 }
             }
@@ -202,12 +202,12 @@ namespace Orcs_Plus
 
                 foreach (SG_Orc orcSociety in influencedOrcSocieties_Warring)
                 {
-                    ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Raided enemy settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
+                    ModCore.Get().TryAddInfluenceGain(orcSociety, new ReasonMsg("Raided enemy settlement", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
                 }
 
                 foreach (SG_Orc orcSociety in influencedOrcSocieties_Regional)
                 {
-                    ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Raided encroaching settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
+                    ModCore.Get().TryAddInfluenceGain(orcSociety, new ReasonMsg("Raided encroaching settlement", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
                 }
             }
         }
@@ -240,12 +240,12 @@ namespace Orcs_Plus
 
                 foreach (SG_Orc orcSociety in influencedOrcSocieties_Warring)
                 {
-                    ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Raided enemy settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
+                    ModCore.Get().TryAddInfluenceGain(orcSociety, new ReasonMsg("Raided enemy settlement", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
                 }
 
                 foreach (SG_Orc orcSociety in influencedOrcSocieties_Regional)
                 {
-                    ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Raided encroaching settlement", ModCore.core.data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
+                    ModCore.Get().TryAddInfluenceGain(orcSociety, new ReasonMsg("Raided encroaching settlement", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RazingLocation]), true);
                 }
             }
         }
@@ -293,18 +293,18 @@ namespace Orcs_Plus
 
             if (ua.isCommandable() && orcSociety != null)
             {
-                if (ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+                if (ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
                 {
-                    ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(challenge.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand]), true);
+                    ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg(challenge.getName(), ModCore.Get().data.influenceGain[ModData.influenceGainAction.Expand]), true);
                 }
             }
         }
 
         public static void Ch_Orcs_OrganiseTheHorde(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)
         {
-            if (ua.isCommandable() && ua.location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            if (ua.isCommandable() && ua.location.soc is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
             {
-                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Raiding]), true);
+                ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.Get().data.influenceGain[ModData.influenceGainAction.Raiding]), true);
             }
         }
 

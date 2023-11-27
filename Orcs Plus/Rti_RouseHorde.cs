@@ -16,7 +16,7 @@ namespace Orcs_Plus
             : base(loc)
         {
             Type t = null;
-            if (ModCore.core.data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC) && intDataCCC.assembly != null)
+            if (ModCore.Get().data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC) && intDataCCC.assembly != null)
             {
                 intDataCCC.typeDict.TryGetValue("Banner", out t);
             }

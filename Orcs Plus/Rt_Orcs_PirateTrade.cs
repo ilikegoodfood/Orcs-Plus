@@ -64,7 +64,7 @@ namespace Orcs_Plus
                         if (endPoint.soc != null)
                         {
                             SG_Orc orcSociety = um.society as SG_Orc;
-                            if (orcSociety != null && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+                            if (orcSociety != null && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
                             {
                                 if (orcCulture.tenet_intolerance.status == -2)
                                 {
@@ -135,7 +135,7 @@ namespace Orcs_Plus
                     List<bool> endAlignments = new List<bool>();
                     foreach (Location endPoint in endPoints)
                     {
-                        if (ModCore.core.checkAlignment(u.society as SG_Orc, endPoint))
+                        if (ModCore.Get().checkAlignment(u.society as SG_Orc, endPoint))
                         {
                             endAlignments.Add(true);
                         }

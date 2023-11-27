@@ -137,7 +137,7 @@ namespace Orcs_Plus
                     return true;
                 }
 
-                if (!ua.isCommandable() && !ua.society.isDark() && ModCore.core.data.orcSGCultureMap.TryGetValue(orcScoiety, out HolyOrder_Orcs orcCulture2) && orcCulture2.tenet_intolerance.status > 0)
+                if (!ua.isCommandable() && !ua.society.isDark() && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcScoiety, out HolyOrder_Orcs orcCulture2) && orcCulture2.tenet_intolerance.status > 0)
                 {
                     return true;
                 }

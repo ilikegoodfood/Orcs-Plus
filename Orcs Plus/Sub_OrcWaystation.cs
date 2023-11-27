@@ -64,7 +64,7 @@ namespace Orcs_Plus
                 return;
             }
 
-            if (!ModCore.core.data.getSettlementTypesForWaystation().Contains(settlement.GetType()))
+            if (!ModCore.Get().data.getSettlementTypesForWaystation().Contains(settlement.GetType()))
             {
                 settlement.subs.Remove(this);
                 return;

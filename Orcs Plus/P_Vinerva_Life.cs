@@ -111,7 +111,7 @@ namespace Orcs_Plus
                 {
                     if (neighbour.settlement is Set_OrcCamp && neighbour.soc is SG_Orc orcSociety)
                     {
-                        if (ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_LifeMother life && life.status < 0)
+                        if (ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_LifeMother life && life.status < 0)
                         {
                             return true;
                         }
@@ -132,7 +132,7 @@ namespace Orcs_Plus
                         {
                             if (subsettlement is Sub_OrcWaystation waystation)
                             {
-                                if (ModCore.core.data.orcSGCultureMap.TryGetValue(waystation.orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_LifeMother life && life.status < 0)
+                                if (ModCore.Get().data.orcSGCultureMap.TryGetValue(waystation.orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_LifeMother life && life.status < 0)
                                 {
                                     return true;
                                 }

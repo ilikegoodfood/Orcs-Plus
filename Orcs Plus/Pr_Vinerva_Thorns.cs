@@ -75,7 +75,7 @@ namespace Orcs_Plus
                 deadUnit.die(map, "Destroyed in Seige");
                 if (location.soc is SG_Orc orcSociety)
                 {
-                    ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Vinerva's wall of thorns destroyed enemy army", ModCore.core.data.influenceGain[ModData.influenceGainAction.ArmyKill]));
+                    ModCore.Get().TryAddInfluenceGain(orcSociety, new ReasonMsg("Vinerva's wall of thorns destroyed enemy army", ModCore.Get().data.influenceGain[ModData.influenceGainAction.ArmyKill]));
                 }
             }
         }

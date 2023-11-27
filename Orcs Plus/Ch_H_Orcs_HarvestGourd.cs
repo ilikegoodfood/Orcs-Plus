@@ -23,7 +23,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "The Gourd of Blood grants orc warriors the ability to survive and rapidly heal from even the most gruesome of wounds, at least for a time. When this challenge is completed, Vinerva gains " + ModCore.core.data.influenceGain[ModData.influenceGainAction.RecieveGift] + " influence over the orc culture.";
+            return "The Gourd of Blood grants orc warriors the ability to survive and rapidly heal from even the most gruesome of wounds, at least for a time. When this challenge is completed, Vinerva gains " + ModCore.Get().data.influenceGain[ModData.influenceGainAction.RecieveGift] + " influence over the orc culture.";
         }
 
         public override string getRestriction()
@@ -87,7 +87,7 @@ namespace Orcs_Plus
 
                 if (orcCulture == null)
                 {
-                    ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+                    ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
                 }
 
                 if (orcSociety != null && orcSociety.isAtWar())
@@ -118,7 +118,7 @@ namespace Orcs_Plus
             HolyOrder_Orcs orcCulture = u.society as HolyOrder_Orcs;
             if (orcCulture == null && u.society is SG_Orc orcSociety)
             {
-                ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+                ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
             }
 
             Pr_Vinerva_Health gourd = u.location.properties.OfType<Pr_Vinerva_Health>().FirstOrDefault();
@@ -132,7 +132,7 @@ namespace Orcs_Plus
                 }
 
                 orcCulture.vinerva_HealthDuration += 10;
-                ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg("Feasted of Gourd of Blood", ModCore.core.data.influenceGain[ModData.influenceGainAction.RecieveGift]), true);
+                ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Feasted of Gourd of Blood", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RecieveGift]), true);
                 orcCulture.orcSociety.menace += 5;
             }
         }

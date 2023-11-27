@@ -45,7 +45,7 @@ namespace Orcs_Plus
         {
             bool valid = false;
 
-            if (unit is UM_OrcArmy orcArmy && !(orcArmy is UM_PerfectHorde) && orcArmy.homeLocation != -1 && orcArmy.society is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_Perfection perfection && perfection.status < -1)
+            if (unit is UM_OrcArmy orcArmy && !(orcArmy is UM_PerfectHorde) && orcArmy.homeLocation != -1 && orcArmy.society is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_Perfection perfection && perfection.status < -1)
             {
                 Pr_Ophanim_Perfection perfectionLocal = orcArmy.map.locations[orcArmy.homeLocation].properties.OfType<Pr_Ophanim_Perfection>().FirstOrDefault();
                 if (perfectionLocal != null && perfectionLocal.charge >= 300.0)
@@ -81,7 +81,7 @@ namespace Orcs_Plus
                 perfectHorde.updateMaxHP();
                 perfectHorde.hp = (int)Math.Ceiling(perfectHorde.maxHp * hpPercentage);
 
-                ModCore.core.TryAddInfluenceGain(orcSociety, new ReasonMsg("Made Perfect", ModCore.core.data.influenceGain[ModData.influenceGainAction.RecieveGift]), true);
+                ModCore.Get().TryAddInfluenceGain(orcSociety, new ReasonMsg("Made Perfect", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RecieveGift]), true);
 
                 if (GraphicalMap.selectedUnit == unit)
                 {

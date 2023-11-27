@@ -54,7 +54,7 @@ namespace Orcs_Plus
             double utility = -50.0;
             reasons?.Add(new ReasonMsg("Base Reluctance", -50.0));
 
-            if (ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_MammonClient client && client.status < 0)
+            if (ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_MammonClient client && client.status < 0)
             {
                 int cost = costA;
                 if (client.status < -1)
@@ -205,7 +205,7 @@ namespace Orcs_Plus
                     }
                     else if (target is SG_Orc orcSociety2)
                     {
-                        if (ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null)
+                        if (ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null)
                         {
                             if (orcCulture.tenet_alignment.status < 0 && orcCulture2.tenet_alignment.status > 0)
                             {
@@ -247,7 +247,7 @@ namespace Orcs_Plus
                 return;
             }
 
-            if (ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_MammonClient client && client.status < 0)
+            if (ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_MammonClient client && client.status < 0)
             {
                 int cost = costA;
                 double armySize = armySizeA;
@@ -312,7 +312,7 @@ namespace Orcs_Plus
 
                         armySize *= settlementHuman.prosperity;
                     }
-                    else if (target is SG_Orc orcSociety2 && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null)
+                    else if (target is SG_Orc orcSociety2 && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null)
                     {
                         if (orcCulture.tenet_alignment.status < 0 && orcCulture2.tenet_alignment.status > 0)
                         {

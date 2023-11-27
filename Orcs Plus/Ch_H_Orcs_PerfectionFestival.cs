@@ -66,7 +66,7 @@ namespace Orcs_Plus
                 }
                 else if (orcCulture == null)
                 {
-                    ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+                    ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
                 }
             }
 
@@ -134,7 +134,7 @@ namespace Orcs_Plus
 
         public override bool valid()
         {
-            if (location.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_Perfection perfection && perfection.status < 0)
+            if (location.soc is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_Perfection perfection && perfection.status < 0)
             {
                 if (location.settlement.subs.Any(sub => sub is Sub_OrcCultureCapital || sub is Sub_OrcTemple))
                 {
@@ -180,7 +180,7 @@ namespace Orcs_Plus
                 orcSociety.menace += 0.5;
             }
 
-            ModCore.core.TryAddInfluenceGain(location.soc as SG_Orc, new ReasonMsg(getName(), (ModCore.core.data.influenceGain[ModData.influenceGainAction.RecieveGift] / 20) * getProgressPerTurnInner(ua, null)), true);
+            ModCore.Get().TryAddInfluenceGain(location.soc as SG_Orc, new ReasonMsg(getName(), (ModCore.Get().data.influenceGain[ModData.influenceGainAction.RecieveGift] / 20) * getProgressPerTurnInner(ua, null)), true);
         }
 
         public override int[] buildPositiveTags()

@@ -56,9 +56,9 @@ namespace Orcs_Plus
             //Console.WriteLine("OrcsPlus: HolyOrder_Orcs Ctor");
             orcSociety = o;
             capital = l.index;
-            if (!ModCore.core.data.orcSGCultureMap.ContainsKey(orcSociety))
+            if (!ModCore.Get().data.orcSGCultureMap.ContainsKey(orcSociety))
             {
-                ModCore.core.data.orcSGCultureMap.Add(orcSociety, this);
+                ModCore.Get().data.orcSGCultureMap.Add(orcSociety, this);
             }
 
             genderExclusive = 1 - Eleven.random.Next(3);
@@ -123,7 +123,7 @@ namespace Orcs_Plus
             }*/
 
             // Add god specific HolyTenets
-            if (ModCore.core.data.godTenetTypes.TryGetValue(map.overmind.god.GetType(), out Type tenetType) && tenetType != null)
+            if (ModCore.Get().data.godTenetTypes.TryGetValue(map.overmind.god.GetType(), out Type tenetType) && tenetType != null)
             {
                 tenet_god = (HolyTenet)Activator.CreateInstance(tenetType, new object[] { this });
                 tenets.Add(tenet_god);
@@ -259,7 +259,7 @@ namespace Orcs_Plus
             plunder.Clear();
             plunderValue = 0;
 
-            ModCore.core.data.getOrcCamps(map, this, out camps, out specializedCamps);
+            ModCore.Get().data.getOrcCamps(map, this, out camps, out specializedCamps);
             List<Set_OrcCamp> allCamps = new List<Set_OrcCamp>();
             allCamps.AddRange(camps);
             allCamps.AddRange(specializedCamps);
@@ -1133,7 +1133,7 @@ namespace Orcs_Plus
                 }
 
                 SG_Orc rebelSociety = new SG_Orc(map, rebelCapital.location);
-                ModCore.core.data.orcSGCultureMap.TryGetValue(rebelSociety, out HolyOrder_Orcs rebelCulture);
+                ModCore.Get().data.orcSGCultureMap.TryGetValue(rebelSociety, out HolyOrder_Orcs rebelCulture);
 
                 rebelData.Add(rebelCapital, new Tuple<SG_Orc, HolyOrder_Orcs>(rebelSociety, rebelCulture));
 

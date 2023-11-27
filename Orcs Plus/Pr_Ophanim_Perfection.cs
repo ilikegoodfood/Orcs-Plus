@@ -69,7 +69,7 @@ namespace Orcs_Plus
                 location.properties.Add(defences);
             }
 
-            if (ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_Perfection perfection)
+            if (ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_Perfection perfection)
             {
                 if (perfection.status < 0)
                 {
@@ -102,7 +102,7 @@ namespace Orcs_Plus
                     {
                         if (charge >= 100)
                         {
-                            if (neighbour.settlement is Set_OrcCamp && neighbour.soc is SG_Orc orcSociety2 && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null && orcCulture2.tenet_god is H_Orcs_Perfection perfection2 && perfection2.status < 0)
+                            if (neighbour.settlement is Set_OrcCamp && neighbour.soc is SG_Orc orcSociety2 && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null && orcCulture2.tenet_god is H_Orcs_Perfection perfection2 && perfection2.status < 0)
                             {
                                 double threshold2 = perfection2.thresholdMinor;
                                 if (perfection2.status < -1)

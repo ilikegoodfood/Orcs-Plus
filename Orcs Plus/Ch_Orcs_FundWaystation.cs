@@ -50,7 +50,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Donate " + cost + " gold so that the orcs can build, guard and buy stock for a waystation in a neighbouring non-human settlement. You gain " + ModCore.core.data.influenceGain[ModData.influenceGainAction.BuildWaystation] + " influence with the orc culture by completing this challenge.";
+            return "Donate " + cost + " gold so that the orcs can build, guard and buy stock for a waystation in a neighbouring non-human settlement. You gain " + ModCore.Get().data.influenceGain[ModData.influenceGainAction.BuildWaystation] + " influence with the orc culture by completing this challenge.";
         }
 
         public override string getCastFlavour()
@@ -167,7 +167,7 @@ namespace Orcs_Plus
                     {
                         if (!neighbour.isOcean && neighbour.settlement != null && neighbour.hex.getHabilitability() >= map.opt_orcHabMult * map.param.orc_habRequirement)
                         {
-                            if (ModCore.core.data.getSettlementTypesForWaystation().Contains(neighbour.settlement.GetType()) && !neighbour.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == orcSociety))
+                            if (ModCore.Get().data.getSettlementTypesForWaystation().Contains(neighbour.settlement.GetType()) && !neighbour.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == orcSociety))
                             {
                                 return true;
                             }
@@ -224,7 +224,7 @@ namespace Orcs_Plus
                     {
                         if (neighbour.settlement != null && neighbour.hex.getHabilitability() >= map.opt_orcHabMult * map.param.orc_habRequirement)
                         {
-                            if (ModCore.core.data.getSettlementTypesForWaystation().Contains(neighbour.settlement.GetType()) && !neighbour.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == orcSociety))
+                            if (ModCore.Get().data.getSettlementTypesForWaystation().Contains(neighbour.settlement.GetType()) && !neighbour.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == orcSociety))
                             {
                                 settlements.Add(neighbour.settlement);
                             }
@@ -247,9 +247,9 @@ namespace Orcs_Plus
                         }
                         u.person.gold -= cost;
 
-                        if (u.isCommandable() && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+                        if (u.isCommandable() && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
                         {
-                            ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand]), true);
+                            ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg(getName(), ModCore.Get().data.influenceGain[ModData.influenceGainAction.Expand]), true);
                         }
                     }
                 }

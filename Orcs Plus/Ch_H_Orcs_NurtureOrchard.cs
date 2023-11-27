@@ -22,7 +22,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "The Sapling of Life can be nurtured and grown into a great orchard, which provides water, food and a stable habitat for settlement. When this challenge is completed, Vinerva gains " + ModCore.core.data.influenceGain[ModData.influenceGainAction.RecieveGift] + " influence over the orc culture.";
+            return "The Sapling of Life can be nurtured and grown into a great orchard, which provides water, food and a stable habitat for settlement. When this challenge is completed, Vinerva gains " + ModCore.Get().data.influenceGain[ModData.influenceGainAction.RecieveGift] + " influence over the orc culture.";
         }
 
         public override string getRestriction()
@@ -51,7 +51,7 @@ namespace Orcs_Plus
 
             foreach (Location neighbour in location.getNeighbours())
             {
-                if (neighbour.soc is SG_Orc orcSociety && ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_LifeMother life && life.status < 0)
+                if (neighbour.soc is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_LifeMother life && life.status < 0)
                 {
                     result = true;
                     break;
@@ -64,7 +64,7 @@ namespace Orcs_Plus
                 }
 
                 Sub_OrcWaystation waystation = neighbour.settlement?.subs.OfType<Sub_OrcWaystation>().FirstOrDefault();
-                if (waystation != null && ModCore.core.data.orcSGCultureMap.TryGetValue(waystation.orcSociety, out HolyOrder_Orcs orcCulture3) && orcCulture3 != null && orcCulture3.tenet_god is H_Orcs_LifeMother life3 && life3.status < 0)
+                if (waystation != null && ModCore.Get().data.orcSGCultureMap.TryGetValue(waystation.orcSociety, out HolyOrder_Orcs orcCulture3) && orcCulture3 != null && orcCulture3.tenet_god is H_Orcs_LifeMother life3 && life3.status < 0)
                 {
                     result = true;
                     break;

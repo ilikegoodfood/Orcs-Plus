@@ -100,7 +100,7 @@ namespace Orcs_Plus
                 }
 
                 HolyOrder_Orcs orcCulture;
-                ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+                ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
 
                 foreach (Location neighbour in um.location.getNeighbours())
                 {
@@ -235,14 +235,14 @@ namespace Orcs_Plus
             {
                 HolyOrder_Orcs orcCulture = null;
 
-                if ( ModCore.core.data.orcSGCultureMap.ContainsKey(u.society as SG_Orc) && ModCore.core.data.orcSGCultureMap[u.society as SG_Orc] != null)
+                if ( ModCore.Get().data.orcSGCultureMap.ContainsKey(u.society as SG_Orc) && ModCore.Get().data.orcSGCultureMap[u.society as SG_Orc] != null)
                 {
-                    orcCulture = ModCore.core.data.orcSGCultureMap[u.society as SG_Orc];
+                    orcCulture = ModCore.Get().data.orcSGCultureMap[u.society as SG_Orc];
                 }
 
                 if (orcCulture != null)
                 {
-                    ModCore.core.TryAddInfluenceGain(orcCulture, new ReasonMsg(getName(), ModCore.core.data.influenceGain[ModData.influenceGainAction.Expand]), true);
+                    ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg(getName(), ModCore.Get().data.influenceGain[ModData.influenceGainAction.Expand]), true);
                 }
             }
         }

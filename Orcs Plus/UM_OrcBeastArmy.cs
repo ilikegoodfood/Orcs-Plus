@@ -93,7 +93,7 @@ namespace Orcs_Plus
 
             if (orcSociety != null)
             {
-                ModCore.core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+                ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
             }
 
             if (hp < maxHp * 0.3)
@@ -155,7 +155,7 @@ namespace Orcs_Plus
                                     rel = society.getRel(um.society);
                                 }
                                 // Will attack military units that they are at war with, or that they are hostile with and are within this army's territory.
-                                if (um.society == null || rel.state == DipRel.dipState.war || (rel.state == DipRel.dipState.hostile && unit.location.soc == society && ModCore.core.checkAlignment(society as SG_Orc, um.society)))
+                                if (um.society == null || rel.state == DipRel.dipState.war || (rel.state == DipRel.dipState.hostile && unit.location.soc == society && ModCore.Get().checkAlignment(society as SG_Orc, um.society)))
                                 {
                                     // Ignore units that are already in combat with armies that the orcs are also at war with.
                                     if (!fightingMutualEnemy(um) && !checkIsCordyceps(um, orcCulture))
@@ -201,7 +201,7 @@ namespace Orcs_Plus
 
                 if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
                 {
-                    if (ModCore.core.data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("God", out Type t) && t != null)
+                    if (ModCore.Get().data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("God", out Type t) && t != null)
                     {
                         if (map.overmind.god.GetType() == t || map.overmind.god.GetType().IsSubclassOf(t))
                         {
@@ -299,7 +299,7 @@ namespace Orcs_Plus
             bool cordyceps = false;
             if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
             {
-                if (ModCore.core.data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null)
+                if (ModCore.Get().data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null)
                 {
                     if (intDataCord.typeDict.TryGetValue("VespidicSwarm", out Type vSwarmType) && vSwarmType != null && (um.GetType() == vSwarmType || um.GetType().IsSubclassOf(vSwarmType)))
                     {
