@@ -1309,29 +1309,26 @@ namespace Orcs_Plus
             }
         }
 
-        /*public override bool interceptDeath(Person person, string v, object killer)
+        public override bool interceptDeath(Person person, string v, object killer)
         {
-            if (person.items.Any(i => i is I_BloodGourd))
+            for (int i = 0; i < person.items.Length; i++)
             {
-                int index = -1;
-                for (int i = 0; i < person.items.Length; i++)
+                if (person.items[i] is I_BloodGourd)
                 {
-                    if (person.items[i] is I_BloodGourd)
+                    person.map.addUnifiedMessage(person, null, "Survived Death", "In a last, desperate attempt to stave off death " + person.getName() + " devours the entire blood gourd that they carried with them. Its healing abilities were said to be able to heal any would, cure any poison, and the stories were right. " + person.getName() + " makes a full recovery.", "Survived Death");
+                    person.items[i] = null;
+                    
+                    if (person.unit != null && person.unit.hp < person.unit.maxHp)
                     {
-                        index = i;
-                        break;
+                        person.unit.hp = person.unit.maxHp;
                     }
-                }
 
-                if (index != -1)
-                {
-                    person.items[index] = null;
-                    person.map.addUnifiedMessage();
+                    return true;
                 }
             }
 
             return false;
-        }*/
+        }
 
         public override void onPersonDeath_StartOfProcess(Person person, string v, object killer)
         {
