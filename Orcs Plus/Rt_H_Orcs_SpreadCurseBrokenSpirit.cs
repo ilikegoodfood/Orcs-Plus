@@ -39,7 +39,7 @@ namespace Orcs_Plus
         {
             if (ModCore.Get().data.tryGetModAssembly("Chandalor", out ModData.ModIntegrationData intDataChand) && intDataChand.assembly != null)
             {
-                return EventManager.getImg("love.ch_witchcurse.png");
+                return EventManager.getImg("OrcsPlus.Icon_BrokenSpirit.png");
             }
             return map.world.iconStore.agony;
         }
