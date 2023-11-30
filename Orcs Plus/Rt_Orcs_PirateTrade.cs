@@ -174,7 +174,7 @@ namespace Orcs_Plus
 
                         if (wreckLocation != null)
                         {
-                            ModCore.comLib.spawnShipwreck(wreckLocation);
+                            ModCore.GetComLib().spawnShipwreck(wreckLocation);
                         }
                     }
 

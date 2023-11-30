@@ -72,7 +72,7 @@ namespace Orcs_Plus
             bool valid = true;
             if (um.location.settlement != null)
             {
-                if (ModCore.comLib.tryGetSettlementTypeForOrcExpansion(um.location.settlement.GetType(), out List<Type> subsettlementBlacklist))
+                if (ModCore.GetComLib().tryGetSettlementTypeForOrcExpansion(um.location.settlement.GetType(), out List<Type> subsettlementBlacklist))
                 {
                     if (subsettlementBlacklist != null)
                     {

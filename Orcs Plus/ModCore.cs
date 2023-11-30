@@ -15,7 +15,7 @@ namespace Orcs_Plus
     {
         private static ModCore core;
 
-        public static CommunityLib.ModCore comLib;
+        private static CommunityLib.ModCore comLib;
 
         public AgentAI comLibAI;
 
@@ -32,6 +32,8 @@ namespace Orcs_Plus
         private static bool patched = false;
 
         public static ModCore Get() => core;
+
+        public static CommunityLib.ModCore GetComLib() => comLib;
 
         public override void onModsInitiallyLoaded()
         {
@@ -56,7 +58,7 @@ namespace Orcs_Plus
             }
             
             HarmonyPatches_Conditional.PatchingInit();
-
+            agentAI.populateConditional();
             eventModifications(map);
 
             core.godPowers1 = new List<Power>();
@@ -169,6 +171,7 @@ namespace Orcs_Plus
             }
 
             HarmonyPatches_Conditional.PatchingInit();
+            agentAI.populateConditional();
             eventModifications(map);
         }
 
@@ -189,29 +192,6 @@ namespace Orcs_Plus
                         comLib.forceShipwrecks();
 
                         core.agentAI = new AgentAIs(map);
-                        if (core.data.godTenetTypes.TryGetValue(map.overmind.god.GetType(), out Type tenet) && tenet != null)
-                        {
-                            switch (tenet.Name)
-                            {
-                                case nameof(H_Orcs_HarbingersMadness):
-                                    core.comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcElder), new AIChallenge(typeof(Ch_H_Orcs_MadnessFestival), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }));
-                                    break;
-                                case nameof(H_Orcs_LifeMother):
-                                    core.comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcElder), new AIChallenge(typeof(Ch_H_Orcs_NurtureOrchard), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }));
-                                    core.comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcElder), new AIChallenge(typeof(Ch_H_Orcs_HarvestGourd), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }));
-                                    break;
-                                case nameof(H_Orcs_Perfection):
-                                    core.comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcElder), new AIChallenge(typeof(Ch_H_Orcs_PerfectionFestival), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }));
-                                    break;
-                                case nameof(H_Orcs_GlorySeeker):
-                                    AIChallenge spreadCurse = new AIChallenge(typeof(Rt_H_Orcs_SpreadCurseOfGlory), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocalRandomized });
-                                    spreadCurse.delegates_ValidFor.Add(core.agentAI.delegate_ValidFor_SpreadCurse);
-                                    core.comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcElder), spreadCurse);
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
                         break;
                     case "ShadowsInsectGod.Code":
                         //Console.WriteLine("OrcsPlus: Found Cordyceps");
@@ -273,7 +253,31 @@ namespace Orcs_Plus
                         if (core.data.tryGetModAssembly("CovensCursesCurios", out intDataCCC) && intDataCCC.assembly != null)
                         {
                             Type dominionBannerType = intDataCCC.assembly.GetType("CovenExpansion.I_BarbDominion", false);
-                            intDataCCC.typeDict.Add("Banner", dominionBannerType);
+                            if (dominionBannerType != null)
+                            {
+                                intDataCCC.typeDict.Add("Banner", dominionBannerType);
+                            }
+
+                            Type callHordesType = intDataCCC.assembly.GetType("CovenExpansion.Mg_callHordes", false);
+                            if (callHordesType != null)
+                            {
+                                intDataCCC.typeDict.Add("CallHordes", callHordesType);
+                            }
+                        }
+                        break;
+                    case "God_Love":
+                        ModData.ModIntegrationData intDataChand = new ModData.ModIntegrationData(kernel.GetType().Assembly);
+                        core.data.addModAssembly("Chandalor", intDataChand);
+
+                        if (core.data.tryGetModAssembly("Chandalor", out intDataChand) && intDataChand.assembly != null)
+                        {
+                            Type godType = intDataChand.assembly.GetType("God_Love.God_Curse", false);
+                            if (godType != null)
+                            {
+                                intDataChand.typeDict.Add("Chandalor", godType);
+
+                                core.registerGodTenet(godType, typeof(H_Orcs_Curseweaving));
+                            }
                         }
                         break;
                     case "LivingCharacter":
@@ -799,7 +803,7 @@ namespace Orcs_Plus
                         specialisedCamp.specialism = 0;
                         if (specialisedCamp.army != null)
                         {
-                            specialisedCamp.army.die(map, "Desertion");
+                            specialisedCamp.army.disband(map, specialisedCamp.army.getName() + " disbands as their home settlement decayed while the broken maker sleeps");
                             specialisedCamp.army = null;
                         }
                         Sub_Temple temple = (Sub_Temple)specialisedCamp.subs.FirstOrDefault(sub => sub is Sub_OrcTemple);
@@ -935,92 +939,144 @@ namespace Orcs_Plus
             OnChallengeComplete.processChallenge(challenge, ua, task_PerformChallenge);
         }
 
+        public override double unitAgentAIAttack(Map map, UA ua, Unit other, List<ReasonMsg> reasons, double initialUtility)
+        {
+            if (ua.person != null && ua.person.traits.Any(t => t is T_BrokenSpirit))
+            {
+                double val = -20.0;
+                reasons?.Add(new ReasonMsg("Broken Spirit", val));
+                initialUtility += val;
+            }
+
+            return initialUtility;
+        }
+
+        public override double unitAgentAIBodyguard(Map map, UA ua, Unit other, List<ReasonMsg> reasons, double initialUtility)
+        {
+            if (ua.person != null && ua.person.traits.Any(t => t is T_BrokenSpirit))
+            {
+                double val = -20.0;
+                reasons?.Add(new ReasonMsg("Broken Spirit", val));
+                initialUtility += val;
+            }
+
+            return initialUtility;
+        }
+
+        public override double unitAgentAIDisrupt(Map map, UA ua, List<ReasonMsg> reasons, double initialUtility)
+        {
+            if (ua.person != null && ua.person.traits.Any(t => t is T_BrokenSpirit))
+            {
+                double val = -20.0;
+                reasons?.Add(new ReasonMsg("Broken Spirit", val));
+                initialUtility += val;
+            }
+
+            return initialUtility;
+        }
+
         public override double sovereignAI(Map map, AN actionNational, Person ruler, List<ReasonMsg> reasons, double initialUtility)
         {
-            if (actionNational is AN_WarOnThreat threatWar && threatWar.target is SG_Orc orcSociety)
+            if (ruler.house.curses.Any(curse => curse is Curse_BrokenSpirit))
             {
-                if (reasons != null)
+                if (actionNational is AN_DeclareWar || actionNational is AN_WarCrusade || actionNational is AN_WarOnThreat || actionNational is AN_RazeSubsettlement || actionNational is AN_FormAlliance)
                 {
-                    ReasonMsg distanceReason = reasons.FirstOrDefault(r => r.msg == "Distance between");
-                    if (distanceReason != null)
-                    {
-                        initialUtility += distanceReason.value;
-                        distanceReason.value *= 2;
-                    }
+                    double val = -20.0;
+                    reasons?.Add(new ReasonMsg("Broken Spirit", val));
+                    initialUtility += val;
+                }
+            }
 
-                    if (map.locations[ruler.rulerOf].soc is Society society && (society.isDarkEmpire || society.isOphanimControlled))
+            if (actionNational is AN_WarOnThreat threatWar)
+            {
+                if (threatWar.target is SG_Orc orcSociety)
+                {
+                    if (reasons != null)
                     {
-                        if (core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+                        ReasonMsg distanceReason = reasons.FirstOrDefault(r => r.msg == "Distance between");
+                        if (distanceReason != null)
                         {
-                            if (orcCulture.tenet_alignment.status < 1 && orcCulture.tenet_intolerance.status < 0)
+                            initialUtility += distanceReason.value;
+                            distanceReason.value *= 2;
+                        }
+
+                        if (map.locations[ruler.rulerOf].soc is Society society && (society.isDarkEmpire || society.isOphanimControlled))
+                        {
+                            if (core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
                             {
-                                initialUtility -= 1000;
-                                reasons.Add(new ReasonMsg("Mutual interests", -1000));
+                                if (orcCulture.tenet_alignment.status < 1 && orcCulture.tenet_intolerance.status < 0)
+                                {
+                                    initialUtility -= 1000;
+                                    reasons.Add(new ReasonMsg("Mutual interests", -1000));
+                                }
                             }
                         }
                     }
-                }
-                else
-                {
-                    double val = map.getStepDist(ruler.society, threatWar.target) - 1;
-                    if (val > 0)
+                    else
                     {
-                        val = Math.Max(val * map.param.utility_soc_warDistancePenaltyPerStep, map.param.utility_soc_warDistancePenaltyCap);
-                        initialUtility += val;
-                    }
-
-                    if (map.locations[ruler.rulerOf].soc is Society society && (society.isDarkEmpire || society.isOphanimControlled))
-                    {
-                        if (core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+                        double val = map.getStepDist(ruler.society, threatWar.target) - 1;
+                        if (val > 0)
                         {
-                            if (orcCulture.tenet_alignment.status < 1 && orcCulture.tenet_intolerance.status < 0)
+                            val = Math.Max(val * map.param.utility_soc_warDistancePenaltyPerStep, map.param.utility_soc_warDistancePenaltyCap);
+                            initialUtility += val;
+                        }
+
+                        if (map.locations[ruler.rulerOf].soc is Society society && (society.isDarkEmpire || society.isOphanimControlled))
+                        {
+                            if (core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
                             {
-                                initialUtility -= 1000;
+                                if (orcCulture.tenet_alignment.status < 1 && orcCulture.tenet_intolerance.status < 0)
+                                {
+                                    initialUtility -= 1000;
+                                }
                             }
                         }
                     }
                 }
             }
 
-            if (actionNational is AN_DeclareWar war && war.target is SG_Orc orcSociety2)
+            if (actionNational is AN_DeclareWar war)
             {
-                if (reasons != null)
+                if (war.target is SG_Orc orcSociety)
                 {
-                    ReasonMsg distanceReason = reasons.FirstOrDefault(r => r.msg == "Distance between");
-                    if (distanceReason != null)
+                    if (reasons != null)
                     {
-                        initialUtility += distanceReason.value;
-                        distanceReason.value *= 2;
-                    }
-
-                    if (map.locations[ruler.rulerOf].soc is Society society && (society.isDarkEmpire || society.isOphanimControlled))
-                    {
-                        if (core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+                        ReasonMsg distanceReason = reasons.FirstOrDefault(r => r.msg == "Distance between");
+                        if (distanceReason != null)
                         {
-                            if (orcCulture.tenet_alignment.status < 1 && orcCulture.tenet_intolerance.status < 0)
+                            initialUtility += distanceReason.value;
+                            distanceReason.value *= 2;
+                        }
+
+                        if (map.locations[ruler.rulerOf].soc is Society society && (society.isDarkEmpire || society.isOphanimControlled))
+                        {
+                            if (core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
                             {
-                                initialUtility -= 1000;
-                                reasons.Add(new ReasonMsg("Mutual interests", -1000));
+                                if (orcCulture.tenet_alignment.status < 1 && orcCulture.tenet_intolerance.status < 0)
+                                {
+                                    initialUtility -= 1000;
+                                    reasons.Add(new ReasonMsg("Mutual interests", -1000));
+                                }
                             }
                         }
                     }
-                }
-                else
-                {
-                    double val = map.getStepDist(ruler.society, war.target) - 1;
-                    if (val > 0)
+                    else
                     {
-                        val = Math.Max(val * map.param.utility_soc_warDistancePenaltyPerStep, map.param.utility_soc_warDistancePenaltyCap);
-                        initialUtility += val;
-                    }
-
-                    if (map.locations[ruler.rulerOf].soc is Society society && (society.isDarkEmpire || society.isOphanimControlled))
-                    {
-                        if (core.data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+                        double val = map.getStepDist(ruler.society, war.target) - 1;
+                        if (val > 0)
                         {
-                            if (orcCulture.tenet_alignment.status < 1 && orcCulture.tenet_intolerance.status < 0)
+                            val = Math.Max(val * map.param.utility_soc_warDistancePenaltyPerStep, map.param.utility_soc_warDistancePenaltyCap);
+                            initialUtility += val;
+                        }
+
+                        if (map.locations[ruler.rulerOf].soc is Society society && (society.isDarkEmpire || society.isOphanimControlled))
+                        {
+                            if (core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
                             {
-                                initialUtility -= 1000;
+                                if (orcCulture.tenet_alignment.status < 1 && orcCulture.tenet_intolerance.status < 0)
+                                {
+                                    initialUtility -= 1000;
+                                }
                             }
                         }
                     }

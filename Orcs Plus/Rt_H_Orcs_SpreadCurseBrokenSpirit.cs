@@ -8,37 +8,40 @@ using UnityEngine;
 
 namespace Orcs_Plus
 {
-    public class Rt_H_Orcs_SpreadCurseOfGlory : Ritual
+    public class Rt_H_Orcs_SpreadCurseBrokenSpirit : Ritual
     {
-        public Rt_H_Orcs_SpreadCurseOfGlory(Location location)
+        public Rt_H_Orcs_SpreadCurseBrokenSpirit(Location location)
             : base(location)
         {
 
         }
-
-        public override string getName()
+            public override string getName()
         {
-            return "Spread Curse of Glory";
+            return "Curseweaving: Break Spirit";
         }
 
         public override string getDesc()
         {
-            return "Spreads the curse of glory to a human bloodline.";
+            return "Inflicts the house of the target ruler with a terrible curse, filling them, and their family, with an unceasing and cripling fear.";
         }
 
         public override string getCastFlavour()
         {
-            return "Their blood has been stirred into a frenzy by the curse. Perhaps it can be passed off to someone else...";
+            return "They jump at the sound of a door closing in the night, leave lanterns lit in the small hours, and have guards preceed them into every room. The fear that gnaws at their innermost thoughts is indescribable...";
         }
 
         public override string getRestriction()
         {
-            return "May only be used once per sleep cycyle.";
+            return "May only be used once for each level of elder alignment that the Curseweaving tenet has.";
         }
 
         public override Sprite getSprite()
         {
-            return EventManager.getImg("OrcsPlus.Icon_CurseOfGlory.png");
+            if (ModCore.Get().data.tryGetModAssembly("Chandalor", out ModData.ModIntegrationData intDataChand) && intDataChand.assembly != null)
+            {
+                return EventManager.getImg("love.ch_witchcurse.png");
+            }
+            return map.world.iconStore.agony;
         }
 
         public override challengeStat getChallengeType()
@@ -72,7 +75,7 @@ namespace Orcs_Plus
 
             if (ua.location.soc is Society society && ua.location.settlement is SettlementHuman settlementHuman && settlementHuman.ruler != null)
             {
-                if (ua is UAEN_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture && orcCulture.tenet_god is H_Orcs_GlorySeeker glory && !glory.cursed && glory.status < -1)
+                if (ua is UAEN_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture && orcCulture.tenet_god is H_Orcs_Curseweaving curse && curse.status < 0 && curse.usedCount < Math.Abs(curse.status))
                 {
                     double val = 100.0;
                     msgs?.Add(new ReasonMsg("Base", val));
@@ -101,13 +104,13 @@ namespace Orcs_Plus
         {
             bool result = false;
 
-            if (ua is UAEN_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture && orcCulture.tenet_god is H_Orcs_GlorySeeker glory && glory.status < -1 && !glory.cursed)
+            if (ua is UAEN_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture && orcCulture.tenet_god is H_Orcs_Curseweaving curse && curse.status < 0 && curse.usedCount < Math.Abs(curse.status))
             {
-                if (!orcCulture.acolytes.Any(a => a != ua && ((a.task is Task_PerformChallenge performChallenge && performChallenge.challenge is Rt_H_Orcs_SpreadCurseOfGlory) || (a.task is Task_GoToPerformChallenge goPerformChallenge && goPerformChallenge.challenge is Rt_H_Orcs_SpreadCurseOfGlory))))
+                if (!orcCulture.acolytes.Any(a => a != ua && ((a.task is Task_PerformChallenge performChallenge && performChallenge.challenge is Rt_H_Orcs_SpreadCurseBrokenSpirit) || (a.task is Task_GoToPerformChallenge goPerformChallenge && goPerformChallenge.challenge is Rt_H_Orcs_SpreadCurseBrokenSpirit))))
                 {
                     if (ua.location.soc != null && orcCulture.getRel(ua.location.soc).state == DipRel.dipState.war)
                     {
-                        if (ua.location.settlement is SettlementHuman humanSettlement && humanSettlement.ruler != null && !humanSettlement.ruler.house.curses.Any(curse => curse is Curse_EGlory))
+                        if (ua.location.settlement is SettlementHuman humanSettlement && humanSettlement.ruler != null && !humanSettlement.ruler.house.curses.Any(curse2 => curse2 is Curse_BrokenSpirit))
                         {
                             result = true;
                         }
@@ -140,10 +143,10 @@ namespace Orcs_Plus
 
         public override void complete(UA u)
         {
-            if (u is UAEN_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture && orcCulture.tenet_god is H_Orcs_GlorySeeker glory && !glory.cursed && glory.status < -1 && elder.location.settlement is SettlementHuman humanSettlement && humanSettlement.ruler != null && !humanSettlement.ruler.house.curses.Any(curse => curse is Curse_EGlory))
+            if (u is UAEN_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture && orcCulture.tenet_god is H_Orcs_Curseweaving curse && curse.usedCount < Math.Abs(curse.getMaxNegativeInfluence()) && elder.location.settlement is SettlementHuman humanSettlement && humanSettlement.ruler != null && !humanSettlement.ruler.house.curses.Any(curse2 => curse2 is Curse_BrokenSpirit))
             {
-                humanSettlement.ruler.house.curses.Add(new Curse_EGlory());
-                glory.cursed = true;
+                humanSettlement.ruler.house.curses.Add(new Curse_BrokenSpirit());
+                curse.usedCount++;
             }
         }
 

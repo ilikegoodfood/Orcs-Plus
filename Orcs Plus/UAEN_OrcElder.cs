@@ -15,7 +15,9 @@ namespace Orcs_Plus
     {
         public Rt_H_Orcs_GiftGold rt_giftGold = null;
 
-        public Rt_H_Orcs_SpreadCurseOfGlory rt_spreadCurse = null;
+        public Rt_H_Orcs_SpreadCurseOfGlory rt_spreadCurseGlory = null;
+
+        public Rt_H_Orcs_SpreadCurseBrokenSpirit rt_spreadCurseBroken = null;
 
         public HolyOrder order;
 
@@ -36,12 +38,20 @@ namespace Orcs_Plus
             rt_giftGold = new Rt_H_Orcs_GiftGold(loc);
             rituals.Add(rt_giftGold);
 
-            if (sg is HolyOrder_Orcs orcCulture && orcCulture.tenet_god is H_Orcs_GlorySeeker)
+            if (sg is HolyOrder_Orcs orcCulture)
             {
-                rt_spreadCurse = new Rt_H_Orcs_SpreadCurseOfGlory(loc);
-                rituals.Add(rt_spreadCurse);
+                if (orcCulture.tenet_god is H_Orcs_GlorySeeker)
+                {
+                    rt_spreadCurseGlory = new Rt_H_Orcs_SpreadCurseOfGlory(loc);
+                    rituals.Add(rt_spreadCurseGlory);
+                }
+                else if (orcCulture.tenet_god is H_Orcs_Curseweaving)
+                {
+                    rt_spreadCurseBroken = new Rt_H_Orcs_SpreadCurseBrokenSpirit(loc);
+                    rituals.Add(rt_spreadCurseBroken);
+                }
             }
-            
+
         }
 
         public UAEN_OrcElder(Location loc, HolyOrder sg, Person p)
@@ -61,10 +71,18 @@ namespace Orcs_Plus
             rt_giftGold = new Rt_H_Orcs_GiftGold(loc);
             rituals.Add(rt_giftGold);
 
-            if (sg is HolyOrder_Orcs orcCulture && orcCulture.tenet_god is H_Orcs_GlorySeeker)
+            if (sg is HolyOrder_Orcs orcCulture)
             {
-                rt_spreadCurse = new Rt_H_Orcs_SpreadCurseOfGlory(loc);
-                rituals.Add(rt_spreadCurse);
+                if (orcCulture.tenet_god is H_Orcs_GlorySeeker)
+                {
+                    rt_spreadCurseGlory = new Rt_H_Orcs_SpreadCurseOfGlory(loc);
+                    rituals.Add(rt_spreadCurseGlory);
+                }
+                else if (orcCulture.tenet_god is H_Orcs_Curseweaving)
+                {
+                    rt_spreadCurseBroken = new Rt_H_Orcs_SpreadCurseBrokenSpirit(loc);
+                    rituals.Add(rt_spreadCurseBroken);
+                }
             }
         }
 

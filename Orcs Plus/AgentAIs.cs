@@ -1,6 +1,7 @@
 ﻿using Assets.Code;
 using CommunityLib;
 using HarmonyLib;
+using Mono.Cecil.Cil;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +31,48 @@ namespace Orcs_Plus
             populateOrcElders();
 
             populateOrcShamans();
+        }
+
+        public void populateConditional()
+        {
+            if (ModCore.Get().data.godTenetTypes.TryGetValue(map.overmind.god.GetType(), out Type tenet) && tenet != null)
+            {
+                switch (tenet.Name)
+                {
+                    case nameof(H_Orcs_Curseweaving):
+                        AIChallenge spreadCurseBroken = new AIChallenge(typeof(Rt_H_Orcs_SpreadCurseBrokenSpirit), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.PreferLocalRandomized });
+                        spreadCurseBroken.delegates_ValidFor.Add(delegate_ValidFor_SpreadCurseBrokenSpirit);
+                        spreadCurseBroken.delegates_Utility.Add(delegate_Utility_SpreadCurseBrokenSpirit);
+                        ModCore.Get().comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcElder), spreadCurseBroken);
+                        break;
+                    case nameof(H_Orcs_HarbingersMadness):
+                        ModCore.Get().comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcElder), new AIChallenge(typeof(Ch_H_Orcs_MadnessFestival), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }));
+                        break;
+                    case nameof(H_Orcs_LifeMother):
+                        ModCore.Get().comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcElder), new AIChallenge(typeof(Ch_H_Orcs_NurtureOrchard), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }));
+                        ModCore.Get().comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcElder), new AIChallenge(typeof(Ch_H_Orcs_HarvestGourd), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }));
+                        break;
+                    case nameof(H_Orcs_Perfection):
+                        ModCore.Get().comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcElder), new AIChallenge(typeof(Ch_H_Orcs_PerfectionFestival), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }));
+                        break;
+                    case nameof(H_Orcs_GlorySeeker):
+                        AIChallenge spreadCurseGlory = new AIChallenge(typeof(Rt_H_Orcs_SpreadCurseOfGlory), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.PreferLocalRandomized });
+                        spreadCurseGlory.delegates_ValidFor.Add(delegate_ValidFor_SpreadCurseOfGlory);
+                        spreadCurseGlory.delegates_Utility.Add(delegate_Utility_SpreadCurseOfGlory);
+                        ModCore.Get().comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcElder), spreadCurseGlory);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (ModCore.Get().data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC) && intDataCCC.assembly != null && intDataCCC.typeDict.TryGetValue("CallHordes", out Type callHordesType) && callHordesType != null)
+            {
+                AIChallenge CCC_CallHordes = new AIChallenge(callHordesType, 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden });
+                ModCore.Get().comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcUpstart), CCC_CallHordes);
+                ModCore.Get().comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcElder), CCC_CallHordes);
+                ModCore.Get().comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcShaman), CCC_CallHordes);
+            }
         }
 
         // Universal Delegates
@@ -220,7 +263,8 @@ namespace Orcs_Plus
                 new AIChallenge(typeof(Ch_Orcs_BloodMoney), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
                 new AIChallenge(typeof(Ch_Orcs_DrinkGrott), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
                 new AIChallenge(typeof(Ch_Orcs_RefillDrinkingHorns), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
-                new AIChallenge(typeof(Ch_DrinkPrimalWaters), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocal })
+                new AIChallenge(typeof(Ch_DrinkPrimalWaters), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocal }),
+                new AIChallenge(typeof(Rti_RouseHorde), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden })
             };
 
             aiChallenges_Elder[0].delegates_ValidFor.Add(delegate_ValidFor_OwnCulture);
@@ -502,7 +546,7 @@ namespace Orcs_Plus
             return utility;
         }
 
-        public bool delegate_ValidFor_SpreadCurse(AgentAI.ChallengeData challengeData, UA ua)
+        private bool delegate_ValidFor_SpreadCurseOfGlory(AgentAI.ChallengeData challengeData, UA ua)
         {
             bool result = false;
 
@@ -521,6 +565,85 @@ namespace Orcs_Plus
             }
 
             return result;
+        }
+
+        private double delegate_Utility_SpreadCurseOfGlory(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
+        {
+            if (challengeData.location.soc is Society society && challengeData.location.settlement is SettlementHuman settlementHuman && settlementHuman.ruler != null)
+            {
+                if (ua is UAEN_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture && orcCulture.tenet_god is H_Orcs_GlorySeeker glory && !glory.cursed && glory.status < -1)
+                {
+                    double val = 100.0;
+                    reasonMsgs?.Add(new ReasonMsg("Base", val));
+                    utility += val;
+
+                    if (challengeData.location == society.getCapital())
+                    {
+                        val = 30;
+                        reasonMsgs?.Add(new ReasonMsg("Target is Soverign", val));
+                        utility += val;
+                    }
+
+                    if (!elder.minions.Any(m => m is M_OrcChampion))
+                    {
+                        val = -200.0;
+                        reasonMsgs?.Add(new ReasonMsg("Unguarded by Champion", val));
+                        utility += val;
+                    }
+                }
+            }
+
+            return utility;
+        }
+
+        private bool delegate_ValidFor_SpreadCurseBrokenSpirit(AgentAI.ChallengeData challengeData, UA ua)
+        {
+            bool result = false;
+
+            if (ua is UAEN_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture && orcCulture.tenet_god is H_Orcs_Curseweaving curse && curse.status < 0 && curse.usedCount < Math.Abs(curse.status))
+            {
+                if (!orcCulture.acolytes.Any(a => a != ua && ((a.task is Task_PerformChallenge performChallenge && performChallenge.challenge is Rt_H_Orcs_SpreadCurseBrokenSpirit) || (a.task is Task_GoToPerformChallenge goPerformChallenge && goPerformChallenge.challenge is Rt_H_Orcs_SpreadCurseBrokenSpirit))))
+                {
+                    if (challengeData.location.soc != null && orcCulture.getRel(challengeData.location.soc).state == DipRel.dipState.war)
+                    {
+                        if (challengeData.location.settlement is SettlementHuman humanSettlement && humanSettlement.ruler != null && !humanSettlement.ruler.house.curses.Any(curse2 => curse2 is Curse_BrokenSpirit))
+                        {
+                            result = true;
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private double delegate_Utility_SpreadCurseBrokenSpirit(AgentAI.ChallengeData challengeData, UA ua, double utility, List<ReasonMsg> reasonMsgs)
+        {
+            if (challengeData.location.soc is Society society && challengeData.location.settlement is SettlementHuman settlementHuman && settlementHuman.ruler != null)
+            {
+                if (ua is UAEN_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture && orcCulture.tenet_god is H_Orcs_Curseweaving curse && curse.usedCount < Math.Abs(curse.getMaxNegativeInfluence()))
+                {
+                    double val = 100.0;
+                    reasonMsgs?.Add(new ReasonMsg("Base", val));
+                    utility += val;
+
+                    if (challengeData.location == society.getCapital())
+                    {
+                        val = 30;
+                        reasonMsgs?.Add(new ReasonMsg("Target is Soverign", val));
+                        utility += val;
+                    }
+
+                    if (!elder.minions.Any(m => m is M_OrcChampion))
+                    {
+                        val = -200.0;
+                        reasonMsgs?.Add(new ReasonMsg("Unguarded by Champion", val));
+                        utility += val;
+                    }
+                }
+            }
+
+            return utility;
         }
 
         private void populateOrcShamans()
@@ -544,7 +667,8 @@ namespace Orcs_Plus
                 new AIChallenge(typeof(Rt_StudyDeath), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.RequiresOwnSociety}),
                 new AIChallenge(typeof(Ch_Orcs_DrinkGrott), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
                 new AIChallenge(typeof(Ch_Orcs_RefillDrinkingHorns), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
-                new AIChallenge(typeof(Ch_DrinkPrimalWaters), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocal })
+                new AIChallenge(typeof(Ch_DrinkPrimalWaters), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocal }),
+                new AIChallenge(typeof(Rti_RouseHorde), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden })
             };
 
             aiChallenges_Shaman[2].delegates_ValidFor.Add(delegate_ValidFor_SecretsOfDeath);

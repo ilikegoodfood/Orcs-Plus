@@ -598,6 +598,46 @@ namespace Orcs_Plus
             }
         }
 
+        public override void onArmyBattleCycle_StartOfProcess(BattleArmy battle)
+        {
+            List<UM> armies = new List<UM>();
+            armies.AddRange(battle.attackers);
+            armies.AddRange(battle.defenders);
+
+            foreach (UM army in armies)
+            {
+                if (army.homeLocation != -1)
+                {
+                    Location home = map.locations[army.homeLocation];
+                    if (home != null && home.settlement is SettlementHuman settlementHuman && settlementHuman.ruler != null)
+                    {
+                        if (settlementHuman.ruler.house.curses.Any(curse => curse is Curse_BrokenSpirit))
+                        {
+                            army.hp -= 2;
+                            if (army.hp > 0)
+                            {
+                                battle.messages.Add(army.getName() + " has suffered desertion (1 damage).");
+                            }
+                            else
+                            {
+                                battle.messages.Add(army.getName() + " deserts battle.");
+                                if (battle.attackers.Contains(army))
+                                {
+                                    battle.attackers.Remove(army);
+                                }
+                                else if (battle.defenders.Contains(army))
+                                {
+                                    battle.defenders.Remove(army);
+                                }
+                                army.task = null;
+                                army.disband(map, "Desertion");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         public override int onArmyBattleCycle_DamageCalculated(BattleArmy battle, int dmg, UM unit, UM target)
         {
             if (unit is UM_OrcArmy || unit is UM_OrcRaiders)

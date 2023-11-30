@@ -49,11 +49,25 @@ namespace Orcs_Plus
         {
             timer--;
 
-            if (owner.unit != null)
+            if (owner.unit is UA ua)
             {
-                if (timer <= 0 && owner.unit.hp < owner.unit.maxHp)
+                if (timer <= 0)
                 {
-                    owner.unit.hp++;
+                    if (owner.unit.hp < owner.unit.maxHp)
+                    {
+                        owner.unit.hp++;
+                    }
+                    else
+                    {
+                        foreach (Minion minion in ua.minions)
+                        {
+                            if (minion != null && minion.hp < minion.getMaxHP())
+                            {
+                                minion.hp++;
+                                break;
+                            }
+                        }
+                    }
                 }
 
                 Pr_Death death = (Pr_Death)owner.unit.location.properties.FirstOrDefault(pr => pr is Pr_Death);

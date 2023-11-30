@@ -47,10 +47,10 @@ namespace Orcs_Plus
                 {
                     if (map.locations[army.homeLocation].settlement.isInfiltrated && !(army.task is Task_InBattle))
                     {
-                        Location[] path = ModCore.comLib.pathfinding.getPathTo(army.location, location, army);
+                        Location[] path = ModCore.GetComLib().pathfinding.getPathTo(army.location, location, army);
                         if (path != null)
                         {
-                            int duration = ModCore.comLib.getTravelTimeTo(army, location);
+                            int duration = ModCore.GetComLib().getTravelTimeTo(army, location);
 
                             if (duration > travelDuration)
                             {
@@ -109,13 +109,13 @@ namespace Orcs_Plus
 
         public override bool valid()
         {
-            return location.settlement != null && location.settlement is Set_OrcCamp && location.soc != null && location.soc is SG_Orc && location.settlement.isInfiltrated && !location.soc.isAtWar() && location.soc.currentMilitary > 0.0;
+            return location.settlement != null && location.settlement is Set_OrcCamp && location.soc != null && location.settlement.isInfiltrated && location.soc is SG_Orc orcSociety && !orcSociety.isAtWar() && orcSociety.currentMilitary > 0.0;
         }
 
         public override bool validFor(UA uA)
         {
             //Console.WriteLine("OrcsPlus: Running GatherHorde ValidFor");
-            if (location.soc == null || !(location.soc is SG_Orc) || location.soc.currentMilitary == 0.0)
+            if (location.soc == null || !(location.soc is SG_Orc) || location.soc.isAtWar() || location.soc.currentMilitary == 0.0)
             {
                 //Console.WriteLine("OrcsPlus: Invalid location, or no army found.");
                 return false;
