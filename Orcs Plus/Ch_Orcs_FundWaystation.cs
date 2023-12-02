@@ -167,7 +167,7 @@ namespace Orcs_Plus
                     {
                         if (!neighbour.isOcean && neighbour.settlement != null && neighbour.hex.getHabilitability() >= map.opt_orcHabMult * map.param.orc_habRequirement)
                         {
-                            if (ModCore.Get().data.getSettlementTypesForWaystation().Contains(neighbour.settlement.GetType()) && !neighbour.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == orcSociety))
+                            if (ModCore.Get().data.getSettlementTypesForWaystation().TryGetValue(neighbour.settlement.GetType(), out HashSet<Type> blacklist) && !neighbour.settlement.subs.Any(sub => (sub is Sub_OrcWaystation way && way.orcSociety == orcSociety) || blacklist.Contains(sub.GetType())))
                             {
                                 return true;
                             }
@@ -224,7 +224,7 @@ namespace Orcs_Plus
                     {
                         if (neighbour.settlement != null && neighbour.hex.getHabilitability() >= map.opt_orcHabMult * map.param.orc_habRequirement)
                         {
-                            if (ModCore.Get().data.getSettlementTypesForWaystation().Contains(neighbour.settlement.GetType()) && !neighbour.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == orcSociety))
+                            if (ModCore.Get().data.getSettlementTypesForWaystation().TryGetValue(neighbour.settlement.GetType(), out HashSet<Type> blacklist) && !neighbour.settlement.subs.Any(sub => (sub is Sub_OrcWaystation way && way.orcSociety == orcSociety) || blacklist.Contains(sub.GetType())))
                             {
                                 settlements.Add(neighbour.settlement);
                             }

@@ -87,14 +87,11 @@ namespace Orcs_Plus
                 }
                 else if (loc.settlement != null)
                 {
-                    if (ModCore.GetComLib().tryGetSettlementTypeForOrcExpansion(loc.settlement.GetType(), out List<Type> subsettlementBlacklist))
+                    if (ModCore.GetComLib().tryGetSettlementTypeForOrcExpansion(loc.settlement.GetType(), out HashSet<Type> subsettlementBlacklist))
                     {
-                        foreach (Subsettlement sub in loc.settlement.subs)
+                        if (loc.settlement.subs.Any(sub => subsettlementBlacklist.Contains(sub.GetType())))
                         {
-                            if (subsettlementBlacklist.Contains(sub.GetType()))
-                            {
-                                valid = false;
-                            }
+                            valid = false;
                         }
                     }
                     else

@@ -2301,19 +2301,16 @@ namespace Orcs_Plus
             return false;
         }
 
-        public bool registerSettlementTypeForOrcWaystation(Type setType)
+        public void registerSettlementTypeForOrcWaystation(Type setType)
         {
             if (!setType.IsSubclassOf(typeof(Settlement)))
             {
-                return false;
+                return;
             }
 
-            if (core.data.tryAddSettlementTypeForWaystation(setType))
-            {
-                return true;
-            }
+            core.data.tryAddSettlementTypeForWaystation(setType);
 
-            return false;
+            return;
         }
     }
 }

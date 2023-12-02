@@ -37,7 +37,7 @@ namespace Orcs_Plus
 
         public Dictionary<Type, Type> godTenetTypes;
 
-        private List<Type> settlementTypesForWaystations;
+        private Dictionary<Type, HashSet<Type>> settlementTypesForWaystations;
 
         public enum influenceGainAction
         {
@@ -124,15 +124,15 @@ namespace Orcs_Plus
                 { typeof(God_Eternity), typeof(H_Orcs_GlorySeeker) }
             };
 
-            settlementTypesForWaystations = new List<Type>
+            settlementTypesForWaystations = new Dictionary<Type, HashSet<Type>>
             {
-                typeof(Set_CityRuins),
-                typeof(Set_MinorOther),
-                typeof(Set_MinorVinerva),
-                typeof(Set_VinervaManifestation),
-                typeof(Set_TombOfGods),
-                typeof(Set_DeepOneSanctum),
-                typeof(Set_Shipwreck)
+                { typeof(Set_CityRuins), new HashSet<Type>() },
+                { typeof(Set_MinorOther), new HashSet < Type >() },
+                { typeof(Set_MinorVinerva), new HashSet < Type >() },
+                { typeof(Set_VinervaManifestation), new HashSet < Type >() },
+                { typeof(Set_TombOfGods), new HashSet < Type >() },
+                { typeof(Set_DeepOneSanctum), new HashSet < Type >() },
+                { typeof(Set_Shipwreck), new HashSet < Type >() }
             };
         }
 
@@ -493,20 +493,33 @@ namespace Orcs_Plus
             return result;
         }
 
-        internal bool tryAddSettlementTypeForWaystation(Type t)
+        internal void tryAddSettlementTypeForWaystation(Type t, HashSet<Type> subsettlementBlacklist = null)
         {
-            if (!settlementTypesForWaystations.Contains(t))
+            if (!t.IsSubclassOf(typeof(Subsettlement)))
             {
-                settlementTypesForWaystations.Add(t);
-                return true;
+                return;
             }
 
-            return false;
+            if (settlementTypesForWaystations.TryGetValue(t, out HashSet<Type> blacklist))
+            {
+                if (subsettlementBlacklist != null)
+                {
+                    blacklist.UnionWith(subsettlementBlacklist);
+                }
+            }
+            else
+            {
+                if (subsettlementBlacklist == null)
+                {
+                    subsettlementBlacklist = new HashSet<Type>();
+                }
+
+                settlementTypesForWaystations.Add(t, subsettlementBlacklist);
+            }
+
+            return;
         }
 
-        internal List<Type> getSettlementTypesForWaystation()
-        {
-            return settlementTypesForWaystations;
-        }
+        internal Dictionary<Type, HashSet<Type>> getSettlementTypesForWaystation() => settlementTypesForWaystations;
     }
 }
