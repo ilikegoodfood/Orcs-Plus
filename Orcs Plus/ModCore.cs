@@ -2301,14 +2301,14 @@ namespace Orcs_Plus
             return false;
         }
 
-        public void registerSettlementTypeForOrcWaystation(Type setType)
+        public void registerSettlementTypeForOrcWaystation(Type setType, HashSet<Type> subsettlementBlacklist)
         {
             if (!setType.IsSubclassOf(typeof(Settlement)))
             {
                 return;
             }
 
-            core.data.tryAddSettlementTypeForWaystation(setType);
+            core.data.tryAddSettlementTypeForWaystation(setType, subsettlementBlacklist);
 
             return;
         }
