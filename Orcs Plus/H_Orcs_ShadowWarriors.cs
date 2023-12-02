@@ -22,7 +22,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Directed and honed by the influence of an elder got, these orc warriors are most deadly when their camp is fully enshadowed, dealing more damage to their enemies, and, at maximum elder alignment, shrugging of harm.";
+            return "Directed and honed by the influence of an elder god, these orc warriors are most deadly when their camp is fully enshadowed, dealing more damage to their enemies, and, at maximum elder alignment, shrugging off harm.";
         }
     }
 }
