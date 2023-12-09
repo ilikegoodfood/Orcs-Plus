@@ -111,7 +111,7 @@ namespace Orcs_Plus
             bool hasFullMinions = ua.getStatCommandLimit() - ua.getCurrentlyUsedCommand() <= 0;
             Set_OrcCamp camp = ua.location.settlement as Set_OrcCamp;
 
-            if (camp == null || (ua.isCommandable() && !camp.isInfiltrated))
+            if (camp == null || (ua.isCommandable() && camp.infiltration < 1.0))
             {
                 return false;
             }

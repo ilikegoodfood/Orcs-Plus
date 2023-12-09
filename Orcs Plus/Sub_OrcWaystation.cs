@@ -64,13 +64,9 @@ namespace Orcs_Plus
                 return;
             }
 
-            if (!ModCore.Get().data.getSettlementTypesForWaystation().TryGetValue(settlement.GetType(), out HashSet<Type> blacklist) || settlement.subs.Any(sub => blacklist.Contains(sub.GetType())))
-            {
-                settlement.subs.Remove(this);
-                return;
-            }
+            settlement = settlement.location.settlement;
 
-            if (settlement.location.settlement != settlement)
+            if (!ModCore.Get().data.getSettlementTypesForWaystation().TryGetValue(settlement.GetType(), out HashSet<Type> blacklist) || settlement.subs.Any(sub => blacklist.Contains(sub.GetType())))
             {
                 settlement.subs.Remove(this);
                 return;

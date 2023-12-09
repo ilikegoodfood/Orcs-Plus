@@ -460,7 +460,7 @@ namespace Orcs_Plus
                                     rel = um.society.getRel(um.society);
                                 }
                                 // Will attack military units that they are at war with, or that they are hostile with and are within this army's territory.
-                                if (um.society == null || rel.state == DipRel.dipState.war || (rel.state == DipRel.dipState.hostile && unit.location.soc == um.society && ModCore.Get().checkAlignment(um.society as SG_Orc, um.society)))
+                                if (um.society == null || rel.state == DipRel.dipState.war || (rel.state == DipRel.dipState.hostile && unit.location.soc == um.society && ModCore.Get().isHostileAlignment(um.society as SG_Orc, um.society)))
                                 {
                                     // Ignore units that are already in combat with armies that the orcs are also at war with.
                                     if (!fightingMutualEnemy(um) && !checkIsCordyceps(um, orcCulture))

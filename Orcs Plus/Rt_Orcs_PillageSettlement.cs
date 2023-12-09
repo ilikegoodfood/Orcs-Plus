@@ -63,7 +63,7 @@ namespace Orcs_Plus
                         Pr_Devastation devastation = settlementHuman.location.properties.OfType<Pr_Devastation>().FirstOrDefault();
                         if (devastation == null || devastation.charge < 150)
                         {
-                            if (ModCore.Get().checkAlignment(um.society as SG_Orc, neighbour))
+                            if (ModCore.Get().isHostileAlignment(um.society as SG_Orc, neighbour))
                             {
                                 return true;
                             }
@@ -117,7 +117,7 @@ namespace Orcs_Plus
                 {
                     if (neighbour.settlement is SettlementHuman settlementHuman && neighbour.soc != null)
                     {
-                        if (ModCore.Get().checkAlignment(u.society as SG_Orc, neighbour) && (targetSettlements.Count == 0 || settlementHuman.prosperity >= prosperity))
+                        if (ModCore.Get().isHostileAlignment(u.society as SG_Orc, neighbour) && (targetSettlements.Count == 0 || settlementHuman.prosperity >= prosperity))
                         {
                             if (settlementHuman.prosperity > prosperity)
                             {

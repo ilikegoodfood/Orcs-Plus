@@ -45,7 +45,7 @@ namespace Orcs_Plus
 
                 foreach (UM_OrcArmy army in armies)
                 {
-                    if (map.locations[army.homeLocation].settlement.isInfiltrated && !(army.task is Task_InBattle))
+                    if (map.locations[army.homeLocation].settlement.infiltration == 1.0 && !(army.task is Task_InBattle))
                     {
                         Location[] path = ModCore.GetComLib().pathfinding.getPathTo(army.location, location, army);
                         if (path != null)
@@ -109,7 +109,7 @@ namespace Orcs_Plus
 
         public override bool valid()
         {
-            return location.settlement != null && location.settlement is Set_OrcCamp && location.soc != null && location.settlement.isInfiltrated && location.soc is SG_Orc orcSociety && !orcSociety.isAtWar() && orcSociety.currentMilitary > 0.0;
+            return location.settlement != null && location.settlement is Set_OrcCamp && location.soc != null && location.settlement.infiltration == 1.0 && location.soc is SG_Orc orcSociety && !orcSociety.isAtWar() && orcSociety.currentMilitary > 0.0;
         }
 
         public override bool validFor(UA uA)
@@ -147,7 +147,7 @@ namespace Orcs_Plus
                             {
                                 //Console.WriteLine("OrcsPlus: Iterating orc armies belonging to this social group.");
                                 Settlement armyBase = map.locations[army.homeLocation].settlement;
-                                if (armyBase != null && armyBase.isInfiltrated && !(armyBase.location == location && army.location == armyBase.location))
+                                if (armyBase != null && armyBase.infiltration == 1.0 && !(armyBase.location == location && army.location == armyBase.location))
                                 {
                                     //Console.WriteLine("OrcsPlus: Found army with infiltrated home location.");
                                     hasInfiltratedArmyBase = true;

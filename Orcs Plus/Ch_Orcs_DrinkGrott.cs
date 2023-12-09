@@ -143,7 +143,7 @@ namespace Orcs_Plus
                 }
             }
 
-            if (ua.isCommandable() && location.settlement is Set_OrcCamp && location.settlement.isInfiltrated)
+            if (ua.isCommandable() && location.settlement is Set_OrcCamp && location.settlement.infiltration == 1.0)
             {
                 return true;
             }

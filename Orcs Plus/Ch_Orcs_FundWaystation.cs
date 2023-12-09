@@ -124,13 +124,20 @@ namespace Orcs_Plus
             SG_Orc orcSociety = location.soc as SG_Orc;
 
             Sub_OrcWaystation waystation = null;
-            if (location.settlement != null && location.settlement.subs.Count > 0)
+            if (location.settlement != null)
             {
                 waystation = (Sub_OrcWaystation)location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation w && w.getChallenges().Contains(this));
                 if (waystation != null)
                 {
                     orcSociety = waystation.orcSociety;
                 }
+            }
+
+            bool infiltrated = true;
+            bool infiltratable = (location.settlement is Set_OrcCamp || location.settlement.subs.Any(sub => sub.canBeInfiltrated()));
+            if (infiltratable)
+            {
+                infiltrated = location.settlement.infiltration == 1.0;
             }
 
             if (orcSociety != null && ua.person.gold >= cost && location.settlement != null)
@@ -140,7 +147,7 @@ namespace Orcs_Plus
                     return true;
                 }
 
-                if (ua.isCommandable() && (location.settlement.infiltration == 1.0 || waystation != null))
+                if (ua.isCommandable() && infiltrated)
                 {
                     return true;
                 }
@@ -213,7 +220,7 @@ namespace Orcs_Plus
                 bool infiltratable = (location.settlement is Set_OrcCamp || location.settlement.subs.Any(sub => sub.canBeInfiltrated()));
                 if (infiltratable)
                 {
-                    infiltrated = location.settlement.isInfiltrated;
+                    infiltrated = location.settlement.infiltration == 1.0;
                 }
 
                 if (orcSociety != null && (u.isCommandable() && infiltrated) || (u is UAEN_OrcElder elder && (elder.society as HolyOrder_Orcs)?.orcSociety == orcSociety))

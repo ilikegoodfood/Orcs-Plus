@@ -57,7 +57,7 @@ namespace Orcs_Plus
         {
             base.turnTick();
 
-            if (settlement.isInfiltrated)
+            if (settlement.infiltration == 1.0)
             {
                 ModCore.Get().TryAddInfluenceGain(order as HolyOrder_Orcs, new ReasonMsg("Infiltrated Seat of the Elders (Per Turn)", 2.0), true);
             }

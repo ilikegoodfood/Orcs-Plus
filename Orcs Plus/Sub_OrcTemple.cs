@@ -50,7 +50,7 @@ namespace Orcs_Plus
         {
             base.turnTick();
 
-            if (settlement.isInfiltrated)
+            if (settlement.infiltration == 1.0)
             {
                 ModCore.Get().TryAddInfluenceGain(order as HolyOrder_Orcs, new ReasonMsg("Infiltrated Great Hall (Per Turn)", 1.0), true);
             }

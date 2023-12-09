@@ -135,7 +135,7 @@ namespace Orcs_Plus
                     List<bool> endAlignments = new List<bool>();
                     foreach (Location endPoint in endPoints)
                     {
-                        if (ModCore.Get().checkAlignment(u.society as SG_Orc, endPoint))
+                        if (ModCore.Get().isHostileAlignment(u.society as SG_Orc, endPoint))
                         {
                             endAlignments.Add(true);
                         }

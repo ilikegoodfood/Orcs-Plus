@@ -342,7 +342,7 @@ namespace Orcs_Plus
                     {
                         groups.Add(neighbour.soc);
 
-                        if (ModCore.Get().checkAlignment(orcSociety, neighbour))
+                        if (ModCore.Get().isHostileAlignment(orcSociety, neighbour))
                         {
                             double milStrengthFactor = orcSociety.currentMilitary / neighbour.soc.currentMilitary;
 

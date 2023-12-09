@@ -71,13 +71,16 @@
     <Compile Include="Ch_Orcs_DrinkGrott.cs" />
     <Compile Include="Ch_Orcs_ForceRestock.cs" />
     <Compile Include="Ch_Orcs_FundWaystation.cs" />
+    <Compile Include="Ch_Orcs_LootRemains.cs" />
     <Compile Include="Ch_Orcs_RecruitCorsair.cs" />
+    <Compile Include="Mg_Orcs_ReviveImmortal.cs" />
     <Compile Include="Curse_BrokenSpirit.cs" />
     <Compile Include="Curse_EGlory.cs" />
     <Compile Include="GetTags.cs" />
     <Compile Include="HarmonyPatches_Conditional.cs" />
     <Compile Include="H_Orcs_BloodOffering.cs" />
     <Compile Include="H_Orcs_Curseweaving.cs" />
+    <Compile Include="H_Orcs_DeathMastery.cs" />
     <Compile Include="H_Orcs_Expansionism.cs" />
     <Compile Include="H_Orcs_GlorySeeker.cs" />
     <Compile Include="H_Orcs_GodTenet.cs" />
@@ -105,6 +108,7 @@
     <Compile Include="PrWM_CagedManticore.cs" />
     <Compile Include="Pr_Ophanim_Perfection.cs" />
     <Compile Include="Pr_Orcs_GreatConstruction.cs" />
+    <Compile Include="Pr_Orcs_ImmortalRemains.cs" />
     <Compile Include="Pr_Orcs_SacrificialSite.cs" />
     <Compile Include="Pr_Vinerva_Health.cs" />
     <Compile Include="Pr_Vinerva_Life.cs" />
@@ -144,6 +148,7 @@
     <Compile Include="Rt_H_Orcs_GiftGold.cs" />
     <Compile Include="Rt_Orcs_PillageSettlement.cs" />
     <Compile Include="Rt_Orcs_PirateTrade.cs" />
+    <Compile Include="Rt_Orcs_ReclaimHordeBanner.cs" />
     <Compile Include="Rt_Orcs_SacrificialSite.cs" />
     <Compile Include="Sub_OrcCultureCapital.cs" />
     <Compile Include="Sub_OrcTemple.cs" />

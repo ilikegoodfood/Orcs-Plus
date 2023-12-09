@@ -217,6 +217,12 @@ namespace Orcs_Plus
                             if (doomedType != null)
                             {
                                 intDataCord.typeDict.Add("Doomed", doomedType);
+
+                                FieldInfo FI_Target = doomedType.GetField("target", BindingFlags.Public | BindingFlags.Instance);
+                                if (FI_Target != null)
+                                {
+                                    intDataCord.fieldInfoDict.Add("DoomedTarget", FI_Target);
+                                }
                             }
 
                             Type droneType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.UAEN_Drone", false);
@@ -224,6 +230,12 @@ namespace Orcs_Plus
                             {
                                 //Console.WriteLine("OrcsPlus: Got Drone Type");
                                 intDataCord.typeDict.Add("Drone", droneType);
+                            }
+
+                            Type haematophageType = intDataCord.assembly.GetType("ShadowsInsectGod.UAEN_Haematophage", false);
+                            if (haematophageType != null)
+                            {
+                                intDataCord.typeDict.Add("Haematophage", haematophageType);
                             }
 
                             Type vespidiciSwarmType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.UM_Vespidic_Swarm", false);
@@ -263,6 +275,12 @@ namespace Orcs_Plus
                             {
                                 intDataCCC.typeDict.Add("CallHordes", callHordesType);
                             }
+
+                            Type studyMagicType = intDataCCC.assembly.GetType("CovenExpansion.Rt_studyCurseweaving", false);
+                            if (studyMagicType != null)
+                            {
+                                intDataCCC.typeDict.Add("StudyCurseweaving", studyMagicType);
+                            }
                         }
                         break;
                     case "God_Love":
@@ -277,6 +295,19 @@ namespace Orcs_Plus
                                 intDataChand.typeDict.Add("Chandalor", godType);
 
                                 core.registerGodTenet(godType, typeof(H_Orcs_Curseweaving));
+                            }
+                        }
+                        break;
+                    case "God_Flesh":
+                        ModData.ModIntegrationData intDataEscam = new ModData.ModIntegrationData(kernel.GetType().Assembly);
+                        core.data.addModAssembly("Escamrak", intDataEscam);
+
+                        if (core.data.tryGetModAssembly("Escamrak", out intDataEscam) && intDataEscam.assembly != null)
+                        {
+                            Type studyMagicType = intDataEscam.assembly.GetType("God_Flesh.Rt_StudyFlesh", false);
+                            if (studyMagicType != null)
+                            {
+                                intDataEscam.typeDict.Add("StudyFleshcrafting", studyMagicType);
                             }
                         }
                         break;
@@ -349,6 +380,14 @@ namespace Orcs_Plus
 
                         if (core.data.tryGetModAssembly("Ixthus", out intDataIx))
                         {
+                            Type godType = intDataIx.assembly.GetType("ShadowsLib.God_KingofCups", false);
+                            if (godType != null)
+                            {
+                                intDataIx.typeDict.Add("Ixthus", godType);
+
+                                core.registerGodTenet(godType, typeof(H_Orcs_DeathMastery));
+                            }
+
                             Type tenetType = intDataIx.assembly.GetType("ShadowsLib.H_expeditionPatrons", false);
                             if (tenetType != null)
                             {
@@ -425,29 +464,6 @@ namespace Orcs_Plus
             if (core.godPowers1.Count > 0 || core.godPowers2.Count > 0)
             {
                 core.updateGodPowers(map);
-            }
-
-            foreach (Unit unit in map.units)
-            {
-                if (!unit.isDead && unit is UAEN_OrcUpstart upstart && upstart.society is SG_Orc orcSociety)
-                {
-                    Item[] items = upstart.person.items;
-                    if (!items.Any(i => i is I_HordeBanner banner && banner.orcs == upstart.society))
-                    {
-                        int itemIndex = 0;
-                        for (int i = 0; i < items.Length; i++)
-                        {
-                            if (items[i] == null)
-                            {
-                                itemIndex = i;
-                                break;
-                            }
-                        }
-
-                        I_HordeBanner banner = new I_HordeBanner(map, orcSociety, upstart.location);
-                        upstart.person.items[itemIndex] = banner;
-                    }
-                }
             }
         }
 
@@ -2132,6 +2148,39 @@ namespace Orcs_Plus
                 sub.person.unit = sub;
                 sub.hp = 1;
             }
+
+            if (unit is UA ua && ua.person != null)
+            {
+                SG_Orc orcSociety = ua.society as SG_Orc;
+                HolyOrder_Orcs orcCulture = ua.society as HolyOrder_Orcs;
+
+                if (orcSociety != null)
+                {
+                    core.data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+                }
+
+                if (orcCulture != null && orcCulture.tenet_god is H_Orcs_DeathMastery deathMastery && deathMastery.status < 0)
+                {
+                    int level = ua.person.level;
+                    int levelXP = ua.person.XPForNextLevel;
+                    int xp = ua.person.XP;
+
+                    while (level > 0)
+                    {
+                        level--;
+                        levelXP = levelXP * 2 / 3;
+                        xp += levelXP;
+                    }
+
+                    if (xp > 200)
+                    {
+                        ua.location.properties.Add(new Pr_Orcs_ImmortalRemains(ua.location, ua));
+                        ua.person.unit = ua;
+
+                        ua.location.properties.RemoveAll(pr => pr is Pr_FallenHuman fallen && fallen.personIndex == ua.person.index);
+                    }
+                }
+            }
         }
 
         public override void onGraphicalHexUpdated(GraphicalHex graphicalHex)
@@ -2186,33 +2235,271 @@ namespace Orcs_Plus
             return false;
         }
 
-        public bool checkAlignment(SG_Orc orcSociety, Location loc)
+        /// <summary>
+        /// Returns false if the orc society considers the target social group to not be hostile.
+        /// </summary>
+        /// <param name="orcSociety"></param>
+        /// <param name="sg"></param>
+        /// <returns></returns>
+        public bool isHostileAlignment(SG_Orc orcSociety, SocialGroup sg)
         {
-            if (orcSociety == null)
+            if (orcSociety != null)
+            {
+                if (core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+                {
+                    if (orcSociety == sg || orcCulture == sg)
+                    {
+                        return false;
+                    }
+
+                    if (sg is SG_Orc || sg is HolyOrder_Orcs)
+                    {
+                        return true;
+                    }
+
+                    if (orcCulture.tenet_intolerance.status == -2)
+                    {
+                        if (sg.isDark() || (sg is Society society && (society.isDarkEmpire || society.isOphanimControlled)))
+                        {
+                            return false;
+                        }
+                    }
+                    else if (orcCulture.tenet_intolerance.status == 2)
+                    {
+                        if (!sg.isDark() || (sg is Society society && (!society.isDarkEmpire || !society.isOphanimControlled)))
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Returns false if the orcSociety considers the social group that controls the target location to not be hostile.
+        /// </summary>
+        /// <param name="orcSociety"></param>
+        /// <param name="loc"></param>
+        /// <returns></returns>
+        public bool isHostileAlignment(SG_Orc orcSociety, Location loc)
+        {
+            if (loc.soc == null)
+            {
+                return true;
+            }
+
+            return isHostileAlignment(orcSociety, loc.soc);
+        }
+
+        /// <summary>
+        /// Returns true if a unit is not of an orc social group or culture, or if the orc social group considers the social group that the target unit belongs to to be hostile.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="u"></param>
+        /// <returns></returns>
+        public bool isHostileAlignment(Unit u, Unit target)
+        {
+            if (u.society == target.society)
             {
                 return false;
             }
 
-            bool result = true;
-            if (orcSociety != null && core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && loc.soc != null)
+            SG_Orc orcSociety = u.society as SG_Orc;
+            HolyOrder_Orcs orcCulture = u.society as HolyOrder_Orcs;
+
+            if (orcSociety != null)
             {
-                if (orcCulture.tenet_intolerance.status == -2)
+                data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+            }
+            else if (orcCulture != null)
+            {
+                orcSociety = orcCulture.orcSociety;
+            }
+
+            if (orcSociety != null && orcCulture != null)
+            {
+                if (target.society == orcSociety || target.society == orcCulture)
                 {
-                    if (loc.soc.isDark() || (loc.soc is Society society && (society.isDarkEmpire || society.isOphanimControlled)))
+                    return false;
+                }
+
+                if (orcCulture.tenet_intolerance.status > 1)
+                {
+                    if (!target.isCommandable() && !target.society.isDark())
                     {
-                        result = false;
+                        return false;
                     }
                 }
-                else if (orcCulture.tenet_intolerance.status == 2)
+                else if (orcCulture.tenet_intolerance.status < 1)
                 {
-                    if (!loc.soc.isDark() || (loc.soc is Society society && (!society.isDarkEmpire || !society.isOphanimControlled)))
+                    if (target is UM_UntamedDead || target is UM_RavenousDead)
                     {
-                        result = false;
+                        if (target.location.soc == orcSociety || target.location.soc == orcCulture)
+                        {
+                            return false;
+                        }
+                    }
+
+                    if (orcCulture.tenet_intolerance.status < 0)
+                    {
+                        if (target.isCommandable())
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+                if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
+                {
+                    if (checkIsCordyceps(target))
+                    {
+                        return false;
                     }
                 }
             }
 
-            return result;
+            return true;
+        }
+
+        /// <summary>
+        /// Returns true if the target unit belongs to Codyceps.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="orcCulture"></param>
+        /// <returns></returns>
+        public bool checkIsCordyceps(Unit target)
+        {
+            bool cordyceps = false;
+            
+            if (data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null)
+            {
+                if (target is UM_Refugees refugee)
+                {
+                    if (refugee.task != null)
+                    {
+                        if (intDataCord.typeDict.TryGetValue("Doomed", out Type doomedType) && doomedType != null && (refugee.task.GetType() == doomedType || refugee.task.GetType().IsSubclassOf(doomedType)))
+                        {
+                            if (intDataCord.fieldInfoDict.TryGetValue("DoomedTarget", out FieldInfo FI_Target) && FI_Target != null)
+                            {
+                                int targetIndex = (int)FI_Target.GetValue(refugee.task);
+
+                                if (intDataCord.typeDict.TryGetValue("Hive", out Type hiveType) && hiveType != null)
+                                {
+                                    if (target.map.locations[targetIndex].settlement.GetType() == hiveType || target.map.locations[targetIndex].settlement.GetType().IsSubclassOf(hiveType))
+                                    {
+                                        cordyceps = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (intDataCord.typeDict.TryGetValue("VespidicSwarm", out Type vSwarmType) && vSwarmType != null && (target.GetType() == vSwarmType || target.GetType().IsSubclassOf(vSwarmType)))
+                {
+                    cordyceps = true;
+                }
+                else if (intDataCord.typeDict.TryGetValue("Drone", out Type droneType) && droneType != null && (target.GetType() == droneType || target.GetType().IsSubclassOf(droneType)))
+                {
+                    cordyceps = true;
+                }
+                else if (intDataCord.typeDict.TryGetValue("Haematophage", out Type haematophageType) && haematophageType != null && (target.GetType() == haematophageType || target.GetType().IsSubclassOf(haematophageType)))
+                {
+                    cordyceps = true;
+                }
+            }
+
+            return cordyceps;
+        }
+
+        /// <summary>
+        /// Returns true if target is; in combat against an army of the same society as u, tasked with attacking an army of the same society as u, razing a settlement belong to u's society, razing an outpost belonging to u's society.
+        /// If u's society is an orcSociety or orcCulture, it handles checking both types.
+        /// </summary>
+        /// <param name="u"></param>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public bool isAttackingSociety(Unit u, Unit target)
+        {
+            SG_Orc orcSociety = u.society as SG_Orc;
+            HolyOrder_Orcs orcCulture = u.society as HolyOrder_Orcs;
+
+            if (orcSociety != null)
+            {
+                ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+            }
+            else if (orcCulture != null)
+            {
+                orcSociety = orcCulture.orcSociety;
+            }
+
+            if (target.task is Task_InBattle taskBattle)
+            {
+                List<UM> combatants = taskBattle.battle.attackers.Contains(target) ? taskBattle.battle.defenders : taskBattle.battle.attackers;
+                if (combatants.Any(comb => comb.society == u.society))
+                {
+                    return true;
+                }
+
+                if (orcSociety != null && orcCulture != null)
+                {
+                    if (combatants.Any(comb => comb.society == orcSociety || comb.society == orcCulture))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            if (target.task is Task_AttackArmy tAttack)
+            {
+                if (tAttack.other.society == u.society)
+                {
+                    return true;
+                }
+
+                if (orcSociety != null && orcCulture != null)
+                {
+                    if (tAttack.other.society == orcSociety || tAttack.other.society == orcCulture)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            if (target.task is Task_RazeLocation)
+            {
+                if (target.location.soc == u.society)
+                {
+                    return true;
+                }
+
+                if (orcSociety != null && orcCulture != null)
+                {
+                    if (target.location.soc == orcSociety || target.location.soc == orcCulture)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            if (target.task is Task_RazeOutpost tRazeOutpost && tRazeOutpost.outpost != null && tRazeOutpost.outpost.parent != null)
+            {
+                if (tRazeOutpost.outpost.parent == u.society)
+                {
+                    return true;
+                }
+
+                if (orcCulture != null)
+                {
+                    if (tRazeOutpost.outpost.parent == orcCulture)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         public Item getOrcItem(Map map, SG_Orc orcSociety, Location location)
@@ -2250,35 +2537,6 @@ namespace Orcs_Plus
                     return Item.getItemFromPool1(map, -1);
                 }
             }
-        }
-
-        public bool checkAlignment(SG_Orc orcSociety, SocialGroup sg)
-        {
-            if (orcSociety == null)
-            {
-                return false;
-            }
-
-            bool result = true;
-            if (orcSociety != null && core.data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
-            {
-                if (orcCulture.tenet_intolerance.status == -2)
-                {
-                    if (sg.isDark() || (sg is Society society && (society.isDarkEmpire || society.isOphanimControlled)))
-                    {
-                        result = false;
-                    }
-                }
-                else if (orcCulture.tenet_intolerance.status == 2)
-                {
-                    if (!sg.isDark() || (sg is Society society && (!society.isDarkEmpire || !society.isOphanimControlled)))
-                    {
-                        result = false;
-                    }
-                }
-            }
-
-            return result;
         }
 
         public bool registerGodTenet(Type godType, Type tenetType)

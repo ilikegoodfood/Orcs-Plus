@@ -290,7 +290,7 @@ namespace Orcs_Plus
                             if (loc.soc != null && loc.settlement is SettlementHuman settlementHuman)
                             {
                                 //Console.WriteLine("OrcsPlus: loc is settlement human");
-                                if (ModCore.Get().checkAlignment(society as SG_Orc, loc))
+                                if (ModCore.Get().isHostileAlignment(society as SG_Orc, loc))
                                 {
                                     //Console.WriteLine("OrcsPlus: loc alignment is valid");
                                     if (checkPath(loc, out _))
@@ -324,7 +324,7 @@ namespace Orcs_Plus
                     {
                         if (tradeRoute.raidingCooldown == 0)
                         {
-                            if (!ModCore.Get().checkAlignment(society as SG_Orc, tradeRoute.start()) && !ModCore.Get().checkAlignment(society as SG_Orc, tradeRoute.end()))
+                            if (!ModCore.Get().isHostileAlignment(society as SG_Orc, tradeRoute.start()) && !ModCore.Get().isHostileAlignment(society as SG_Orc, tradeRoute.end()))
                             {
                                 //Console.WriteLine("OrcsPlus: Trade route alignment is valid");
                                 foreach (Location loc in tradeRoute.path)

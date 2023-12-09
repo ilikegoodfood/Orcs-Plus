@@ -9,6 +9,8 @@ namespace Orcs_Plus
 {
     public class Task_RazeOutpost : Assets.Code.Task
     {
+        public Pr_HumanOutpost outpost = null;
+
         public override string getShort()
         {
             return "Razing Outpost";
@@ -32,7 +34,7 @@ namespace Orcs_Plus
                 return;
             }
 
-            Pr_HumanOutpost outpost = unit.location.properties.OfType<Pr_HumanOutpost>().FirstOrDefault();
+            outpost = unit.location.properties.OfType<Pr_HumanOutpost>().FirstOrDefault();
             if (outpost == null || outpost.charge <= 0.0)
             {
                 unit.task = null;

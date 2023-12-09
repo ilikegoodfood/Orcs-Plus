@@ -73,7 +73,7 @@ namespace Orcs_Plus
 
         public override bool valid()
         {
-            return location.soc is SG_Orc orcSociety && location.settlement is Set_OrcCamp camp && camp.isInfiltrated && camp.specialism != 0 && !camp.subs.Any(sub => sub is Sub_Temple);
+            return location.soc is SG_Orc orcSociety && location.settlement is Set_OrcCamp camp && camp.infiltration == 1.0 && camp.specialism != 0 && !camp.subs.Any(sub => sub is Sub_Temple);
         }
 
         public override void complete(UA u)

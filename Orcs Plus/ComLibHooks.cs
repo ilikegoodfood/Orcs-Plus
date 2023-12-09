@@ -10,6 +10,9 @@ namespace Orcs_Plus
 {
     public class ComLibHooks : CommunityLib.Hooks
     {
+        private Dictionary<UM, int> armyBattle_AttackerOrcHPDict = new Dictionary<UM, int>();
+        private Dictionary<UM, int> armyBattle_DefenderOrcHPDict = new Dictionary<UM, int>();
+
         public ComLibHooks(Map map)
             : base(map)
         {
@@ -669,6 +672,10 @@ namespace Orcs_Plus
                         {
                             bonus += 1;
                         }
+                        if (shadow >= 1.0)
+                        {
+                            bonus += 1;
+                        }
                         if (Eleven.random.NextDouble() <= shadow)
                         {
                             bonus += 1;
@@ -702,6 +709,10 @@ namespace Orcs_Plus
                         {
                             bonus += 1;
                         }
+                        if (shadow >= 1.0)
+                        {
+                            bonus += 1;
+                        }
                         if (Eleven.random.NextDouble() <= shadow)
                         {
                             bonus += 1;
@@ -724,6 +735,171 @@ namespace Orcs_Plus
             }
 
             return dmg;
+        }
+
+        public override int onUnitReceivesArmyBattleDamage(BattleArmy battle, UM u, int dmg)
+        {
+            if (u is UM_OrcArmy || u is UM_OrcRaiders)
+            {
+                if (u.society is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+                {
+                    if (orcCulture.tenet_god is H_Orcs_DeathMastery deathMastery && deathMastery.status < 0)
+                    {
+                        if (battle.attackers.Contains(u))
+                        {
+                            if (!armyBattle_AttackerOrcHPDict.ContainsKey(u))
+                            {
+                                armyBattle_AttackerOrcHPDict.Add(u, u.hp);
+                            }
+                        }
+                        else
+                        {
+                            if (!armyBattle_DefenderOrcHPDict.ContainsKey(u))
+                            {
+                                armyBattle_DefenderOrcHPDict.Add(u, u.hp);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return dmg;
+        }
+
+        public override void onArmyBattleCycle_EndOfProcess(BattleArmy battle)
+        {
+            manageUndead_Ixthus(battle);
+        }
+
+        private void manageUndead_Ixthus(BattleArmy battle = null)
+        {
+            Location location = null;
+
+            int attackerDeadHP = 0;
+            int defenderDeadHP = 0;
+            foreach (KeyValuePair<UM, int> pair in armyBattle_AttackerOrcHPDict)
+            {
+                if (location == null && pair.Key.location != null)
+                {
+                    location = pair.Key.location;
+                }
+
+                if (pair.Key.hp < pair.Value)
+                {
+                    if (pair.Key.society is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_DeathMastery deathMastery && deathMastery.status < 0)
+                    {
+                        double hpConversion = deathMastery.status < -1 ? 1.5 * (pair.Value - pair.Key.hp) : 1 * (pair.Value - pair.Key.hp);
+                        int deathHP = (int)Math.Floor(hpConversion);
+                        if (Eleven.random.NextDouble() < hpConversion - deathHP)
+                        {
+                            deathHP++;
+                        }
+
+                        if (deathHP > 0)
+                        {
+                            attackerDeadHP += deathHP;
+                        }
+                    }
+                }
+            }
+
+            foreach (KeyValuePair<UM, int> pair in armyBattle_DefenderOrcHPDict)
+            {
+                if (location == null && pair.Key.location != null)
+                {
+                    location = pair.Key.location;
+                }
+
+                if (pair.Key.hp < pair.Value)
+                {
+                    if (pair.Key.society is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_DeathMastery deathMastery && deathMastery.status < 0)
+                    {
+                        double hpConversion = deathMastery.status < -1 ? 0.75 * (pair.Value - pair.Key.hp) : 0.5 * (pair.Value - pair.Key.hp);
+                        int deathHP = (int)Math.Floor(hpConversion);
+                        if (Eleven.random.NextDouble() < hpConversion - deathHP)
+                        {
+                            deathHP++;
+                        }
+
+                        if (deathHP > 0)
+                        {
+                            defenderDeadHP += deathHP;
+                        }
+                    }
+                }
+            }
+
+            if (location != null)
+            {
+                if (attackerDeadHP > 0)
+                {
+                    UM_UntamedDead dead = null;
+                    if (battle != null)
+                    {
+                        dead = (UM_UntamedDead)location.units.FirstOrDefault(u => !u.isDead && u is UM_UntamedDead d && d.master == null && d.task is Task_InBattle bTask && bTask.battle.attackers.Contains(u));
+                    }
+                    else
+                    {
+                        dead = (UM_UntamedDead)location.units.FirstOrDefault(u => !u.isDead && u is UM_UntamedDead d && d.master == null);
+                    }
+
+                    if (dead == null)
+                    {
+                        dead = new UM_UntamedDead(location, map.soc_dark, attackerDeadHP);
+                        location.units.Add(dead);
+                        map.units.Add(dead);
+
+                        dead.master = null;
+
+                        if (!battle.done)
+                        {
+                            dead.task = new Task_InBattle(battle);
+                            battle.attackers.Add(dead);
+                        }
+                    }
+                    else
+                    {
+                        dead.hp += attackerDeadHP;
+                        dead.maxHp = dead.hp;
+                    }
+                }
+
+                if (defenderDeadHP > 0)
+                {
+                    UM_UntamedDead dead = null;
+                    if (battle != null)
+                    {
+                        dead = (UM_UntamedDead)location.units.FirstOrDefault(u => u is UM_UntamedDead d && d.master == null && d.task is Task_InBattle bTask && bTask.battle.defenders.Contains(u));
+                    }
+                    else
+                    {
+                        dead = (UM_UntamedDead)location.units.FirstOrDefault(u => u is UM_UntamedDead d && d.master == null);
+                    }
+
+                    if (dead == null)
+                    {
+                        dead = new UM_UntamedDead(location, map.soc_dark, defenderDeadHP);
+                        location.units.Add(dead);
+                        map.units.Add(dead);
+
+                        dead.master = null;
+
+                        if (!battle.done)
+                        {
+                            dead.task = new Task_InBattle(battle);
+                            battle.defenders.Add(dead);
+                        }
+                    }
+                    else
+                    {
+                        dead.hp += defenderDeadHP;
+                        dead.maxHp = dead.hp;
+                    }
+                }
+            }
+
+            armyBattle_AttackerOrcHPDict.Clear();
+            armyBattle_DefenderOrcHPDict.Clear();
         }
 
         public override string onPopupHolyOrder_DisplayInfluenceElder(HolyOrder order, string s, int infGain)

@@ -60,7 +60,7 @@ namespace Orcs_Plus
 
         public override bool valid()
         {
-            return sub.settlement.isInfiltrated;
+            return sub.settlement.infiltration == 1.0;
         }
 
         public override bool validFor(UA ua)

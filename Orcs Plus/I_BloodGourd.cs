@@ -10,9 +10,9 @@ namespace Orcs_Plus
 {
     public class I_BloodGourd : Item
     {
-        public int timer = 3;
+        public int timer = 5;
 
-        public double deathNeed = 100.0;
+        public double deathNeed = 300.0;
 
         public I_BloodGourd(Map map)
             : base(map)
@@ -22,12 +22,37 @@ namespace Orcs_Plus
 
         public override string getName()
         {
+            if (deathNeed <= 30.0)
+            {
+                return "Gourd of Blood (Ripening)";
+            }
+            if (deathNeed <= 60.0)
+            {
+                return "Gourd of Blood (Fruiting)";
+            }
+            if (deathNeed <= 120.0)
+            {
+                return "Gourd of Blood (Flowering)";
+            }
+            if (deathNeed <= 180.0)
+            {
+                return "Gourd of Blood (Budding)";
+            }
+            if (deathNeed <= 240.0)
+            {
+                return "Gourd of Blood (Leafy)";
+            }
+            if (deathNeed <= 270.0)
+            {
+                return "Gourd of Blood (Sprouting)";
+            }
+
             return "Gourd of Blood";
         }
 
         public override string getShortDesc()
         {
-            return "The gourd of blood is a small red gourd that can only be found in the depths of the wilderness. Its flesh is closer to meat than plant matter and it is filled to bursting with blood of uncertain origins. It is occasionally harvested by orc tribes, a process that is extremely dangerous. The holder regains 1 hp every three turns, or they can consume the gourd to fully refill their health.";
+            return "The gourd of blood is a small red gourd that can only be found in the depths of the wilderness. Its flesh is closer to meat than plant matter and it is filled to bursting with blood of uncertain origins. It is occasionally harvested by orc tribes, a process that is extremely dangerous. The holder regains 1 hp every five turns, or they can consume the gourd to fully refill their health.";
         }
 
         public override Sprite getIconFore()
@@ -77,52 +102,30 @@ namespace Orcs_Plus
                     Property.addToProperty("Fertilizer for Gourd of Blood", Property.standardProperties.DEATH, -delta, owner.unit.location);
                     deathNeed -= delta;
                 }
+                else if (deathNeed < 300.0)
+                {
+                    deathNeed += 0.5;
+
+                    if (deathNeed > 300.0)
+                    {
+                        deathNeed = 300.0;
+                    }
+                }
 
                 if (deathNeed <= 0.0)
                 {
-                    bool duplicated = false;
-
-                    for (int i = 0; i < owner.items.Length; i++)
+                    if (owner.unit != null && owner.unit.isCommandable() || owner.isWatched())
                     {
-                        if (owner.items[i] == null)
-                        {
-                            owner.items[i] = new I_BloodGourd(map);
-                            duplicated = true;
-                            break;
-                        }
+                        owner.map.addUnifiedMessage(owner, null, "Gourd of Blood Propagated", owner.getName() + "'s Gourd of Blood has, fattened by the presence of death, grown a second gourd.", "Gourd of Blood Propagated");
                     }
 
-                    if (duplicated)
-                    {
-                        owner.map.addUnifiedMessage(owner, null, "Gourd of Blood Propagated", owner.unit.getName() + "'s Gourd of Blood has, fattened by the presence of death, grown a second gourd. " + owner.unit.getName() + " now holds both gourds.", "Gourd Propagated");
-                    }
-                    else
-                    {
-                        string msgBody = owner.unit.getName() + "'s Gourd of Blood has, fattened by the presence of death, grown a second gourd. " + owner.unit.getName() + ", being unable to carry the second gourd, ";
-                        
-                        if (owner.unit.hp < owner.unit.maxHp)
-                        {
-                            msgBody += "ate it, regaining " + (owner.unit.maxHp - owner.unit.hp) + " hp.";
-                            owner.unit.hp = owner.unit.maxHp;
-                        }
-                        else
-                        {
-                            msgBody += "discarded it.";
-                        }
-
-                        owner.map.addUnifiedMessage(owner, null, "Gourd of Blood Propagated", msgBody, "Gourd Propagated");
-                    }
+                    ua.person.gainItem(new I_BloodGourd(ua.map));
                 }
-            }
-
-            if (deathNeed <= 0.0)
-            {
-                deathNeed = 100.0;
             }
 
             if (timer <= 0)
             {
-                timer = 3;
+                timer = 5;
             }
         }
 

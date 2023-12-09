@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static HarmonyLib.Code;
 
 namespace Orcs_Plus
 {
@@ -336,35 +335,33 @@ namespace Orcs_Plus
                     //Console.WriteLine("OrcsPlus: Choosing seat of orc culture.");
                     if (temples.Count > 0)
                     {
-                        capitalCamp = temples[Eleven.random.Next(temples.Count)].settlement as Set_OrcCamp;
-                    }
-                    else if (specializedCamps.Count == 0)
-                    {
-                        if (camps.Count == 0)
+                        capitalCamp = temples[0].settlement as Set_OrcCamp;
+                        if (temples.Count > 1)
                         {
-                            return;
+                            capitalCamp = temples[Eleven.random.Next(temples.Count)].settlement as Set_OrcCamp;
                         }
+                    }
+                    else if (specializedCamps.Count > 0)
+                    {
+                        capitalCamp = specializedCamps[0];
+                        capital = capitalCamp.location.index;
 
-                        if (camps.Count == 1)
+                        if (specializedCamps.Count > 1)
                         {
-                            capitalCamp = camps[0];
+                            capitalCamp = specializedCamps[Eleven.random.Next(specializedCamps.Count())];
                             capital = capitalCamp.location.index;
                         }
-                        else
+                    }
+                    else if (camps.Count > 0)
+                    {
+                        capitalCamp = camps[0];
+                        capital = capitalCamp.location.index;
+
+                        if (camps.Count > 1)
                         {
                             capitalCamp = camps[Eleven.random.Next(camps.Count())];
                             capital = capitalCamp.location.index;
                         }
-                    }
-                    else if (specializedCamps.Count == 1)
-                    {
-                        capitalCamp = specializedCamps[0];
-                        capital = capitalCamp.location.index;
-                    }
-                    else
-                    {
-                        capitalCamp = specializedCamps[Eleven.random.Next(specializedCamps.Count())];
-                        capital = capitalCamp.location.index;
                     }
                 }
 
@@ -599,23 +596,8 @@ namespace Orcs_Plus
         {
             if (specializedCamps.Count > 0)
             {
-                List<Set_OrcCamp> mageCamps = new List<Set_OrcCamp>();
-                foreach (Set_OrcCamp specializedCamp in specializedCamps)
-                {
-                    if (specializedCamp.specialism == 2)
-                    {
-                        mageCamps.Add(specializedCamp);
-                    }
-                }
-
-                List<UAEN_OrcShaman> shamans = new List<UAEN_OrcShaman>();
-                foreach(UA agent in agents)
-                {
-                    if (agent is UAEN_OrcShaman shaman)
-                    {
-                        shamans.Add(shaman);
-                    }
-                }
+                List<Set_OrcCamp> mageCamps = specializedCamps.FindAll(camp => camp.specialism == 2);
+                List<UAEN_OrcShaman> shamans = agents.OfType<UAEN_OrcShaman>().ToList();
 
                 if (mageCamps.Count > 0)
                 {
@@ -630,14 +612,11 @@ namespace Orcs_Plus
                         }
                     }
 
-                    if (mageCamps.Count > 0)
+                    foreach (Set_OrcCamp mageCamp in mageCamps)
                     {
-                        foreach(Set_OrcCamp mageCamp in mageCamps)
+                        if (Eleven.random.Next(4) == 0)
                         {
-                            if (Eleven.random.Next(4) == 0)
-                            {
-                                createShaman(mageCamp);
-                            }
+                            createShaman(mageCamp);
                         }
                     }
                 }

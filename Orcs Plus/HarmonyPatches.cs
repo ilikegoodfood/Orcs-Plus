@@ -3,6 +3,7 @@ using Assets.Code.Modding;
 using CommunityLib;
 using HarmonyLib;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -368,7 +369,7 @@ namespace Orcs_Plus
 
         private static bool Ch_Orcs_Expand_valid_Postfix(bool result, Ch_Orcs_Expand __instance)
         {
-            if (__instance.location.settlement != null && __instance.location.settlement.subs.Count > 0)
+            if (__instance.location.settlement != null)
             {
                 Sub_OrcWaystation waystation = (Sub_OrcWaystation)__instance.location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation w && w.getChallenges().Contains(__instance));
                 if (waystation != null)
@@ -542,7 +543,7 @@ namespace Orcs_Plus
 
             foreach (Location neighbour in ch.location.getNeighbours())
             {
-                if (neighbour.soc != null && neighbour.settlement is SettlementHuman && ModCore.Get().checkAlignment(orcSociety, neighbour))
+                if (neighbour.soc != null && neighbour.settlement is SettlementHuman && ModCore.Get().isHostileAlignment(orcSociety, neighbour))
                 {
                     Pr_Devastation devastation = ch.location.properties.OfType<Pr_Devastation>().FirstOrDefault();
                     if (devastation == null || devastation.charge < 150)
@@ -601,7 +602,7 @@ namespace Orcs_Plus
             //Console.WriteLine("OrcsPlus: Finding target location.");
             foreach (Location neighbour in location.getNeighbours())
             {
-                if (neighbour.soc != null && neighbour.settlement is SettlementHuman settlementHuman && ModCore.Get().checkAlignment(orcSociety, neighbour))
+                if (neighbour.soc != null && neighbour.settlement is SettlementHuman settlementHuman && ModCore.Get().isHostileAlignment(orcSociety, neighbour))
                 {
                     //Console.WriteLine("OrcsPlus: Neighbour has social group and settlement.");
 
@@ -1254,6 +1255,7 @@ namespace Orcs_Plus
             __instance.person.stat_might--;
 
             __instance.rituals.Add(new Rt_Orcs_Confinement(__instance.location));
+            __instance.rituals.Add(new Rt_Orcs_ReclaimHordeBanner(__instance.location));
 
             I_HordeBanner banner = __instance.person.items.OfType<I_HordeBanner>().FirstOrDefault();
             if (banner != null)
@@ -2571,13 +2573,28 @@ namespace Orcs_Plus
                 {
                     int dist = um.map.getStepDist(um.location, um2.location);
 
+                    if (ModCore.Get().isAttackingSociety(um, um2))
+                    {
+                        if (steps == -1 || dist <= steps)
+                        {
+                            if (dist < steps)
+                            {
+                                targets.Clear();
+                            }
+
+                            targets.Add(um2);
+                            steps = dist;
+                        }
+                        continue;
+                    }
+
                     // Will not attack refugees that are further than 1 step distance. Also will not attack refugees that are en-route to a Cordyceps hive if Cordyceps' god tenet is Elder aligned.
                     if (!(um2 is UM_Refugees) || (dist <= 1))
                     {
                         // Will attack military units in own societ's territory or at a distance up to 4 step distance away.
                         if (um2.location.soc == um.society || dist <= 4)
                         {
-                            // Will only attack military units in own society if they are above recruitment threshold.
+                            // Will only attack military units in unit's own society if they are above recruitment threshold.
                             if (um2.location.soc != um2.society || um2.hp >= um2.maxHp / 3)
                             {
                                 DipRel rel = null;
@@ -2585,11 +2602,14 @@ namespace Orcs_Plus
                                 {
                                     rel = um.society.getRel(um2.society);
                                 }
+
                                 // Will attack military units that they are at war with, or that they are hostile with and are within this army's territory.
-                                if (um2.society == null || rel.state == DipRel.dipState.war || (rel.state == DipRel.dipState.hostile && unit.location.soc == um.society && ModCore.Get().checkAlignment(um.society as SG_Orc, um2.society)))
+                                if (um2.society == null
+                                    || rel.state == DipRel.dipState.war
+                                    || (rel.state == DipRel.dipState.hostile && unit.location.soc == um.society && ModCore.Get().isHostileAlignment(um.society as SG_Orc, um2.society)))
                                 {
                                     // Ignore military units that are already in combat with armies that the orcs are also at war with.
-                                    if (!um.fightingMutualEnemy(um2) && !checkIsCordyceps(um2, orcCulture))
+                                    if (!um.fightingMutualEnemy(um2) && ModCore.Get().isHostileAlignment(um, um2))
                                     {
                                         if (steps == -1 || dist <= steps)
                                         {
@@ -2609,7 +2629,7 @@ namespace Orcs_Plus
                 }
             }
 
-            
+
             if (targets.Count > 0)
             {
                 target = targets[0];
@@ -2738,39 +2758,6 @@ namespace Orcs_Plus
                 um.task = new Task_GoToLocation(um.map.locations[um.homeLocation]);
                 return;
             }
-        }
-
-        private static bool checkIsCordyceps(UM um, HolyOrder_Orcs orcCulture)
-        {
-            bool cordyceps = false;
-            if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
-            {
-                if (ModCore.Get().data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null)
-                {
-                    if (um is UM_Refugees refugee)
-                    {
-                        if (refugee.task != null)
-                        {
-                            if (intDataCord.typeDict.TryGetValue("Doomed", out Type doomedType) && doomedType != null && (refugee.task.GetType() == doomedType || refugee.task.GetType().IsSubclassOf(doomedType)))
-                            {
-                                if (intDataCord.typeDict.TryGetValue("Hive", out Type hiveType) && hiveType != null)
-                                {
-                                    if (um.map.locations.Any(l => l.settlement != null && (l.settlement.GetType() == hiveType || l.settlement.GetType().IsSubclassOf(hiveType))))
-                                    {
-                                        cordyceps = true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else if (intDataCord.typeDict.TryGetValue("VespidicSwarm", out Type vSwarmType) && vSwarmType != null && (um.GetType() == vSwarmType || um.GetType().IsSubclassOf(vSwarmType)))
-                    {
-                        cordyceps = true;
-                    }
-                }
-            }
-
-            return cordyceps;
         }
 
         private static void UM_OrcRaiders_ctor_Postfix(UM_OrcRaiders __instance)

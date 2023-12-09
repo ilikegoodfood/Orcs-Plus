@@ -148,7 +148,7 @@ namespace Orcs_Plus
 
         public override bool validFor(UA ua)
         {
-            if (ua.isCommandable() && location.settlement.isInfiltrated && ua.person.getGold() >= cost)
+            if (ua.isCommandable() && location.settlement.infiltration == 1.0 && ua.person.getGold() >= cost)
             {
                 return true;
             }
