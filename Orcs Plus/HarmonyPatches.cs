@@ -2035,7 +2035,7 @@ namespace Orcs_Plus
                 {
                     result++;
                 }
-                else if (map.sizeX * map.sizeY < 1296 )
+                else if (map.sizeX * map.sizeY < 1600 )
                 {
                     result--;
                 }

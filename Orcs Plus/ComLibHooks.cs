@@ -609,7 +609,7 @@ namespace Orcs_Plus
 
             foreach (UM army in armies)
             {
-                if (army.homeLocation != -1)
+                if (army.homeLocation >= 0 && army.homeLocation < map.locations.Count)
                 {
                     Location home = map.locations[army.homeLocation];
                     if (home != null && home.settlement is SettlementHuman settlementHuman && settlementHuman.ruler != null)
@@ -619,7 +619,7 @@ namespace Orcs_Plus
                             army.hp -= 2;
                             if (army.hp > 0)
                             {
-                                battle.messages.Add(army.getName() + " has suffered desertion (1 damage).");
+                                battle.messages.Add(army.getName() + " has suffered desertion (2 damage).");
                             }
                             else
                             {
