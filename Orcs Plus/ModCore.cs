@@ -31,6 +31,10 @@ namespace Orcs_Plus
 
         private static bool patched = false;
 
+        public static bool opt_DynamicOrcCount = false;
+
+        public static int opt_targetOrcCount = 2;
+
         public static ModCore Get() => core;
 
         public static CommunityLib.ModCore GetComLib() => comLib;
@@ -43,6 +47,30 @@ namespace Orcs_Plus
             {
                 patched = true;
                 HarmonyPatches.PatchingInit();
+            }
+        }
+
+        public override void receiveModConfigOpts_bool(string optName, bool value)
+        {
+            switch (optName)
+            {
+                case "Dynamic Orc Horde Count":
+                    opt_DynamicOrcCount = value;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public override void receiveModConfigOpts_int(string optName, int value)
+        {
+            switch(optName)
+            {
+                case "Target Orc Horde Count":
+                    opt_targetOrcCount = value;
+                    break;
+                default:
+                    break;
             }
         }
 
