@@ -118,6 +118,7 @@ namespace Orcs_Plus
             // Patches for SG_Orc
             harmony.Patch(original: AccessTools.Constructor(typeof(SG_Orc), new Type[] { typeof(Map), typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(SG_Orc_ctor_Postfox)));
             harmony.Patch(original: AccessTools.Method(typeof(SG_Orc), nameof(SG_Orc.canSettle), new Type[] { typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(SG_Orc_canSettle_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(SG_Orc), nameof(SG_Orc.getName), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(SG_Orc_getName_Postfix)));
 
             // Patches for MA_Orc_Expand
             harmony.Patch(original: AccessTools.Method(typeof(MA_Orc_Expand), nameof(MA_Orc_Expand.getUtility), new Type[] { typeof(List<ReasonMsg>) }), postfix: new HarmonyMethod(patchType, nameof(MA_Orcs_Expand_getUtility_Postfix)));
@@ -2019,6 +2020,22 @@ namespace Orcs_Plus
                         }
                     }
                 }
+            }
+
+            return result;
+        }
+
+        private static string SG_Orc_getName_Postfix(string result, SG_Orc __instance)
+        {
+            if (ModCore.Get().data.orcSGCultureMap.TryGetValue(__instance, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.ophanim_PerfectSociety)
+            {
+                if (!ModCore.Get().data.perfectHordeNameDict.TryGetValue(result, out string newResult))
+                {
+                    int splitPoint = result.LastIndexOf(" Horde");
+                    newResult = result.Substring(0, splitPoint) + " Perfect Horde";
+                    ModCore.Get().data.perfectHordeNameDict.Add(result, newResult);
+                }
+                return newResult;
             }
 
             return result;

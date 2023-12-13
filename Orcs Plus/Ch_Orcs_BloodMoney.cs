@@ -77,7 +77,7 @@ namespace Orcs_Plus
             if (warCount > 0)
             {
                 double val = 50.0;
-                msgs?.Add(new ReasonMsg("At War", val));
+                msgs?.Add(new ReasonMsg("At war", val));
                 utility += val;
 
                 if (warCount > 1)
@@ -90,13 +90,13 @@ namespace Orcs_Plus
                 if (orcMight - 10 > enemyMight)
                 {
                     val = enemyMight - (orcMight - 10);
-                    msgs?.Add(new ReasonMsg("Superior Military", val));
+                    msgs?.Add(new ReasonMsg("Superior military", val));
                     utility += val;
                 }
                 else if (orcMight - 10 < enemyMight)
                 {
                     val = 2 * (enemyMight - (orcMight - 10));
-                    msgs?.Add(new ReasonMsg("Inferior Military", val));
+                    msgs?.Add(new ReasonMsg("Inferior military", val));
                     utility += val;
                 }
             }

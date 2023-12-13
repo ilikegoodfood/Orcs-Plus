@@ -310,7 +310,8 @@ namespace Orcs_Plus
                 new AIChallenge(typeof(Ch_Orcs_DrinkGrott), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
                 new AIChallenge(typeof(Ch_Orcs_RefillDrinkingHorns), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility }),
                 new AIChallenge(typeof(Ch_DrinkPrimalWaters), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocal }),
-                new AIChallenge(typeof(Rti_RouseHorde), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden })
+                new AIChallenge(typeof(Rti_RouseHorde), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden }),
+                new AIChallenge(typeof(Rti_Orc_CeaseWar), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden })
             };
 
             aiChallenges_Elder[0].delegates_ValidFor.Add(delegate_ValidFor_OwnCulture);
@@ -716,7 +717,8 @@ namespace Orcs_Plus
                 new AIChallenge(typeof(Ch_DrinkPrimalWaters), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.BaseValid, AIChallenge.ChallengeTags.BaseValidFor, AIChallenge.ChallengeTags.BaseUtility, AIChallenge.ChallengeTags.PreferLocal }),
                 new AIChallenge(typeof(Rti_RouseHorde), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden }),
                 new AIChallenge(typeof(Rt_StudyBlood), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden }),
-                new AIChallenge(typeof(Rt_StudyGeomancy), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden })
+                new AIChallenge(typeof(Rt_StudyGeomancy), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden }),
+                new AIChallenge(typeof(Rti_Orc_CeaseWar), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden })
             };
 
             aiChallenges_Shaman[2].delegates_ValidFor.Add(delegate_ValidFor_SecretsOfDeath);

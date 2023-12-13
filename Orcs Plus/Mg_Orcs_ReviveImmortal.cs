@@ -179,6 +179,9 @@ namespace Orcs_Plus
                 map.overmind.calculateAgentsUsed();
             }
 
+            immortalRemains.ua.setMenace(immortalRemains.ua.inner_menaceMin);
+            immortalRemains.ua.setProfile(immortalRemains.ua.inner_profileMin);
+
             location.properties.Remove(immortalRemains);
         }
     }

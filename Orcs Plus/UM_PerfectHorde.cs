@@ -10,7 +10,7 @@ namespace Orcs_Plus
 {
     public class UM_PerfectHorde : UM_OrcArmy
     {
-        public double strengthFactor = 1.4;
+        public double strengthFactor = 1.2;
 
         public double goldGainFactor = 2.0;
 
@@ -67,7 +67,7 @@ namespace Orcs_Plus
         {
             if (homeLocation != -1 && map.locations[homeLocation].soc is SG_Orc)
             {
-                Pr_OrcishIndustry industry = map.locations[homeLocation].properties.OfType<Pr_OrcishIndustry>().FirstOrDefault();
+                Pr_OrcishIndustry industry = (Pr_OrcishIndustry)map.locations[homeLocation].properties.FirstOrDefault(pr => pr is Pr_OrcishIndustry);
                 double totalIndustry = 0;
 
                 if (industry != null)
@@ -79,7 +79,7 @@ namespace Orcs_Plus
                 {
                     if (neighbour.soc == society)
                     {
-                        industry = neighbour.properties.OfType<Pr_OrcishIndustry>().FirstOrDefault();
+                        industry = (Pr_OrcishIndustry)neighbour.properties.FirstOrDefault(pr => pr is Pr_OrcishIndustry);
 
                         if (industry != null)
                         {
@@ -88,7 +88,7 @@ namespace Orcs_Plus
                     }
                 }
 
-                Pr_Ophanim_Perfection perfection = map.locations[this.homeLocation].properties.OfType<Pr_Ophanim_Perfection>().FirstOrDefault();
+                Pr_Ophanim_Perfection perfection = (Pr_Ophanim_Perfection)map.locations[this.homeLocation].properties.FirstOrDefault(pr => pr is Pr_Ophanim_Perfection);
                 double perfectionMult = 1.0;
                 if (perfection != null)
                 {

@@ -77,10 +77,15 @@ namespace Orcs_Plus
 
         public int sleepDuration = 50;
 
+        public Dictionary<string, string> perfectHordeNameDict;
+
+        public List<AIChallenge> forbiddenChallenges;
         public ModData()
         {
             modAssemblies= new Dictionary<string, ModIntegrationData>();
             orcGeoMageHabitabilityBonus = new Dictionary<int, float>();
+            perfectHordeNameDict = new Dictionary<string, string>();
+            forbiddenChallenges = new List<AIChallenge>();
 
             influenceGain = new Dictionary<influenceGainAction, int>
             {
@@ -135,8 +140,6 @@ namespace Orcs_Plus
                 { typeof(Set_Shipwreck), new HashSet < Type >() }
             };
         }
-
-        public List<AIChallenge> forbiddenChallenges = new List<AIChallenge>();
 
         public void onTurnStart(Map map)
         {
