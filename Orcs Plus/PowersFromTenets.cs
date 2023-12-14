@@ -23,6 +23,9 @@ namespace Orcs_Plus
             {
                 switch (tenetType.Name)
                 {
+                    case nameof(H_Orcs_Fleshweaving):
+                        godPowers.Add(new P_Escamrak_SpawningPit(map), elderAwakeMaxElder);
+                        break;
                     case nameof(H_Orcs_LifeMother):
                         godPowers.Add(new P_Vinerva_Life(map), elderAligned1);
                         godPowers.Add(new P_Vinerva_Health(map), elderAligned1);

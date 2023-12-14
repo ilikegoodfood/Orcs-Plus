@@ -8,9 +8,7 @@ namespace Orcs_Plus
 {
     public class H_Orcs_Fleshweaving : H_Orcs_GodTenet
     {
-        public int lastTunrActivated = -150;
-
-        H_Orcs_Fleshweaving(HolyOrder_Orcs orcCUlture)
+        public H_Orcs_Fleshweaving(HolyOrder_Orcs orcCUlture)
             : base(orcCUlture)
         {
 

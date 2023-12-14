@@ -4,6 +4,7 @@ using DuloGames.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -89,6 +90,35 @@ namespace Orcs_Plus
         public override void turnTick(Map map)
         {
             base.turnTick(map);
+
+            if (order is HolyOrder_Orcs orcCulture && orcCulture.tenet_god is H_Orcs_Fleshweaving fleshweaving)
+            {
+                if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModData.ModIntegrationData intDataEscam))
+                {
+                    if (intDataEscam.typeDict.TryGetValue("FleshStatBonusTrait", out Type fleshStatBonusType) && intDataEscam.constructorInfoDict.TryGetValue("FleshStatBonusTrait", out ConstructorInfo ci) && intDataEscam.fieldInfoDict.TryGetValue("FleshStatBonusTrait_BonusType", out FieldInfo FI_BonusType))
+                    {
+                        Trait fleshStatBonusTrait = person.traits.FirstOrDefault(t => t.GetType() == fleshStatBonusType || t.GetType().IsSubclassOf(fleshStatBonusType));
+                        if (fleshweaving.status >= 0 || isCommandable())
+                        {
+                            if (fleshStatBonusTrait != null)
+                            {
+                                person.traits.Remove(fleshStatBonusTrait);
+                            }
+                        }
+                        else
+                        {
+                            if (fleshStatBonusTrait == null)
+                            {
+                                fleshStatBonusTrait = (Trait)ci.Invoke(new object[0]);
+                                FI_BonusType.SetValue(fleshStatBonusTrait, "Might");
+                            }
+
+                            fleshStatBonusTrait.level = fleshweaving.status;
+                        }
+                    }
+                }
+            }
+
             person.XP += map.param.socialGroup_orc_upstartXPPerTurn;
             if (person.skillPoints > 0)
             {

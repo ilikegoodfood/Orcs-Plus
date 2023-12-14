@@ -9,17 +9,19 @@ using UnityEngine;
 
 namespace Orcs_Plus
 {
-    public class Sub_Excamrak_SpawningPit : Subsettlement
+    public class Sub_Orcs_SpawningPit : Subsettlement
     {
-        public int fleshGrowth = 0;
+        public double fleshStore = 0;
 
-        public int growthRate = 5;
+        public double growthRate = 1.25;
 
-        public int maxFlesh = 25;
+        public double maxFlesh = 25;
+
+        public double menaceGain = 10.0;
 
         public List<Challenge> challenges;
 
-        public Sub_Excamrak_SpawningPit(Settlement set)
+        public Sub_Orcs_SpawningPit(Settlement set)
             : base(set)
         {
             challenges = new List<Challenge>();
@@ -42,20 +44,33 @@ namespace Orcs_Plus
 
         public override void turnTick()
         {
-            if (fleshGrowth < maxFlesh)
+            if (fleshStore < maxFlesh)
             {
-                fleshGrowth += growthRate;
+                fleshStore += growthRate;
 
-                if (fleshGrowth > maxFlesh)
+                if (fleshStore > maxFlesh)
                 {
-                    fleshGrowth = maxFlesh;
+                    fleshStore = maxFlesh;
                 }
+            }
+
+            if (!(settlement.location.soc is SG_Orc orcSociety) || (!ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) || !(orcCulture.tenet_god is H_Orcs_Fleshweaving fleshweaving && fleshweaving.status < -1)))
+            {
+                spawnArmy();
+                settlement.subs.Remove(this);
+                return;
+            }
+
+            if (fleshStore >= maxFlesh && settlement.location.soc.isAtWar())
+            {
+                spawnArmy();
+                menace += 10;
             }
         }
 
         public void spawnArmy()
         {
-            if (fleshGrowth > 0)
+            if (fleshStore > 0)
             {
                 if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModData.ModIntegrationData intDataEscam))
                 {
@@ -63,21 +78,16 @@ namespace Orcs_Plus
                     {
                         if (intDataEscam.kernel != null && intDataEscam.fieldInfoDict.TryGetValue("FleshSociety", out FieldInfo FI_fleshSociety))
                         {
-                            SocialGroup targetSociety = (SocialGroup)FI_fleshSociety.GetValue(intDataEscam.kernel);
-                            if (targetSociety == null)
-                            {
-                                targetSociety = settlement.map.soc_dark;
-                            }
-
-                            UM army = (UM)ci.Invoke(new object[] { settlement.location, targetSociety });
-                            army.maxHp = fleshGrowth;
-                            army.hp = fleshGrowth;
+                            SocialGroup targetSocialGroup = (SocialGroup)(FI_fleshSociety.GetValue(intDataEscam.kernel) ?? settlement.map.soc_dark);
+                            UM army = (UM)ci.Invoke(new object[] { settlement.location, targetSocialGroup });
+                            army.maxHp = (int)fleshStore;
+                            army.hp = (int)fleshStore;
                             army.location = settlement.location;
 
                             settlement.map.units.Add(army);
                             settlement.location.units.Add(army);
 
-                            fleshGrowth = 0;
+                            fleshStore = 0;
                         }
                     }
                 }

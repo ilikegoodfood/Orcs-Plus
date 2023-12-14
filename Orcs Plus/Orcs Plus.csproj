@@ -116,6 +116,7 @@
     <Compile Include="Pr_Vinerva_Life.cs" />
     <Compile Include="Pr_Vinerva_LifeBoon.cs" />
     <Compile Include="Pr_Vinerva_Thorns.cs" />
+    <Compile Include="P_Escamrak_SpawningPit.cs" />
     <Compile Include="P_Ophanim_PerfectHorde.cs" />
     <Compile Include="P_Vinerva_Health.cs" />
     <Compile Include="P_Vinerva_Life.cs" />
@@ -152,7 +153,7 @@
     <Compile Include="Rt_Orcs_PirateTrade.cs" />
     <Compile Include="Rt_Orcs_ReclaimHordeBanner.cs" />
     <Compile Include="Rt_Orcs_SacrificialSite.cs" />
-    <Compile Include="Sub_Excamrak_SpawningPit.cs" />
+    <Compile Include="Sub_Orcs_SpawningPit.cs" />
     <Compile Include="Sub_OrcCultureCapital.cs" />
     <Compile Include="Sub_OrcTemple.cs" />
     <Compile Include="Sub_OrcWaystation.cs" />

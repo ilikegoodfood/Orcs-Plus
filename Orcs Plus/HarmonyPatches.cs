@@ -1422,6 +1422,38 @@ namespace Orcs_Plus
             {
                 __instance.person.XP = Math.Max(0, __instance.person.XP - 5);
             }
+
+            SG_Orc orcSociety = __instance.society as SG_Orc;
+            if (orcSociety != null && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture))
+            {
+                if (orcCulture.tenet_god is H_Orcs_Fleshweaving fleshweaving)
+                {
+                    if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModData.ModIntegrationData intDataEscam))
+                    {
+                        if (intDataEscam.typeDict.TryGetValue("FleshStatBonusTrait", out Type fleshStatBonusType) && intDataEscam.constructorInfoDict.TryGetValue("FleshStatBonusTrait", out ConstructorInfo ci) && intDataEscam.fieldInfoDict.TryGetValue("FleshStatBonusTrait_BonusType", out FieldInfo FI_BonusType))
+                        {
+                            Trait fleshStatBonusTrait = __instance.person.traits.FirstOrDefault(t => t.GetType() == fleshStatBonusType || t.GetType().IsSubclassOf(fleshStatBonusType));
+                            if (fleshweaving.status >= 0 || __instance.isCommandable())
+                            {
+                                if (fleshStatBonusTrait != null)
+                                {
+                                    __instance.person.traits.Remove(fleshStatBonusTrait);
+                                }
+                            }
+                            else
+                            {
+                                if (fleshStatBonusTrait == null)
+                                {
+                                    fleshStatBonusTrait = (Trait)ci.Invoke(new object[0]);
+                                    FI_BonusType.SetValue(fleshStatBonusTrait, "Might");
+                                }
+
+                                fleshStatBonusTrait.level = fleshweaving.status;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private static double UA_getAttackUtility_Postfix(double utility, UA __instance, Unit other, List<ReasonMsg> reasons, bool includeDangerousFoe)
@@ -2496,12 +2528,14 @@ namespace Orcs_Plus
 
         private static void UM_OrcArmy_turnTickInner_Postfix(UM_OrcArmy __instance)
         {
-            if (__instance.task == null)
+            SG_Orc orcSociety = __instance.society as SG_Orc;
+
+            if (orcSociety != null && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture))
             {
-                List<UA> targetAgents = new List<UA>();
-                if (__instance.society != null && __instance.parent != null && __instance.parent.location.settlement == __instance.parent && __instance.parent.location.soc == __instance.society && __instance.location == __instance.parent.location && __instance.task == null)
+                if (__instance.task == null)
                 {
-                    if (ModCore.Get().data.orcSGCultureMap.TryGetValue(__instance.society as SG_Orc, out HolyOrder_Orcs orcCulture))
+                    List<UA> targetAgents = new List<UA>();
+                    if (__instance.parent != null && __instance.parent.location.settlement == __instance.parent && __instance.parent.location.soc == orcSociety && __instance.location == __instance.parent.location)
                     {
                         H_Orcs_Intolerance intolerance = orcCulture.tenet_intolerance;
                         if (intolerance != null)
@@ -2525,10 +2559,10 @@ namespace Orcs_Plus
                                         {
                                             __instance.map.addUnifiedMessage(__instance, agent, "Army Kills Agent", string.Concat(new string[]
                                             {
-                                                __instance.getName(),
-                                                " has inflicted 1 HP damage and thus killed ",
-                                                agent.getName(),
-                                                ", as they attempt to perform this challenge.\\n\\nWhile an orc army is at rest, they patrol constantly, attacking any outsiders operating in their home camp, unless they are tolerant towards them, or, in the case of dark agents, including player controlled agents, the army's home camp is >50% shadow. (You CANNOT see this on the map by the red spikes on the army icon when the agent is selected). Note: 100% infiltration will allow your agents to continue to operate normally"
+                                            __instance.getName(),
+                                            " has inflicted 1 HP damage and thus killed ",
+                                            agent.getName(),
+                                            ", as they attempt to perform this challenge.\\n\\nWhile an orc army is at rest, they patrol constantly, attacking any outsiders operating in their home camp, unless they are tolerant towards them, or, in the case of dark agents, including player controlled agents, the army's home camp is >50% shadow. (You CANNOT see this on the map by the red spikes on the army icon when the agent is selected). Note: 100% infiltration will allow your agents to continue to operate normally"
                                             }), UnifiedMessage.messageType.ARMY_BLOCKS, false);
                                         }
                                         agent.die(__instance.map, "Killed by " + __instance.getName(), __instance.person);
@@ -2539,10 +2573,10 @@ namespace Orcs_Plus
                                         {
                                             __instance.map.addUnifiedMessage(__instance, agent, "Army Intercepts", string.Concat(new string[]
                                             {
-                                                __instance.getName(),
-                                                " has blocked ",
-                                                agent.getName(),
-                                                ", as they are perform this challenge in an orc camp that is not tolerant of them. They have taken 1HP adamge while escaping, and will continue to do so until they leave the location. \\n\\nWhile an orc army is at rest, they patrol constantly, attacking any outsiders operating in their home camp, unless they are tolerant towards them, or, in the case of dark agents, including player controlled agents, the army's home camp is >50% shadow. (You CANNOT see this on the map by the red spikes on the army icon when the agent is selected). Note: 100% infiltration will allow your agents to continue to operate normally"
+                                            __instance.getName(),
+                                            " has blocked ",
+                                            agent.getName(),
+                                            ", as they are perform this challenge in an orc camp that is not tolerant of them. They have taken 1HP adamge while escaping, and will continue to do so until they leave the location. \\n\\nWhile an orc army is at rest, they patrol constantly, attacking any outsiders operating in their home camp, unless they are tolerant towards them, or, in the case of dark agents, including player controlled agents, the army's home camp is >50% shadow. (You CANNOT see this on the map by the red spikes on the army icon when the agent is selected). Note: 100% infiltration will allow your agents to continue to operate normally"
                                             }), UnifiedMessage.messageType.ARMY_BLOCKS, false);
                                         }
                                     }
@@ -2551,36 +2585,44 @@ namespace Orcs_Plus
                         }
                     }
                 }
-            }
-            else if (__instance.task is Task_RazeOutpost)
-            {
-                Pr_HumanOutpost outpost = __instance.location.properties.OfType<Pr_HumanOutpost>().FirstOrDefault();
-                if (outpost != null && __instance.society is SG_Orc orcSociety && orcSociety.capital != -1 && __instance.map.locations[orcSociety.capital].soc == orcSociety && __instance.map.locations[orcSociety.capital].settlement is Set_OrcCamp camp)
+                else if (__instance.task is Task_RazeOutpost)
                 {
-                    Pr_OrcPlunder plunder = camp.location.properties.OfType<Pr_OrcPlunder>().FirstOrDefault();
-                    if (plunder == null)
+                    Pr_HumanOutpost outpost = __instance.location.properties.OfType<Pr_HumanOutpost>().FirstOrDefault();
+                    if (outpost != null && orcSociety != null && orcSociety.capital != -1 && __instance.map.locations[orcSociety.capital].soc == orcSociety && __instance.map.locations[orcSociety.capital].settlement is Set_OrcCamp camp)
                     {
-                        plunder = new Pr_OrcPlunder(__instance.map.locations[orcSociety.capital]);
-                        __instance.map.locations[orcSociety.capital].properties.Add(plunder);
-                    }
-
-                    int gold = (int)Math.Floor((50.0 / outpost.charge) * outpost.funding);
-                    outpost.funding -= gold;
-                    plunder.gold += gold;
-                    __instance.map.addMessage(__instance.getName() + " plunders " + gold + " gold", 0.2, true, __instance.location.hex);
-                    if (__instance.map.burnInComplete && gold >= 10.0)
-                    {
-                        __instance.map.addUnifiedMessage(__instance, __instance.location, "Plunder", string.Concat(new string[]
+                        Pr_OrcPlunder plunder = camp.location.properties.OfType<Pr_OrcPlunder>().FirstOrDefault();
+                        if (plunder == null)
                         {
+                            plunder = new Pr_OrcPlunder(__instance.map.locations[orcSociety.capital]);
+                            __instance.map.locations[orcSociety.capital].properties.Add(plunder);
+                        }
+
+                        int gold = (int)Math.Floor((50.0 / outpost.charge) * outpost.funding);
+                        outpost.funding -= gold;
+                        plunder.gold += gold;
+                        __instance.map.addMessage(__instance.getName() + " plunders " + gold + " gold", 0.2, true, __instance.location.hex);
+                        if (__instance.map.burnInComplete && gold >= 10.0)
+                        {
+                            __instance.map.addUnifiedMessage(__instance, __instance.location, "Plunder", string.Concat(new string[]
+                            {
                         __instance.getName(),
                         " plunders ",
                         gold.ToString(),
                         " gold from ",
                         __instance.location.getName(true),
                         " while razing the outpost, which will be gathered in the orc main fortress's plunder, which your agents can access."
-                        }), UnifiedMessage.messageType.ORC_PLUNDER, true);
+                            }), UnifiedMessage.messageType.ORC_PLUNDER, true);
+                        }
+                        __instance.map.hintSystem.popHint(HintSystem.hintType.ORC_PLUNDER);
                     }
-                    __instance.map.hintSystem.popHint(HintSystem.hintType.ORC_PLUNDER);
+                }
+
+                if (orcCulture.tenet_god is H_Orcs_Fleshweaving fleshweaving && fleshweaving.status < 0)
+                {
+                    if (__instance.hp < __instance.maxHp)
+                    {
+                        __instance.hp++;
+                    }
                 }
             }
         }

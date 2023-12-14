@@ -338,6 +338,18 @@ namespace Orcs_Plus
                             if (fleshStatBonusType != null)
                             {
                                 intDataEscam.typeDict.Add("FleshStatBonusTrait", fleshStatBonusType);
+
+                                ConstructorInfo constructor = fleshStatBonusType.GetConstructor(Type.EmptyTypes);
+                                if (constructor != null)
+                                {
+                                    intDataEscam.constructorInfoDict.Add("FleshStatBonusTrait", constructor);
+                                }
+
+                                FieldInfo bonusType = fleshStatBonusType.GetField("BonusType");
+                                if (bonusType != null)
+                                {
+                                    intDataEscam.fieldInfoDict.Add("FleshStatBonusTrait_BonusType", bonusType);
+                                }
                             }
 
                             Type abominationArmy = intDataEscam.assembly.GetType("God_Flesh.UM_AbomMilitary", false);

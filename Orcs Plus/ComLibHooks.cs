@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using UnityEngine;
 
@@ -1254,9 +1255,9 @@ namespace Orcs_Plus
             switch(ua)
             {
                 case UAEN_OrcElder elder:
-                    return interceptOrcElder(elder);
+                    return interceptOrc(elder);
                 case UAEN_OrcShaman shaman:
-                    return interceptOrcShaman(shaman);
+                    return interceptOrc(shaman);
                 default:
                     break;
             }
@@ -1264,24 +1265,68 @@ namespace Orcs_Plus
             return false;
         }
 
-        private bool interceptOrcElder(UAEN_OrcElder elder)
+        private bool interceptOrc(UAEN uaen)
         {
-            if (elder.society.isGone())
+            if (uaen.society.isGone())
             {
-                elder.die(map, "Died in the wilderness", null);
+                uaen.die(map, "Died in the wilderness", null);
                 return true;
             }
             return false;
         }
 
-        private bool interceptOrcShaman(UAEN_OrcShaman shaman)
+        public override void onAgentAI_EndOfProcess(UA ua, CommunityLib.AgentAI.AIData aiData, List<CommunityLib.AgentAI.ChallengeData> validChallengeData, List<CommunityLib.AgentAI.TaskData> validTaskData, List<Unit> visibleUnits)
         {
-            if (shaman.society.isGone())
+            if (ua is UAEN_OrcUpstart || ua is UAEN_OrcElder || ua is UAEN_OrcShaman)
             {
-                shaman.die(map, "Died in the wilderness", null);
-                return true;
+                if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModData.ModIntegrationData intDataEscam))
+                {
+                    if (intDataEscam.typeDict.TryGetValue("FleshStatBonusTrait", out Type fleshStatBonusType) && intDataEscam.fieldInfoDict.TryGetValue("FleshStatBonusTrait_BonusType", out FieldInfo FI_BonusType))
+                    {
+                        Trait fleshStatBonusTrait = ua.person.traits.FirstOrDefault(t => t.GetType() == fleshStatBonusType || t.GetType().IsSubclassOf(fleshStatBonusType));
+                        if (fleshStatBonusTrait != null)
+                        {
+                            string bonusType = "Might";
+                            if (ua.task is Task_PerformChallenge challengeTask)
+                            {
+                                switch (challengeTask.challenge.getChallengeType())
+                                {
+                                    case Challenge.challengeStat.LORE:
+                                        bonusType = "Lore";
+                                        break;
+                                    case Challenge.challengeStat.INTRIGUE:
+                                        bonusType = "Intrigue";
+                                        break;
+                                    case Challenge.challengeStat.COMMAND:
+                                        bonusType = "Command";
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                            else if (ua.task is Task_GoToPerformChallenge goChallengeTask)
+                            {
+                                switch (goChallengeTask.challenge.getChallengeType())
+                                {
+                                    case Challenge.challengeStat.LORE:
+                                        bonusType = "Lore";
+                                        break;
+                                    case Challenge.challengeStat.INTRIGUE:
+                                        bonusType = "Intrigue";
+                                        break;
+                                    case Challenge.challengeStat.COMMAND:
+                                        bonusType = "Command";
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+
+                            FI_BonusType.SetValue(fleshStatBonusTrait, bonusType);
+                        }
+                    }
+                }
             }
-            return false;
         }
 
         public override HolyOrder onLocationViewFaithButton_GetHolyOrder(Location loc)
