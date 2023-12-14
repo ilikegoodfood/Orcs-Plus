@@ -41,18 +41,12 @@ namespace Orcs_Plus
 
         public override void onPlayerOpensReligionUI(HolyOrder order)
         {
-            if (ModCore.Get().godPowers1.Count > 0 || ModCore.Get().godPowers2.Count > 0)
-            {
-                ModCore.Get().updateGodPowers(order.map);
-            }
+            ModCore.Get().powers.updateOrcPowers(order.map);
         }
 
         public override void onPlayerInfluenceTenet(HolyOrder order, HolyTenet tenet)
         {
-            if (ModCore.Get().godPowers1.Count > 0 || ModCore.Get().godPowers2.Count > 0)
-            {
-                ModCore.Get().updateGodPowers(order.map);
-            }
+            ModCore.Get().powers.updateOrcPowers(order.map);
         }
 
         public override int onAgentBattle_ReceiveDamage(PopupBattleAgent popup, BattleAgents battle, UA defender, Minion minion, int dmg, int row)
@@ -106,11 +100,11 @@ namespace Orcs_Plus
                 if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < -1)
                 {
                     //Console.WriteLine("Orcs_Plus: UM is subject to Insectile Symbiosis");
-                    if (ModCore.Get().data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("VespidicSwarm", out Type vSwarmType) && vSwarmType != null)
+                    if (ModCore.Get().data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.typeDict.TryGetValue("VespidicSwarm", out Type vSwarmType))
                     {
                         Location loc = um.location;
                         SocialGroup soc = um.map.soc_dark;
-                        if (intDataCord.typeDict.TryGetValue("Swarm", out Type swarmType) && swarmType != null)
+                        if (intDataCord.typeDict.TryGetValue("Swarm", out Type swarmType))
                         {
                             if (loc.soc != null && (loc.soc.GetType() == swarmType || loc.soc.GetType().IsSubclassOf(swarmType)))
                             {
@@ -559,13 +553,11 @@ namespace Orcs_Plus
 
             if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
             {
-                if (ModCore.Get().data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null)
+                if (ModCore.Get().data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord))
                 {
-                    intDataCord.typeDict.TryGetValue("Hive", out Type hiveType);
-                    intDataCord.typeDict.TryGetValue("Doomed", out Type doomedType);
                     List<UM_Refugees> refugees = new List<UM_Refugees>();
 
-                    if (doomedType != null && hiveType != null)
+                    if (intDataCord.typeDict.TryGetValue("Doomed", out Type doomedType) && intDataCord.typeDict.TryGetValue("Hive", out Type hiveType))
                     {
                         foreach (Unit unit in um.location.units)
                         {

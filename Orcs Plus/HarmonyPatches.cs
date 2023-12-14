@@ -1367,7 +1367,7 @@ namespace Orcs_Plus
                         if (result)
                         {
                             Type dominionBanner = null;
-                            if (ModCore.Get().data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC) && intDataCCC.assembly != null)
+                            if (ModCore.Get().data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC))
                             {
                                 intDataCCC.typeDict.TryGetValue("Banner", out dominionBanner);
                             }
@@ -1396,9 +1396,9 @@ namespace Orcs_Plus
                                 return false;
                             }
 
-                            if (ModCore.Get().data.tryGetModAssembly("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.assembly != null && intDataLW.typeDict.TryGetValue("NatureCritter", out Type t))
+                            if (ModCore.Get().data.tryGetModAssembly("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.typeDict.TryGetValue("NatureCritter", out Type natureCritterType))
                             {
-                                if (t != null && target.GetType().IsSubclassOf(t))
+                                if (target.GetType().IsSubclassOf(natureCritterType))
                                 {
                                     return false;
                                 }
@@ -1523,7 +1523,7 @@ namespace Orcs_Plus
                         if (otherIsTarget)
                         {
                             Type dominionBanner = null;
-                            if (ModCore.Get().data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC) && intDataCCC.assembly != null)
+                            if (ModCore.Get().data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC))
                             {
                                 intDataCCC.typeDict.TryGetValue("Banner", out dominionBanner);
                             }
@@ -1618,9 +1618,9 @@ namespace Orcs_Plus
                                     utility += val;
                                 }
 
-                                if (ModCore.Get().data.tryGetModAssembly("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.assembly != null && intDataLW.typeDict.TryGetValue("NatureCritter", out Type t))
+                                if (ModCore.Get().data.tryGetModAssembly("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.typeDict.TryGetValue("NatureCritter", out Type natureCritterType))
                                 {
-                                    if (t != null && target.GetType().IsSubclassOf(t))
+                                    if (target.GetType().IsSubclassOf(natureCritterType))
                                     {
                                         val = -35;
                                         reasonMsgs?.Add(new ReasonMsg("Nature", val));
@@ -1751,7 +1751,7 @@ namespace Orcs_Plus
             if (orcSociety != null && !orcSociety.isGone() && orcCulture != null)
             {
                 Type dominionBanner = null;
-                if (ModCore.Get().data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC) && intDataCCC.assembly != null)
+                if (ModCore.Get().data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC))
                 {
                     intDataCCC.typeDict.TryGetValue("Banner", out dominionBanner);
                 }
@@ -2076,9 +2076,9 @@ namespace Orcs_Plus
                     return result;
                 }
 
-                if (ModCore.Get().data.tryGetModAssembly("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.assembly != null && intDataLW.typeDict.TryGetValue("WolfRun", out Type t))
+                if (ModCore.Get().data.tryGetModAssembly("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.typeDict.TryGetValue("WolfRun", out Type wolfRunType))
                 {
-                    if (t != null && l2.settlement.GetType() == t)
+                    if (l2.settlement.GetType() == wolfRunType)
                     {
                         if (l2.hex.getHabilitability() >= l2.map.opt_orcHabMult * l2.map.param.orc_habRequirement)
                         {
@@ -2747,11 +2747,11 @@ namespace Orcs_Plus
 
                 if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
                 {
-                    if (ModCore.Get().data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("God", out Type t))
+                    if (ModCore.Get().data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.typeDict.TryGetValue("God", out Type cordycepsType))
                     {
-                        if (t != null && (um.map.overmind.god.GetType() == t || um.map.overmind.god.GetType().IsSubclassOf(t)))
+                        if (um.map.overmind.god.GetType() == cordycepsType || um.map.overmind.god.GetType().IsSubclassOf(cordycepsType))
                         {
-                            FieldInfo FI_VespidicAttack = AccessTools.Field(t, "God_Insect.vespidicSwarmTarget");
+                            FieldInfo FI_VespidicAttack = AccessTools.Field(cordycepsType, "God_Insect.vespidicSwarmTarget");
                             if (FI_VespidicAttack != null)
                             {
                                 Location vespidicTarget = (Location)FI_VespidicAttack.GetValue(um.map.overmind.god);

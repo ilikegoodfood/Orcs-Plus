@@ -213,14 +213,13 @@ namespace Orcs_Plus
             {
                 if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
                 {
-                    if (ModCore.Get().data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("God", out Type t) && t != null)
+                    if (ModCore.Get().data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.typeDict.TryGetValue("God", out Type cordycepsType))
                     {
-                        if (map.overmind.god.GetType() == t || map.overmind.god.GetType().IsSubclassOf(t))
+                        if (map.overmind.god.GetType() == cordycepsType || map.overmind.god.GetType().IsSubclassOf(cordycepsType))
                         {
-                            FieldInfo FI_VespidicAttack = AccessTools.Field(t, "God_Insect.vespidSwarmTarget");
-                            if (FI_VespidicAttack != null)
+                            if (intDataCord.fieldInfoDict.TryGetValue("VespidicSwarmTarget", out FieldInfo FI_vSwarmTarget))
                             {
-                                Location vespidicTarget = (Location)FI_VespidicAttack.GetValue(map.overmind.god);
+                                Location vespidicTarget = (Location)FI_vSwarmTarget.GetValue(map.overmind.god);
                                 if (vespidicTarget != null && vespidicTarget != location)
                                 {
                                     if ((vespidicTarget.isCoastal || vespidicTarget.isOcean) && checkPath(vespidicTarget, out int dist) && dist < 3)

@@ -506,11 +506,11 @@ namespace Orcs_Plus
 
                 if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
                 {
-                    if (ModCore.Get().data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null && intDataCord.typeDict.TryGetValue("God", out Type t) && t != null)
+                    if (ModCore.Get().data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.typeDict.TryGetValue("God", out Type cordycepsType))
                     {
-                        if (map.overmind.god.GetType() == t || map.overmind.god.GetType().IsSubclassOf(t))
+                        if (map.overmind.god.GetType() == cordycepsType || map.overmind.god.GetType().IsSubclassOf(cordycepsType))
                         {
-                            FieldInfo FI_VespidicAttack = AccessTools.Field(t, "God_Insect.vespidSwarmTarget");
+                            FieldInfo FI_VespidicAttack = AccessTools.Field(cordycepsType, "God_Insect.vespidSwarmTarget");
                             if (FI_VespidicAttack != null)
                             {
                                 Location vespidicTarget = (Location)FI_VespidicAttack.GetValue(map.overmind.god);
@@ -592,15 +592,15 @@ namespace Orcs_Plus
             bool cordyceps = false;
             if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
             {
-                if (ModCore.Get().data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.assembly != null)
+                if (ModCore.Get().data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord))
                 {
                     if (um is UM_Refugees refugee)
                     {
                         if (refugee.task != null)
                         {
-                            if (intDataCord.typeDict.TryGetValue("Doomed", out Type doomedType) && doomedType != null && (refugee.task.GetType() == doomedType || refugee.task.GetType().IsSubclassOf(doomedType)))
+                            if (intDataCord.typeDict.TryGetValue("Doomed", out Type doomedType) && (refugee.task.GetType() == doomedType || refugee.task.GetType().IsSubclassOf(doomedType)))
                             {
-                                if (intDataCord.typeDict.TryGetValue("Hive", out Type hiveType) && hiveType != null)
+                                if (intDataCord.typeDict.TryGetValue("Hive", out Type hiveType))
                                 {
                                     if (um.map.locations.Any(l => l.settlement != null && (l.settlement.GetType() == hiveType || l.settlement.GetType().IsSubclassOf(hiveType))))
                                     {
@@ -610,7 +610,7 @@ namespace Orcs_Plus
                             }
                         }
                     }
-                    else if (intDataCord.typeDict.TryGetValue("VespidicSwarm", out Type vSwarmType) && vSwarmType != null && (um.GetType() == vSwarmType || um.GetType().IsSubclassOf(vSwarmType)))
+                    else if (intDataCord.typeDict.TryGetValue("VespidicSwarm", out Type vSwarmType) && (um.GetType() == vSwarmType || um.GetType().IsSubclassOf(vSwarmType)))
                     {
                         cordyceps = true;
                     }

@@ -11,8 +11,6 @@ namespace Orcs_Plus
     {
         public Ch_Orcs_BuyItem[] buyChallenges;
 
-        public List<Challenge> allChallenges;
-
         public int restockTimer = 0;
 
         public Sub_OrcTemple(Settlement set, HolyOrder order)
@@ -20,7 +18,6 @@ namespace Orcs_Plus
         {
             // Remove unwanted challenges added by parent types.
             challenges.Clear();
-            allChallenges = new List<Challenge>();
             buyChallenges = new Ch_Orcs_BuyItem[3];
 
             // Add new challenges
@@ -39,6 +36,8 @@ namespace Orcs_Plus
                 buyChallenges[i] = new Ch_Orcs_BuyItem(set.location);
                 restockTimer = 25;
             }
+
+            challenges.AddRange(buyChallenges);
         }
 
         public override string getHoverOverText()
@@ -100,11 +99,7 @@ namespace Orcs_Plus
 
         public override List<Challenge> getChallenges()
         {
-            allChallenges.Clear();
-            allChallenges.AddRange(challenges);
-            allChallenges.AddRange(buyChallenges);
-
-            return allChallenges;
+            return challenges;
         }
     }
 }

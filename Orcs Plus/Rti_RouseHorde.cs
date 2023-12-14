@@ -15,13 +15,13 @@ namespace Orcs_Plus
         public Rti_RouseHorde (Location loc, Item banner)
             : base(loc)
         {
-            Type t = null;
-            if (ModCore.Get().data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC) && intDataCCC.assembly != null)
+            Type dominionBannerType = null;
+            if (ModCore.Get().data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC))
             {
-                intDataCCC.typeDict.TryGetValue("Banner", out t);
+                intDataCCC.typeDict.TryGetValue("Banner", out dominionBannerType);
             }
 
-            if ((banner is I_HordeBanner) || (t != null && (banner.GetType() == t || banner.GetType().IsSubclassOf(t))))
+            if ((banner is I_HordeBanner) || (dominionBannerType != null && (banner.GetType() == dominionBannerType || banner.GetType().IsSubclassOf(dominionBannerType))))
             {
                 this.banner = banner;
             }

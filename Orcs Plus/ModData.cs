@@ -23,6 +23,7 @@ namespace Orcs_Plus
             public Dictionary<string, Type> typeDict;
             public Dictionary<string, MethodInfo> methodInfoDict;
             public Dictionary<string, FieldInfo> fieldInfoDict;
+            public Dictionary<string, ConstructorInfo> constructorInfoDict;
 
             public ModIntegrationData(Assembly asm)
             {
@@ -30,6 +31,7 @@ namespace Orcs_Plus
                 typeDict = new Dictionary<string, Type>();
                 methodInfoDict = new Dictionary<string, MethodInfo>();
                 fieldInfoDict = new Dictionary<string, FieldInfo>();
+                constructorInfoDict = new Dictionary<string, ConstructorInfo>();
             }
         }
 
@@ -490,10 +492,7 @@ namespace Orcs_Plus
 
         internal bool tryGetModAssembly(string key, out ModIntegrationData asm)
         {
-            bool result = modAssemblies.TryGetValue(key, out ModIntegrationData retASM);
-            asm = retASM;
-
-            return result;
+            return modAssemblies.TryGetValue(key, out asm);
         }
 
         internal void tryAddSettlementTypeForWaystation(Type t, HashSet<Type> subsettlementBlacklist = null)

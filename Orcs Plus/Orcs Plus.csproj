@@ -73,6 +73,7 @@
     <Compile Include="Ch_Orcs_FundWaystation.cs" />
     <Compile Include="Ch_Orcs_LootRemains.cs" />
     <Compile Include="Ch_Orcs_RecruitCorsair.cs" />
+    <Compile Include="H_Orcs_Fleshweaving.cs" />
     <Compile Include="Mg_Orcs_ReviveImmortal.cs" />
     <Compile Include="Curse_BrokenSpirit.cs" />
     <Compile Include="Curse_EGlory.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="Mt_DockyardBrawler.cs" />
     <Compile Include="M_OrcCorsair.cs" />
     <Compile Include="OnChallengeComplete.cs" />
+    <Compile Include="PowersFromTenets.cs" />
     <Compile Include="PrWM_CagedManticore.cs" />
     <Compile Include="Pr_Ophanim_Perfection.cs" />
     <Compile Include="Pr_Orcs_GreatConstruction.cs" />
@@ -150,6 +152,7 @@
     <Compile Include="Rt_Orcs_PirateTrade.cs" />
     <Compile Include="Rt_Orcs_ReclaimHordeBanner.cs" />
     <Compile Include="Rt_Orcs_SacrificialSite.cs" />
+    <Compile Include="Sub_Excamrak_SpawningPit.cs" />
     <Compile Include="Sub_OrcCultureCapital.cs" />
     <Compile Include="Sub_OrcTemple.cs" />
     <Compile Include="Sub_OrcWaystation.cs" />

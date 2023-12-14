@@ -37,11 +37,7 @@ namespace Orcs_Plus
 
         public override Sprite getSprite()
         {
-            if (ModCore.Get().data.tryGetModAssembly("Chandalor", out ModData.ModIntegrationData intDataChand) && intDataChand.assembly != null)
-            {
-                return EventManager.getImg("OrcsPlus.Icon_BrokenSpirit.png");
-            }
-            return map.world.iconStore.agony;
+            return EventManager.getImg("OrcsPlus.Icon_BrokenSpirit.png");
         }
 
         public override challengeStat getChallengeType()

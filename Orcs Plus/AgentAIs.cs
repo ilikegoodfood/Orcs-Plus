@@ -69,9 +69,9 @@ namespace Orcs_Plus
                 }
             }
 
-            if (ModCore.Get().data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC) && intDataCCC.assembly != null)
+            if (ModCore.Get().data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC))
             {
-                if (intDataCCC.typeDict.TryGetValue("CallHordes", out Type callHordesType) && callHordesType != null)
+                if (intDataCCC.typeDict.TryGetValue("CallHordes", out Type callHordesType))
                 {
                     AIChallenge CCC_CallHordes = new AIChallenge(callHordesType, 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden });
                     ModCore.Get().comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcUpstart), CCC_CallHordes);
@@ -81,16 +81,16 @@ namespace Orcs_Plus
                     ModCore.Get().comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcShaman), CCC_CallHordes);
                 }
 
-                if (intDataCCC.typeDict.TryGetValue("StudyCurseweaving", out Type studyMagicType) && studyMagicType != null)
+                if (intDataCCC.typeDict.TryGetValue("StudyCurseweaving", out Type studyMagicType))
                 {
                     AIChallenge CCC_StudyMagic = new AIChallenge(studyMagicType, 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden });
                     ModCore.Get().comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcShaman), CCC_StudyMagic);
                 }
             }
 
-            if (ModCore.Get().data.tryGetModAssembly("Escamrak", out ModData.ModIntegrationData intDataEscam) && intDataEscam.assembly != null)
+            if (ModCore.Get().data.tryGetModAssembly("Escamrak", out ModData.ModIntegrationData intDataEscam))
             {
-                if (intDataCCC.typeDict.TryGetValue("StudyFleshcrafting", out Type studyMagicType) && studyMagicType != null)
+                if (intDataCCC.typeDict.TryGetValue("StudyFleshcrafting", out Type studyMagicType))
                 {
                     AIChallenge Escam_StudyMagic = new AIChallenge(studyMagicType, 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden });
                     ModCore.Get().comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcUpstart), Escam_StudyMagic);

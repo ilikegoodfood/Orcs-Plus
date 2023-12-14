@@ -12,8 +12,6 @@ namespace Orcs_Plus
     {
         public Ch_Orcs_BuyItem[] buyChallenges;
 
-        public List<Challenge> allChallenges;
-
         public int restockTimer = 0;
 
         public Sub_OrcCultureCapital(Settlement set, HolyOrder_Orcs order)
@@ -21,7 +19,6 @@ namespace Orcs_Plus
         {
             // Remove unwanted challenges added by parent types.
             challenges.Clear();
-            allChallenges = new List<Challenge>();
             buyChallenges = new Ch_Orcs_BuyItem[3];
 
             // Add new challenges
@@ -41,6 +38,8 @@ namespace Orcs_Plus
                 restockTimer = 25;
             }
             buyChallenges[0].onSale = new I_HordeBanner(order.map, order.orcSociety, settlement.location);
+
+            challenges.AddRange(buyChallenges);
         }
 
         public override string getName()
@@ -105,11 +104,7 @@ namespace Orcs_Plus
 
         public override List<Challenge> getChallenges()
         {
-            allChallenges.Clear();
-            allChallenges.AddRange(challenges);
-            allChallenges.AddRange(buyChallenges);
-
-            return allChallenges;
+            return challenges;
         }
     }
 }
