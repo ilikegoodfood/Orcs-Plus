@@ -46,7 +46,7 @@ namespace Orcs_Plus
             Pr_Vinerva_Health giftHealth = (Pr_Vinerva_Health)location.properties.FirstOrDefault(pr => pr is Pr_Vinerva_Health);
             if (giftHealth != null)
             {
-                return Math.Min(2, (int)Math.Ceiling(giftHealth.charge / 25.0));
+                return Math.Max(2, (int)Math.Ceiling(giftHealth.charge / 25.0));
             }
 
             return 2;
@@ -132,7 +132,7 @@ namespace Orcs_Plus
                 }
 
                 orcCulture.vinerva_HealthDuration += 10;
-                ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Feasted of Gourd of Blood", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RecieveGift]), true);
+                ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Feasted on Gourd of Blood", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RecieveGift]), true);
                 orcCulture.orcSociety.menace += 5;
             }
         }

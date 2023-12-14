@@ -56,7 +56,6 @@ namespace Orcs_Plus
 
             if (!(settlement.location.soc is SG_Orc orcSociety) || (!ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) || !(orcCulture.tenet_god is H_Orcs_Fleshweaving fleshweaving && fleshweaving.status < -1)))
             {
-                spawnArmy();
                 settlement.subs.Remove(this);
                 return;
             }
@@ -64,6 +63,8 @@ namespace Orcs_Plus
             if (fleshStore >= maxFlesh && settlement.location.soc.isAtWar())
             {
                 spawnArmy();
+                ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Gift of flesh grew into army", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RecieveGift] / 4), true);
+
                 menace += 10;
             }
         }

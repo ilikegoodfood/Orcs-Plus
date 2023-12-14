@@ -67,6 +67,11 @@ namespace Orcs_Plus
             if (loc.settlement != null)
             {
                 loc.settlement.subs.Add(new Sub_Orcs_SpawningPit(loc.settlement));
+
+                if (loc.soc is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture))
+                {
+                    ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Recieved Gift of Flesh", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RecieveGift]), true);
+                }
             }
         }
     }
