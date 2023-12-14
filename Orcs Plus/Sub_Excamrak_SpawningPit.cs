@@ -61,15 +61,24 @@ namespace Orcs_Plus
                 {
                     if (intDataEscam.constructorInfoDict.TryGetValue("SpawningGroundArmy", out ConstructorInfo ci))
                     {
-                        UM army = (UM)ci.Invoke(new object[] { settlement.location, settlement.map.soc_dark });
-                        army.maxHp = fleshGrowth;
-                        army.hp = fleshGrowth;
-                        army.location = settlement.location;
+                        if (intDataEscam.kernel != null && intDataEscam.fieldInfoDict.TryGetValue("FleshSociety", out FieldInfo FI_fleshSociety))
+                        {
+                            SocialGroup targetSociety = (SocialGroup)FI_fleshSociety.GetValue(intDataEscam.kernel);
+                            if (targetSociety == null)
+                            {
+                                targetSociety = settlement.map.soc_dark;
+                            }
 
-                        settlement.map.units.Add(army);
-                        settlement.location.units.Add(army);
+                            UM army = (UM)ci.Invoke(new object[] { settlement.location, targetSociety });
+                            army.maxHp = fleshGrowth;
+                            army.hp = fleshGrowth;
+                            army.location = settlement.location;
 
-                        fleshGrowth = 0;
+                            settlement.map.units.Add(army);
+                            settlement.location.units.Add(army);
+
+                            fleshGrowth = 0;
+                        }
                     }
                 }
             }

@@ -195,7 +195,7 @@ namespace Orcs_Plus
                         break;
                     case "ShadowsInsectGod.Code":
                         //Console.WriteLine("OrcsPlus: Found Cordyceps");
-                        ModData.ModIntegrationData intDataCord = new ModData.ModIntegrationData(kernel.GetType().Assembly);
+                        ModData.ModIntegrationData intDataCord = new ModData.ModIntegrationData(kernel.GetType().Assembly, kernel);
                         data.addModIntegrationData("Cordyceps", intDataCord);
 
                         if (data.tryGetModIntegrationData("Cordyceps", out intDataCord))
@@ -265,7 +265,7 @@ namespace Orcs_Plus
                         }
                         break;
                     case "CovenExpansion":
-                        ModData.ModIntegrationData intDataCCC = new ModData.ModIntegrationData(kernel.GetType().Assembly);
+                        ModData.ModIntegrationData intDataCCC = new ModData.ModIntegrationData(kernel.GetType().Assembly, kernel);
                         data.addModIntegrationData("CovensCursesCurios", intDataCCC);
 
                         if (data.tryGetModIntegrationData("CovensCursesCurios", out intDataCCC))
@@ -290,7 +290,7 @@ namespace Orcs_Plus
                         }
                         break;
                     case "God_Love":
-                        ModData.ModIntegrationData intDataChand = new ModData.ModIntegrationData(kernel.GetType().Assembly);
+                        ModData.ModIntegrationData intDataChand = new ModData.ModIntegrationData(kernel.GetType().Assembly, kernel);
                         data.addModIntegrationData("Chandalor", intDataChand);
 
                         if (data.tryGetModIntegrationData("Chandalor", out intDataChand))
@@ -304,11 +304,23 @@ namespace Orcs_Plus
                         }
                         break;
                     case "God_Flesh":
-                        ModData.ModIntegrationData intDataEscam = new ModData.ModIntegrationData(kernel.GetType().Assembly);
+                        ModData.ModIntegrationData intDataEscam = new ModData.ModIntegrationData(kernel.GetType().Assembly, kernel);
                         data.addModIntegrationData("Escamrak", intDataEscam);
 
                         if (data.tryGetModIntegrationData("Escamrak", out intDataEscam))
                         {
+                            Type kernelType = intDataEscam.assembly.GetType("God_Flesh.flesh_Kernal", false);
+                            if (kernelType != null)
+                            {
+                                intDataEscam.typeDict.Add("Kernel", kernelType);
+
+                                FieldInfo FI_fleshSociety = kernelType.GetField("Society_LivingSettlements");
+                                if (FI_fleshSociety != null)
+                                {
+                                    intDataEscam.fieldInfoDict.Add("FleshSociety", FI_fleshSociety);
+                                }
+                            }
+
                             Type godType = intDataEscam.assembly.GetType("God_Flesh.God_Flesh", false);
                             if (godType != null)
                             {
@@ -372,7 +384,7 @@ namespace Orcs_Plus
                         }
                         break;
                     case "LivingCharacter":
-                        ModData.ModIntegrationData intDataLC = new ModData.ModIntegrationData(kernel.GetType().Assembly);
+                        ModData.ModIntegrationData intDataLC = new ModData.ModIntegrationData(kernel.GetType().Assembly, kernel);
                         data.addModIntegrationData("LivingCharacters", intDataLC);
 
                         if (data.tryGetModIntegrationData("LivingCharacters", out intDataLC))
@@ -385,7 +397,7 @@ namespace Orcs_Plus
                         }
                         break;
                     case "LivingWilds":
-                        ModData.ModIntegrationData intDataLW = new ModData.ModIntegrationData(kernel.GetType().Assembly);
+                        ModData.ModIntegrationData intDataLW = new ModData.ModIntegrationData(kernel.GetType().Assembly, kernel);
                         data.addModIntegrationData("LivingWilds", intDataLW);
 
                         if (data.tryGetModIntegrationData("LivingWilds", out intDataLW))
@@ -412,7 +424,7 @@ namespace Orcs_Plus
                         }
                         break;
                     case "ShadowsBloodshedGod":
-                        ModData.ModIntegrationData intDataKishi = new ModData.ModIntegrationData(kernel.GetType().Assembly);
+                        ModData.ModIntegrationData intDataKishi = new ModData.ModIntegrationData(kernel.GetType().Assembly, kernel);
                         data.addModIntegrationData("Kishi", intDataKishi);
 
                         if (data.tryGetModIntegrationData("Kishi", out intDataKishi))
@@ -435,7 +447,7 @@ namespace Orcs_Plus
                         }
                         break;
                     case "ShadowsLib":
-                        ModData.ModIntegrationData intDataIx = new ModData.ModIntegrationData(kernel.GetType().Assembly);
+                        ModData.ModIntegrationData intDataIx = new ModData.ModIntegrationData(kernel.GetType().Assembly, kernel);
                         data.addModIntegrationData("Ixthus", intDataIx);
 
                         if (data.tryGetModIntegrationData("Ixthus", out intDataIx))
@@ -456,7 +468,7 @@ namespace Orcs_Plus
                         }
                         break;
                     case "Wonderblunder_DeepOnes":
-                        ModData.ModIntegrationData intDataDOPlus = new ModData.ModIntegrationData(kernel.GetType().Assembly);
+                        ModData.ModIntegrationData intDataDOPlus = new ModData.ModIntegrationData(kernel.GetType().Assembly, kernel);
                         data.addModIntegrationData("DeepOnesPlus", intDataDOPlus);
 
                         if (data.tryGetModIntegrationData("DeepOnesPlus", out intDataDOPlus))
