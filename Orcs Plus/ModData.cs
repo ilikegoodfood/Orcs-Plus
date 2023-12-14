@@ -35,7 +35,7 @@ namespace Orcs_Plus
             }
         }
 
-        private Dictionary<string, ModIntegrationData> modAssemblies;
+        private Dictionary<string, ModIntegrationData> modIntegrationData;
 
         public Dictionary<Type, Type> godTenetTypes;
 
@@ -84,7 +84,7 @@ namespace Orcs_Plus
         public List<AIChallenge> forbiddenChallenges;
         public ModData()
         {
-            modAssemblies= new Dictionary<string, ModIntegrationData>();
+            modIntegrationData= new Dictionary<string, ModIntegrationData>();
             orcGeoMageHabitabilityBonus = new Dictionary<int, float>();
             perfectHordeNameDict = new Dictionary<string, string>();
             forbiddenChallenges = new List<AIChallenge>();
@@ -473,26 +473,26 @@ namespace Orcs_Plus
             return result;
         }
 
-        internal void addModAssembly(string key, ModIntegrationData asm)
+        internal void addModIntegrationData(string key, ModIntegrationData intData)
         {
-            if (key == "" || asm.assembly == null)
+            if (key == "" || intData.assembly == null)
             {
                 return;
             }
 
-            if (modAssemblies.ContainsKey(key) && modAssemblies[key].assembly == null)
+            if (modIntegrationData.TryGetValue(key, out ModIntegrationData data) && data.assembly == null)
             {
-                modAssemblies[key] = asm;
+                modIntegrationData[key] = intData;
             }
             else
             {
-                modAssemblies.Add(key, asm);
+                modIntegrationData.Add(key, intData);
             }
         }
 
-        internal bool tryGetModAssembly(string key, out ModIntegrationData asm)
+        internal bool tryGetModIntegrationData(string key, out ModIntegrationData intData)
         {
-            return modAssemblies.TryGetValue(key, out asm);
+            return modIntegrationData.TryGetValue(key, out intData);
         }
 
         internal void tryAddSettlementTypeForWaystation(Type t, HashSet<Type> subsettlementBlacklist = null)

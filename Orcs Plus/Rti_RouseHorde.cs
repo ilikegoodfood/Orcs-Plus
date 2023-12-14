@@ -16,7 +16,7 @@ namespace Orcs_Plus
             : base(loc)
         {
             Type dominionBannerType = null;
-            if (ModCore.Get().data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC))
+            if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC))
             {
                 intDataCCC.typeDict.TryGetValue("Banner", out dominionBannerType);
             }

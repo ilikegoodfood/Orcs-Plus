@@ -506,7 +506,7 @@ namespace Orcs_Plus
 
                 if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
                 {
-                    if (ModCore.Get().data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.typeDict.TryGetValue("God", out Type cordycepsType))
+                    if (ModCore.Get().data.tryGetModIntegrationData("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.typeDict.TryGetValue("God", out Type cordycepsType))
                     {
                         if (map.overmind.god.GetType() == cordycepsType || map.overmind.god.GetType().IsSubclassOf(cordycepsType))
                         {
@@ -592,7 +592,7 @@ namespace Orcs_Plus
             bool cordyceps = false;
             if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
             {
-                if (ModCore.Get().data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord))
+                if (ModCore.Get().data.tryGetModIntegrationData("Cordyceps", out ModData.ModIntegrationData intDataCord))
                 {
                     if (um is UM_Refugees refugee)
                     {

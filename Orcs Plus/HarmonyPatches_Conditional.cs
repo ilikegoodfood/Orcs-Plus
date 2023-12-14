@@ -28,12 +28,12 @@ namespace Orcs_Plus
                 harmony.UnpatchAll(harmonyID);
             }
 
-            if (ModCore.Get().data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC) && intDataCCC.typeDict.TryGetValue("Banner", out T_I_BarbDominion))
+            if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC) && intDataCCC.typeDict.TryGetValue("Banner", out T_I_BarbDominion))
             {
                 Patching_CovensCursesCurios();
             }
 
-            if (ModCore.Get().data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.typeDict.TryGetValue("Kernel", out T_Kernel_Cordyceps))
+            if (ModCore.Get().data.tryGetModIntegrationData("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.typeDict.TryGetValue("Kernel", out T_Kernel_Cordyceps))
             {
                 Patching_Cordyceps();
             }

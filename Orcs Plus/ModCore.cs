@@ -130,7 +130,7 @@ namespace Orcs_Plus
 
         public override void afterMapGenAfterHistorical(Map map)
         {
-            if (data.tryGetModAssembly("Ixthus", out ModData.ModIntegrationData intDataIx) && intDataIx.typeDict.TryGetValue("Tenet", out Type tenetType))
+            if (data.tryGetModIntegrationData("Ixthus", out ModData.ModIntegrationData intDataIx) && intDataIx.typeDict.TryGetValue("Tenet", out Type tenetType))
             {
                 foreach (HolyOrder_Orcs orcCulture in data.getOrcCultures(map, true))
                 {
@@ -196,9 +196,9 @@ namespace Orcs_Plus
                     case "ShadowsInsectGod.Code":
                         //Console.WriteLine("OrcsPlus: Found Cordyceps");
                         ModData.ModIntegrationData intDataCord = new ModData.ModIntegrationData(kernel.GetType().Assembly);
-                        data.addModAssembly("Cordyceps", intDataCord);
+                        data.addModIntegrationData("Cordyceps", intDataCord);
 
-                        if (data.tryGetModAssembly("Cordyceps", out intDataCord))
+                        if (data.tryGetModIntegrationData("Cordyceps", out intDataCord))
                         {
                             Type kernelType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.ModCore", false);
                             if (kernelType != null )
@@ -266,9 +266,9 @@ namespace Orcs_Plus
                         break;
                     case "CovenExpansion":
                         ModData.ModIntegrationData intDataCCC = new ModData.ModIntegrationData(kernel.GetType().Assembly);
-                        data.addModAssembly("CovensCursesCurios", intDataCCC);
+                        data.addModIntegrationData("CovensCursesCurios", intDataCCC);
 
-                        if (data.tryGetModAssembly("CovensCursesCurios", out intDataCCC))
+                        if (data.tryGetModIntegrationData("CovensCursesCurios", out intDataCCC))
                         {
                             Type dominionBannerType = intDataCCC.assembly.GetType("CovenExpansion.I_BarbDominion", false);
                             if (dominionBannerType != null)
@@ -291,9 +291,9 @@ namespace Orcs_Plus
                         break;
                     case "God_Love":
                         ModData.ModIntegrationData intDataChand = new ModData.ModIntegrationData(kernel.GetType().Assembly);
-                        data.addModAssembly("Chandalor", intDataChand);
+                        data.addModIntegrationData("Chandalor", intDataChand);
 
-                        if (data.tryGetModAssembly("Chandalor", out intDataChand))
+                        if (data.tryGetModIntegrationData("Chandalor", out intDataChand))
                         {
                             Type godType = intDataChand.assembly.GetType("God_Love.God_Curse", false);
                             if (godType != null)
@@ -305,9 +305,9 @@ namespace Orcs_Plus
                         break;
                     case "God_Flesh":
                         ModData.ModIntegrationData intDataEscam = new ModData.ModIntegrationData(kernel.GetType().Assembly);
-                        data.addModAssembly("Escamrak", intDataEscam);
+                        data.addModIntegrationData("Escamrak", intDataEscam);
 
-                        if (data.tryGetModAssembly("Escamrak", out intDataEscam))
+                        if (data.tryGetModIntegrationData("Escamrak", out intDataEscam))
                         {
                             Type godType = intDataEscam.assembly.GetType("God_Flesh.God_Flesh", false);
                             if (godType != null)
@@ -373,9 +373,9 @@ namespace Orcs_Plus
                         break;
                     case "LivingCharacter":
                         ModData.ModIntegrationData intDataLC = new ModData.ModIntegrationData(kernel.GetType().Assembly);
-                        data.addModAssembly("LivingCharacters", intDataLC);
+                        data.addModIntegrationData("LivingCharacters", intDataLC);
 
-                        if (data.tryGetModAssembly("LivingCharacters", out intDataLC))
+                        if (data.tryGetModIntegrationData("LivingCharacters", out intDataLC))
                         {
                             Type vampireNobeType = intDataLC.assembly.GetType("LivingCharacters.UAEN_Chars_VampireNoble", false);
                             if (vampireNobeType != null)
@@ -386,9 +386,9 @@ namespace Orcs_Plus
                         break;
                     case "LivingWilds":
                         ModData.ModIntegrationData intDataLW = new ModData.ModIntegrationData(kernel.GetType().Assembly);
-                        data.addModAssembly("LivingWilds", intDataLW);
+                        data.addModIntegrationData("LivingWilds", intDataLW);
 
-                        if (data.tryGetModAssembly("LivingWilds", out intDataLW))
+                        if (data.tryGetModIntegrationData("LivingWilds", out intDataLW))
                         {
                             Type natureCritterType = intDataLW.assembly.GetType("LivingWilds.UAEN_Nature_Critter", false);
                             if (natureCritterType != null)
@@ -413,9 +413,9 @@ namespace Orcs_Plus
                         break;
                     case "ShadowsBloodshedGod":
                         ModData.ModIntegrationData intDataKishi = new ModData.ModIntegrationData(kernel.GetType().Assembly);
-                        data.addModAssembly("Kishi", intDataKishi);
+                        data.addModIntegrationData("Kishi", intDataKishi);
 
-                        if (data.tryGetModAssembly("Kishi", out intDataKishi))
+                        if (data.tryGetModIntegrationData("Kishi", out intDataKishi))
                         {
                             Type godType = intDataKishi.assembly.GetType("ShadowsBloodshedGod.God_Bloodshed", false);
                             if (godType != null)
@@ -436,9 +436,9 @@ namespace Orcs_Plus
                         break;
                     case "ShadowsLib":
                         ModData.ModIntegrationData intDataIx = new ModData.ModIntegrationData(kernel.GetType().Assembly);
-                        data.addModAssembly("Ixthus", intDataIx);
+                        data.addModIntegrationData("Ixthus", intDataIx);
 
-                        if (data.tryGetModAssembly("Ixthus", out intDataIx))
+                        if (data.tryGetModIntegrationData("Ixthus", out intDataIx))
                         {
                             Type godType = intDataIx.assembly.GetType("ShadowsLib.God_KingofCups", false);
                             if (godType != null)
@@ -457,9 +457,9 @@ namespace Orcs_Plus
                         break;
                     case "Wonderblunder_DeepOnes":
                         ModData.ModIntegrationData intDataDOPlus = new ModData.ModIntegrationData(kernel.GetType().Assembly);
-                        data.addModAssembly("DeepOnesPlus", intDataDOPlus);
+                        data.addModIntegrationData("DeepOnesPlus", intDataDOPlus);
 
-                        if (data.tryGetModAssembly("DeepOnesPlus", out intDataDOPlus))
+                        if (data.tryGetModIntegrationData("DeepOnesPlus", out intDataDOPlus))
                         {
                             Type kernelType = intDataDOPlus.assembly.GetType("Wonderblunder_DeepOnes.Modcore", false);
                             if (kernelType != null)
@@ -1337,7 +1337,7 @@ namespace Orcs_Plus
             if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < -1)
             {
                 //Console.WriteLine("Orcs_Plus: Orc agent is subject to Insectile Symbiosis");
-                if (data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.typeDict.TryGetValue("Drone", out Type droneType) && intDataCord.typeDict.TryGetValue("Swarm", out Type swarmType) && intDataCord.typeDict.TryGetValue("Hive", out Type hiveType))
+                if (data.tryGetModIntegrationData("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.typeDict.TryGetValue("Drone", out Type droneType) && intDataCord.typeDict.TryGetValue("Swarm", out Type swarmType) && intDataCord.typeDict.TryGetValue("Hive", out Type hiveType))
                 {
                     if (uaPerson.map.locations.Any(l => l.settlement != null && (l.settlement.GetType() == hiveType || l.settlement.GetType().IsSubclassOf(hiveType))))
                     {
@@ -1418,7 +1418,7 @@ namespace Orcs_Plus
                     {
                         if (orcCulture.tenet_god is H_Orcs_BloodOffering blood && blood.status < 0)
                         {
-                            if (data.tryGetModAssembly("Kishi", out ModData.ModIntegrationData intDataKishi) && intDataKishi.methodInfoDict.TryGetValue("addBloodstain", out MethodInfo MI_AddBloodstain))
+                            if (data.tryGetModIntegrationData("Kishi", out ModData.ModIntegrationData intDataKishi) && intDataKishi.methodInfoDict.TryGetValue("addBloodstain", out MethodInfo MI_AddBloodstain))
                             {
                                 object[] parameters = new object[] { pKiller, Math.Abs(blood.status) };
                                 MI_AddBloodstain.Invoke(null, parameters);
@@ -1442,7 +1442,7 @@ namespace Orcs_Plus
                         if (killerOrcCulture != null && killerOrcCulture.tenet_god is H_Orcs_BloodOffering blood && blood.status < 0 && person.hasSoul)
                         {
                             int gainAmount = Math.Abs(blood.status) - 1;
-                            if (gainAmount > 0 && data.tryGetModAssembly("Kishi", out ModData.ModIntegrationData intDataKishi) && intDataKishi.methodInfoDict.TryGetValue("addBloodstain", out MethodInfo MI_AddBloodstain))
+                            if (gainAmount > 0 && data.tryGetModIntegrationData("Kishi", out ModData.ModIntegrationData intDataKishi) && intDataKishi.methodInfoDict.TryGetValue("addBloodstain", out MethodInfo MI_AddBloodstain))
                             {
                                 object[] parameters = new object[] { pKiller, gainAmount };
                                 MI_AddBloodstain.Invoke(null, parameters);
@@ -1482,7 +1482,7 @@ namespace Orcs_Plus
 
             if (uPerson != null)
             {
-                if (data.tryGetModAssembly("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.typeDict.TryGetValue("NatureCritter", out Type natureType))
+                if (data.tryGetModIntegrationData("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.typeDict.TryGetValue("NatureCritter", out Type natureType))
                 {
                     if (uPerson.GetType() == natureType || uPerson.GetType().IsSubclassOf(natureType))
                     {
@@ -2114,7 +2114,7 @@ namespace Orcs_Plus
                 return true;
             }
 
-            if (data.tryGetModAssembly("LivingCharacters", out ModData.ModIntegrationData intDataLC) && intDataLC.typeDict.TryGetValue("Vampire", out Type vampireNobleType))
+            if (data.tryGetModIntegrationData("LivingCharacters", out ModData.ModIntegrationData intDataLC) && intDataLC.typeDict.TryGetValue("Vampire", out Type vampireNobleType))
             {
                 if (ua.GetType() == vampireNobleType || ua.GetType().IsSubclassOf(vampireNobleType))
                 {
@@ -2234,7 +2234,7 @@ namespace Orcs_Plus
                     }
 
                     ModData.ModIntegrationData intDataEscam;
-                    if (data.tryGetModAssembly("Escamrak", out intDataEscam))
+                    if (data.tryGetModIntegrationData("Escamrak", out intDataEscam))
                     {
                         if (intDataEscam.typeDict.TryGetValue("CalledFleshcrafters", out Type calledFlescraftersType))
                         {
@@ -2306,7 +2306,7 @@ namespace Orcs_Plus
         {
             bool cordyceps = false;
             
-            if (data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord))
+            if (data.tryGetModIntegrationData("Cordyceps", out ModData.ModIntegrationData intDataCord))
             {
                 if (target is UM_Refugees refugee)
                 {

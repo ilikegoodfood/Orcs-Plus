@@ -111,7 +111,7 @@ namespace Orcs_Plus
             if (orcSociety != null && !orcSociety.isGone() && orcCulture != null)
             {
                 Type dominionBanner = null;
-                if (ModCore.Get().data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC))
+                if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC))
                 {
                     intDataCCC.typeDict.TryGetValue("Banner", out dominionBanner);
                 }
@@ -270,7 +270,7 @@ namespace Orcs_Plus
                         if (otherIsTarget)
                         {
                             Type dominionBanner = null;
-                            if (ModCore.Get().data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC))
+                            if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC))
                             {
                                 intDataCCC.typeDict.TryGetValue("Banner", out dominionBanner);
                             }
@@ -349,7 +349,7 @@ namespace Orcs_Plus
                                     utility += val;
                                 }
 
-                                if (ModCore.Get().data.tryGetModAssembly("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.typeDict.TryGetValue("NatureCritter", out Type natureCritterType))
+                                if (ModCore.Get().data.tryGetModIntegrationData("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.typeDict.TryGetValue("NatureCritter", out Type natureCritterType))
                                 {
                                     if (target.GetType().IsSubclassOf(natureCritterType))
                                     {
@@ -522,7 +522,7 @@ namespace Orcs_Plus
                             if (otherIsTarget)
                             {
                                 Type dominionBanner = null;
-                                if (ModCore.Get().data.tryGetModAssembly("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC))
+                                if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC))
                                 {
                                     intDataCCC.typeDict.TryGetValue("Banner", out dominionBanner);
                                 }
@@ -613,7 +613,7 @@ namespace Orcs_Plus
                                         utility += val;
                                     }
 
-                                    if (ModCore.Get().data.tryGetModAssembly("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.typeDict.TryGetValue("NatureCritter", out Type natureCritterType))
+                                    if (ModCore.Get().data.tryGetModIntegrationData("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.typeDict.TryGetValue("NatureCritter", out Type natureCritterType))
                                     {
                                         if (target.GetType().IsSubclassOf(natureCritterType))
                                         {

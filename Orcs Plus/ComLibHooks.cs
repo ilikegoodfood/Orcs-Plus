@@ -100,7 +100,7 @@ namespace Orcs_Plus
                 if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < -1)
                 {
                     //Console.WriteLine("Orcs_Plus: UM is subject to Insectile Symbiosis");
-                    if (ModCore.Get().data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.typeDict.TryGetValue("VespidicSwarm", out Type vSwarmType))
+                    if (ModCore.Get().data.tryGetModIntegrationData("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.typeDict.TryGetValue("VespidicSwarm", out Type vSwarmType))
                     {
                         Location loc = um.location;
                         SocialGroup soc = um.map.soc_dark;
@@ -553,7 +553,7 @@ namespace Orcs_Plus
 
             if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
             {
-                if (ModCore.Get().data.tryGetModAssembly("Cordyceps", out ModData.ModIntegrationData intDataCord))
+                if (ModCore.Get().data.tryGetModIntegrationData("Cordyceps", out ModData.ModIntegrationData intDataCord))
                 {
                     List<UM_Refugees> refugees = new List<UM_Refugees>();
 
