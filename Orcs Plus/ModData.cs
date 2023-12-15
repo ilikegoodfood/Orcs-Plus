@@ -458,12 +458,12 @@ namespace Orcs_Plus
 
         internal void addModIntegrationData(string key, ModIntegrationData intData)
         {
-            if (key == "" || intData.assembly == null)
+            if (key == "" || intData == null || intData.assembly == null)
             {
                 return;
             }
 
-            if (modIntegrationData.TryGetValue(key, out ModIntegrationData data) && data.assembly == null)
+            if (modIntegrationData.TryGetValue(key, out ModIntegrationData data) && (data == null || data.assembly == null))
             {
                 modIntegrationData[key] = intData;
             }
