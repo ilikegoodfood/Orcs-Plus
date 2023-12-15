@@ -130,7 +130,7 @@ namespace Orcs_Plus
 
         public override void afterMapGenAfterHistorical(Map map)
         {
-            if (data.tryGetModIntegrationData("Ixthus", out ModData.ModIntegrationData intDataIx) && intDataIx.typeDict.TryGetValue("Tenet", out Type tenetType))
+            if (data.tryGetModIntegrationData("Ixthus", out ModIntegrationData intDataIx) && intDataIx.typeDict.TryGetValue("Tenet", out Type tenetType))
             {
                 foreach (HolyOrder_Orcs orcCulture in data.getOrcCultures(map, true))
                 {
@@ -194,8 +194,8 @@ namespace Orcs_Plus
                         agentAI = new AgentAIs(map);
                         break;
                     case "ShadowsInsectGod.Code":
-                        //Console.WriteLine("OrcsPlus: Found Cordyceps");
-                        ModData.ModIntegrationData intDataCord = new ModData.ModIntegrationData(kernel.GetType().Assembly, kernel);
+                        Console.WriteLine("OrcsPlus: Cordyceps is Enabled");
+                        ModIntegrationData intDataCord = new ModIntegrationData(kernel.GetType().Assembly, kernel);
                         data.addModIntegrationData("Cordyceps", intDataCord);
 
                         if (data.tryGetModIntegrationData("Cordyceps", out intDataCord))
@@ -205,6 +205,10 @@ namespace Orcs_Plus
                             {
                                 intDataCord.typeDict.Add("Kernel", kernelType);
                             }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Cordyceps kernel Type (ShadowsInsectGod.Code.ModCore)");
+                            }
 
                             Type godType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.God_Insect", false);
                             if (godType != null)
@@ -212,11 +216,19 @@ namespace Orcs_Plus
                                 intDataCord.typeDict.Add("God", godType);
                                 registerGodTenet(godType, typeof(H_Orcs_InsectileSymbiosis));
 
-                                FieldInfo vSwarmTarget = AccessTools.Field(godType, "God_Insect.vespidSwarmTarget");
+                                FieldInfo vSwarmTarget = godType.GetField("vespidSwarmTarget");
                                 if (vSwarmTarget != null)
                                 {
                                     intDataCord.fieldInfoDict.Add("VespidicSwarmTarget", vSwarmTarget);
                                 }
+                                else
+                                {
+                                    Console.WriteLine("OrcsPlus: Failed to get Cordyceps VespidiciSwarmTarget field from Cordyceps god Type (ShadowsInsectGod.Code.God_Insect.vespidSwarmTarget)");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Cordyceps god Type (ShadowsInsectGod.Code.God_Insect)");
                             }
 
                             Type doomedType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.Task_Doomed", false);
@@ -224,11 +236,19 @@ namespace Orcs_Plus
                             {
                                 intDataCord.typeDict.Add("Doomed", doomedType);
 
-                                FieldInfo FI_Target = doomedType.GetField("target", BindingFlags.Public | BindingFlags.Instance);
+                                FieldInfo FI_Target = doomedType.GetField("target");
                                 if (FI_Target != null)
                                 {
                                     intDataCord.fieldInfoDict.Add("DoomedTarget", FI_Target);
                                 }
+                                else
+                                {
+                                    Console.WriteLine("OrcsPlus: Failed to get Doomed target from Doom task Type (ShadowsInsectGod.Code.Task_Doomed.target)");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Doomed task Type (ShadowsInsectGod.Code.Task_Doomed)");
                             }
 
                             Type droneType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.UAEN_Drone", false);
@@ -237,11 +257,19 @@ namespace Orcs_Plus
                                 //Console.WriteLine("OrcsPlus: Got Drone Type");
                                 intDataCord.typeDict.Add("Drone", droneType);
                             }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Drone agent Type (ShadowsInsectGod.Code.UAEN_Drone)");
+                            }
 
-                            Type haematophageType = intDataCord.assembly.GetType("ShadowsInsectGod.UAEN_Haematophage", false);
+                            Type haematophageType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.UAEN_Haematophage", false);
                             if (haematophageType != null)
                             {
                                 intDataCord.typeDict.Add("Haematophage", haematophageType);
+                            }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Haematophage agent Type (ShadowsInsectGod.Code.UAEN_Haematophage)");
                             }
 
                             Type vespidiciSwarmType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.UM_Vespidic_Swarm", false);
@@ -249,11 +277,19 @@ namespace Orcs_Plus
                             {
                                 intDataCord.typeDict.Add("VespidicSwarm", vespidiciSwarmType);
                             }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Vespidic Swarm army Type (ShadowsInsectGod.Code.UM_Vespidic_Swarm)");
+                            }
 
                             Type hiveType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.Set_Hive", false);
                             if (hiveType != null)
                             {
                                 intDataCord.typeDict.Add("Hive", hiveType);
+                            }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Hive settlement Type (ShadowsInsectGod.Code.Set_Hive)");
                             }
 
                             Type swarmType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.SG_Swarm", false);
@@ -262,10 +298,15 @@ namespace Orcs_Plus
                                 //Console.WriteLine("OrcsPlus: Got Swarm Type");
                                 intDataCord.typeDict.Add("Swarm", swarmType);
                             }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Swarm social group Type (ShadowsInsectGod.Code.SG_Swarm)");
+                            }
                         }
                         break;
                     case "CovenExpansion":
-                        ModData.ModIntegrationData intDataCCC = new ModData.ModIntegrationData(kernel.GetType().Assembly, kernel);
+                        Console.WriteLine("OrcsPlus: Covens, Curses, and Curios is Enabled");
+                        ModIntegrationData intDataCCC = new ModIntegrationData(kernel.GetType().Assembly, kernel);
                         data.addModIntegrationData("CovensCursesCurios", intDataCCC);
 
                         if (data.tryGetModIntegrationData("CovensCursesCurios", out intDataCCC))
@@ -275,11 +316,19 @@ namespace Orcs_Plus
                             {
                                 intDataCCC.typeDict.Add("Banner", dominionBannerType);
                             }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Dominion Banner item Type (CovenExpansion.I_BarbDominion)");
+                            }
 
                             Type callHordesType = intDataCCC.assembly.GetType("CovenExpansion.Mg_callHordes", false);
                             if (callHordesType != null)
                             {
                                 intDataCCC.typeDict.Add("CallHordes", callHordesType);
+                            }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Call Hordes ritual Type (CovenExpansion.Mg_callHordes)");
                             }
 
                             Type studyMagicType = intDataCCC.assembly.GetType("CovenExpansion.Rt_studyCurseweaving", false);
@@ -287,10 +336,15 @@ namespace Orcs_Plus
                             {
                                 intDataCCC.typeDict.Add("StudyCurseweaving", studyMagicType);
                             }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Study Curseweaving ritual Type (CovenExpansion.Rt_studyCurseweaving)");
+                            }
                         }
                         break;
                     case "God_Love":
-                        ModData.ModIntegrationData intDataChand = new ModData.ModIntegrationData(kernel.GetType().Assembly, kernel);
+                        Console.WriteLine("OrcsPlus: Chandalor is Enabled");
+                        ModIntegrationData intDataChand = new ModIntegrationData(kernel.GetType().Assembly, kernel);
                         data.addModIntegrationData("Chandalor", intDataChand);
 
                         if (data.tryGetModIntegrationData("Chandalor", out intDataChand))
@@ -301,15 +355,20 @@ namespace Orcs_Plus
                                 intDataChand.typeDict.Add("Chandalor", godType);
                                 registerGodTenet(godType, typeof(H_Orcs_Curseweaving));
                             }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Chandalor god Type (God_Love.God_Curse)");
+                            }
                         }
                         break;
                     case "God_Flesh":
-                        ModData.ModIntegrationData intDataEscam = new ModData.ModIntegrationData(kernel.GetType().Assembly, kernel);
+                        Console.WriteLine("OrcsPlus: Escamrak is Enabled");
+                        ModIntegrationData intDataEscam = new ModIntegrationData(kernel.GetType().Assembly, kernel);
                         data.addModIntegrationData("Escamrak", intDataEscam);
 
                         if (data.tryGetModIntegrationData("Escamrak", out intDataEscam))
                         {
-                            Type kernelType = intDataEscam.assembly.GetType("God_Flesh.flesh_Kernal", false);
+                            Type kernelType = intDataEscam.assembly.GetType("God_Flesh.FleshGod_Kernal", false);
                             if (kernelType != null)
                             {
                                 intDataEscam.typeDict.Add("Kernel", kernelType);
@@ -319,6 +378,14 @@ namespace Orcs_Plus
                                 {
                                     intDataEscam.fieldInfoDict.Add("FleshSociety", FI_fleshSociety);
                                 }
+                                else
+                                {
+                                    Console.WriteLine("OrcsPlus: Failed to get Living settlement society Field from kernel Type (God_Flesh.FleshGod_Kernal.Society_LivingSettlements)");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get kernel Type (God_Flesh.FleshGod_Kernal)");
                             }
 
                             Type godType = intDataEscam.assembly.GetType("God_Flesh.God_Flesh", false);
@@ -327,11 +394,19 @@ namespace Orcs_Plus
                                 intDataEscam.typeDict.Add("Escamrak", godType);
                                 registerGodTenet(godType, typeof(H_Orcs_Fleshweaving));
                             }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Escamrak god Type (God_Flesh.God_Flesh)");
+                            }
 
                             Type studyMagicType = intDataEscam.assembly.GetType("God_Flesh.Rt_StudyFlesh", false);
                             if (studyMagicType != null)
                             {
                                 intDataEscam.typeDict.Add("StudyFleshcrafting", studyMagicType);
+                            }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Study Fleshcrafting ritual Type (God_Flesh.Rt_StudyFlesh)");
                             }
 
                             Type fleshStatBonusType = intDataEscam.assembly.GetType("God_Flesh.T_Flesh_StatBonus", false);
@@ -344,12 +419,24 @@ namespace Orcs_Plus
                                 {
                                     intDataEscam.constructorInfoDict.Add("FleshStatBonusTrait", constructor);
                                 }
+                                else
+                                {
+                                    Console.WriteLine("OrcsPlus: Failed to get default Constructor for Fleshcrafting stat bonus trait Type (God_Flesh.T_Flesh_StatBonus)");
+                                }
 
                                 FieldInfo bonusType = fleshStatBonusType.GetField("BonusType");
                                 if (bonusType != null)
                                 {
                                     intDataEscam.fieldInfoDict.Add("FleshStatBonusTrait_BonusType", bonusType);
                                 }
+                                else
+                                {
+                                    Console.WriteLine("OrcsPlus: Failed to get Bonus Type Field from Fleshcrafting stat bonus trait Type (God_Flesh.T_Flesh_StatBonus.BonusType)");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Fleshcrafting stat bonus trait Type (God_Flesh.T_Flesh_StatBonus)");
                             }
 
                             Type abominationArmy = intDataEscam.assembly.GetType("God_Flesh.UM_AbomMilitary", false);
@@ -357,11 +444,19 @@ namespace Orcs_Plus
                             {
                                 intDataEscam.typeDict.Add("AbominationArmy", abominationArmy);
                             }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Abominatiuon army Type (God_Flesh.UM_AbomMilitary)");
+                            }
 
                             Type calledFleshcraftersType = intDataEscam.assembly.GetType("God_Flesh.UM_CalledFleshcrafters", false);
                             if (calledFleshcraftersType != null)
                             {
                                 intDataEscam.typeDict.Add("CalledFleshcrafters", calledFleshcraftersType);
+                            }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Called Fleshcrafters army Type (God_Flesh.UM_CalledFleshcrafters)");
                             }
 
                             Type escamrakArmyType = intDataEscam.assembly.GetType("God_Flesh.UM_Escamrak", false);
@@ -369,17 +464,29 @@ namespace Orcs_Plus
                             {
                                 intDataEscam.typeDict.Add("EscamrakArmy", escamrakArmyType);
                             }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Escamrak army Type (God_Flesh.UM_Escamrak)");
+                            }
 
                             Type fleshArmyType = intDataEscam.assembly.GetType("God_Flesh.UM_FleshArmy", false);
                             if (fleshArmyType != null)
                             {
                                 intDataEscam.typeDict.Add("FleshArmy", fleshArmyType);
 
-                                FieldInfo isBeserk = fleshArmyType.GetField("isBeserk");
+                                FieldInfo isBeserk = fleshArmyType.GetField("Is_Berserk");
                                 if (isBeserk != null)
                                 {
                                     intDataEscam.fieldInfoDict.Add("FleshArmyIsBeserk", isBeserk);
                                 }
+                                else
+                                {
+                                    Console.WriteLine("OrcsPlus: Failed to get isBeserk Field from Escamrak army Type (God_Flesh.UM_FleshArmy.Is_Berserk)");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Flesh Army army Type (God_Flesh.UM_FleshArmy)");
                             }
 
                             Type spawningArmyType = intDataEscam.assembly.GetType("God_Flesh.UM_SpawningGrounds", false);
@@ -392,11 +499,20 @@ namespace Orcs_Plus
                                 {
                                     intDataEscam.constructorInfoDict.Add("SpawningGroundArmy", constructor);
                                 }
+                                else
+                                {
+                                    Console.WriteLine("OrcsPlus: Failed to get Constructor for Flesh Army army Type (God_Flesh.UM_SpawningGrounds)");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Maddened Spawn army Type (God_Flesh.UM_SpawningGrounds)");
                             }
                         }
                         break;
                     case "LivingCharacter":
-                        ModData.ModIntegrationData intDataLC = new ModData.ModIntegrationData(kernel.GetType().Assembly, kernel);
+                        Console.WriteLine("OrcsPlus: Living Characters is Enabled");
+                        ModIntegrationData intDataLC = new ModIntegrationData(kernel.GetType().Assembly, kernel);
                         data.addModIntegrationData("LivingCharacters", intDataLC);
 
                         if (data.tryGetModIntegrationData("LivingCharacters", out intDataLC))
@@ -406,10 +522,15 @@ namespace Orcs_Plus
                             {
                                 intDataLC.typeDict.Add("Vampire", vampireNobeType);
                             }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Vampire noble agent Type (LivingCharacters.UAEN_Chars_VampireNoble)");
+                            }
                         }
                         break;
                     case "LivingWilds":
-                        ModData.ModIntegrationData intDataLW = new ModData.ModIntegrationData(kernel.GetType().Assembly, kernel);
+                        Console.WriteLine("OrcsPlus: Living Wilds is Enabled");
+                        ModIntegrationData intDataLW = new ModIntegrationData(kernel.GetType().Assembly, kernel);
                         data.addModIntegrationData("LivingWilds", intDataLW);
 
                         if (data.tryGetModIntegrationData("LivingWilds", out intDataLW))
@@ -419,12 +540,20 @@ namespace Orcs_Plus
                             {
                                 intDataLW.typeDict.Add("NatureCritter", natureCritterType);
                             }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Nature critter agent Type (LivingWilds.UAEN_Nature_Critter)");
+                            }
 
                             Type natureSanctuaryType = intDataLW.assembly.GetType("LivingWilds.Set_Nature_NatureSanctuary", false);
                             if (natureSanctuaryType != null)
                             {
                                 intDataLW.typeDict.Add("NatureSanctuary", natureSanctuaryType);
                                 comLib.registerSettlementTypeForOrcExpansion(natureSanctuaryType);
+                            }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Nature sanctuary settlement Type (LivingWilds.Set_Nature_NatureSanctuary)");
                             }
 
                             Type wolfRunType = intDataLW.assembly.GetType("LivingWilds.Set_Nature_WolfRun", false);
@@ -433,10 +562,15 @@ namespace Orcs_Plus
                                 intDataLW.typeDict.Add("WolfRun", wolfRunType);
                                 data.tryAddSettlementTypeForWaystation(wolfRunType);
                             }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Wolf run settlement Type (LivingWilds.Set_Nature_WolfRun)");
+                            }
                         }
                         break;
                     case "ShadowsBloodshedGod":
-                        ModData.ModIntegrationData intDataKishi = new ModData.ModIntegrationData(kernel.GetType().Assembly, kernel);
+                        Console.WriteLine("OrcsPlus: Kishi is Enabled");
+                        ModIntegrationData intDataKishi = new ModIntegrationData(kernel.GetType().Assembly, kernel);
                         data.addModIntegrationData("Kishi", intDataKishi);
 
                         if (data.tryGetModIntegrationData("Kishi", out intDataKishi))
@@ -448,18 +582,35 @@ namespace Orcs_Plus
 
                                 registerGodTenet(godType, typeof(H_Orcs_BloodOffering));
                             }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Kishi god Type (ShadowsBloodshedGod.God_Bloodshed)");
+                            }
 
                             Type traitType = intDataKishi.assembly.GetType("ShadowsBloodshedGod.T_Bloodstain");
                             if (traitType != null)
                             {
                                 intDataKishi.typeDict.Add("Bloodstain", traitType);
 
-                                intDataKishi.methodInfoDict.Add("addBloodstain", AccessTools.Method(traitType, "addBloodstain", new Type[] { typeof(Person), typeof(int) }));
+                                MethodInfo addBloodstain = traitType.GetMethod("addBloodstain", new Type[] { typeof(Person), typeof(int) });
+                                if (addBloodstain != null)
+                                {
+                                    intDataKishi.methodInfoDict.Add("addBloodstain", addBloodstain);
+                                }
+                                else
+                                {
+                                    Console.WriteLine("OrcsPlus: Failed to get addBloodstain static Method from Bloodstain trait Type (ShadowsBloodshedGod.T_Bloodstain.addBloodstain)");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Bloodstain trait Type (ShadowsBloodshedGod.T_Bloodstain)");
                             }
                         }
                         break;
                     case "ShadowsLib":
-                        ModData.ModIntegrationData intDataIx = new ModData.ModIntegrationData(kernel.GetType().Assembly, kernel);
+                        Console.WriteLine("OrcsPlus: Ixthus is Enabled");
+                        ModIntegrationData intDataIx = new ModIntegrationData(kernel.GetType().Assembly, kernel);
                         data.addModIntegrationData("Ixthus", intDataIx);
 
                         if (data.tryGetModIntegrationData("Ixthus", out intDataIx))
@@ -471,16 +622,25 @@ namespace Orcs_Plus
 
                                 registerGodTenet(godType, typeof(H_Orcs_DeathMastery));
                             }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Ixthus god Type (ShadowsLib.God_KingofCups)");
+                            }
 
                             Type tenetType = intDataIx.assembly.GetType("ShadowsLib.H_expeditionPatrons", false);
                             if (tenetType != null)
                             {
                                 intDataIx.typeDict.Add("Tenet", tenetType);
                             }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Expedition patrons tenet Type (ShadowsLib.H_expeditionPatrons)");
+                            }
                         }
                         break;
                     case "Wonderblunder_DeepOnes":
-                        ModData.ModIntegrationData intDataDOPlus = new ModData.ModIntegrationData(kernel.GetType().Assembly, kernel);
+                        Console.WriteLine("OrcsPlus: DeepOnesPlus is Enabled");
+                        ModIntegrationData intDataDOPlus = new ModIntegrationData(kernel.GetType().Assembly, kernel);
                         data.addModIntegrationData("DeepOnesPlus", intDataDOPlus);
 
                         if (data.tryGetModIntegrationData("DeepOnesPlus", out intDataDOPlus))
@@ -490,7 +650,19 @@ namespace Orcs_Plus
                             {
                                 intDataDOPlus.typeDict.Add("Kernel", kernelType);
 
-                                intDataDOPlus.methodInfoDict.Add("getAbyssalItem", AccessTools.Method(kernelType, "getItemFromAbyssalPool", new Type[] { typeof(Map), typeof(UA) }));
+                                MethodInfo getAbyssalItem = AccessTools.Method(kernelType, "getItemFromAbyssalPool", new Type[] { typeof(Map), typeof(UA) });
+                                if (getAbyssalItem != null)
+                                {
+                                    intDataDOPlus.methodInfoDict.Add("getAbyssalItem", getAbyssalItem);
+                                }
+                                else
+                                {
+                                    Console.WriteLine("OrcsPlus: Failed to get getAbyssalItem Method from kernel Type (Wonderblunder_DeepOnes.Modcore.getAbyssalItem)");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get kernel Type (Wonderblunder_DeepOnes.Modcore)");
                             }
                         }
                         break;
@@ -1361,7 +1533,7 @@ namespace Orcs_Plus
             if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < -1)
             {
                 //Console.WriteLine("Orcs_Plus: Orc agent is subject to Insectile Symbiosis");
-                if (data.tryGetModIntegrationData("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.typeDict.TryGetValue("Drone", out Type droneType) && intDataCord.typeDict.TryGetValue("Swarm", out Type swarmType) && intDataCord.typeDict.TryGetValue("Hive", out Type hiveType))
+                if (data.tryGetModIntegrationData("Cordyceps", out ModIntegrationData intDataCord) && intDataCord.typeDict.TryGetValue("Drone", out Type droneType) && intDataCord.typeDict.TryGetValue("Swarm", out Type swarmType) && intDataCord.typeDict.TryGetValue("Hive", out Type hiveType))
                 {
                     if (uaPerson.map.locations.Any(l => l.settlement != null && (l.settlement.GetType() == hiveType || l.settlement.GetType().IsSubclassOf(hiveType))))
                     {
@@ -1442,7 +1614,7 @@ namespace Orcs_Plus
                     {
                         if (orcCulture.tenet_god is H_Orcs_BloodOffering blood && blood.status < 0)
                         {
-                            if (data.tryGetModIntegrationData("Kishi", out ModData.ModIntegrationData intDataKishi) && intDataKishi.methodInfoDict.TryGetValue("addBloodstain", out MethodInfo MI_AddBloodstain))
+                            if (data.tryGetModIntegrationData("Kishi", out ModIntegrationData intDataKishi) && intDataKishi.methodInfoDict.TryGetValue("addBloodstain", out MethodInfo MI_AddBloodstain))
                             {
                                 object[] parameters = new object[] { pKiller, Math.Abs(blood.status) };
                                 MI_AddBloodstain.Invoke(null, parameters);
@@ -1466,7 +1638,7 @@ namespace Orcs_Plus
                         if (killerOrcCulture != null && killerOrcCulture.tenet_god is H_Orcs_BloodOffering blood && blood.status < 0 && person.hasSoul)
                         {
                             int gainAmount = Math.Abs(blood.status) - 1;
-                            if (gainAmount > 0 && data.tryGetModIntegrationData("Kishi", out ModData.ModIntegrationData intDataKishi) && intDataKishi.methodInfoDict.TryGetValue("addBloodstain", out MethodInfo MI_AddBloodstain))
+                            if (gainAmount > 0 && data.tryGetModIntegrationData("Kishi", out ModIntegrationData intDataKishi) && intDataKishi.methodInfoDict.TryGetValue("addBloodstain", out MethodInfo MI_AddBloodstain))
                             {
                                 object[] parameters = new object[] { pKiller, gainAmount };
                                 MI_AddBloodstain.Invoke(null, parameters);
@@ -1506,7 +1678,7 @@ namespace Orcs_Plus
 
             if (uPerson != null)
             {
-                if (data.tryGetModIntegrationData("LivingWilds", out ModData.ModIntegrationData intDataLW) && intDataLW.typeDict.TryGetValue("NatureCritter", out Type natureType))
+                if (data.tryGetModIntegrationData("LivingWilds", out ModIntegrationData intDataLW) && intDataLW.typeDict.TryGetValue("NatureCritter", out Type natureType))
                 {
                     if (uPerson.GetType() == natureType || uPerson.GetType().IsSubclassOf(natureType))
                     {
@@ -2138,7 +2310,7 @@ namespace Orcs_Plus
                 return true;
             }
 
-            if (data.tryGetModIntegrationData("LivingCharacters", out ModData.ModIntegrationData intDataLC) && intDataLC.typeDict.TryGetValue("Vampire", out Type vampireNobleType))
+            if (data.tryGetModIntegrationData("LivingCharacters", out ModIntegrationData intDataLC) && intDataLC.typeDict.TryGetValue("Vampire", out Type vampireNobleType))
             {
                 if (ua.GetType() == vampireNobleType || ua.GetType().IsSubclassOf(vampireNobleType))
                 {
@@ -2257,7 +2429,7 @@ namespace Orcs_Plus
                         }
                     }
 
-                    ModData.ModIntegrationData intDataEscam;
+                    ModIntegrationData intDataEscam;
                     if (data.tryGetModIntegrationData("Escamrak", out intDataEscam))
                     {
                         if (intDataEscam.typeDict.TryGetValue("CalledFleshcrafters", out Type calledFlescraftersType))
@@ -2330,7 +2502,7 @@ namespace Orcs_Plus
         {
             bool cordyceps = false;
             
-            if (data.tryGetModIntegrationData("Cordyceps", out ModData.ModIntegrationData intDataCord))
+            if (data.tryGetModIntegrationData("Cordyceps", out ModIntegrationData intDataCord))
             {
                 if (target is UM_Refugees refugee)
                 {

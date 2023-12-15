@@ -69,7 +69,7 @@ namespace Orcs_Plus
                 }
             }
 
-            if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC))
+            if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCC))
             {
                 if (intDataCCC.typeDict.TryGetValue("CallHordes", out Type callHordesType))
                 {
@@ -88,7 +88,7 @@ namespace Orcs_Plus
                 }
             }
 
-            if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModData.ModIntegrationData intDataEscam))
+            if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModIntegrationData intDataEscam))
             {
                 if (intDataCCC.typeDict.TryGetValue("StudyFleshcrafting", out Type studyMagicType))
                 {

@@ -73,7 +73,7 @@ namespace Orcs_Plus
         {
             if (fleshStore > 0)
             {
-                if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModData.ModIntegrationData intDataEscam))
+                if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModIntegrationData intDataEscam))
                 {
                     if (intDataEscam.constructorInfoDict.TryGetValue("SpawningGroundArmy", out ConstructorInfo ci))
                     {

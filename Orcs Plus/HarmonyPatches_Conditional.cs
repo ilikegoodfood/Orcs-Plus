@@ -28,12 +28,12 @@ namespace Orcs_Plus
                 harmony.UnpatchAll(harmonyID);
             }
 
-            if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModData.ModIntegrationData intDataCCC) && intDataCCC.typeDict.TryGetValue("Banner", out T_I_BarbDominion))
+            if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCC) && intDataCCC.typeDict.TryGetValue("Banner", out T_I_BarbDominion))
             {
                 Patching_CovensCursesCurios();
             }
 
-            if (ModCore.Get().data.tryGetModIntegrationData("Cordyceps", out ModData.ModIntegrationData intDataCord) && intDataCord.typeDict.TryGetValue("Kernel", out T_Kernel_Cordyceps))
+            if (ModCore.Get().data.tryGetModIntegrationData("Cordyceps", out ModIntegrationData intDataCord) && intDataCord.typeDict.TryGetValue("Kernel", out T_Kernel_Cordyceps))
             {
                 Patching_Cordyceps();
             }
@@ -112,6 +112,12 @@ namespace Orcs_Plus
                 }
 
                 yield return instructionList[i];
+            }
+
+            Console.WriteLine("OrcsPlus: Completed Cordyceps_ModCore_onTurnEnd_Transpiler");
+            if (targetIndex != 0)
+            {
+                Console.WriteLine("OrcsPlus: ERROR: Transpiler failed at targetIndex " + targetIndex);
             }
         }
 

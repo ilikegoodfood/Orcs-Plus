@@ -103,6 +103,7 @@
     <Compile Include="I_SpiritCallerStaff.cs" />
     <Compile Include="MA_Orcs_GreatConstruction.cs" />
     <Compile Include="MA_Orc_HireMercenaries.cs" />
+    <Compile Include="ModIntegrationData.cs" />
     <Compile Include="Mt_DockyardBrawler.cs" />
     <Compile Include="M_OrcCorsair.cs" />
     <Compile Include="OnChallengeComplete.cs" />
