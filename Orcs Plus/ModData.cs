@@ -65,9 +65,10 @@ namespace Orcs_Plus
         public Dictionary<string, string> perfectHordeNameDict;
 
         public List<AIChallenge> forbiddenChallenges;
+
         public ModData()
         {
-            modIntegrationData= new Dictionary<string, ModIntegrationData>();
+            modIntegrationData = new Dictionary<string, ModIntegrationData>();
             orcGeoMageHabitabilityBonus = new Dictionary<int, float>();
             perfectHordeNameDict = new Dictionary<string, string>();
             forbiddenChallenges = new List<AIChallenge>();
@@ -124,6 +125,24 @@ namespace Orcs_Plus
                 { typeof(Set_DeepOneSanctum), new HashSet < Type >() },
                 { typeof(Set_Shipwreck), new HashSet < Type >() }
             };
+        }
+
+        public void afterLoading()
+        {
+            modIntegrationData = new Dictionary<string, ModIntegrationData>();
+
+            settlementTypesForWaystations = new Dictionary<Type, HashSet<Type>>
+            {
+                { typeof(Set_CityRuins), new HashSet<Type>() },
+                { typeof(Set_MinorOther), new HashSet < Type >() },
+                { typeof(Set_MinorVinerva), new HashSet < Type >() },
+                { typeof(Set_VinervaManifestation), new HashSet < Type >() },
+                { typeof(Set_TombOfGods), new HashSet < Type >() },
+                { typeof(Set_DeepOneSanctum), new HashSet < Type >() },
+                { typeof(Set_Shipwreck), new HashSet < Type >() }
+            };
+
+            isPlayerTurn = true;
         }
 
         public void onTurnStart(Map map)
@@ -197,30 +216,41 @@ namespace Orcs_Plus
             //Console.WriteLine("OrcsPlus: iterating map locations");
             foreach (Location location in map.locations)
             {
-                if (location.settlement is Set_OrcCamp camp && camp.specialism == 2 && location.properties.Any(pr => pr is Pr_GeomanticLocus))
+                if (location.settlement is Set_OrcCamp camp && camp.specialism == 2)
                 {
-                    //Console.WriteLine("OrcsPlus: found geo mage at " + location.getName());
-                    if (!affectedLocationIndexSet.Contains(location.index))
+                    if (ModCore.Get().checkHasAnyLocus(location))
                     {
-                        //Console.WriteLine("OrcsPlus: " + location.getName() + " is not already documented");
-                        affectedLocationIndexSet.Add(location.index);
-                        orcGeoMageHabitabilityBonus.Add(location.index, 0f);
-                        affectedLocations.Add(location, 0);
-                    }
-                    affectedLocations[location]++;
-
-                    //Console.WriteLine("OrcsPlus: processing geo mage neighbours");
-                    foreach (Location neighbour in location.getNeighbours())
-                    {
-                        if (!affectedLocationIndexSet.Contains(neighbour.index))
+                        //Console.WriteLine("OrcsPlus: found geo mage at " + location.getName());
+                        if (!affectedLocationIndexSet.Contains(location.index))
                         {
-                            //Console.WriteLine("OrcsPlus: " + neighbour.getName() + " is not already documented");
-                            affectedLocationIndexSet.Add(neighbour.index);
-                            orcGeoMageHabitabilityBonus.Add(neighbour.index, 0f);
-                            affectedLocations.Add(neighbour, 0);
-                        }
+                            //Console.WriteLine("OrcsPlus: " + location.getName() + " is not already documented");
+                            affectedLocationIndexSet.Add(location.index);
+                            affectedLocations.Add(location, 0);
 
-                        affectedLocations[neighbour]++;
+                            if (!orcGeoMageHabitabilityBonus.ContainsKey(location.index))
+                            {
+                                orcGeoMageHabitabilityBonus.Add(location.index, 0f);
+                            }
+                        }
+                        affectedLocations[location]++;
+
+                        //Console.WriteLine("OrcsPlus: processing geo mage neighbours");
+                        foreach (Location neighbour in location.getNeighbours())
+                        {
+                            if (!affectedLocationIndexSet.Contains(neighbour.index))
+                            {
+                                //Console.WriteLine("OrcsPlus: " + neighbour.getName() + " is not already documented");
+                                affectedLocationIndexSet.Add(neighbour.index);
+                                affectedLocations.Add(neighbour, 0);
+
+                                if (!orcGeoMageHabitabilityBonus.ContainsKey(location.index))
+                                {
+                                    orcGeoMageHabitabilityBonus.Add(location.index, 0f);
+                                }
+                            }
+
+                            affectedLocations[neighbour]++;
+                        }
                     }
                 }
             }
@@ -250,14 +280,14 @@ namespace Orcs_Plus
 
         public bool isAffectedByGeoMage(Location loc)
         {
-            if (loc.settlement is Set_OrcCamp camp && camp.specialism == 2 && loc.properties.Any(pr => pr is Pr_GeomanticLocus))
+            if (loc.settlement is Set_OrcCamp camp && camp.specialism == 2 && ModCore.Get().checkHasAnyLocus(loc))
             {
                 return true;
             }
 
             foreach (Location neighbour in loc.getNeighbours())
             {
-                if (neighbour.settlement is Set_OrcCamp camp2 && camp2.specialism == 2 && neighbour.properties.Any(pr => pr is Pr_GeomanticLocus))
+                if (neighbour.settlement is Set_OrcCamp camp2 && camp2.specialism == 2 && ModCore.Get().checkHasAnyLocus(neighbour))
                 {
                     return true;
                 }

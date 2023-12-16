@@ -47,59 +47,61 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_CommandeerShips), nameof(Rt_Orcs_CommandeerShips.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Rt_Orcs_CommandeerShips_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_CommandeerShips), nameof(Rt_Orcs_CommandeerShips.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Rt_Orcs_CommandeerShips_complete_Transpiler)));
             harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_ClaimTerritory), nameof(Rt_Orcs_ClaimTerritory.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Rt_Orcs_ClaimTerritory_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_ClaimTerritory), nameof(Rt_Orcs_ClaimTerritory.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Rt_Orcs_ClaimTerritory_validFor_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_ClaimTerritory), nameof(Rt_Orcs_ClaimTerritory.complete), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Rt_Orcs_ClaimTerritory_complete_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_RecruitRaiders), nameof(Rt_Orcs_RecruitRaiders.complete), new Type[] { typeof(UA) }), prefix: new HarmonyMethod(patchType, nameof(Rt_Orcs_RecruitRaiders_complete_Prefix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Rt_Orc_ReceiveFunding), nameof(Rt_Orc_ReceiveFunding.buildPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Orc)));
+            harmony.Patch(original: AccessTools.Method(typeof(Rt_Orc_ReceiveFunding), nameof(Rt_Orc_ReceiveFunding.buildPositiveTags), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Orc)));
 
             // Patches for Challenges in orc camps
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_ChallengeTheHorde), nameof(Ch_Orcs_ChallengeTheHorde.getRestriction), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_ChallengeTheHorde_getRestriction_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_ChallengeTheHorde), nameof(Ch_Orcs_ChallengeTheHorde.valid), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_ChallengeTheHorde_valid_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_ChallengeTheHorde), nameof(Ch_Orcs_ChallengeTheHorde.getRestriction),Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_ChallengeTheHorde_getRestriction_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_ChallengeTheHorde), nameof(Ch_Orcs_ChallengeTheHorde.valid), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_ChallengeTheHorde_valid_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_ChallengeTheHorde), nameof(Ch_Orcs_ChallengeTheHorde.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_ChallengeTheHorde_validFor_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_ChallengeTheHorde), nameof(Ch_Orcs_ChallengeTheHorde.buildPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_AmbitionOrc)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_ChallengeTheHorde), nameof(Ch_Orcs_ChallengeTheHorde.buildPositiveTags), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_AmbitionOrc)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_DevastateOrcishIndustry), nameof(Ch_Orcs_DevastateOrcishIndustry.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_DevastateOrcishIndustry_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.getName), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_getName_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.getRestriction), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_getRestriction_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.valid), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_valid_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.getName), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_getName_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.getDesc), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.getRestriction), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_getRestriction_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.valid), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_valid_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_Expand), nameof(Ch_Orcs_Expand.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_Expand_complete_Transpiler)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.getName), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_getName_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.valid), new Type[0]), transpiler: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_valid_Transpiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.getName), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_getName_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.getDesc), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.valid), Type.EmptyTypes), transpiler: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_valid_Transpiler)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_OrcRaiding_complete_Transpiler)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.buildPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_AmbitionOrc)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_OrcRaiding), nameof(Ch_OrcRaiding.buildPositiveTags), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_AmbitionOrc)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_RetreatToTheHills), nameof(Ch_Orcs_RetreatToTheHills.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_RetreatToTheHills_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_RetreatToTheHills), nameof(Ch_Orcs_RetreatToTheHills.valid)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_RetreatToTheHills_valid_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_RetreatToTheHills), nameof(Ch_Orcs_RetreatToTheHills.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_RetreatToTheHills_validFor_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_RetreatToTheHills), nameof(Ch_Orcs_RetreatToTheHills.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_RetreatToTheHills_complete_Transpiler)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Subjugate_Orcs), nameof(Ch_Subjugate_Orcs.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Subjugate_Orcs_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Subjugate_Orcs), nameof(Ch_Subjugate_Orcs.complete), new Type[] { typeof(UA) }));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OrganiseTheHorde), nameof(Ch_Orcs_OrganiseTheHorde.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OrganiseTheHorde_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OrganiseTheHorde), nameof(Ch_Orcs_OrganiseTheHorde.valid), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OrganiseTheHorde_valid_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OrganiseTheHorde), nameof(Ch_Orcs_OrganiseTheHorde.getDesc), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OrganiseTheHorde_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OrganiseTheHorde), nameof(Ch_Orcs_OrganiseTheHorde.valid), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OrganiseTheHorde_valid_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OrganiseTheHorde), nameof(Ch_Orcs_OrganiseTheHorde.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OrganiseTheHorde_validFor_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OpportunisticEncroachment), nameof(Ch_Orcs_OpportunisticEncroachment.getName), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_getName_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OpportunisticEncroachment), nameof(Ch_Orcs_OpportunisticEncroachment.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OpportunisticEncroachment), nameof(Ch_Orcs_OpportunisticEncroachment.valid), new Type[0]), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_valid_Transpiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OpportunisticEncroachment), nameof(Ch_Orcs_OpportunisticEncroachment.getName), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_getName_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OpportunisticEncroachment), nameof(Ch_Orcs_OpportunisticEncroachment.getDesc), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OpportunisticEncroachment), nameof(Ch_Orcs_OpportunisticEncroachment.valid), Type.EmptyTypes), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_valid_Transpiler)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_OpportunisticEncroachment), nameof(Ch_Orcs_OpportunisticEncroachment.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_complete_Transpiler)));
 
             // Patches for challenges in Pr_OrcPlunder
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.valid), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_valid_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.getDesc), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.valid), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_valid_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_validFor_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Ch_Orcs_AccessPlunder_complete_Transpiler)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.buildNegativeTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Orc)));
-            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_StealPlunder), nameof(Ch_Orcs_StealPlunder.getInherentDanger), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_StealPlunder_getInherentDanger_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_AccessPlunder), nameof(Ch_Orcs_AccessPlunder.buildNegativeTags), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Orc)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_StealPlunder), nameof(Ch_Orcs_StealPlunder.getInherentDanger), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_StealPlunder_getInherentDanger_Postfix)));
 
             // Patches for I_HordeBanner
             harmony.Patch(original: AccessTools.Constructor(typeof(I_HordeBanner), new Type[] { typeof(Map), typeof(SG_Orc), typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(I_HordeBanner_ctor_Postfix)));
 
             // Patches for challenges in I_HordeBanner
-            harmony.Patch(original: AccessTools.Method(typeof(Rti_Orc_AttackHere), nameof(Rti_Orc_AttackHere.buildPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Orc)));
-            harmony.Patch(original: AccessTools.Method(typeof(Rti_Orc_CeaseWar), nameof(Rti_Orc_CeaseWar.buildPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Orc)));
-            harmony.Patch(original: AccessTools.Method(typeof(Rti_Orc_UniteTheHordes), nameof(Rti_Orc_UniteTheHordes.buildPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Orc)));
+            harmony.Patch(original: AccessTools.Method(typeof(Rti_Orc_AttackHere), nameof(Rti_Orc_AttackHere.buildPositiveTags), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Orc)));
+            harmony.Patch(original: AccessTools.Method(typeof(Rti_Orc_CeaseWar), nameof(Rti_Orc_CeaseWar.buildPositiveTags), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Orc)));
+            harmony.Patch(original: AccessTools.Method(typeof(Rti_Orc_UniteTheHordes), nameof(Rti_Orc_UniteTheHordes.buildPositiveTags), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Orc)));
             harmony.Patch(original: AccessTools.Method(typeof(Rti_Orc_UniteTheHordes), nameof(Rti_Orc_UniteTheHordes.complete), new Type[] { typeof(UA) }), transpiler: new HarmonyMethod(patchType, nameof(Rti_Orc_UniteTheHordes_complete_Transpiler)));
 
             // Patch and Branches for getPostiveTags and getNegative Tags
-            harmony.Patch(original: AccessTools.Method(typeof(Challenge), nameof(Challenge.getPositiveTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Challenge_getPositiveTags_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Challenge), nameof(Challenge.getNegativeTags), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Challenge_getNegativeTags_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Challenge), nameof(Challenge.getPositiveTags), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(Challenge_getPositiveTags_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Challenge), nameof(Challenge.getNegativeTags), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(Challenge_getNegativeTags_Postfix)));
 
             // Patches for UAEN_OrcUpstart
             harmony.Patch(original: AccessTools.Constructor(typeof(UAEN_OrcUpstart), new Type[] { typeof(Location), typeof(SocialGroup), typeof(Person) }), postfix: new HarmonyMethod(patchType, nameof(UAEN_OrcUpstart_ctor_Postfix)));
@@ -110,22 +112,22 @@ namespace Orcs_Plus
 
             // Patches for UA
             harmony.Patch(original: AccessTools.Method(typeof(UA), nameof(UA.getAttackUtility), new Type[] { typeof(Unit), typeof(List<ReasonMsg>), typeof(bool) }), postfix: new HarmonyMethod(patchType, nameof(UA_getAttackUtility_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(UA), nameof(UA.getVisibleUnits), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(UA_getVisibleUnits_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(UA), nameof(UA.getVisibleUnits), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(UA_getVisibleUnits_Postfix)));
 
             // Patches for SocialGroup
             harmony.Patch(original: AccessTools.Method(typeof(SocialGroup), nameof(SocialGroup.checkIsGone), new Type[] { }), postfix: new HarmonyMethod(patchType, nameof(SocialGroup_checkIsGone_Postfix)));
 
             // Patches for ManagerMajorThreats
-            harmony.Patch(original: AccessTools.Method(typeof(ManagerMajorThreats), nameof(ManagerMajorThreats.turnTick), new Type[0]), transpiler: new HarmonyMethod(patchType, nameof(ManagerMajorThreats_turnTick_Transpiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(ManagerMajorThreats), nameof(ManagerMajorThreats.turnTick), Type.EmptyTypes), transpiler: new HarmonyMethod(patchType, nameof(ManagerMajorThreats_turnTick_Transpiler)));
 
             // Patches for SG_Orc
-            harmony.Patch(original: AccessTools.Constructor(typeof(SG_Orc), new Type[] { typeof(Map), typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(SG_Orc_ctor_Postfox)));
+            harmony.Patch(original: AccessTools.Constructor(typeof(SG_Orc), new Type[] { typeof(Map), typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(SG_Orc_ctor_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(SG_Orc), nameof(SG_Orc.canSettle), new Type[] { typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(SG_Orc_canSettle_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(SG_Orc), nameof(SG_Orc.getName), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(SG_Orc_getName_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(SG_Orc), nameof(SG_Orc.getName), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(SG_Orc_getName_Postfix)));
 
             // Patches for MA_Orc_Expand
             harmony.Patch(original: AccessTools.Method(typeof(MA_Orc_Expand), nameof(MA_Orc_Expand.getUtility), new Type[] { typeof(List<ReasonMsg>) }), postfix: new HarmonyMethod(patchType, nameof(MA_Orcs_Expand_getUtility_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(MA_Orc_Expand), nameof(MA_Orc_Expand.complete), new Type[0]), transpiler: new HarmonyMethod(patchType, nameof(MA_Orc_Expand_complete_Transpiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(MA_Orc_Expand), nameof(MA_Orc_Expand.complete), Type.EmptyTypes), transpiler: new HarmonyMethod(patchType, nameof(MA_Orc_Expand_complete_Transpiler)));
 
             // Patches for Set_OrcCamp
             harmony.Patch(original: AccessTools.Constructor(typeof(Set_OrcCamp), new Type[] { typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(Set_OrcCamp_ctor_Postfix)));
@@ -133,24 +135,24 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Method(typeof(Set_OrcCamp), nameof(Set_OrcCamp.getMaxDefence)), postfix: new HarmonyMethod(patchType, nameof(Set_OrcCamp_getMaxDefence_Postfix)));
 
             // Patches for Pr_OrcDefences
-            harmony.Patch(original: AccessTools.Method(typeof(Pr_OrcDefences), nameof(Pr_OrcDefences.turnTick), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Pr_OrcDefences_turnTick_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Pr_OrcDefences), nameof(Pr_OrcDefences.turnTick), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(Pr_OrcDefences_turnTick_Postfix)));
 
             // Patches for Pr_OrcishIndustry
-            harmony.Patch(original: AccessTools.Method(typeof(Pr_OrcishIndustry), nameof(Pr_OrcishIndustry.turnTick), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(Pr_OrcishIndustry_turnTick_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Pr_OrcishIndustry), nameof(Pr_OrcishIndustry.turnTick), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(Pr_OrcishIndustry_turnTick_Postfix)));
 
             // Patches for Pr_OrcFunbding
-            harmony.Patch(original: AccessTools.Method(typeof(Pr_OrcFunding), nameof(Pr_OrcFunding.turnTick), new Type[0]), transpiler: new HarmonyMethod(patchType, nameof(Pr_OrcFunding_turnTick_Transpiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(Pr_OrcFunding), nameof(Pr_OrcFunding.turnTick), Type.EmptyTypes), transpiler: new HarmonyMethod(patchType, nameof(Pr_OrcFunding_turnTick_Transpiler)));
 
             // Patches for UM_OrcArmy
             harmony.Patch(original: AccessTools.Constructor(typeof(UM_OrcArmy), new Type[] { typeof(Location), typeof(SocialGroup), typeof(Set_OrcCamp) }), postfix: new HarmonyMethod(patchType, nameof(UM_OrcArmy_ctor_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(UM_OrcArmy), nameof(UM_OrcArmy.getName), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(UM_OrcArmy_getName_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(UM_OrcArmy), nameof(UM_OrcArmy.getName), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(UM_OrcArmy_getName_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(UM_OrcArmy), nameof(UM_OrcArmy.turnTickInner), new Type[] { typeof(Map) }), postfix: new HarmonyMethod(patchType, nameof(UM_OrcArmy_turnTickInner_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(UM_OrcArmy), nameof(UM_OrcArmy.updateMaxHP), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(UM_OrcArmy_updateMaxHP_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(UM_OrcArmy), nameof(UM_OrcArmy.turnTickAI), new Type[0]), transpiler: new HarmonyMethod(patchType, nameof(UM_OrcArmy_turnTickAI_Transpiler)));
+            harmony.Patch(original: AccessTools.Method(typeof(UM_OrcArmy), nameof(UM_OrcArmy.updateMaxHP), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(UM_OrcArmy_updateMaxHP_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(UM_OrcArmy), nameof(UM_OrcArmy.turnTickAI), Type.EmptyTypes), transpiler: new HarmonyMethod(patchType, nameof(UM_OrcArmy_turnTickAI_Transpiler)));
 
             // Patches for UM_OrcRaiders
             harmony.Patch(original: AccessTools.Constructor(typeof(UM_OrcRaiders), new Type[] { typeof(Location), typeof(SocialGroup) }), postfix: new HarmonyMethod(patchType, nameof(UM_OrcRaiders_ctor_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(UM_OrcRaiders), nameof(UM_OrcRaiders.assignMaxHP), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(UM_OrcRaiders_assignMaxHP_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(UM_OrcRaiders), nameof(UM_OrcRaiders.assignMaxHP), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(UM_OrcRaiders_assignMaxHP_Postfix)));
 
             // Pathes for UM_UntamedDead
             harmony.Patch(original: AccessTools.Method(typeof(UM_UntamedDead), nameof(UM_UntamedDead.turnTickInner), new Type[] { typeof(Map) }), postfix: new HarmonyMethod(patchType, nameof(UM_UntamedDead_turnTickInner_Postfix)));
@@ -168,12 +170,12 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Method(typeof(Rt_StudyDeath), nameof(Rt_StudyDeath.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Rt_StudyDeath_Postfix)));
 
             // Patches for P_Opha_Crusade
-            harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Crusade), nameof(P_Opha_Crusade.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Crusade_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Crusade), nameof(P_Opha_Crusade.getDesc), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Crusade_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Crusade), nameof(P_Opha_Crusade.cast), new Type[] { typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Crusade_cast_Postfix)));
 
             // Patches for P_Opha_Empower
-            harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Empower), nameof(P_Opha_Empower.getDesc), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Empower_getDesc_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Empower), nameof(P_Opha_Empower.getRestrictionText), new Type[0]), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Empower_getRestrictionText_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Empower), nameof(P_Opha_Empower.getDesc), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Empower_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Empower), nameof(P_Opha_Empower.getRestrictionText), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Empower_getRestrictionText_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Empower), nameof(P_Opha_Empower.validTarget), new Type[] { typeof(Unit) }), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Empower_validTarget_Postfix)));
 
             // Patches for PC_Card
@@ -388,6 +390,7 @@ namespace Orcs_Plus
         private static IEnumerable<CodeInstruction> Ch_Orcs_Expand_complete_Transpiler(IEnumerable<CodeInstruction> codeInstructions, ILGenerator ilg)
         {
             MethodInfo MI_TranspilerBody_GetOrcs = AccessTools.Method(patchType, nameof(Ch_Orcs_Expand_complete_TranspilerBody_GetOrcs));
+            MethodInfo MI_TranspilerBody_RemoveWaystations = AccessTools.Method(patchType, nameof(Ch_Orcs_Expand_complete_TranspilerBody_RemoveWaystations));
             MethodInfo MI_TranspilerBody_InfluenceGain = AccessTools.Method(patchType, nameof(Ch_Orcs_Expand_complete_TranspilerBody_InfluenceGain));
 
             MethodInfo MI_fallIntoRuin = AccessTools.Method(typeof(Settlement), nameof(Settlement.fallIntoRuin), new Type[] { typeof(string), typeof(object) });
@@ -445,6 +448,8 @@ namespace Orcs_Plus
                             yield return new CodeInstruction(OpCodes.Ldarg_1);
                             yield return new CodeInstruction(OpCodes.Ldloc_0);
                             yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody_InfluenceGain);
+                            yield return new CodeInstruction(OpCodes.Ldloc_3);
+                            yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody_RemoveWaystations);
                         }
                     }
                 }
@@ -473,6 +478,18 @@ namespace Orcs_Plus
             }
 
             return result;
+        }
+
+        private static void Ch_Orcs_Expand_complete_TranspilerBody_RemoveWaystations(Location location)
+        {
+            if (location.settlement != null)
+            {
+                List<Sub_OrcWaystation> waystations = location.settlement.subs.OfType<Sub_OrcWaystation>().ToList();
+                foreach(Sub_OrcWaystation waystation in waystations)
+                {
+                    location.settlement.subs.Remove(waystation);
+                }
+            }
         }
 
         private static void Ch_Orcs_Expand_complete_TranspilerBody_InfluenceGain(Ch_Orcs_Expand ch, UA ua, SG_Orc orcSociety)
@@ -1218,6 +1235,40 @@ namespace Orcs_Plus
             __result += " You gain " + ModCore.Get().data.influenceGain[ModData.influenceGainAction.Expand] + " influence with the orc culture by completing this challenge.";
         }
 
+        public static void Rt_Orcs_ClaimTerritory_validFor_Postfix(ref bool __result, UA ua)
+        {
+            if (!__result)
+            {
+                if (!ua.location.isOcean && ua.location.hex.getHabilitability() >= ua.location.map.opt_orcHabMult * ua.location.map.param.orc_habRequirement)
+                {
+                    if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModIntegrationData intDataEscam) && intDataEscam.typeDict.TryGetValue("LivingTerrainSettlement", out Type livingTerrainSettlementType) && intDataEscam.fieldInfoDict.TryGetValue("LivingTerrainSettlement_TypeOfTerrain", out FieldInfo FI_TypeOfTerrain))
+                    {
+                        if (ua.society is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture.tenet_god is H_Orcs_Fleshweaving fleshweaving && fleshweaving.status < -1)
+                        {
+                            if (ua.location.settlement.GetType() == livingTerrainSettlementType && (int)FI_TypeOfTerrain.GetValue(ua.location.settlement) == 0)
+                            {
+                                __result = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public static void Rt_Orcs_ClaimTerritory_complete_Postfix(UA u)
+        {
+            Set_OrcCamp camp = u.location.settlement as Set_OrcCamp;
+
+            if (camp != null)
+            {
+                List<Sub_OrcWaystation> waystations = camp.subs.OfType<Sub_OrcWaystation>().ToList();
+                foreach (Sub_OrcWaystation waystation in waystations)
+                {
+                    camp.subs.Remove(waystation);
+                }
+            }
+        }
+
         public static bool Rt_Orcs_RecruitRaiders_complete_Prefix(UA u)
         {
             SG_Orc orcSociety = u.society as SG_Orc;
@@ -1445,10 +1496,11 @@ namespace Orcs_Plus
                                 if (fleshStatBonusTrait == null)
                                 {
                                     fleshStatBonusTrait = (Trait)ci.Invoke(new object[0]);
+                                    __instance.person.receiveTrait(fleshStatBonusTrait);
                                     FI_BonusType.SetValue(fleshStatBonusTrait, "Might");
                                 }
 
-                                fleshStatBonusTrait.level = fleshweaving.status;
+                                fleshStatBonusTrait.level = -fleshweaving.status;
                             }
                         }
                     }
@@ -2081,7 +2133,7 @@ namespace Orcs_Plus
             return result;
         }
 
-        private static void SG_Orc_ctor_Postfox(SG_Orc __instance)
+        private static void SG_Orc_ctor_Postfix(SG_Orc __instance)
         {
             if (!ModCore.Get().data.orcSGCultureMap.ContainsKey(__instance))
             {
@@ -2099,44 +2151,51 @@ namespace Orcs_Plus
             }
         }
 
-        private static bool SG_Orc_canSettle_Postfix(bool result, Location l2)
+        private static void SG_Orc_canSettle_Postfix(ref bool __result, SG_Orc __instance, Location l2)
         {
-            if (!result && l2.settlement != null)
+            if (!__result && l2.settlement != null)
             {
-                if (l2.isOcean || l2.soc != null || l2.settlement == null)
+                if (l2.isOcean || l2.hex.getHabilitability() < l2.map.opt_orcHabMult * l2.map.param.orc_habRequirement)
                 {
-                    return result;
+                    return;
                 }
 
                 if (ModCore.Get().data.tryGetModIntegrationData("LivingWilds", out ModIntegrationData intDataLW) && intDataLW.typeDict.TryGetValue("WolfRun", out Type wolfRunType))
                 {
                     if (l2.settlement.GetType() == wolfRunType)
                     {
-                        if (l2.hex.getHabilitability() >= l2.map.opt_orcHabMult * l2.map.param.orc_habRequirement)
+                        __result = true;
+                        return;
+                    }
+                }
+
+                if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModIntegrationData intDataEscam) && intDataEscam.typeDict.TryGetValue("LivingTerrainSettlement", out Type livingTerrainSettlementType) && intDataEscam.fieldInfoDict.TryGetValue("LivingTerrainSettlement_TypeOfTerrain", out FieldInfo FI_TypeOfTerrain))
+                {
+                    if (ModCore.Get().data.orcSGCultureMap.TryGetValue(__instance, out HolyOrder_Orcs orcCulture) && orcCulture.tenet_god is H_Orcs_Fleshweaving fleshweaving && fleshweaving.status < -1)
+                    {
+                        if (l2.settlement.GetType() == livingTerrainSettlementType && (int)FI_TypeOfTerrain.GetValue(l2.settlement) == 0)
                         {
-                            return true;
+                            __result = true;
+                            return;
                         }
                     }
                 }
             }
-
-            return result;
         }
 
-        private static string SG_Orc_getName_Postfix(string result, SG_Orc __instance)
+        private static void SG_Orc_getName_Postfix(ref string __result, SG_Orc __instance)
         {
             if (ModCore.Get().data.orcSGCultureMap.TryGetValue(__instance, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.ophanim_PerfectSociety)
             {
-                if (!ModCore.Get().data.perfectHordeNameDict.TryGetValue(result, out string newResult))
+                if (!ModCore.Get().data.perfectHordeNameDict.TryGetValue(__result, out string newResult))
                 {
-                    int splitPoint = result.LastIndexOf(" Horde");
-                    newResult = result.Substring(0, splitPoint) + " Perfect Horde";
-                    ModCore.Get().data.perfectHordeNameDict.Add(result, newResult);
+                    int splitPoint = __result.LastIndexOf(" Horde");
+                    newResult = __result.Substring(0, splitPoint) + " Perfect Horde";
+                    ModCore.Get().data.perfectHordeNameDict.Add(__result, newResult);
                 }
-                return newResult;
+                __result = newResult;
+                return;
             }
-
-            return result;
         }
 
         // Patches for MA_Orcs_Expand
@@ -2244,23 +2303,12 @@ namespace Orcs_Plus
             if (targetIndex != -1)
             {
                 Location location = ma.map.locations[targetIndex];
-                if (location.settlement is Set_OrcCamp camp && camp.subs.Count > 0)
+                if (location.settlement is Set_OrcCamp camp)
                 {
-                    List<Sub_OrcWaystation> waystations = new List<Sub_OrcWaystation>();
-                    foreach (Subsettlement sub in camp.subs)
+                    List<Sub_OrcWaystation> waystations = camp.subs.OfType<Sub_OrcWaystation>().ToList();
+                    foreach (Sub_OrcWaystation waystation in waystations)
                     {
-                        if (sub is Sub_OrcWaystation waystation)
-                        {
-                            waystations.Add(waystation);
-                        }
-                    }
-
-                    if (waystations.Count > 0)
-                    {
-                        foreach (Sub_OrcWaystation waystation in waystations)
-                        {
-                            camp.subs.Remove(waystation);
-                        }
+                        camp.subs.Remove(waystation);
                     }
                 }
             }

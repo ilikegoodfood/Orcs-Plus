@@ -66,7 +66,7 @@ namespace Orcs_Plus
         {
             //Console.WriteLine("Orcs_Plus: Unit died");
 
-            if (u is UA)
+            if (u == null || u is UA)
             {
                 //Console.WriteLine("Orcs_Plus: Unit is Person");
                 return;
@@ -365,6 +365,23 @@ namespace Orcs_Plus
                     {
                         ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("Awakening destroyed trespassing army", ModCore.Get().data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                     }
+                }
+            }
+            else if (v == "Smashed by a Flesh Tentacle")
+            {
+                if (influencedOrcCulture_Direct != null)
+                {
+                    ModCore.Get().TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Escamrak destroyed orc army", ModCore.Get().data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                {
+                    ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("Escamrak destroyed enemy army", ModCore.Get().data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                {
+                    ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("Escamrak destroyed trespassing army", ModCore.Get().data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                 }
             }
             else if (v == "killed by cheat" || v == "console" || v == "Killed by console")
@@ -1231,6 +1248,30 @@ namespace Orcs_Plus
                     ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("Kishi's tide consumed encroaching settlement", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                 }
             }
+            else if (v == "Consumed by the Tide of Flesh")
+            {
+                if (influencedOrcCulture_Direct != null)
+                {
+                    ModCore.Get().TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Flesh tide consumed orc camp", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RecieveGift]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                {
+                    ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("Flesh tide consumed enemy settlement", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                {
+                    ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("Flesh tide consumed encroaching settlement", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                }
+            }
+            else if (v == "Population called away by Escamrak")
+            {
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                {
+                    ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("Population of encroaching settlement called away", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                }
+            }
             else if (v == "console" || v == "Console" || v == "Cheats")
             {
                 if (influencedOrcCulture_Direct != null)
@@ -1287,10 +1328,23 @@ namespace Orcs_Plus
                         if (fleshStatBonusTrait != null)
                         {
                             string bonusType = "Might";
+
+                            if (ua is UAEN_OrcElder)
+                            {
+                                bonusType = "Command";
+                            }
+                            else if (ua is UAEN_OrcShaman)
+                            {
+                                bonusType = "Lore";
+                            }
+
                             if (ua.task is Task_PerformChallenge challengeTask)
                             {
                                 switch (challengeTask.challenge.getChallengeType())
                                 {
+                                    case Challenge.challengeStat.MIGHT:
+                                        bonusType = "Might";
+                                        break;
                                     case Challenge.challengeStat.LORE:
                                         bonusType = "Lore";
                                         break;
@@ -1308,6 +1362,9 @@ namespace Orcs_Plus
                             {
                                 switch (goChallengeTask.challenge.getChallengeType())
                                 {
+                                    case Challenge.challengeStat.MIGHT:
+                                        bonusType = "Might";
+                                        break;
                                     case Challenge.challengeStat.LORE:
                                         bonusType = "Lore";
                                         break;
@@ -1319,6 +1376,13 @@ namespace Orcs_Plus
                                         break;
                                     default:
                                         break;
+                                }
+                            }
+                            else
+                            {
+                                if (ua.task is Task_AttackUnit || ua.task is Task_AttackUnitWithEscort || ua.task is Task_DisruptUA || ua.task is Task_Bodyguard)
+                                {
+                                    bonusType = "Might";
                                 }
                             }
 

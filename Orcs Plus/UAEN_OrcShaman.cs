@@ -62,10 +62,11 @@ namespace Orcs_Plus
                                 if (fleshStatBonusTrait == null)
                                 {
                                     fleshStatBonusTrait = (Trait)ci.Invoke(new object[0]);
-                                    FI_BonusType.SetValue(fleshStatBonusTrait, "Might");
+                                    person.receiveTrait(fleshStatBonusTrait);
+                                    FI_BonusType.SetValue(fleshStatBonusTrait, "Lore");
                                 }
 
-                                fleshStatBonusTrait.level = fleshweaving.status;
+                                fleshStatBonusTrait.level = -fleshweaving.status;
                             }
                         }
                     }

@@ -154,7 +154,7 @@
     <Compile Include="Rt_Orcs_PirateTrade.cs" />
     <Compile Include="Rt_Orcs_ReclaimHordeBanner.cs" />
     <Compile Include="Rt_Orcs_SacrificialSite.cs" />
-    <Compile Include="Sub_Orcs_SpawningPit.cs" />
+    <Compile Include="Sub_OrcSpawningPit.cs" />
     <Compile Include="Sub_OrcCultureCapital.cs" />
     <Compile Include="Sub_OrcTemple.cs" />
     <Compile Include="Sub_OrcWaystation.cs" />

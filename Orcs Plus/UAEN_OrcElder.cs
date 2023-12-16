@@ -1,6 +1,5 @@
 ﻿using Assets.Code;
 using Assets.Code.Modding;
-using DuloGames.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +7,6 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Diagnostics;
 
 namespace Orcs_Plus
 {
@@ -20,7 +18,9 @@ namespace Orcs_Plus
 
         public Rt_H_Orcs_SpreadCurseBrokenSpirit rt_spreadCurseBroken = null;
 
-        public HolyOrder order;
+        public Sprite foreground = null;
+
+        public Sprite foregroundAlt = null;
 
         public UAEN_OrcElder(Location loc, HolyOrder sg)
             : base(loc, sg)
@@ -33,8 +33,6 @@ namespace Orcs_Plus
             person.hasSoul = false;
             person.traits.Add(new T_ReveredElder());
             person.species = map.species_orc;
-
-            order = society as HolyOrder;
 
             rt_giftGold = new Rt_H_Orcs_GiftGold(loc);
             rituals.Add(rt_giftGold);
@@ -53,6 +51,7 @@ namespace Orcs_Plus
                 }
             }
 
+            setPortraitForeground();
         }
 
         public UAEN_OrcElder(Location loc, HolyOrder sg, Person p)
@@ -67,8 +66,6 @@ namespace Orcs_Plus
             person.traits.Add(new T_ReveredElder());
             person.species = map.species_orc;
 
-            order = society as HolyOrder;
-
             rt_giftGold = new Rt_H_Orcs_GiftGold(loc);
             rituals.Add(rt_giftGold);
 
@@ -85,13 +82,15 @@ namespace Orcs_Plus
                     rituals.Add(rt_spreadCurseBroken);
                 }
             }
+
+            setPortraitForeground();
         }
 
         public override void turnTick(Map map)
         {
             base.turnTick(map);
 
-            if (order is HolyOrder_Orcs orcCulture && orcCulture.tenet_god is H_Orcs_Fleshweaving fleshweaving)
+            if (society is HolyOrder_Orcs orcCulture && orcCulture.tenet_god is H_Orcs_Fleshweaving fleshweaving)
             {
                 if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModIntegrationData intDataEscam))
                 {
@@ -110,10 +109,11 @@ namespace Orcs_Plus
                             if (fleshStatBonusTrait == null)
                             {
                                 fleshStatBonusTrait = (Trait)ci.Invoke(new object[0]);
-                                FI_BonusType.SetValue(fleshStatBonusTrait, "Might");
+                                person.receiveTrait(fleshStatBonusTrait);
+                                FI_BonusType.SetValue(fleshStatBonusTrait, "Command");
                             }
 
-                            fleshStatBonusTrait.level = fleshweaving.status;
+                            fleshStatBonusTrait.level = -fleshweaving.status;
                         }
                     }
                 }
@@ -785,52 +785,56 @@ namespace Orcs_Plus
 
         public override Sprite getPortraitForeground()
         {
-            Sprite result;
-            if (order.genderExclusive == -1)
+            if (foreground == null)
             {
-                result = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
+                setPortraitForeground();
             }
-            else if (order.genderExclusive == 1)
+
+            return foreground;
+        }
+
+        public void setPortraitForeground()
+        {
+            HolyOrder_Orcs orcCulture = society as HolyOrder_Orcs;
+            if (orcCulture == null)
             {
-                result = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
+                foreground = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
+                foregroundAlt = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
+            }
+
+            if (orcCulture.genderExclusive == -1)
+            {
+                foreground = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
+                foregroundAlt = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
+            }
+            else if (orcCulture.genderExclusive == 1)
+            {
+                foreground = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
+                foregroundAlt = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
             }
             else
             {
                 if (person.index % 2 == 0)
                 {
-                    result = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
+                    foreground = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
+                    foregroundAlt = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
                 }
                 else
                 {
-                    result = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
+                    foreground = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
+                    foregroundAlt = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
                 }
             }
-            return result;
         }
 
         public override Sprite getPortraitForegroundAlt()
         {
-            Sprite result;
-            if (order.genderExclusive == -1)
+            if (foregroundAlt == null)
             {
-                result = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
+                setPortraitForeground();
             }
-            else if (order.genderExclusive == 1)
-            {
-                result = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
-            }
-            else
-            {
-                if (person.index % 2 == 0)
-                {
-                    result = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
-                }
-                else
-                {
-                    result = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
-                }
-            }
-            return result;
+
+            return foregroundAlt;
         }
 
         public override void spendSkillPoint()

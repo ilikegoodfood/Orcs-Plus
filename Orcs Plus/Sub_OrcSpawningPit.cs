@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Orcs_Plus
 {
-    public class Sub_Orcs_SpawningPit : Subsettlement
+    public class Sub_OrcSpawningPit : Subsettlement
     {
         public double fleshStore = 0;
 
@@ -21,7 +21,7 @@ namespace Orcs_Plus
 
         public List<Challenge> challenges;
 
-        public Sub_Orcs_SpawningPit(Settlement set)
+        public Sub_OrcSpawningPit(Settlement set)
             : base(set)
         {
             challenges = new List<Challenge>();

@@ -75,7 +75,7 @@ namespace Orcs_Plus
             {
                 if (specialism == 2)
                 {
-                    if (!target.location.properties.Any(pr => pr is Pr_GeomanticLocus))
+                    if (!ModCore.Get().checkHasAnyLocus(target.location))
                     {
                         clearTarget();
                     }
@@ -188,7 +188,7 @@ namespace Orcs_Plus
                         testReasonMsgs = new List<ReasonMsg>();
                     }
 
-                    if (camp.location.properties.Any(pr => pr is Pr_GeomanticLocus))
+                    if (ModCore.Get().checkHasAnyLocus(camp.location))
                     {
                         testSpecialism = 2;
                         testUtility = getMageCampUtility(camp, testReasonMsgs);

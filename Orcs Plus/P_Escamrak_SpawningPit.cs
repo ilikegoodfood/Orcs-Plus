@@ -52,7 +52,7 @@ namespace Orcs_Plus
             {
                 if (loc.soc is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture.tenet_god is H_Orcs_Fleshweaving fleshweaving && fleshweaving.status < -1)
                 {
-                    if (!camp.subs.Any(sub => sub is Sub_Orcs_SpawningPit))
+                    if (!camp.subs.Any(sub => sub is Sub_OrcSpawningPit))
                     {
                         return true;
                     }
@@ -64,9 +64,10 @@ namespace Orcs_Plus
 
         public override void cast(Location loc)
         {
+            base.cast(loc);
             if (loc.settlement != null)
             {
-                loc.settlement.subs.Add(new Sub_Orcs_SpawningPit(loc.settlement));
+                loc.settlement.subs.Add(new Sub_OrcSpawningPit(loc.settlement));
 
                 if (loc.soc is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture))
                 {

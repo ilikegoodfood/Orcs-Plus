@@ -8,8 +8,8 @@ namespace Orcs_Plus
 {
     public class H_Orcs_Fleshweaving : H_Orcs_GodTenet
     {
-        public H_Orcs_Fleshweaving(HolyOrder_Orcs orcCUlture)
-            : base(orcCUlture)
+        public H_Orcs_Fleshweaving(HolyOrder_Orcs orcCulture)
+            : base(orcCulture)
         {
 
         }

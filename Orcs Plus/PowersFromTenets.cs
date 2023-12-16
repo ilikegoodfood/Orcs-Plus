@@ -13,12 +13,14 @@ namespace Orcs_Plus
 
         public int highestStatus = 0;
 
-        public int maxPower = 1;
+        public int maxPower = -1;
 
-        public Dictionary<Power, Func<Map, Power, HolyTenet, bool>> godPowers = new Dictionary<Power, Func<Map, Power, HolyTenet, bool>>();
+        public Dictionary<Power, Func<Map, Power, HolyTenet, bool>> godPowers;
 
         public PowersFromTenets(Map map)
         {
+            godPowers = new Dictionary<Power, Func<Map, Power, HolyTenet, bool>>();
+
             if (ModCore.Get().data.godTenetTypes.TryGetValue(map.overmind.god.GetType(), out Type tenetType) && tenetType != null)
             {
                 switch (tenetType.Name)
@@ -36,6 +38,22 @@ namespace Orcs_Plus
                         break;
                     default:
                         break;
+                }
+            }
+
+            if (godPowers.Count > 0)
+            {
+                List<Power> mutablePowers = new List<Power>();
+                mutablePowers.AddRange(godPowers.Keys);
+                foreach (Power power in mutablePowers)
+                {
+                    Power existingPower = map.overmind.god.powers.FirstOrDefault(p => p.GetType() == power.GetType());
+                    if (existingPower != null)
+                    {
+                        Func<Map, Power, HolyTenet, bool> validFunc = godPowers[power];
+                        godPowers.Remove(power);
+                        godPowers.Add(existingPower, validFunc);
+                    }
                 }
             }
         }
