@@ -2535,6 +2535,11 @@ namespace Orcs_Plus
         /// <returns></returns>
         public bool isHostileAlignment(Unit u, Unit target)
         {
+            if (u == null || u.society == null || target == null || target.society == null)
+            {
+                return false;
+            }
+
             if (u.society == target.society)
             {
                 return false;
@@ -2607,7 +2612,7 @@ namespace Orcs_Plus
                             return false;
                         }
 
-                        if (intDataEscam.assembly != null)
+                        if (intDataEscam != null)
                         {
                             if (intDataEscam.typeDict.TryGetValue("SpawningGroundArmy", out Type spawningGroundArmyType))
                             {

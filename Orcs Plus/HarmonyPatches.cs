@@ -1245,7 +1245,27 @@ namespace Orcs_Plus
                     {
                         if (ua.society is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture.tenet_god is H_Orcs_Fleshweaving fleshweaving && fleshweaving.status < -1)
                         {
-                            if (ua.location.settlement.GetType() == livingTerrainSettlementType && (int)FI_TypeOfTerrain.GetValue(ua.location.settlement) == 0)
+                            bool valid = false;
+                            if (ua.location.getNeighbours().Any(l => (l.soc == orcSociety && l.settlement is Set_OrcCamp) || (l.settlement != null && l.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == orcSociety))))
+                            {
+                                valid = true;
+                            }
+
+                            if (!valid)
+                            {
+                                if (ua.location.isCoastal)
+                                {
+                                    foreach (Location location in ua.map.locations)
+                                    {
+                                        if (location.soc == orcSociety && location.settlement is Set_OrcCamp camp && camp.specialism == 5)
+                                        {
+                                            valid = true;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (valid && ua.location.settlement.GetType() == livingTerrainSettlementType && (int)FI_TypeOfTerrain.GetValue(ua.location.settlement) == 0)
                             {
                                 __result = true;
                             }
@@ -2156,6 +2176,11 @@ namespace Orcs_Plus
             if (!__result && l2.settlement != null)
             {
                 if (l2.isOcean || l2.hex.getHabilitability() < l2.map.opt_orcHabMult * l2.map.param.orc_habRequirement)
+                {
+                    return;
+                }
+
+                if (!l2.getNeighbours().Any(l => (l.soc == __instance && l.settlement is Set_OrcCamp) || (l.settlement != null && l.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == __instance))))
                 {
                     return;
                 }
