@@ -944,10 +944,6 @@ namespace Orcs_Plus
                 }
 
                 // Integer division truncates.
-                if (civilWar_TargetCampCount == 0)
-                {
-                    civilWar_TargetCampCount = 8;
-                }
                 int targetCapitalCount = Math.Max(1, chunkCamps.Count / civilWar_TargetCampCount);
                 if (chunks.Count == 1 && targetCapitalCount == 1)
                 {

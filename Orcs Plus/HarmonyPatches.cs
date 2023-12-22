@@ -2145,11 +2145,6 @@ namespace Orcs_Plus
                 }
             }
 
-            if (result < 1)
-            {
-                result = 1;
-            }
-
             return result;
         }
 

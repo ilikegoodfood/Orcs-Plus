@@ -86,6 +86,40 @@ namespace Orcs_Plus
             setPortraitForeground();
         }
 
+        public void setPortraitForeground()
+        {
+            HolyOrder_Orcs orcCulture = society as HolyOrder_Orcs;
+            if (orcCulture == null)
+            {
+                foreground = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
+                foregroundAlt = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
+            }
+
+            if (orcCulture.genderExclusive == -1)
+            {
+                foreground = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
+                foregroundAlt = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
+            }
+            else if (orcCulture.genderExclusive == 1)
+            {
+                foreground = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
+                foregroundAlt = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
+            }
+            else
+            {
+                if (person.index % 2 == 0)
+                {
+                    foreground = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
+                    foregroundAlt = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
+                }
+                else
+                {
+                    foreground = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
+                    foregroundAlt = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
+                }
+            }
+        }
+
         public override void turnTick(Map map)
         {
             base.turnTick(map);
@@ -785,55 +819,11 @@ namespace Orcs_Plus
 
         public override Sprite getPortraitForeground()
         {
-            if (foreground == null)
-            {
-                setPortraitForeground();
-            }
-
             return foreground;
-        }
-
-        public void setPortraitForeground()
-        {
-            HolyOrder_Orcs orcCulture = society as HolyOrder_Orcs;
-            if (orcCulture == null)
-            {
-                foreground = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
-                foregroundAlt = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
-            }
-
-            if (orcCulture.genderExclusive == -1)
-            {
-                foreground = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
-                foregroundAlt = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
-            }
-            else if (orcCulture.genderExclusive == 1)
-            {
-                foreground = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
-                foregroundAlt = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
-            }
-            else
-            {
-                if (person.index % 2 == 0)
-                {
-                    foreground = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
-                    foregroundAlt = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
-                }
-                else
-                {
-                    foreground = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
-                    foregroundAlt = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
-                }
-            }
         }
 
         public override Sprite getPortraitForegroundAlt()
         {
-            if (foregroundAlt == null)
-            {
-                setPortraitForeground();
-            }
-
             return foregroundAlt;
         }
 

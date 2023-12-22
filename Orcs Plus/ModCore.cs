@@ -173,8 +173,33 @@ namespace Orcs_Plus
             HarmonyPatches_Conditional.PatchingInit();
             agentAI.populateConditional();
             eventModifications(map);
+            updateSaveGameVersion(map);
 
             Get().powers = new PowersFromTenets(map);
+        }
+
+        public void updateSaveGameVersion(Map map)
+        {
+            if (opt_targetOrcCount == 0)
+            {
+                opt_targetOrcCount = 2;
+            }
+
+            foreach (SocialGroup sg in map.socialGroups)
+            {
+                if (sg is HolyOrder_Orcs orcCulture && orcCulture.civilWar_TargetCampCount == 0)
+                {
+                    orcCulture.civilWar_TargetCampCount = 8;
+                }
+            }
+
+            foreach (Unit u in map.units)
+            {
+                if (u is UAEN_OrcElder elder && (elder.foreground == null || elder.foregroundAlt == null))
+                {
+                    elder.setPortraitForeground();
+                }
+            }
         }
 
         private void getModKernels(Map map)

@@ -204,6 +204,7 @@ namespace Orcs_Plus
                     if (orcGeoMageHabitabilityBonus[index] <= 0f)
                     {
                         orcGeoMageHabitabilityBonus.Remove(index);
+                        continue;
                     }
                 }
                 else
@@ -243,9 +244,9 @@ namespace Orcs_Plus
                                 affectedLocationIndexSet.Add(neighbour.index);
                                 affectedLocations.Add(neighbour, 0);
 
-                                if (!orcGeoMageHabitabilityBonus.ContainsKey(location.index))
+                                if (!orcGeoMageHabitabilityBonus.ContainsKey(neighbour.index))
                                 {
-                                    orcGeoMageHabitabilityBonus.Add(location.index, 0f);
+                                    orcGeoMageHabitabilityBonus.Add(neighbour.index, 0f);
                                 }
                             }
 
