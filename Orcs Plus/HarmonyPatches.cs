@@ -2345,7 +2345,7 @@ namespace Orcs_Plus
             __instance.customChallenges.Add(new Ch_Orcs_WarFestival(__instance.location));
             __instance.customChallenges.Add(new Ch_Orcs_BuildTemple(__instance.location));
             __instance.customChallenges.Add(new Ch_Orcs_BloodMoney(__instance.location));
-            __instance.customChallenges.Add(new Ch_Orcs_RecruitCorsair(__instance.location, new M_OrcCorsair(__instance.map), 0, null, __instance));
+            __instance.customChallenges.Add(new Ch_Orcs_RecruitCorsair(__instance.location, new M_OrcCorsair(__instance.map), -1, null, __instance));
 
             if (ModCore.Get().data.godTenetTypes.TryGetValue(__instance.map.overmind.god.GetType(), out Type tenetType) && tenetType == typeof(H_Orcs_HarbingersMadness))
             {

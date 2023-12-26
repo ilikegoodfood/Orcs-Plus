@@ -185,6 +185,7 @@ namespace Orcs_Plus
                 opt_targetOrcCount = 2;
             }
 
+            // Account for civilWar_TargetCampCount default value being 0.
             foreach (SocialGroup sg in map.socialGroups)
             {
                 if (sg is HolyOrder_Orcs orcCulture && orcCulture.civilWar_TargetCampCount == 0)
@@ -193,6 +194,20 @@ namespace Orcs_Plus
                 }
             }
 
+            // Fix Orc Corsair being recuitable by heroes.
+            foreach (Location loc in map.locations)
+            {
+                if (loc.settlement is Set_OrcCamp camp)
+                {
+                    Ch_RecruitMinion recruitCorsair = (Ch_RecruitMinion)camp.customChallenges.FirstOrDefault(c => c is Ch_RecruitMinion rMinion && rMinion.exemplar is M_OrcCorsair);
+                    if (recruitCorsair != null)
+                    {
+                        recruitCorsair.tern = -1;
+                    }
+                }
+            }
+
+            // Fix Orc Elders portraits.
             foreach (Unit u in map.units)
             {
                 if (u is UAEN_OrcElder elder && (elder.foreground == null || elder.foregroundAlt == null))
