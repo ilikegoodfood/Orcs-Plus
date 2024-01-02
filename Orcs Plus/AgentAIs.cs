@@ -83,14 +83,13 @@ namespace Orcs_Plus
 
                 if (intDataCCC.typeDict.TryGetValue("StudyCurseweaving", out Type studyMagicType))
                 {
-                    AIChallenge CCC_StudyMagic = new AIChallenge(studyMagicType, 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden });
-                    ModCore.Get().comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcShaman), CCC_StudyMagic);
+                    ModCore.Get().comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcShaman), new AIChallenge(studyMagicType, 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden }));
                 }
             }
 
             if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModIntegrationData intDataEscam))
             {
-                if (intDataCCC.typeDict.TryGetValue("StudyFleshcrafting", out Type studyMagicType))
+                if (intDataEscam.typeDict.TryGetValue("StudyFleshcrafting", out Type studyMagicType))
                 {
                     AIChallenge Escam_StudyMagic = new AIChallenge(studyMagicType, 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden });
                     ModCore.Get().comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcUpstart), Escam_StudyMagic);
