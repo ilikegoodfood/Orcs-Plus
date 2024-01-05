@@ -511,7 +511,7 @@ namespace Orcs_Plus
 
         internal void tryAddSettlementTypeForWaystation(Type t, HashSet<Type> subsettlementBlacklist = null)
         {
-            if (!t.IsSubclassOf(typeof(Subsettlement)))
+            if (!t.IsSubclassOf(typeof(Settlement)))
             {
                 return;
             }
