@@ -28,8 +28,6 @@ namespace Orcs_Plus
 
         public PowersFromTenets powers;
 
-        private static bool patched = false;
-
         public static bool opt_DynamicOrcCount = false;
 
         public static int opt_targetOrcCount = 2;
@@ -42,11 +40,14 @@ namespace Orcs_Plus
         {
             core = this;
 
-            if (!patched)
-            {
-                patched = true;
-                HarmonyPatches.PatchingInit();
-            }
+            HarmonyPatches.PatchingInit();
+
+            data = new ModData();
+        }
+
+        public override void onStartGamePresssed(Map map, List<God> gods)
+        {
+            data.clean();
         }
 
         public override void receiveModConfigOpts_bool(string optName, bool value)
@@ -75,7 +76,7 @@ namespace Orcs_Plus
 
         public override void beforeMapGen(Map map)
         {
-            data = new ModData();
+            data.isClean = false;
             comLibHooks = new ComLibHooks(map);
 
             getModKernels(map);
@@ -2861,36 +2862,8 @@ namespace Orcs_Plus
             }
         }
 
-        public bool registerGodTenet(Type godType, Type tenetType)
-        {
-            if (godType.IsSubclassOf(typeof(God)) && tenetType.IsSubclassOf(typeof(HolyTenet)))
-            {
-                if (!Get().data.godTenetTypes.ContainsKey(godType))
-                {
-                    Get().data.godTenetTypes.Add(godType, tenetType);
-                    return true;
-                }
+        public bool registerGodTenet(Type godType, Type tenetType) => Get().data.tryAddGodTenetType(godType, tenetType);
 
-                if (Get().data.godTenetTypes[godType] == null)
-                {
-                    Get().data.godTenetTypes[godType] = tenetType;
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public void registerSettlementTypeForOrcWaystation(Type setType, HashSet<Type> subsettlementBlacklist)
-        {
-            if (!setType.IsSubclassOf(typeof(Settlement)))
-            {
-                return;
-            }
-
-            Get().data.tryAddSettlementTypeForWaystation(setType, subsettlementBlacklist);
-
-            return;
-        }
+        public void registerSettlementTypeForOrcWaystation(Type setType, HashSet<Type> subsettlementBlacklist) => Get().data.tryAddSettlementTypeForWaystation(setType, subsettlementBlacklist);
     }
 }

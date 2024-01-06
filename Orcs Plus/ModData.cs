@@ -10,6 +10,8 @@ namespace Orcs_Plus
 {
     public class ModData
     {
+        public bool isClean = true;
+
         public Dictionary<SG_Orc, HolyOrder_Orcs> orcSGCultureMap;
 
         public bool isPlayerTurn = false;
@@ -60,7 +62,9 @@ namespace Orcs_Plus
 
         public bool brokenMakerSleeping = false;
 
-        public int sleepDuration = 50;
+        public int sleepDuration;
+
+        public int sleepDurationBase() => 50;
 
         public Dictionary<string, string> perfectHordeNameDict;
 
@@ -105,42 +109,76 @@ namespace Orcs_Plus
 
             influenceGainHuman = new Dictionary<HolyOrder_Orcs, List<ReasonMsg>>();
 
-            godTenetTypes = new Dictionary<Type, Type> {
-                { typeof(God_Snake), typeof(H_Orcs_SerpentWarriors) },
-                { typeof(God_LaughingKing), typeof(H_Orcs_HarbingersMadness) },
-                { typeof(God_Vinerva), typeof(H_Orcs_LifeMother) },
-                { typeof(God_Ophanim), typeof(H_Orcs_Perfection) },
-                { typeof(God_Mammon), typeof(H_Orcs_MammonClient) },
-                { typeof(God_Cards), typeof(H_Orcs_Lucky) },
-                { typeof(God_Eternity), typeof(H_Orcs_GlorySeeker) }
-            };
+            initialiseGodSpecificTenets();
+            initialiseSettlementTypesForWaystations();
 
-            settlementTypesForWaystations = new Dictionary<Type, HashSet<Type>>
+            sleepDuration = sleepDurationBase();
+        }
+
+        private void initialiseGodSpecificTenets()
+        {
+            if (godTenetTypes == null)
             {
-                { typeof(Set_CityRuins), new HashSet<Type>() },
-                { typeof(Set_MinorOther), new HashSet < Type >() },
-                { typeof(Set_MinorVinerva), new HashSet < Type >() },
-                { typeof(Set_VinervaManifestation), new HashSet < Type >() },
-                { typeof(Set_TombOfGods), new HashSet < Type >() },
-                { typeof(Set_DeepOneSanctum), new HashSet < Type >() },
-                { typeof(Set_Shipwreck), new HashSet < Type >() }
-            };
+                godTenetTypes = new Dictionary<Type, Type> {
+                    { typeof(God_Snake), typeof(H_Orcs_SerpentWarriors) },
+                    { typeof(God_LaughingKing), typeof(H_Orcs_HarbingersMadness) },
+                    { typeof(God_Vinerva), typeof(H_Orcs_LifeMother) },
+                    { typeof(God_Ophanim), typeof(H_Orcs_Perfection) },
+                    { typeof(God_Mammon), typeof(H_Orcs_MammonClient) },
+                    { typeof(God_Cards), typeof(H_Orcs_Lucky) },
+                    { typeof(God_Eternity), typeof(H_Orcs_GlorySeeker) }
+                };
+            }
+        }
+
+        private void initialiseSettlementTypesForWaystations()
+        {
+            if (settlementTypesForWaystations == null)
+            {
+                settlementTypesForWaystations = new Dictionary<Type, HashSet<Type>>
+                {
+                    { typeof(Set_CityRuins), new HashSet<Type>() },
+                    { typeof(Set_MinorOther), new HashSet < Type >() },
+                    { typeof(Set_MinorVinerva), new HashSet < Type >() },
+                    { typeof(Set_VinervaManifestation), new HashSet < Type >() },
+                    { typeof(Set_TombOfGods), new HashSet < Type >() },
+                    { typeof(Set_DeepOneSanctum), new HashSet < Type >() },
+                    { typeof(Set_Shipwreck), new HashSet < Type >() }
+                };
+            }
+        }
+
+        public void clean()
+        {
+            if (isClean)
+            {
+                return;
+            }
+
+            modIntegrationData.Clear();
+            orcGeoMageHabitabilityBonus.Clear();
+            perfectHordeNameDict.Clear();
+            forbiddenChallenges.Clear();
+            orcSGCultureMap.Clear();
+            influenceGainElder.Clear();
+            influenceGainHuman.Clear();
+
+            initialiseGodSpecificTenets();
+            initialiseSettlementTypesForWaystations();
+
+            isPlayerTurn = false;
+            acceleratedTime = false;
+            brokenMakerSleeping = false;
+            sleepDuration = sleepDurationBase();
+
+            isClean = true;
         }
 
         public void afterLoading()
         {
             modIntegrationData = new Dictionary<string, ModIntegrationData>();
 
-            settlementTypesForWaystations = new Dictionary<Type, HashSet<Type>>
-            {
-                { typeof(Set_CityRuins), new HashSet<Type>() },
-                { typeof(Set_MinorOther), new HashSet < Type >() },
-                { typeof(Set_MinorVinerva), new HashSet < Type >() },
-                { typeof(Set_VinervaManifestation), new HashSet < Type >() },
-                { typeof(Set_TombOfGods), new HashSet < Type >() },
-                { typeof(Set_DeepOneSanctum), new HashSet < Type >() },
-                { typeof(Set_Shipwreck), new HashSet < Type >() }
-            };
+            initialiseSettlementTypesForWaystations();
 
             isPlayerTurn = true;
         }
@@ -509,12 +547,36 @@ namespace Orcs_Plus
             return modIntegrationData.TryGetValue(key, out intData);
         }
 
+        internal bool tryAddGodTenetType(Type godType, Type tenetType)
+        {
+            if (godType.IsSubclassOf(typeof(God)) && tenetType.IsSubclassOf(typeof(HolyTenet)))
+            {
+                initialiseGodSpecificTenets();
+
+                if (!godTenetTypes.ContainsKey(godType))
+                {
+                    godTenetTypes.Add(godType, tenetType);
+                    return true;
+                }
+
+                if (godTenetTypes[godType] == null)
+                {
+                    godTenetTypes[godType] = tenetType;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         internal void tryAddSettlementTypeForWaystation(Type t, HashSet<Type> subsettlementBlacklist = null)
         {
             if (!t.IsSubclassOf(typeof(Settlement)))
             {
                 return;
             }
+
+            initialiseSettlementTypesForWaystations();
 
             if (settlementTypesForWaystations.TryGetValue(t, out HashSet<Type> blacklist))
             {
