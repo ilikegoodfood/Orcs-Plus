@@ -12,6 +12,8 @@ namespace Orcs_Plus
     {
         public int timer = 5;
 
+        public bool doublesHeld = false;
+
         public double deathNeed = 300.0;
 
         public I_BloodGourd(Map map)
@@ -52,7 +54,7 @@ namespace Orcs_Plus
 
         public override string getShortDesc()
         {
-            return "The gourd of blood is a small red gourd that can only be found in the depths of the wilderness. Its flesh is closer to meat than plant matter and it is filled to bursting with blood of uncertain origins. It is occasionally harvested by orc tribes, a process that is extremely dangerous. The holder regains 1 hp every five turns, or they can consume the gourd to fully refill their health.";
+            return "The gourd of blood is a small red gourd that can only be found in the depths of the wilderness. Its flesh is closer to meat than plant matter and it is filled to bursting with blood of uncertain origins. It is occasionally harvested by orc tribes, a process that is extremely dangerous. The holder regains 1 hp every five turns, or they can consume the gourd to fully refill their health (max of only one will have effect per agent)." + (doublesHeld ? " [DISABLED]" : "");
         }
 
         public override Sprite getIconFore()
@@ -72,60 +74,78 @@ namespace Orcs_Plus
 
         public override void turnTick(Person owner)
         {
-            timer--;
-
-            if (owner.unit is UA ua)
+            doublesHeld = false;
+            foreach (Item item in owner.items)
             {
-                if (timer <= 0)
+                if (item == this)
                 {
-                    if (owner.unit.hp < owner.unit.maxHp)
+                    break;
+                }
+
+                if (item is I_IdolOfMadness)
+                {
+                    doublesHeld = true;
+                }
+            }
+
+            if (!doublesHeld)
+            {
+                timer--;
+
+                if (owner.unit is UA ua)
+                {
+                    if (timer <= 0)
                     {
-                        owner.unit.hp++;
-                    }
-                    else
-                    {
-                        foreach (Minion minion in ua.minions)
+                        if (owner.unit.hp < owner.unit.maxHp)
                         {
-                            if (minion != null && minion.hp < minion.getMaxHP())
+                            owner.unit.hp++;
+                        }
+                        else
+                        {
+                            foreach (Minion minion in ua.minions)
                             {
-                                minion.hp++;
-                                break;
+                                if (minion != null && minion.hp < minion.getMaxHP())
+                                {
+                                    minion.hp++;
+                                    break;
+                                }
                             }
                         }
                     }
-                }
 
-                Pr_Death death = (Pr_Death)owner.unit.location.properties.FirstOrDefault(pr => pr is Pr_Death);
-                if (death != null)
-                {
-                    double delta = Math.Min(5.0, death.charge);
-                    Property.addToProperty("Fertilizer for Gourd of Blood", Property.standardProperties.DEATH, -delta, owner.unit.location);
-                    deathNeed -= delta;
-                }
-                else if (deathNeed < 300.0)
-                {
-                    deathNeed += 0.5;
-
-                    if (deathNeed > 300.0)
+                    Pr_Death death = (Pr_Death)owner.unit.location.properties.FirstOrDefault(pr => pr is Pr_Death);
+                    if (death != null)
                     {
+                        double delta = Math.Min(5.0, death.charge);
+                        Property.addToProperty("Fertilizer for Gourd of Blood", Property.standardProperties.DEATH, -delta, owner.unit.location);
+                        deathNeed -= delta;
+                    }
+                    else if (deathNeed < 300.0)
+                    {
+                        deathNeed += 0.5;
+
+                        if (deathNeed > 300.0)
+                        {
+                            deathNeed = 300.0;
+                        }
+                    }
+
+                    if (deathNeed <= 0.0)
+                    {
+                        if (owner.unit != null && owner.unit.isCommandable() || owner.isWatched())
+                        {
+                            owner.map.addUnifiedMessage(owner, null, "Gourd of Blood Propagated", owner.getName() + "'s Gourd of Blood has, fattened by the presence of death, grown a second gourd.", "Gourd of Blood Propagated");
+                        }
+
+                        ua.person.gainItem(new I_BloodGourd(ua.map));
                         deathNeed = 300.0;
                     }
                 }
 
-                if (deathNeed <= 0.0)
+                if (timer <= 0)
                 {
-                    if (owner.unit != null && owner.unit.isCommandable() || owner.isWatched())
-                    {
-                        owner.map.addUnifiedMessage(owner, null, "Gourd of Blood Propagated", owner.getName() + "'s Gourd of Blood has, fattened by the presence of death, grown a second gourd.", "Gourd of Blood Propagated");
-                    }
-
-                    ua.person.gainItem(new I_BloodGourd(ua.map));
+                    timer = 5;
                 }
-            }
-
-            if (timer <= 0)
-            {
-                timer = 5;
             }
         }
 

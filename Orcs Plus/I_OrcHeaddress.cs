@@ -30,7 +30,7 @@ namespace Orcs_Plus
 
         public override string getShortDesc()
         {
-            return "A heavy wood and cloth headdress carved to resemble an orc, but still identifiably different to any familiar with orc faces. You gain +" + (int)(xpModifier * 100) + "% XP when completing challenges relating to Orcs, and, while in an orc camp, your profile is always at its minimu.(max of only one will have effect per agent)." + (doublesHeld ? " [DISABLED]" : "");
+            return "A heavy wood and cloth headdress carved to resemble an orc, but still identifiably different to any familiar with orc faces. You gain +" + (int)(xpModifier * 100) + "% XP when completing challenges relating to Orcs, and, while in an orc camp, your profile is always at its minimum (max of only one will have effect per agent)." + (doublesHeld ? " [DISABLED]" : "");
         }
 
         public override Sprite getIconFore()
