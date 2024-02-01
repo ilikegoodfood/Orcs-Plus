@@ -50,6 +50,16 @@ namespace Orcs_Plus
             ModCore.Get().powers.updateOrcPowers(order.map);
         }
 
+        public override Minion onAgentBattle_ReinforceFromEscort(UA ua, UM escort)
+        {
+            if (escort is UM_VengenceHorde)
+            {
+                return new M_OrcWarrior(ua.map);
+            }
+
+            return null;
+        }
+
         public override int onAgentBattle_ReceiveDamage(PopupBattleAgent popup, BattleAgents battle, UA defender, Minion minion, int dmg, int row)
         {
             //Console.WriteLine("OrcsPlus: ReceiveDamage hook called");
@@ -61,6 +71,31 @@ namespace Orcs_Plus
 
             return dmg;
         }
+
+        /*public override bool interceptUnitDeath(Unit u, string v, Person kiler = null)
+        {
+            if (u.person != null)
+            {
+                //Console.WriteLine("OrcsPlus: Intercept unit death with person");
+                for (int i = 0; i < u.person.items.Length; i++)
+                {
+                    if (u.person.items[i] is I_BloodGourd)
+                    {
+                        //Console.WriteLine("OrcsPlus: Person has Blood Gourd (Item slot " + (i + 1).ToString() + ")");
+
+                        u.person.map.addUnifiedMessage(u.person, null, "Survived Death", "In a last, desperate attempt to stave off death " + u.person.getName() + " devours the entire blood gourd that they carried with them. Its healing abilities were said to be able to heal any wound, cure any poison, and the stories were right. " + u.person.getName() + " makes a full recovery.", "Survived Death");
+                        u.person.items[i] = null;
+
+                        u.hp = u.maxHp;
+                        u.person.isDead = false;
+
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }*/
 
         public override void onUnitDeath_StartOfProcess(Unit u, string v, Person killer)
         {
@@ -1320,6 +1355,31 @@ namespace Orcs_Plus
         {
             if (ua is UAEN_OrcUpstart || ua is UAEN_OrcElder || ua is UAEN_OrcShaman)
             {
+                SG_Orc orcSociety = ua.society as SG_Orc;
+                HolyOrder_Orcs orcCulture = ua.society as HolyOrder_Orcs;
+
+                if (orcSociety != null)
+                {
+                    ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+                }
+                else if (orcCulture != null)
+                {
+                    orcSociety = orcCulture.orcSociety;
+                }
+
+                if (ua is UAEN_OrcElder elder)
+                {
+                    if (elder.task is Task_DisruptUA tDisrupt)
+                    {
+                        elder.task = new Task_Orcs_DisruptUA(elder, tDisrupt.other);
+                    }
+                }
+                
+                if (orcSociety != null && ua.task is Task_AttackUnit tAttack && tAttack.target is UA targetUA && targetUA.person != null && targetUA.person.traits.Any(t => t is T_BloodFeud feud && feud.orcSociety == orcSociety))
+                {
+                    ua.task = new Task_AvengeBloodFeud(ua, targetUA);
+                }
+
                 if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModIntegrationData intDataEscam))
                 {
                     if (intDataEscam.typeDict.TryGetValue("FleshStatBonusTrait", out Type fleshStatBonusType) && intDataEscam.fieldInfoDict.TryGetValue("FleshStatBonusTrait_BonusType", out FieldInfo FI_BonusType))

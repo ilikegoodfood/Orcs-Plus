@@ -64,7 +64,7 @@ namespace Orcs_Plus
                     break;
                 }
 
-                if (item is I_SnakeskinArmour)
+                if (item is I_ShamanStaff)
                 {
                     doublesHeld = true;
                 }
@@ -83,7 +83,7 @@ namespace Orcs_Plus
                     break;
                 }
 
-                if (item is I_SnakeskinArmour)
+                if (item is I_ShamanStaff)
                 {
                     doublesHeld = true;
                 }

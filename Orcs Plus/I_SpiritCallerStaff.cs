@@ -25,7 +25,7 @@ namespace Orcs_Plus
 
         public override string getShortDesc()
         {
-            return "A thick wooden staff, topped with an orc skull. It is used by orc spirit callers to communicate with the dead. Grants +1 <b>lore</b>, and +1 attack and defence in locations with at least 50 death.";
+            return "A thick wooden staff, topped with an orc skull. It is used by orc spirit callers to communicate with the dead. Grants +1 <b>lore</b>, and +1 attack and defence when in a location with at least 50 death.";
         }
 
         public override Sprite getIconFore()
@@ -76,12 +76,28 @@ namespace Orcs_Plus
 
             getHolder();
 
-            if (holder?.unit?.location != null)
+            if (holder != null)
             {
-                Pr_Death death = (Pr_Death)holder.unit.location.properties.FirstOrDefault(pr => pr is Pr_Death);
-                if (death != null && death.charge >= 50.0)
+                Location holderLoc = null;
+                if (holder.unit != null)
                 {
-                    result = 1;
+                    if (holder.unit.location != null)
+                    {
+                        holderLoc = holder.unit.location;
+                    }
+                }
+                else if (holder.rulerOf != -1)
+                {
+                    holderLoc = map.locations[holder.rulerOf];
+                }
+
+                if (holderLoc != null)
+                {
+                    Pr_Death death = (Pr_Death)holderLoc.properties.FirstOrDefault(pr => pr is Pr_Death);
+                    if (death != null && death.charge >= 50.0)
+                    {
+                        result = 1;
+                    }
                 }
             }
 
@@ -94,12 +110,28 @@ namespace Orcs_Plus
 
             getHolder();
 
-            if (holder?.unit?.location != null)
+            if (holder != null)
             {
-                Pr_Death death = (Pr_Death)holder.unit.location.properties.FirstOrDefault(pr => pr is Pr_Death);
-                if (death != null && death.charge >= 50.0)
+                Location holderLoc = null;
+                if (holder.unit != null)
                 {
-                    result = 1;
+                    if (holder.unit.location != null)
+                    {
+                        holderLoc = holder.unit.location;
+                    }
+                }
+                else if (holder.rulerOf != -1)
+                {
+                    holderLoc = map.locations[holder.rulerOf];
+                }
+
+                if (holderLoc != null)
+                {
+                    Pr_Death death = (Pr_Death)holderLoc.properties.FirstOrDefault(pr => pr is Pr_Death);
+                    if (death != null && death.charge >= 50.0)
+                    {
+                        result = 1;
+                    }
                 }
             }
 

@@ -34,7 +34,7 @@ namespace Orcs_Plus
 
         public override string getShortDesc()
         {
-            return base.getShortDesc() + "\nGains +2 attack and defence when at sea.";
+            return base.getShortDesc() + "\nGains +2 attack and defence when at sea or on the coast.";
         }
 
         public override Sprite getIcon()
@@ -73,7 +73,7 @@ namespace Orcs_Plus
                 }
             }
 
-            if (holder != null && holder.location != null && holder.location.isOcean)
+            if (holder != null && holder.location != null && (holder.location.isOcean || holder.location.isCoastal))
             {
                 result += 2;
             }

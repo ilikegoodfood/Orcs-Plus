@@ -82,7 +82,7 @@ namespace Orcs_Plus
                     break;
                 }
 
-                if (item is I_IdolOfMadness)
+                if (item is I_OrcHeaddress)
                 {
                     doublesHeld = true;
                 }

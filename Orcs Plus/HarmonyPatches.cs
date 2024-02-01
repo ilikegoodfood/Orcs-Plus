@@ -106,6 +106,9 @@ namespace Orcs_Plus
             // Patches for UAEN_OrcUpstart
             harmony.Patch(original: AccessTools.Constructor(typeof(UAEN_OrcUpstart), new Type[] { typeof(Location), typeof(SocialGroup), typeof(Person) }), postfix: new HarmonyMethod(patchType, nameof(UAEN_OrcUpstart_ctor_Postfix)));
 
+            // Ptches for UAE_Warlord
+            harmony.Patch(original: AccessTools.Constructor(typeof(UAE_Warlord), new Type[] { typeof(Location), typeof(SocialGroup)}), postfix: new HarmonyMethod(patchType, nameof(UAEN_OrcWarlord_ctor_Postfix)));
+
             // Patches for Unit
             harmony.Patch(original: AccessTools.Method(typeof(Unit), nameof(Unit.hostileTo), new Type[] { typeof(Unit), typeof(bool) }), postfix: new HarmonyMethod(patchType, nameof(Unit_hostileTo_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(UAEN_OrcUpstart), nameof(UAEN_OrcUpstart.turnTick), new Type[] { typeof(Map) }), postfix: new HarmonyMethod(patchType, nameof(UAEN_OrcsUpstart_turnTick_Postfix)));
@@ -1338,6 +1341,11 @@ namespace Orcs_Plus
                 Rti_RecruitWarband recruit = banner.rituals.OfType<Rti_RecruitWarband>().FirstOrDefault();
                 recruit?.complete(__instance);
             }
+        }
+
+        private static void UAEN_OrcWarlord_ctor_Postfix(UAE_Warlord __instance)
+        {
+            __instance.rituals.Add(new Rt_H_Orcs_GiftGold(__instance.location));
         }
 
         private static bool Unit_hostileTo_Postfix(bool result, Unit __instance, Unit other, bool allowRecursion)

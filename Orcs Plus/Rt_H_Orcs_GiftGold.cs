@@ -11,9 +11,9 @@ namespace Orcs_Plus
 {
     public class Rt_H_Orcs_GiftGold : Ritual
     {
-        public int bribeCost = 40;
+        public int bribeCost = 20;
 
-        public double bribeEffect = 4;
+        public double bribeEffect = 2;
 
         public double relationsBonusPerMenaceReduced = 1.25;
 
@@ -25,7 +25,7 @@ namespace Orcs_Plus
 
         public override string getName()
         {
-            return "Holy: Orcish Gift";
+            return "Orcish Gift";
         }
 
         public override string getDesc()
@@ -50,7 +50,7 @@ namespace Orcs_Plus
 
         public override double getComplexity()
         {
-            return 40;
+            return 15;
         }
 
         public override challengeStat getChallengeType()
@@ -76,7 +76,7 @@ namespace Orcs_Plus
                 result += val;
             }
 
-            if (result < 1)
+            if (result < 1.0)
             {
                 msgs?.Add(new ReasonMsg("Base", 1.0));
                 result = 1.0;
@@ -88,7 +88,7 @@ namespace Orcs_Plus
 
         public override double getUtility(UA ua, List<ReasonMsg> msgs)
         {
-            double utility = ((ua.society as HolyOrder_Orcs)?.orcSociety.menace ?? 0) * 4;
+            double utility = ((ua.society as HolyOrder_Orcs)?.orcSociety.menace ?? 0) * 8;
 
             if (utility > 0)
             {
@@ -131,7 +131,7 @@ namespace Orcs_Plus
 
         public override bool validFor(UA ua)
         {
-            return ua is UAEN_OrcElder elder && elder.person.gold >= bribeCost && elder.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety.menace > bribeEffect && elder.location.settlement is SettlementHuman;
+            return (ua is UAEN_OrcElder || ua is UAE_Warlord) && ua.person.gold >= bribeCost && ua.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety.menace > bribeEffect && ua.location.settlement is SettlementHuman;
         }
 
         public override int getCompletionProfile()
@@ -141,12 +141,21 @@ namespace Orcs_Plus
 
         public override void complete(UA u)
         {
+            SG_Orc orcSociety = u.society as SG_Orc;
             HolyOrder_Orcs orcCulture = u.society as HolyOrder_Orcs;
-            double menaceReduction = bribeEffect;
-            if (orcCulture != null && orcCulture.orcSociety != null)
-            {
-                SG_Orc orcSociety = orcCulture.orcSociety;
 
+            if (orcSociety != null)
+            {
+                ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+            }
+            else if (orcCulture != null)
+            {
+                orcSociety = orcCulture.orcSociety;
+            }
+
+            double menaceReduction = bribeEffect;
+            if (orcSociety != null && orcCulture != null)
+            {
                 if (u.location.settlement != null && u.location.settlement is SettlementHuman settlementHuman && settlementHuman.ruler != null)
                 {
                     Person ruler = settlementHuman.ruler;

@@ -158,9 +158,11 @@
     <Compile Include="Sub_OrcCultureCapital.cs" />
     <Compile Include="Sub_OrcTemple.cs" />
     <Compile Include="Sub_OrcWaystation.cs" />
+    <Compile Include="Task_AvengeBloodFeud.cs" />
     <Compile Include="Task_DevourArmy.cs" />
     <Compile Include="Task_DevourLocation.cs" />
     <Compile Include="Task_GatherAtLocation.cs" />
+    <Compile Include="Task_Orcs_DisruptUA.cs" />
     <Compile Include="Task_RazeOutpost.cs" />
     <Compile Include="T_BloodFeud.cs" />
     <Compile Include="T_BrokenSpirit.cs" />
@@ -176,6 +178,7 @@
     <Compile Include="UM_OrcRabble.cs" />
     <Compile Include="UM_PerfectHorde.cs" />
     <Compile Include="UM_PerfectRaiders.cs" />
+    <Compile Include="UM_VengenceHorde.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

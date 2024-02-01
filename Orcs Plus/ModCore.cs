@@ -215,6 +215,15 @@ namespace Orcs_Plus
                 {
                     elder.setPortraitForeground();
                 }
+
+                if (u is UAE_Warlord)
+                {
+                    Rt_H_Orcs_GiftGold giftGold = (Rt_H_Orcs_GiftGold)u.rituals.FirstOrDefault(c => c is Rt_H_Orcs_GiftGold);
+                    if (giftGold == null)
+                    {
+                        u.rituals.Add(new Rt_H_Orcs_GiftGold(u.location));
+                    }
+                }
             }
         }
 
@@ -1572,18 +1581,50 @@ namespace Orcs_Plus
             }
         }
 
-        public override bool interceptDeath(Person person, string v, object killer)
+        /*public override bool interceptDeath(Person person, string v, object killer)
         {
+            //Console.WriteLine("OrcsPlus: intercepting person death (ModKernel.interceptDeath)");
             for (int i = 0; i < person.items.Length; i++)
             {
                 if (person.items[i] is I_BloodGourd)
                 {
-                    person.map.addUnifiedMessage(person, null, "Survived Death", "In a last, desperate attempt to stave off death " + person.getName() + " devours the entire blood gourd that they carried with them. Its healing abilities were said to be able to heal any would, cure any poison, and the stories were right. " + person.getName() + " makes a full recovery.", "Survived Death");
+                    person.map.addUnifiedMessage(person, null, "Survived Death", "In a last, desperate attempt to stave off death " + person.getName() + " devours the entire blood gourd that they carried with them. Its healing abilities were said to be able to heal any wound, cure any poison, and the stories were right. " + person.getName() + " makes a full recovery.", "Survived Death");
                     person.items[i] = null;
-                    
-                    if (person.unit != null && person.unit.hp < person.unit.maxHp)
+
+                    person.isDead = false;
+
+                    // Restore all values that may have been wiped by cause of death logic.
+                    if (person.rulerOf != -1)
                     {
-                        person.unit.hp = person.unit.maxHp;
+                        Location rulerLoc = person.map.locations[person.rulerOf];
+                        SettlementHuman rulerSet = rulerLoc.settlement as SettlementHuman;
+
+                        if (rulerSet != null && rulerSet.rulerIndex == -1)
+                        {
+                            rulerSet.rulerIndex = person.index;
+                        }
+                        else
+                        {
+
+                        }
+                    }
+
+                    if (person.unit != null)
+                    {
+                        if (person.unit.maxHp < 1)
+                        {
+                            person.unit.maxHp = 1;
+                        }
+
+                        if (person.unit.hp < 1)
+                        {
+                            person.unit.hp = 1;
+                        }
+
+                        if (person.unit.person == null)
+                        {
+                            person.unit.person = person;
+                        }
                     }
 
                     return true;
@@ -1591,7 +1632,24 @@ namespace Orcs_Plus
             }
 
             return false;
-        }
+        }*/
+
+        /*public override string interceptCombatOutcomeEvent(string currentlyChosenEvent, UA victor, UA defeated, BattleAgents battleAgents)
+        {
+            if (defeated.person != null && defeated.person.items.Any(i => i is I_BloodGourd))
+            {
+                if (currentlyChosenEvent == victor.getEventID_combatDAL())
+                {
+                    return victor.getEventID_combatDAR();
+                }
+                if (currentlyChosenEvent == victor.getEventID_combatDDL())
+                {
+                    return victor.getEventID_combatDDR();
+                }
+            }
+
+            return currentlyChosenEvent;
+        }*/
 
         public override void onPersonDeath_StartOfProcess(Person person, string v, object killer)
         {

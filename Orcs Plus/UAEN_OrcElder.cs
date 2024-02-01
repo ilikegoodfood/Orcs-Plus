@@ -1,5 +1,6 @@
 ﻿using Assets.Code;
 using Assets.Code.Modding;
+using CommunityLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -347,7 +348,8 @@ namespace Orcs_Plus
                                     {
                                         reasons?.Add(new ReasonMsg("Orcs will not disrupt banner bearer", -10000.0));
                                         utility -= 10000.0;
-                                        return utility;
+                                        otherIsTarget = false;
+                                        break;
                                     }
                                     else
                                     {
@@ -356,108 +358,158 @@ namespace Orcs_Plus
                                         {
                                             reasons?.Add(new ReasonMsg("Orcs will not disrupt banner bearer", -10000.0));
                                             utility -= 10000.0;
-                                            return utility;
+                                            otherIsTarget = false;
+                                            break;
                                         }
                                     }
                                 }
                             }
+                        }
 
-                            if (target.location.soc == orcSociety || (((target.society != null && orcSociety.getRel(target.society).state == DipRel.dipState.war) || feud != null) && (target.location.soc == null || orcSociety.getRel(target.location.soc).state == DipRel.dipState.war)))
+                        if (otherIsTarget)
+                        {
+                            double val = map.turn - person.disruptionTurnLast;
+                            if (val < map.param.utility_ua_disruptSoftTimeoutTimer)
                             {
-                                double val;
-                                if (target.location.soc != orcSociety)
-                                {
-                                    val = -25;
-                                    reasons?.Add(new ReasonMsg("Target is outside of " + orcSociety.getName() + "'s territory", val));
-                                    utility += val;
-                                }
-                                else if (target.task is Task_PerformChallenge task)
-                                {
-                                    val = 20;
-                                    reasons?.Add(new ReasonMsg("Agent is interfereing with " + orcSociety.getName() + "'s territory", val));
-                                    utility += val;
+                                val = map.param.utility_ua_disruptSoftTimeoutTimer - val;
+                                val *= map.param.utility_ua_disruptSoftTimeoutMult;
+                                val *= -30.0;
 
-                                    if (task.challenge is Ch_Orcs_StealPlunder)
+                                reasons?.Add(new ReasonMsg("Have recently disrupted", val));
+                                utility += val;
+                            }
+
+                            if (disruptionExhaustion > 0)
+                            {
+                                val = -disruptionExhaustion;
+                                reasons?.Add(new ReasonMsg("Disrupted Recently", val));
+                                utility += val;
+                            }
+
+                            val = -map.getStepDist(location, target.location);
+                            reasons?.Add(new ReasonMsg("Distance", val));
+                            utility += val;
+
+                            int disruptCount = 0;
+                            foreach (UAEN_OrcElder elder in orcCulture.acolytes)
+                            {
+                                if (elder.task is Task_DisruptUA tDisrupt && tDisrupt.other == target)
+                                {
+                                    disruptCount++;
+                                }
+                            }
+
+                            if (disruptCount > 0)
+                            {
+                                val = disruptCount * -50.0;
+                                reasons?.Add(new ReasonMsg("Fellow elders are already disrupting", val));
+                                utility += val;
+                            }
+
+                            if (target.task is Task_PerformChallenge tPerformChallenge && (target.location.soc == orcSociety || target.location.soc == orcCulture) && !(tPerformChallenge.challenge is Ch_LayLow || tPerformChallenge.challenge is Ch_LayLowWilderness))
+                            {
+                                val = -50.0;
+                                foreach (Unit unit in target.location.units)
+                                {
+                                    if (!(unit is UAEN_OrcElder elder) || elder.society != orcCulture)
                                     {
-                                        val = 40;
-                                        reasons?.Add(new ReasonMsg("Agent stealing gold from " + orcSociety.getName() + "'s plunder", val));
-                                        utility += val;
-                                    }
-                                }
-                                else if (target.task is Task_GoToPerformChallenge task2 && !(task2.challenge is Ritual) && (task2.challenge.location.soc == orcSociety || task2.challenge.location.soc == orcCulture))
-                                {
-                                    val = 20;
-                                    reasons?.Add(new ReasonMsg("Agent is travelling to interfere with " + orcSociety.getName() + "'s territory", val));
-                                    utility += val;
-
-                                    if (task2.challenge is Ch_Orcs_StealPlunder)
-                                    {
-                                        val = 40;
-                                        reasons?.Add(new ReasonMsg("Agent is travelling to steal gold from " + orcSociety.getName() + "'s plunder", val));
-                                        utility += val;
-                                    }
-                                }
-
-                                utility += person.getTagUtility(new int[]
-                                {
-                                    Tags.COMBAT,
-                                    Tags.CRUEL,
-                                    Tags.DANGER
-                                }, new int[0], reasons);
-                                utility += person.getTagUtility(target.getPositiveTags(), target.getNegativeTags(), reasons);
-
-                                if (ModCore.Get().checkIsVampire(target))
-                                {
-                                    val = -35;
-                                    reasons?.Add(new ReasonMsg("Fear of Vampires", val));
-                                    utility += val;
-                                }
-
-                                if (ModCore.Get().data.tryGetModIntegrationData("LivingWilds", out ModIntegrationData intDataLW) && intDataLW.typeDict.TryGetValue("NatureCritter", out Type natureCritterType))
-                                {
-                                    if (target.GetType().IsSubclassOf(natureCritterType))
-                                    {
-                                        val = -35;
-                                        reasons?.Add(new ReasonMsg("Nature", val));
-                                        utility += val;
+                                        if (unit.task is Task_DisruptUA tDisrupt && tDisrupt.other == target)
+                                        {
+                                            reasons?.Add(new ReasonMsg(unit.getName() + " already disrupting", val));
+                                            utility += val;
+                                        }
                                     }
                                 }
 
-                                if (feud != null)
+                                val = 20;
+                                reasons?.Add(new ReasonMsg("Agent is interfereing with " + orcSociety.getName() + "'s territory", val));
+                                utility += val;
+
+                                if (tPerformChallenge.challenge is Ch_Orcs_StealPlunder)
                                 {
-                                    val = 20;
-                                    reasons?.Add(new ReasonMsg("Blood Feud", val));
+                                    val = 40;
+                                    reasons?.Add(new ReasonMsg("Agent stealing gold from " + orcSociety.getName() + "'s plunder", val));
                                     utility += val;
                                 }
+                            }
+                            else if (target.task is Task_GoToPerformChallenge tGoPerformChallenge
+                                && ((tGoPerformChallenge is Task_GoToPerformChallengeAtLocation tGoPerformChallengeAtLocation && (tGoPerformChallengeAtLocation.target.soc == orcSociety || tGoPerformChallengeAtLocation.target.soc == orcCulture)) || (!(tGoPerformChallenge.challenge is Ritual) && (tGoPerformChallenge.challenge.location.soc == orcSociety || tGoPerformChallenge.challenge.location.soc == orcCulture)))
+                                && !(tGoPerformChallenge.challenge is Ch_LayLow || tGoPerformChallenge.challenge is Ch_LayLowWilderness))
+                            {
+                                val = 20;
+                                reasons?.Add(new ReasonMsg("Agent is travelling to interfere with " + orcSociety.getName() + "'s territory", val));
+                                utility += val;
 
-                                if (target.society != null && orcSociety.getRel(target.society).state == DipRel.dipState.war)
+                                if (tGoPerformChallenge.challenge is Ch_Orcs_StealPlunder)
                                 {
-                                    val = 20.0;
-                                    reasons?.Add(new ReasonMsg("At War", val));
+                                    val = 40;
+                                    reasons?.Add(new ReasonMsg("Agent is travelling to steal gold from " + orcSociety.getName() + "'s plunder", val));
                                     utility += val;
-                                }
-
-                                foreach (HolyTenet holyTenet in orcCulture.tenets)
-                                {
-                                    utility += holyTenet.addUtilityAttack(this, target, reasons);
-                                }
-                                foreach (ModKernel modKernel in map.mods)
-                                {
-                                    utility = modKernel.unitAgentAIAttack(map, this, target, reasons, utility);
                                 }
                             }
                             else
                             {
-                                if (target.society != null && orcSociety.getRel(target.society).state == DipRel.dipState.war)
+                                reasons?.Add(new ReasonMsg("Agent is not travelling to interfere with " + orcSociety.getName() + "'s territory", -10000.0));
+                                utility -= 10000.0;
+                                return utility;
+                            }
+
+                            if (target.location.soc != orcSociety && target.location.soc != orcCulture)
+                            {
+                                val = -25;
+                                reasons?.Add(new ReasonMsg("Target is outside of " + orcSociety.getName() + "'s territory", val));
+                                utility += val;
+                            }
+
+                            utility += person.getTagUtility(new int[]
+                            {
+                                Tags.COMBAT,
+                                Tags.CRUEL,
+                                Tags.DANGER
+                            }, new int[0], reasons);
+                            utility += person.getTagUtility(target.getPositiveTags(), target.getNegativeTags(), reasons);
+
+                            if (target.person != null && (person.hates.Contains(target.person.index + 10000) || person.extremeHates.Contains(target.person.index + 10000)))
+                            {
+                                val = map.param.utility_ua_disruptDislikedPerson;
+                                reasons?.Add(new ReasonMsg("Person I dislike is doing something", val));
+                                utility += val;
+                            }
+
+                            if (ModCore.Get().checkIsVampire(target))
+                            {
+                                val = -35;
+                                reasons?.Add(new ReasonMsg("Fear of Vampires", val));
+                                utility += val;
+                            }
+
+                            if (ModCore.Get().data.tryGetModIntegrationData("LivingWilds", out ModIntegrationData intDataLW) && intDataLW.typeDict.TryGetValue("NatureCritter", out Type natureCritterType))
+                            {
+                                if (target.GetType().IsSubclassOf(natureCritterType))
                                 {
-                                    reasons?.Add(new ReasonMsg("Tresspassing in territory of " + target.location.soc.getName(), -10000.0));
-                                    utility -= 10000.0;
+                                    val = -35;
+                                    reasons?.Add(new ReasonMsg("Nature", val));
+                                    utility += val;
                                 }
-                                else
-                                {
-                                    reasons?.Add(new ReasonMsg("Target is outside of " + orcSociety.getName() + "'s territory", -10000.0));
-                                    utility -= 10000.0;
-                                }
+                            }
+
+                            if (feud != null)
+                            {
+                                val = 20;
+                                reasons?.Add(new ReasonMsg("Blood Feud", val));
+                                utility += val;
+                            }
+
+                            if (target.society != null && orcSociety.getRel(target.society).state == DipRel.dipState.war)
+                            {
+                                val = 20.0;
+                                reasons?.Add(new ReasonMsg("At War", val));
+                                utility += val;
+                            }
+
+                            foreach (ModKernel modKernel in map.mods)
+                            {
+                                utility = modKernel.unitAgentAIDisrupt(map, target, reasons, utility);
                             }
                         }
                         else
