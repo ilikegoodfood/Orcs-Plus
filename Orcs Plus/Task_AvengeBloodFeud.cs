@@ -103,6 +103,12 @@ namespace Orcs_Plus
                 return;
             }
 
+            if (other == null || other.isDead || other.location == null || !other.location.units.Contains(other))
+            {
+                unit.task = null;
+                return;
+            }
+
             if (unit is UA ua)
             {
                 if (unit.location == target.location)
