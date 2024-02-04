@@ -107,7 +107,7 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Constructor(typeof(UAEN_OrcUpstart), new Type[] { typeof(Location), typeof(SocialGroup), typeof(Person) }), postfix: new HarmonyMethod(patchType, nameof(UAEN_OrcUpstart_ctor_Postfix)));
 
             // Ptches for UAE_Warlord
-            harmony.Patch(original: AccessTools.Constructor(typeof(UAE_Warlord), new Type[] { typeof(Location), typeof(SocialGroup)}), postfix: new HarmonyMethod(patchType, nameof(UAEN_OrcWarlord_ctor_Postfix)));
+            harmony.Patch(original: AccessTools.Constructor(typeof(UAE_Warlord), new Type[] { typeof(Location), typeof(Society) }), postfix: new HarmonyMethod(patchType, nameof(UAEN_OrcWarlord_ctor_Postfix)));
 
             // Patches for Unit
             harmony.Patch(original: AccessTools.Method(typeof(Unit), nameof(Unit.hostileTo), new Type[] { typeof(Unit), typeof(bool) }), postfix: new HarmonyMethod(patchType, nameof(Unit_hostileTo_Postfix)));
@@ -119,9 +119,6 @@ namespace Orcs_Plus
 
             // Patches for SocialGroup
             harmony.Patch(original: AccessTools.Method(typeof(SocialGroup), nameof(SocialGroup.checkIsGone), new Type[] { }), postfix: new HarmonyMethod(patchType, nameof(SocialGroup_checkIsGone_Postfix)));
-
-            // Patches for ManagerMajorThreats
-            harmony.Patch(original: AccessTools.Method(typeof(ManagerMajorThreats), nameof(ManagerMajorThreats.turnTick), Type.EmptyTypes), transpiler: new HarmonyMethod(patchType, nameof(ManagerMajorThreats_turnTick_Transpiler)));
 
             // Patches for SG_Orc
             harmony.Patch(original: AccessTools.Constructor(typeof(SG_Orc), new Type[] { typeof(Map), typeof(Location) }), postfix: new HarmonyMethod(patchType, nameof(SG_Orc_ctor_Postfix)));
@@ -1470,7 +1467,7 @@ namespace Orcs_Plus
                                 }
                             }
 
-                            if (ModCore.Get().checkIsVampire(target))
+                            if (ModCore.GetComLib().checkIsVampire(target))
                             {
                                 return false;
                             }
@@ -1723,7 +1720,7 @@ namespace Orcs_Plus
                                     utility += val;
                                 }
 
-                                if (ModCore.Get().checkIsVampire(target))
+                                if (ModCore.GetComLib().checkIsVampire(target))
                                 {
                                     val = -35;
                                     reasonMsgs?.Add(new ReasonMsg("Fear of Vampires", val));
@@ -2093,64 +2090,6 @@ namespace Orcs_Plus
                 }
 
                 return isGone;
-            }
-
-            return result;
-        }
-
-        private static IEnumerable<CodeInstruction> ManagerMajorThreats_turnTick_Transpiler(IEnumerable<CodeInstruction> instructions)
-        {
-            List<CodeInstruction> instructionList = instructions.ToList();
-
-            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(ManagerMajorThreats_turnTick_TranspilerBody));
-
-            FieldInfo FI_Map = AccessTools.Field(typeof(ManagerMajorThreats), nameof(ManagerMajorThreats.map));
-
-            int targetIndex = 1;
-
-            for (int i = 0; i < instructionList.Count; i++)
-            {
-                if (targetIndex > 0)
-                {
-                    if (targetIndex == 1)
-                    {
-                        if (instructionList[i].opcode == OpCodes.Ldc_I4_2)
-                        {
-                            targetIndex = 0;
-
-                            yield return new CodeInstruction(OpCodes.Ldarg_0);
-                            yield return new CodeInstruction(OpCodes.Ldfld, FI_Map);
-                            yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
-
-                            i++;
-                        }
-                    }
-                }
-
-                yield return instructionList[i];
-            }
-
-            Console.WriteLine("OrcsPlus: Completed ManagerMajorThreats_turnTick_Transpiler");
-            if (targetIndex != 0)
-            {
-                Console.WriteLine("OrcsPlus: ERROR: Transpiler failed at targetIndex " + targetIndex);
-            }
-        }
-
-        private static int ManagerMajorThreats_turnTick_TranspilerBody(Map map)
-        {
-            int result = ModCore.opt_targetOrcCount;
-
-            if (ModCore.opt_DynamicOrcCount)
-            {
-                if (map.sizeX * map.sizeY >= 3136)
-                {
-                    result++;
-                }
-                else if (map.sizeX * map.sizeY < 1600 )
-                {
-                    result--;
-                }
             }
 
             return result;

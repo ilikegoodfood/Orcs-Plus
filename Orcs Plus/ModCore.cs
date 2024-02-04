@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 namespace Orcs_Plus
 {
@@ -28,10 +27,6 @@ namespace Orcs_Plus
 
         public PowersFromTenets powers;
 
-        public static bool opt_DynamicOrcCount = false;
-
-        public static int opt_targetOrcCount = 2;
-
         public static ModCore Get() => core;
 
         public static CommunityLib.ModCore GetComLib() => comLib;
@@ -48,30 +43,6 @@ namespace Orcs_Plus
         public override void onStartGamePresssed(Map map, List<God> gods)
         {
             data.clean();
-        }
-
-        public override void receiveModConfigOpts_bool(string optName, bool value)
-        {
-            switch (optName)
-            {
-                case "Dynamic Orc Horde Count":
-                    opt_DynamicOrcCount = value;
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        public override void receiveModConfigOpts_int(string optName, int value)
-        {
-            switch(optName)
-            {
-                case "Target Orc Horde Count":
-                    opt_targetOrcCount = value;
-                    break;
-                default:
-                    break;
-            }
         }
 
         public override void beforeMapGen(Map map)
@@ -174,18 +145,13 @@ namespace Orcs_Plus
             HarmonyPatches_Conditional.PatchingInit();
             agentAI.populateConditional();
             eventModifications(map);
-            updateSaveGameVersion(map);
-
             Get().powers = new PowersFromTenets(map);
+
+            updateSaveGameVersion(map);
         }
 
         public void updateSaveGameVersion(Map map)
         {
-            if (opt_targetOrcCount == 0)
-            {
-                opt_targetOrcCount = 2;
-            }
-
             // Account for civilWar_TargetCampCount default value being 0.
             foreach (SocialGroup sg in map.socialGroups)
             {
@@ -208,20 +174,28 @@ namespace Orcs_Plus
                 }
             }
 
-            // Fix Orc Elders portraits.
             foreach (Unit u in map.units)
             {
+                // Fix Orc Elders portraits.
                 if (u is UAEN_OrcElder elder && (elder.foreground == null || elder.foregroundAlt == null))
                 {
                     elder.setPortraitForeground();
                 }
 
+                // Add Gift Gold Ritual to existing Warlords.
                 if (u is UAE_Warlord)
                 {
-                    Rt_H_Orcs_GiftGold giftGold = (Rt_H_Orcs_GiftGold)u.rituals.FirstOrDefault(c => c is Rt_H_Orcs_GiftGold);
-                    if (giftGold == null)
+                    if (!u.rituals.Any(rt => rt is Rt_H_Orcs_GiftGold))
                     {
                         u.rituals.Add(new Rt_H_Orcs_GiftGold(u.location));
+                    }
+                }
+                else if (u is UA &&!(u is UAEN_OrcElder))
+                {
+                    Rt_H_Orcs_GiftGold giftGold = (Rt_H_Orcs_GiftGold)u.rituals.FirstOrDefault(rt => rt is Rt_H_Orcs_GiftGold);
+                    if (giftGold != null)
+                    {
+                        u.rituals.Remove(giftGold);
                     }
                 }
             }
@@ -766,16 +740,6 @@ namespace Orcs_Plus
                             {
                                 Console.WriteLine("OrcsPlus: Failed to get kernel Type (Wonderblunder_DeepOnes.Modcore)");
                             }
-
-                            Type abyssalLocusType = intDataDOPlus.assembly.GetType("Wonderblunder_DeepOnes.Pr_AbyssalLocus");
-                            if (abyssalLocusType != null)
-                            {
-                                intDataDOPlus.typeDict.Add("AbyssalLocus", abyssalLocusType);
-                            }
-                            else
-                            {
-                                Console.WriteLine("OrcsPlus: Failed to get Abyssal locus property Type (Wonderblunder_DeepOnes.Pr_AbyssalLocus)");
-                            }
                         }
                         break;
                     default:
@@ -801,7 +765,16 @@ namespace Orcs_Plus
                                 if (horn != null)
                                 {
                                     horn.full = false;
-                                    c.unit.person.traits.Add(new T_Grott(c.map.param.ch_primalWatersDur));
+
+                                    T_Grott grott = (T_Grott)c.person.traits.FirstOrDefault(t => t is T_Grott);
+                                    if (grott != null)
+                                    {
+                                        grott.duration = c.map.param.ch_primalWatersDur;
+                                    }
+                                    else
+                                    {
+                                        c.person.receiveTrait(new T_Grott(c.map.param.ch_primalWatersDur));
+                                    }
                                 }
                                 
                                 if (c.unit.person.species != c.map.species_orc)
@@ -815,6 +788,60 @@ namespace Orcs_Plus
                                 }
                             }
                         })
+                    );
+            }
+
+            if (!properties.ContainsKey("DRINK_GROTT"))
+            {
+                properties.Add(
+                    "DRINK_GROTT",
+                    new EventRuntime.TypedProperty<string>(delegate (EventContext c, string _)
+                    {
+                        if (c.person != null)
+                        {
+                            T_Grott grott = (T_Grott)c.person.traits.FirstOrDefault(t => t is T_Grott);
+                            if (grott != null)
+                            {
+                                grott.duration = c.map.param.ch_primalWatersDur;
+                            }
+                            else
+                            {
+                                c.person.receiveTrait(new T_Grott(c.map.param.ch_primalWatersDur));
+                            }
+
+                            if (c.unit.person.species != c.map.species_orc)
+                            {
+                                c.unit.hp -= 2;
+                                if (c.unit.hp <= 0)
+                                {
+                                    c.unit.die(c.unit.map, "Killed by an event outcome", null);
+                                    c.map.addUnifiedMessage(c.unit, null, c.unit.getName() + " dies", c.unit.getName() + " has been killed", UnifiedMessage.messageType.AGENT_DIES, true);
+                                }
+                            }
+                        }
+                    })
+                    );
+            }
+
+            if (!properties.ContainsKey("GAIN_GROTT"))
+            {
+                properties.Add(
+                    "GAIN_GROTT",
+                    new EventRuntime.TypedProperty<string>(delegate (EventContext c, string _)
+                    {
+                        if (c.person != null)
+                        {
+                            T_Grott grott = (T_Grott)c.person.traits.FirstOrDefault(t => t is T_Grott);
+                            if (grott != null)
+                            {
+                                grott.duration = c.map.param.ch_primalWatersDur;
+                            }
+                            else
+                            {
+                                c.person.receiveTrait(new T_Grott(c.map.param.ch_primalWatersDur));
+                            }
+                        }
+                    })
                     );
             }
         }
@@ -1581,50 +1608,33 @@ namespace Orcs_Plus
             }
         }
 
-        /*public override bool interceptDeath(Person person, string v, object killer)
+        public override bool interceptDeath(Person person, string v, object killer)
         {
             //Console.WriteLine("OrcsPlus: intercepting person death (ModKernel.interceptDeath)");
             for (int i = 0; i < person.items.Length; i++)
             {
                 if (person.items[i] is I_BloodGourd)
                 {
-                    person.map.addUnifiedMessage(person, null, "Survived Death", "In a last, desperate attempt to stave off death " + person.getName() + " devours the entire blood gourd that they carried with them. Its healing abilities were said to be able to heal any wound, cure any poison, and the stories were right. " + person.getName() + " makes a full recovery.", "Survived Death");
                     person.items[i] = null;
 
-                    person.isDead = false;
+                    EventManager.ActiveEvent activeEvent = null;
+                    EventContext ctx = EventContext.withPerson(person.map, person);
 
-                    // Restore all values that may have been wiped by cause of death logic.
-                    if (person.rulerOf != -1)
+                    foreach (EventManager.ActiveEvent aEvent in EventManager.events.Values)
                     {
-                        Location rulerLoc = person.map.locations[person.rulerOf];
-                        SettlementHuman rulerSet = rulerLoc.settlement as SettlementHuman;
-
-                        if (rulerSet != null && rulerSet.rulerIndex == -1)
+                        if (aEvent.type == EventData.Type.INERT && aEvent.data.id.Contains("revive_bloodGourd"))
                         {
-                            rulerSet.rulerIndex = person.index;
-                        }
-                        else
-                        {
-
+                            activeEvent = aEvent;
                         }
                     }
 
-                    if (person.unit != null)
+                    if (activeEvent == null)
                     {
-                        if (person.unit.maxHp < 1)
-                        {
-                            person.unit.maxHp = 1;
-                        }
-
-                        if (person.unit.hp < 1)
-                        {
-                            person.unit.hp = 1;
-                        }
-
-                        if (person.unit.person == null)
-                        {
-                            person.unit.person = person;
-                        }
+                        person.map.world.prefabStore.popMsg("UNABLE TO FIND VALID REVIVE EVENT FOR BLOOD GOURD HELD BY " + person.getName(), true, true);
+                    }
+                    else
+                    {
+                        person.map.world.prefabStore.popEvent(activeEvent.data, ctx, null, true);
                     }
 
                     return true;
@@ -1632,10 +1642,11 @@ namespace Orcs_Plus
             }
 
             return false;
-        }*/
+        }
 
-        /*public override string interceptCombatOutcomeEvent(string currentlyChosenEvent, UA victor, UA defeated, BattleAgents battleAgents)
+        public override string interceptCombatOutcomeEvent(string currentlyChosenEvent, UA victor, UA defeated, BattleAgents battleAgents)
         {
+            //Console.WriteLine("OrcsPlus: intercepting agent battle outcome event (ModKernel.interceptCombatOutcomeEvent)");
             if (defeated.person != null && defeated.person.items.Any(i => i is I_BloodGourd))
             {
                 if (currentlyChosenEvent == victor.getEventID_combatDAL())
@@ -1649,7 +1660,7 @@ namespace Orcs_Plus
             }
 
             return currentlyChosenEvent;
-        }*/
+        }
 
         public override void onPersonDeath_StartOfProcess(Person person, string v, object killer)
         {
@@ -1895,7 +1906,7 @@ namespace Orcs_Plus
                 if (uaPerson != null)
                 {
                     //Console.WriteLine("Orcs_Plus: Person unit is agent");
-                    isVampire = checkIsVampire(uaPerson);
+                    isVampire = GetComLib().checkIsVampire(uaPerson);
                     /*if (isVampire)
                     {
                         Console.WriteLine("Orcs_Plus: Person is vampire");
@@ -2507,65 +2518,6 @@ namespace Orcs_Plus
                     }
                 }
             }
-        }
-
-        public bool checkIsVampire(UA ua)
-        {
-            if (ua is UAE_Baroness)
-            {
-                return true;
-            }
-
-            if (ua is UAEN_Vampire)
-            {
-                return true;
-            }
-
-            if (Get().data.tryGetModIntegrationData("LivingCharacters", out ModIntegrationData intDataLC) && intDataLC.typeDict.TryGetValue("Vampire", out Type vampireNobleType))
-            {
-                if (ua.GetType() == vampireNobleType || ua.GetType().IsSubclassOf(vampireNobleType))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public bool checkHasAnyLocus(Location location)
-        {
-            Type escamrak_corruptedLocus = null;
-            Type deepOnesPlus_abyssalLocus = null;
-
-            if (Get().data.tryGetModIntegrationData("Escamrak", out ModIntegrationData intDataEscam))
-            {
-                intDataEscam.typeDict.TryGetValue("CorruptedLocus", out escamrak_corruptedLocus);
-            }
-
-            if (Get().data.tryGetModIntegrationData("DeepOnesPlus", out ModIntegrationData intDataDOPlus))
-            {
-                intDataDOPlus.typeDict.TryGetValue("AbyssalLocus", out deepOnesPlus_abyssalLocus);
-            }
-
-            foreach (Property pr in location.properties)
-            {
-                if (pr is Pr_GeomanticLocus)
-                {
-                    return true;
-                }
-
-                if (escamrak_corruptedLocus != null && (pr.GetType() == escamrak_corruptedLocus || pr.GetType().IsSubclassOf(escamrak_corruptedLocus)))
-                {
-                    return true;
-                }
-
-                if (deepOnesPlus_abyssalLocus != null && (pr.GetType() == deepOnesPlus_abyssalLocus || pr.GetType().IsSubclassOf(deepOnesPlus_abyssalLocus)))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         /// <summary>

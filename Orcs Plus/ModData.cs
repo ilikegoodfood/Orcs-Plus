@@ -1,10 +1,8 @@
 ﻿using Assets.Code;
-using Assets.Code.Modding;
 using CommunityLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace Orcs_Plus
 {
@@ -257,7 +255,7 @@ namespace Orcs_Plus
             {
                 if (location.settlement is Set_OrcCamp camp && camp.specialism == 2)
                 {
-                    if (ModCore.Get().checkHasAnyLocus(location))
+                    if (ModCore.GetComLib().checkHasLocus(location))
                     {
                         //Console.WriteLine("OrcsPlus: found geo mage at " + location.getName());
                         if (!affectedLocationIndexSet.Contains(location.index))
@@ -319,14 +317,14 @@ namespace Orcs_Plus
 
         public bool isAffectedByGeoMage(Location loc)
         {
-            if (loc.settlement is Set_OrcCamp camp && camp.specialism == 2 && ModCore.Get().checkHasAnyLocus(loc))
+            if (loc.settlement is Set_OrcCamp camp && camp.specialism == 2 && ModCore.GetComLib().checkHasLocus(loc))
             {
                 return true;
             }
 
             foreach (Location neighbour in loc.getNeighbours())
             {
-                if (neighbour.settlement is Set_OrcCamp camp2 && camp2.specialism == 2 && ModCore.Get().checkHasAnyLocus(neighbour))
+                if (neighbour.settlement is Set_OrcCamp camp2 && camp2.specialism == 2 && ModCore.GetComLib().checkHasLocus(neighbour))
                 {
                     return true;
                 }

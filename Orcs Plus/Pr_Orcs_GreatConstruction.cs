@@ -136,7 +136,7 @@ namespace Orcs_Plus
             }
             else if (specialism == 2)
             {
-                if (!ModCore.Get().checkHasAnyLocus(location))
+                if (!ModCore.GetComLib().checkHasLocus(location))
                 {
                     Console.WriteLine("Orcs Plus: Great Construction (mage camp) invalid because there is no geomantic locus present");
                     valid = false;

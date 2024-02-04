@@ -476,7 +476,7 @@ namespace Orcs_Plus
                                 utility += val;
                             }
 
-                            if (ModCore.Get().checkIsVampire(target))
+                            if (ModCore.GetComLib().checkIsVampire(target))
                             {
                                 val = -35;
                                 reasons?.Add(new ReasonMsg("Fear of Vampires", val));
@@ -722,7 +722,7 @@ namespace Orcs_Plus
                                     }, new int[0], reasons);
                                     utility += person.getTagUtility(target.getPositiveTags(), target.getNegativeTags(), reasons);
 
-                                    if (ModCore.Get().checkIsVampire(target))
+                                    if (ModCore.GetComLib().checkIsVampire(target))
                                     {
                                         val = -35;
                                         reasons?.Add(new ReasonMsg("Fear of Vampires", val));
