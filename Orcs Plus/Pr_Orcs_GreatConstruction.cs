@@ -178,7 +178,7 @@ namespace Orcs_Plus
             if (charge >= 300.0)
             {
                 charge = 300.0;
-                endProperty();
+                completeConstruction();
                 return;
             }
             else if (charge <= 0.0)
@@ -248,7 +248,7 @@ namespace Orcs_Plus
             chargePerGold = newChargePerGold;
         }
 
-        public override void endProperty()
+        public void completeConstruction()
         {
             if (specialism == 3)
             {
