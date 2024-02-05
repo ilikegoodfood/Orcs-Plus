@@ -172,6 +172,18 @@ namespace Orcs_Plus
                         recruitCorsair.tern = -1;
                     }
                 }
+
+                foreach (Challenge challenge in loc.GetChallenges())
+                {
+                    if (challenge is Ch_Orcs_RaidOutpost raidOutpost)
+                    {
+                        if (raidOutpost.orcSociety != null)
+                        {
+                            Get().data.orcSGCultureMap.TryGetValue(raidOutpost.orcSociety, out HolyOrder_Orcs orcCulture);
+                            raidOutpost.orcCulture = orcCulture;
+                        }
+                    }
+                }
             }
 
             foreach (Unit u in map.units)

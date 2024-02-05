@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Orcs_Plus
@@ -18,6 +16,10 @@ namespace Orcs_Plus
             : base(location)
         {
             this.orcSociety = orcSociety;
+            if (this.orcSociety != null)
+            {
+                ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+            }
         }
 
         public override string getName()
@@ -88,7 +90,7 @@ namespace Orcs_Plus
 
             foreach (Location loc in location.getNeighbours())
             {
-                Pr_HumanOutpost outpost = loc.properties.OfType<Pr_HumanOutpost>().FirstOrDefault();
+                Pr_HumanOutpost outpost = (Pr_HumanOutpost)loc.properties.FirstOrDefault(pr => pr is Pr_HumanOutpost);
                 if (outpost != null && outpost.charge > charge)
                 {
                     targetOutpost = outpost;
@@ -133,11 +135,51 @@ namespace Orcs_Plus
 
         public override bool valid()
         {
-            foreach (Location loc in location.getNeighbours())
+            foreach (Location neighbour in location.getNeighbours())
             {
-                if (loc.properties.OfType<Pr_HumanOutpost>().FirstOrDefault() != null)
+                if (neighbour.properties.Any(pr => pr is Pr_HumanOutpost))
                 {
                     return true;
+                }
+            }
+
+            return false;
+        }
+
+        public override bool validFor(UA ua)
+        {
+            foreach (Location neighbour in location.getNeighbours())
+            {
+                Pr_HumanOutpost outpost = (Pr_HumanOutpost)neighbour.properties.FirstOrDefault(pr => pr is Pr_HumanOutpost);
+                if (outpost != null)
+                {
+                    if (ua.isCommandable())
+                    {
+                        if (outpost.parent == null || !outpost.parent.isDark())
+                        {
+                            return true;
+                        }
+                        else if (location.settlement != null)
+                        {
+                            if (orcSociety != null && orcCulture != null)
+                            {
+                                if (orcCulture.tenet_intolerance.status < -1)
+                                {
+                                    if (outpost.parent == null || !outpost.parent.isDark())
+                                    {
+                                        return true;
+                                    }
+                                }
+                                else if (orcCulture.tenet_intolerance.status > 1)
+                                {
+                                    if (outpost.parent == null || outpost.parent.isDark())
+                                    {
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -149,28 +191,55 @@ namespace Orcs_Plus
             List<Pr_HumanOutpost> outposts = new List<Pr_HumanOutpost>();
             Pr_HumanOutpost targetOutpost = null;
 
-            foreach (Location loc in location.getNeighbours())
+            foreach (Location neighbour in location.getNeighbours())
             {
-                Pr_HumanOutpost outpost = loc.properties.OfType<Pr_HumanOutpost>().FirstOrDefault();
+                Pr_HumanOutpost outpost = (Pr_HumanOutpost)neighbour.properties.FirstOrDefault(pr => pr is Pr_HumanOutpost);
                 if (outpost != null)
                 {
-                    outposts.Add(outpost);
+                    if (u.isCommandable())
+                    {
+                        if (outpost.parent == null || !outpost.parent.isDark())
+                        {
+                            outposts.Add(outpost);
+                        }
+                        else if (location.settlement != null)
+                        {
+                            if (orcSociety != null && orcCulture != null)
+                            {
+                                if (orcCulture.tenet_intolerance.status < -1)
+                                {
+                                    if (outpost.parent == null || !outpost.parent.isDark())
+                                    {
+                                        outposts.Add(outpost);
+                                    }
+                                }
+                                else if (orcCulture.tenet_intolerance.status > 1)
+                                {
+                                    if (outpost.parent == null || outpost.parent.isDark())
+                                    {
+                                        outposts.Add(outpost);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
-            if (outposts.Count == 1)
+            if (outposts.Count > 0)
             {
                 targetOutpost = outposts[0];
-            }
-            else if (outposts.Count > 1)
-            {
-                double charge = 0.0;
-                foreach (Pr_HumanOutpost outpost in outposts)
+
+                if (outposts.Count > 1)
                 {
-                    if (outpost.charge > charge)
+                    double charge = 0.0;
+                    foreach (Pr_HumanOutpost outpost in outposts)
                     {
-                        charge = outpost.charge;
-                        targetOutpost = outpost;
+                        if (outpost.charge > charge)
+                        {
+                            charge = outpost.charge;
+                            targetOutpost = outpost;
+                        }
                     }
                 }
             }

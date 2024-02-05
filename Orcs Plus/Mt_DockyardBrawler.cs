@@ -34,9 +34,20 @@ namespace Orcs_Plus
                     List<UA> targets = new List<UA>();
                     foreach (Unit unit in ua.location.units)
                     {
-                        if (unit != ua && unit is UA ua2 && ua2.task is Task_PerformChallenge)
+                        if (unit != ua && unit is UA ua2 && ua2.task is Task_PerformChallenge tPerformChallenge && !(tPerformChallenge.challenge is Ch_LayLow) && !(tPerformChallenge.challenge is Ch_LayLowWilderness) && !(tPerformChallenge.challenge is Ch_FleeBeneathTheWaves))
                         {
-                            targets.Add(ua2);
+                            if ((ua.isCommandable() || (ua.society != null && ua.society.isDark())))
+                            {
+                                if (!ua2.isCommandable())
+                                {
+                                    targets.Add(ua2);
+                                }
+                            }
+                            else
+                            {
+                                targets.Add(ua2);
+                            }
+                            
                         }
                     }
 
