@@ -34,20 +34,22 @@ namespace Orcs_Plus
                     List<UA> targets = new List<UA>();
                     foreach (Unit unit in ua.location.units)
                     {
-                        if (unit != ua && unit is UA ua2 && ua2.task is Task_PerformChallenge tPerformChallenge && !(tPerformChallenge.challenge is Ch_LayLow) && !(tPerformChallenge.challenge is Ch_LayLowWilderness) && !(tPerformChallenge.challenge is Ch_FleeBeneathTheWaves))
+                        if (unit != ua && unit is UA targetUA && targetUA.task is Task_PerformChallenge tPerformChallenge && !(tPerformChallenge.challenge is Ch_LayLow) && !(tPerformChallenge.challenge is Ch_LayLowWilderness) && !(tPerformChallenge.challenge is Ch_FleeBeneathTheWaves))
                         {
-                            if ((ua.isCommandable() || (ua.society != null && ua.society.isDark())))
+                            if (ua.isCommandable() || (ua.society != null && ua.society.isDark()))
                             {
-                                if (!ua2.isCommandable())
+                                if (!targetUA.isCommandable())
                                 {
-                                    targets.Add(ua2);
+                                    targets.Add(targetUA);
                                 }
                             }
-                            else
+                            else if (!ua.isCommandable() && (ua.society == null || !ua.society.isDark()))
                             {
-                                targets.Add(ua2);
+                                if (targetUA.isCommandable() || targetUA.society == null || targetUA.society.isDark() || (ua.society != null && targetUA.society != null && ua.society != targetUA.society && (ua.society.getRel(targetUA.society).state == DipRel.dipState.hostile || ua.society.getRel(targetUA.society).state == DipRel.dipState.war)))
+                                {
+                                    targets.Add(targetUA);
+                                }
                             }
-                            
                         }
                     }
 
