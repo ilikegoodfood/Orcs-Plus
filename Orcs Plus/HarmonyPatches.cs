@@ -1148,86 +1148,131 @@ namespace Orcs_Plus
 
         private static IEnumerable<CodeInstruction> Ch_Orcs_OpportunisticEncroachment_valid_Transpiler(IEnumerable<CodeInstruction> codeInstructions, ILGenerator ilg)
         {
-            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_TranspilerBody_GetOrcs), new Type[] { typeof(Ch_Orcs_OpportunisticEncroachment) });
+            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_valid_TranspilerBody), new Type[] { typeof(Ch_Orcs_OpportunisticEncroachment) });
 
-            List<CodeInstruction> instructionList = codeInstructions.ToList();
+            yield return new CodeInstruction(OpCodes.Nop);
+            yield return new CodeInstruction(OpCodes.Ldarg_0);
+            yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
+            yield return new CodeInstruction(OpCodes.Ret);
 
-            int targetIndex = 1;
-            for (int i = 0; i < instructionList.Count; i++)
+            Console.WriteLine("OrcsPlus: Completed complete function replacemnt transpiler Ch_Orcs_OpportunisticEncroachment_valid_Transpiler");
+        }
+
+        private static bool Ch_Orcs_OpportunisticEncroachment_valid_TranspilerBody(Ch_Orcs_OpportunisticEncroachment ch)
+        {
+            SG_Orc orcSociety = ch.location.soc as SG_Orc;
+
+            if (ch.location.settlement != null)
             {
-                if (targetIndex > 0)
+                Sub_OrcWaystation waystation = (Sub_OrcWaystation)ch.location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation way && way.challenges.Contains(ch));
+                if (waystation != null)
                 {
-                    if (targetIndex == 1)
-                    {
-                        if (instructionList[i].opcode == OpCodes.Stloc_0)
-                        {
-                            targetIndex = 0;
+                    orcSociety = waystation.orcSociety;
+                }
+            }
 
-                            yield return new CodeInstruction(OpCodes.Pop);
-                            yield return new CodeInstruction(OpCodes.Ldarg_0);
-                            yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
-                        }
+            if (orcSociety == null)
+            {
+                return false;
+            }
+
+            bool infiltrated = true;
+            bool infiltratable = (ch.location.settlement is Set_OrcCamp || ch.location.settlement.subs.Any(sub => sub.canBeInfiltrated()));
+            if (infiltratable)
+            {
+                infiltrated = ch.location.settlement.infiltration == 1.0;
+            }
+
+            if (!infiltrated)
+            {
+                return false;
+            }
+
+            foreach (Location neighbour in ch.location.getNeighbours())
+            {
+                if (neighbour.settlement is SettlementHuman && !(neighbour.settlement is Set_City) && !(neighbour.settlement is Set_ElvenCity) && ModCore.Get().isHostileAlignment(orcSociety, neighbour))
+                {
+                    if (!neighbour.properties.Any(pr => pr is Pr_OrcEncroachment))
+                    {
+                        return true;
                     }
                 }
-
-                yield return instructionList[i];
             }
 
-            Console.WriteLine("OrcsPlus: Completed Ch_Orcs_OpportunisticEncroachment_valid_Transpiler");
-            if (targetIndex != 0)
-            {
-                Console.WriteLine("OrcsPlus: ERROR: Transpiler failed at targetIndex " + targetIndex);
-            }
+            return false;
         }
 
         private static IEnumerable<CodeInstruction> Ch_Orcs_OpportunisticEncroachment_complete_Transpiler(IEnumerable<CodeInstruction> codeInstructions, ILGenerator ilg)
         {
-            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_TranspilerBody_GetOrcs), new Type[] { typeof(Ch_Orcs_OpportunisticEncroachment) });
+            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_complete_TranspilerBody), new Type[] { typeof(Ch_Orcs_OpportunisticEncroachment), typeof(UA) });
 
-            List<CodeInstruction> instructionList = codeInstructions.ToList();
+            yield return new CodeInstruction(OpCodes.Nop);
+            yield return new CodeInstruction(OpCodes.Ldarg_0);
+            yield return new CodeInstruction(OpCodes.Ldarg_1);
+            yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
+            yield return new CodeInstruction(OpCodes.Ret);
 
-            int targetIndex = 1;
-            for (int i = 0; i < instructionList.Count; i++)
-            {
-                if (targetIndex > 0)
-                {
-                    if (targetIndex == 1)
-                    {
-                        if (instructionList[i].opcode == OpCodes.Stloc_0)
-                        {
-                            targetIndex = 0;
-
-                            yield return new CodeInstruction(OpCodes.Pop);
-                            yield return new CodeInstruction(OpCodes.Ldarg_0);
-                            yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
-                        }
-                    }
-                }
-
-                yield return instructionList[i];
-            }
-
-            Console.WriteLine("OrcsPlus: Completed Ch_Orcs_OpportunisticEncroachment_complete_Transpiler");
-            if (targetIndex != 0)
-            {
-                Console.WriteLine("OrcsPlus: ERROR: Transpiler failed at targetIndex " + targetIndex);
-            }
+            Console.WriteLine("OrcsPlus: Completed complete function replacemnt transpiler Ch_Orcs_OpportunisticEncroachment_complete_Transpiler");
         }
 
-        private static SG_Orc Ch_Orcs_OpportunisticEncroachment_TranspilerBody_GetOrcs(Ch_Orcs_OpportunisticEncroachment ch)
+        private static void Ch_Orcs_OpportunisticEncroachment_complete_TranspilerBody(Ch_Orcs_OpportunisticEncroachment ch, UA ua)
         {
-            SG_Orc result = ch.location.soc as SG_Orc;
+            SG_Orc orcSociety = ch.location.soc as SG_Orc;
 
-            if (ch.location.settlement != null && ch.location.settlement.subs.Count > 0)
+            if (ch.location.settlement != null)
             {
-                Sub_OrcWaystation waystation = (Sub_OrcWaystation)ch.location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation w && w.getChallenges().Contains(ch));
+                Sub_OrcWaystation waystation = (Sub_OrcWaystation)ch.location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation way && way.challenges.Contains(ch));
                 if (waystation != null)
                 {
-                    result = waystation.orcSociety;
+                    orcSociety = waystation.orcSociety;
                 }
             }
 
-            return result;
+            if (orcSociety == null)
+            {
+                return;
+            }
+
+            bool infiltrated = true;
+            bool infiltratable = (ch.location.settlement is Set_OrcCamp || ch.location.settlement.subs.Any(sub => sub.canBeInfiltrated()));
+            if (infiltratable)
+            {
+                infiltrated = ch.location.settlement.infiltration == 1.0;
+            }
+
+            if (!infiltrated)
+            {
+                return;
+            }
+
+            SettlementHuman target = null;
+            List<SettlementHuman> humanSettlements = new List<SettlementHuman>();
+            foreach (Location neighbour in ch.location.getNeighbours())
+            {
+                if (neighbour.settlement is SettlementHuman setHuman && !(neighbour.settlement is Set_City) && !(neighbour.settlement is Set_ElvenCity) && ModCore.Get().isHostileAlignment(orcSociety, target.location))
+                {
+                    if (!neighbour.properties.Any(pr => pr is Pr_OrcEncroachment))
+                    {
+                        humanSettlements.Add(setHuman);
+                    }
+                }
+            }
+
+            if (humanSettlements.Count > 0)
+            {
+                target = humanSettlements[0];
+                if (humanSettlements.Count > 1)
+                {
+                    target = humanSettlements[Eleven.random.Next(humanSettlements.Count)];
+                }
+            }
+
+            if (target != null)
+            {
+                Pr_OrcEncroachment encroachment = new Pr_OrcEncroachment(target.location, orcSociety);
+                target.location.properties.Add(encroachment);
+                ch.msgString = "Orcs are beginning to encroach on human settlements in " + target.location.getName(true) + ", waiting for signs of weakness to make their land grab.";
+            }
         }
 
         private static void Rt_Orcs_ClaimTerritory_getDesc_Postfix(ref string __result)
