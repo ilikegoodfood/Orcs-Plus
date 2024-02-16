@@ -152,62 +152,15 @@ namespace Orcs_Plus
 
         public void updateSaveGameVersion(Map map)
         {
-            // Account for civilWar_TargetCampCount default value being 0.
-            foreach (SocialGroup sg in map.socialGroups)
+            foreach (Location location in map.locations)
             {
-                if (sg is HolyOrder_Orcs orcCulture && orcCulture.civilWar_TargetCampCount == 0)
+                if (location.settlement is Set_OrcCamp camp)
                 {
-                    orcCulture.civilWar_TargetCampCount = 8;
-                }
-            }
+                    Ch_Orcs_BloodMoney bloodMoney = (Ch_Orcs_BloodMoney)camp.challenges.FirstOrDefault(c => c is Ch_Orcs_BloodMoney);
 
-            // Fix Orc Corsair being recuitable by heroes.
-            foreach (Location loc in map.locations)
-            {
-                if (loc.settlement is Set_OrcCamp camp)
-                {
-                    Ch_RecruitMinion recruitCorsair = (Ch_RecruitMinion)camp.customChallenges.FirstOrDefault(c => c is Ch_RecruitMinion rMinion && rMinion.exemplar is M_OrcCorsair);
-                    if (recruitCorsair != null)
+                    if (bloodMoney != null)
                     {
-                        recruitCorsair.tern = -1;
-                    }
-                }
-
-                foreach (Challenge challenge in loc.GetChallenges())
-                {
-                    if (challenge is Ch_Orcs_RaidOutpost raidOutpost)
-                    {
-                        if (raidOutpost.orcSociety != null)
-                        {
-                            Get().data.orcSGCultureMap.TryGetValue(raidOutpost.orcSociety, out HolyOrder_Orcs orcCulture);
-                            raidOutpost.orcCulture = orcCulture;
-                        }
-                    }
-                }
-            }
-
-            foreach (Unit u in map.units)
-            {
-                // Fix Orc Elders portraits.
-                if (u is UAEN_OrcElder elder && (elder.foreground == null || elder.foregroundAlt == null))
-                {
-                    elder.setPortraitForeground();
-                }
-
-                // Add Gift Gold Ritual to existing Warlords.
-                if (u is UAE_Warlord)
-                {
-                    if (!u.rituals.Any(rt => rt is Rt_H_Orcs_GiftGold))
-                    {
-                        u.rituals.Add(new Rt_H_Orcs_GiftGold(u.location));
-                    }
-                }
-                else if (u is UA &&!(u is UAEN_OrcElder))
-                {
-                    Rt_H_Orcs_GiftGold giftGold = (Rt_H_Orcs_GiftGold)u.rituals.FirstOrDefault(rt => rt is Rt_H_Orcs_GiftGold);
-                    if (giftGold != null)
-                    {
-                        u.rituals.Remove(giftGold);
+                        bloodMoney.invalidSpecialisms = new int[3] { 0, 4, 6 };
                     }
                 }
             }

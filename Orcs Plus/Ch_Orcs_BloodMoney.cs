@@ -12,6 +12,8 @@ namespace Orcs_Plus
     {
         public int cost = 40;
 
+        public int[] invalidSpecialisms = new int[3] { 0, 4, 6 };
+
         public Ch_Orcs_BloodMoney(Location location)
             : base(location)
         {
@@ -143,7 +145,7 @@ namespace Orcs_Plus
 
         public override bool valid()
         {
-            return location.settlement is Set_OrcCamp camp && camp.specialism != 0 && camp.specialism != 4 && camp.army == null;
+            return location.settlement is Set_OrcCamp camp && !invalidSpecialisms.Contains(camp.specialism) && camp.army == null;
         }
 
         public override bool validFor(UA ua)
