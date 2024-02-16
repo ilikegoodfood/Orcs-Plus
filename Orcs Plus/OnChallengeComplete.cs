@@ -29,6 +29,9 @@ namespace Orcs_Plus
                 case Ch_Orcs_BuildShipyard _:
                     Ch_Orcs_BuildShipyard(challenge, ua, task_PerformChallenge);
                     break;
+                    case Ch_Orcs_BuildMines _:
+                    Ch_Orcs_BuildMines(challenge, ua, task_PerformChallenge);
+                    break;
                 case Rt_Orcs_ClaimTerritory _:
                     Rt_Orcs_ClaimTerritory(challenge, ua, task_PerformChallenge);
                     break;
@@ -87,6 +90,14 @@ namespace Orcs_Plus
             if (ua.isCommandable() && ua.location.soc is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
             {
                 ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.Get().data.influenceGain[ModData.influenceGainAction.BuildShipyard]), true);
+            }
+        }
+
+        public static void Ch_Orcs_BuildMines(Challenge challenge, UA ua, Task_PerformChallenge task_PerformChallenge)
+        {
+            if (ua.isCommandable() && ua.location.soc is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            {
+                ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg(task_PerformChallenge.challenge.getName(), ModCore.Get().data.influenceGain[ModData.influenceGainAction.BuildMines]), true);
             }
         }
 

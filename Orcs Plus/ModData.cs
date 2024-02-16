@@ -42,7 +42,8 @@ namespace Orcs_Plus
             RecieveGift,
             BuildWaystation,
             BloodMoney,
-            BuildTemple
+            BuildTemple,
+            BuildMines
         }
 
         public Dictionary<influenceGainAction, int> influenceGain;
@@ -83,6 +84,7 @@ namespace Orcs_Plus
                 { influenceGainAction.BuildMages, 50 },
                 { influenceGainAction.BuildMenagerie, 50 },
                 { influenceGainAction.BuildShipyard, 40 },
+                { influenceGainAction.BuildMines, 40 },
                 { influenceGainAction.CommandeerShips, 20 },
                 { influenceGainAction.DevastateIndustry, 20 },
                 { influenceGainAction.Expand, 15 },

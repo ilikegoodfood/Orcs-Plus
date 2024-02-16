@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading.Tasks;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 namespace Orcs_Plus
 {
@@ -42,6 +43,9 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildMenagerie), nameof(Ch_Orcs_BuildMenagerie.buildNegativeTags)), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Gold)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildShipyard), nameof(Ch_Orcs_BuildShipyard.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildShipyard_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildShipyard), nameof(Ch_Orcs_BuildShipyard.buildNegativeTags)), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Gold)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildMines), nameof(Ch_Orcs_BuildMines.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildMines_getDesc_Postfix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildMines), nameof(Ch_Orcs_BuildMines.buildNegativeTags)), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Gold)));
+            harmony.Patch(original: AccessTools.Method(typeof(Ch_Orcs_BuildMines), nameof(Ch_Orcs_BuildMines.valid)), postfix: new HarmonyMethod(patchType, nameof(Ch_Orcs_BuildMines_valid_Postfix)));
 
             // Patches for Warlord rituals
             harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_CommandeerShips), nameof(Rt_Orcs_CommandeerShips.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Rt_Orcs_CommandeerShips_getDesc_Postfix)));
@@ -210,6 +214,24 @@ namespace Orcs_Plus
         private static void Ch_Orcs_BuildShipyard_getDesc_Postfix(ref string __result)
         {
             __result += " You gain " + ModCore.Get().data.influenceGain[ModData.influenceGainAction.BuildShipyard] + " influence with the orc culture by completing this challenge.";
+        }
+
+        private static void Ch_Orcs_BuildMines_getDesc_Postfix(ref string __result)
+        {
+            __result += " You gain " + ModCore.Get().data.influenceGain[ModData.influenceGainAction.BuildMines] + " influence with the orc culture by completing this challenge.";
+        }
+
+        private static void Ch_Orcs_BuildMines_valid_Postfix(Ch_Orcs_BuildMines __instance, ref bool __result)
+        {
+            if (__result)
+            {
+                if (__instance.location.hex.z == 1 || __instance.location.properties.Any(pr => pr is Pr_TunnelsAbove) || __instance.location.getNeighbours().Any(n => n.hex.z == 1))
+                {
+                    return;
+                }
+
+                __result = false;
+            }
         }
 
         private static int[] postfix_AppendTag_Gold(int[] result, Challenge __instance)
@@ -564,6 +586,11 @@ namespace Orcs_Plus
 
             foreach (Location neighbour in ch.location.getNeighbours())
             {
+                if (neighbour.hex.z == 1 && ch.location.hex.z != 1 && !orcSociety.canGoUnderground())
+                {
+                    continue;
+                }
+
                 if (neighbour.soc != null && neighbour.settlement is SettlementHuman && ModCore.Get().isHostileAlignment(orcSociety, neighbour))
                 {
                     Pr_Devastation devastation = ch.location.properties.OfType<Pr_Devastation>().FirstOrDefault();
@@ -623,6 +650,11 @@ namespace Orcs_Plus
             //Console.WriteLine("OrcsPlus: Finding target location.");
             foreach (Location neighbour in location.getNeighbours())
             {
+                if (neighbour.hex.z == 1 && ch.location.hex.z != 1 && !orcSociety.canGoUnderground())
+                {
+                    continue;
+                }
+
                 if (neighbour.soc != null && neighbour.settlement is SettlementHuman settlementHuman && ModCore.Get().isHostileAlignment(orcSociety, neighbour))
                 {
                     //Console.WriteLine("OrcsPlus: Neighbour has social group and settlement.");
@@ -1148,86 +1180,141 @@ namespace Orcs_Plus
 
         private static IEnumerable<CodeInstruction> Ch_Orcs_OpportunisticEncroachment_valid_Transpiler(IEnumerable<CodeInstruction> codeInstructions, ILGenerator ilg)
         {
-            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_TranspilerBody_GetOrcs), new Type[] { typeof(Ch_Orcs_OpportunisticEncroachment) });
+            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_valid_TranspilerBody), new Type[] { typeof(Ch_Orcs_OpportunisticEncroachment) });
 
-            List<CodeInstruction> instructionList = codeInstructions.ToList();
+            yield return new CodeInstruction(OpCodes.Nop);
+            yield return new CodeInstruction(OpCodes.Ldarg_0);
+            yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
+            yield return new CodeInstruction(OpCodes.Ret);
 
-            int targetIndex = 1;
-            for (int i = 0; i < instructionList.Count; i++)
+            Console.WriteLine("OrcsPlus: Completed complete function replacemnt transpiler Ch_Orcs_OpportunisticEncroachment_valid_Transpiler");
+        }
+
+        private static bool Ch_Orcs_OpportunisticEncroachment_valid_TranspilerBody(Ch_Orcs_OpportunisticEncroachment ch)
+        {
+            SG_Orc orcSociety = ch.location.soc as SG_Orc;
+
+            if (ch.location.settlement != null)
             {
-                if (targetIndex > 0)
+                Sub_OrcWaystation waystation = (Sub_OrcWaystation)ch.location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation way && way.challenges.Contains(ch));
+                if (waystation != null)
                 {
-                    if (targetIndex == 1)
-                    {
-                        if (instructionList[i].opcode == OpCodes.Stloc_0)
-                        {
-                            targetIndex = 0;
+                    orcSociety = waystation.orcSociety;
+                }
+            }
 
-                            yield return new CodeInstruction(OpCodes.Pop);
-                            yield return new CodeInstruction(OpCodes.Ldarg_0);
-                            yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
-                        }
-                    }
+            if (orcSociety == null)
+            {
+                return false;
+            }
+
+            bool infiltrated = true;
+            bool infiltratable = (ch.location.settlement is Set_OrcCamp || ch.location.settlement.subs.Any(sub => sub.canBeInfiltrated()));
+            if (infiltratable)
+            {
+                infiltrated = ch.location.settlement.infiltration == 1.0;
+            }
+
+            if (!infiltrated)
+            {
+                return false;
+            }
+
+            foreach (Location neighbour in ch.location.getNeighbours())
+            {
+                if (neighbour.hex.z == 1 && ch.location.hex.z != 1 && !orcSociety.canGoUnderground())
+                {
+                    continue;
                 }
 
-                yield return instructionList[i];
+                if (neighbour.settlement is SettlementHuman && !(neighbour.settlement is Set_City) && !(neighbour.settlement is Set_ElvenCity) && ModCore.Get().isHostileAlignment(orcSociety, neighbour))
+                {
+                    if (!neighbour.properties.Any(pr => pr is Pr_OrcEncroachment))
+                    {
+                        return true;
+                    }
+                }
             }
 
-            Console.WriteLine("OrcsPlus: Completed Ch_Orcs_OpportunisticEncroachment_valid_Transpiler");
-            if (targetIndex != 0)
-            {
-                Console.WriteLine("OrcsPlus: ERROR: Transpiler failed at targetIndex " + targetIndex);
-            }
+            return false;
         }
 
         private static IEnumerable<CodeInstruction> Ch_Orcs_OpportunisticEncroachment_complete_Transpiler(IEnumerable<CodeInstruction> codeInstructions, ILGenerator ilg)
         {
-            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_TranspilerBody_GetOrcs), new Type[] { typeof(Ch_Orcs_OpportunisticEncroachment) });
+            MethodInfo MI_TranspilerBody = AccessTools.Method(patchType, nameof(Ch_Orcs_OpportunisticEncroachment_complete_TranspilerBody), new Type[] { typeof(Ch_Orcs_OpportunisticEncroachment), typeof(UA) });
 
-            List<CodeInstruction> instructionList = codeInstructions.ToList();
+            yield return new CodeInstruction(OpCodes.Nop);
+            yield return new CodeInstruction(OpCodes.Ldarg_0);
+            yield return new CodeInstruction(OpCodes.Ldarg_1);
+            yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
+            yield return new CodeInstruction(OpCodes.Ret);
 
-            int targetIndex = 1;
-            for (int i = 0; i < instructionList.Count; i++)
-            {
-                if (targetIndex > 0)
-                {
-                    if (targetIndex == 1)
-                    {
-                        if (instructionList[i].opcode == OpCodes.Stloc_0)
-                        {
-                            targetIndex = 0;
-
-                            yield return new CodeInstruction(OpCodes.Pop);
-                            yield return new CodeInstruction(OpCodes.Ldarg_0);
-                            yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
-                        }
-                    }
-                }
-
-                yield return instructionList[i];
-            }
-
-            Console.WriteLine("OrcsPlus: Completed Ch_Orcs_OpportunisticEncroachment_complete_Transpiler");
-            if (targetIndex != 0)
-            {
-                Console.WriteLine("OrcsPlus: ERROR: Transpiler failed at targetIndex " + targetIndex);
-            }
+            Console.WriteLine("OrcsPlus: Completed complete function replacemnt transpiler Ch_Orcs_OpportunisticEncroachment_complete_Transpiler");
         }
 
-        private static SG_Orc Ch_Orcs_OpportunisticEncroachment_TranspilerBody_GetOrcs(Ch_Orcs_OpportunisticEncroachment ch)
+        private static void Ch_Orcs_OpportunisticEncroachment_complete_TranspilerBody(Ch_Orcs_OpportunisticEncroachment ch, UA ua)
         {
-            SG_Orc result = ch.location.soc as SG_Orc;
+            SG_Orc orcSociety = ch.location.soc as SG_Orc;
 
-            if (ch.location.settlement != null && ch.location.settlement.subs.Count > 0)
+            if (ch.location.settlement != null)
             {
-                Sub_OrcWaystation waystation = (Sub_OrcWaystation)ch.location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation w && w.getChallenges().Contains(ch));
+                Sub_OrcWaystation waystation = (Sub_OrcWaystation)ch.location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation way && way.challenges.Contains(ch));
                 if (waystation != null)
                 {
-                    result = waystation.orcSociety;
+                    orcSociety = waystation.orcSociety;
                 }
             }
 
-            return result;
+            if (orcSociety == null)
+            {
+                return;
+            }
+
+            bool infiltrated = true;
+            bool infiltratable = (ch.location.settlement is Set_OrcCamp || ch.location.settlement.subs.Any(sub => sub.canBeInfiltrated()));
+            if (infiltratable)
+            {
+                infiltrated = ch.location.settlement.infiltration == 1.0;
+            }
+
+            if (!infiltrated)
+            {
+                return;
+            }
+
+            SettlementHuman target = null;
+            List<SettlementHuman> humanSettlements = new List<SettlementHuman>();
+            foreach (Location neighbour in ch.location.getNeighbours())
+            {
+                if (neighbour.hex.z == 1 && ch.location.hex.z != 1 && !orcSociety.canGoUnderground())
+                {
+                    continue;
+                }
+
+                if (neighbour.settlement is SettlementHuman setHuman && !(neighbour.settlement is Set_City) && !(neighbour.settlement is Set_ElvenCity) && ModCore.Get().isHostileAlignment(orcSociety, target.location))
+                {
+                    if (!neighbour.properties.Any(pr => pr is Pr_OrcEncroachment))
+                    {
+                        humanSettlements.Add(setHuman);
+                    }
+                }
+            }
+
+            if (humanSettlements.Count > 0)
+            {
+                target = humanSettlements[0];
+                if (humanSettlements.Count > 1)
+                {
+                    target = humanSettlements[Eleven.random.Next(humanSettlements.Count)];
+                }
+            }
+
+            if (target != null)
+            {
+                Pr_OrcEncroachment encroachment = new Pr_OrcEncroachment(target.location, orcSociety);
+                target.location.properties.Add(encroachment);
+                ch.msgString = "Orcs are beginning to encroach on human settlements in " + target.location.getName(true) + ", waiting for signs of weakness to make their land grab.";
+            }
         }
 
         private static void Rt_Orcs_ClaimTerritory_getDesc_Postfix(ref string __result)
@@ -1237,38 +1324,45 @@ namespace Orcs_Plus
 
         public static void Rt_Orcs_ClaimTerritory_validFor_Postfix(ref bool __result, UA ua)
         {
-            if (!__result)
+            if (!__result && ua.society is SG_Orc orcSociety)
             {
-                if (!ua.location.isOcean && ua.location.hex.getHabilitability() >= ua.location.map.opt_orcHabMult * ua.location.map.param.orc_habRequirement)
+                if (ua.location.isOcean || ua.location.hex.getHabilitability() < ua.location.map.opt_orcHabMult * ua.location.map.param.orc_habRequirement)
                 {
-                    if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModIntegrationData intDataEscam) && intDataEscam.typeDict.TryGetValue("LivingTerrainSettlement", out Type livingTerrainSettlementType) && intDataEscam.fieldInfoDict.TryGetValue("LivingTerrainSettlement_TypeOfTerrain", out FieldInfo FI_TypeOfTerrain))
-                    {
-                        if (ua.society is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture.tenet_god is H_Orcs_Fleshweaving fleshweaving && fleshweaving.status < -1)
-                        {
-                            bool valid = false;
-                            if (ua.location.getNeighbours().Any(l => (l.soc == orcSociety && l.settlement is Set_OrcCamp) || (l.settlement != null && l.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == orcSociety))))
-                            {
-                                valid = true;
-                            }
+                    return;
+                }
 
-                            if (!valid)
+                if (ua.location.hex.z == 1 && !orcSociety.canGoUnderground())
+                {
+                    return;
+                }
+
+                if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModIntegrationData intDataEscam) && intDataEscam.typeDict.TryGetValue("LivingTerrainSettlement", out Type livingTerrainSettlementType) && intDataEscam.fieldInfoDict.TryGetValue("LivingTerrainSettlement_TypeOfTerrain", out FieldInfo FI_TypeOfTerrain))
+                {
+                    if (ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture.tenet_god is H_Orcs_Fleshweaving fleshweaving && fleshweaving.status < -1)
+                    {
+                        bool valid = false;
+                        if (ua.location.getNeighbours().Any(l => (l.soc == orcSociety && l.settlement is Set_OrcCamp) || (l.settlement != null && l.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == orcSociety))))
+                        {
+                            valid = true;
+                        }
+
+                        if (!valid)
+                        {
+                            if (ua.location.isCoastal)
                             {
-                                if (ua.location.isCoastal)
+                                foreach (Location location in ua.map.locations)
                                 {
-                                    foreach (Location location in ua.map.locations)
+                                    if (location.soc == orcSociety && location.settlement is Set_OrcCamp camp && camp.specialism == 5)
                                     {
-                                        if (location.soc == orcSociety && location.settlement is Set_OrcCamp camp && camp.specialism == 5)
-                                        {
-                                            valid = true;
-                                        }
+                                        valid = true;
                                     }
                                 }
                             }
+                        }
 
-                            if (valid && ua.location.settlement.GetType() == livingTerrainSettlementType && (int)FI_TypeOfTerrain.GetValue(ua.location.settlement) == 0)
-                            {
-                                __result = true;
-                            }
+                        if (valid && ua.location.settlement.GetType() == livingTerrainSettlementType && (int)FI_TypeOfTerrain.GetValue(ua.location.settlement) == 0)
+                        {
+                            __result = true;
                         }
                     }
                 }
@@ -2304,6 +2398,8 @@ namespace Orcs_Plus
         {
             SG_Orc orcSociety = __instance.location.soc as SG_Orc;
 
+            int mineIncome = 5;
+
             if (orcSociety != null && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
             {
                 if (orcCulture.tenet_shadowWeaving?.status < 0)
@@ -2315,20 +2411,34 @@ namespace Orcs_Plus
                     __instance.shadowPolicy = Settlement.shadowResponse.RECEIVE_ONLY;
                 }
 
-                if (orcCulture.tenet_god is H_Orcs_Perfection perfection && perfection.status < 0)
+                if (orcCulture.tenet_god is H_Orcs_Perfection perfection)
                 {
-                    Pr_Ophanim_Perfection perfectionLocal = __instance.location.properties.OfType<Pr_Ophanim_Perfection>().FirstOrDefault();
-                    if (perfectionLocal == null)
+                    if (perfection.status < 0)
                     {
-                        foreach (Location neighbour in __instance.location.getNeighbours())
+                        Pr_Ophanim_Perfection perfectionLocal = __instance.location.properties.OfType<Pr_Ophanim_Perfection>().FirstOrDefault();
+                        if (perfectionLocal == null)
                         {
-                            if (neighbour.settlement is SettlementHuman && neighbour.properties.OfType<Pr_Opha_Faith>().FirstOrDefault()?.charge > 100.0)
+                            foreach (Location neighbour in __instance.location.getNeighbours())
                             {
-                                perfectionLocal = new Pr_Ophanim_Perfection(__instance.location);
-                                __instance.location.properties.Add(perfectionLocal);
-                                break;
+                                if (neighbour.settlement is SettlementHuman && neighbour.properties.OfType<Pr_Opha_Faith>().FirstOrDefault()?.charge > 100.0)
+                                {
+                                    perfectionLocal = new Pr_Ophanim_Perfection(__instance.location);
+                                    __instance.location.properties.Add(perfectionLocal);
+                                    break;
+                                }
                             }
                         }
+                    }
+                }
+                else if (orcCulture.tenet_god is H_Orcs_MammonClient client)
+                {
+                    if (client.status < -1)
+                    {
+                        mineIncome += 5;
+                    }
+                    else if (client.status < 0)
+                    {
+                        mineIncome += 2;
                     }
                 }
             }
@@ -2381,6 +2491,18 @@ namespace Orcs_Plus
                     }
                 }
             }
+            else if (__instance.specialism == 6)
+            {
+                Pr_OrcPlunder plunder = (Pr_OrcPlunder)__instance.location.properties.FirstOrDefault(pr => pr is Pr_OrcPlunder);
+
+                if (plunder == null)
+                {
+                    plunder = new Pr_OrcPlunder(__instance.location);
+                    __instance.location.properties.Add(plunder);
+                }
+
+                plunder.addGold(mineIncome);
+            }
         }
 
         private static double Set_OrcCamp_getMaxDefence_Postfix(double def, Set_OrcCamp __instance)
@@ -2390,6 +2512,11 @@ namespace Orcs_Plus
             if (giftThorns != null)
             {
                 def += giftThorns.charge / 2;
+            }
+
+            if (__instance.location.hex.z == 1)
+            {
+                def += __instance.map.param.orc_maxCampDefence * 0.5;
             }
 
             return def;
