@@ -2434,11 +2434,11 @@ namespace Orcs_Plus
                 {
                     if (client.status < -1)
                     {
-                        mineIncome += 5;
+                        mineIncome = (int)Math.Ceiling(mineIncome * 2.0);
                     }
                     else if (client.status < 0)
                     {
-                        mineIncome += 2;
+                        mineIncome = (int)Math.Ceiling(mineIncome * 1.4);
                     }
                 }
             }

@@ -68,6 +68,10 @@ namespace Orcs_Plus
             {
                 result += " (Shipyard)";
             }
+            else if (specialism == 6)
+            {
+                result += " (Mines)";
+            }
 
             return result;
         }
@@ -82,7 +86,7 @@ namespace Orcs_Plus
             }
             else if (specialism == 2)
             {
-                desc = "The centre of the camp has been completely cleared, replaced with the stone base of what looks like some kind of tower. The inner walls of the camp are lined with construction materials, among which many tribal artifacts, staffs, totems and other religious and arcane symbols lie.";
+                desc = "The centre of the camp has been completely cleared, replaced with the stone base of what looks like some kind of tower. The inner walls of the camp are lined with construction materials, among which many tribal artifacts, staffs, totems, and other religious and arcane symbols lie.";
             }
             else if (specialism == 3)
             {
@@ -91,6 +95,10 @@ namespace Orcs_Plus
             else if (specialism == 5)
             {
                 desc = "The walls of the camp have been torn down on the side of the coast, replaced by a series of warehouses. New walls are being erected to encase the extension, even as wooden piles are driven into the seafloor. Vast amounts of lumber are being gathered in the newly built warehouses.";
+            }
+            else if (specialism == 6)
+            {
+                desc = "A tunnel has been openned in the centre of the camp, surrounded by growing piles of rock slag. Young orcs sift through the slag, extracting metal ores and gemstones from the debris and placing it to one side. Near the camp's main gates, a huge stone forge is being assembled, and huge millstones lie in wait to crush the incoming rocks.";
             }
 
             return "The orcs of " + orcSociety.getName() + " are performing extensive construction work in " + orcCamp.getName() + ". " + desc;
@@ -138,7 +146,7 @@ namespace Orcs_Plus
             {
                 if (!ModCore.GetComLib().checkHasLocus(location))
                 {
-                    Console.WriteLine("Orcs Plus: Great Construction (mage camp) invalid because there is no geomantic locus present");
+                    Console.WriteLine("Orcs Plus: Great Construction (mage camp) invalid because there is no magical locus present");
                     valid = false;
                 }
             }
@@ -155,6 +163,19 @@ namespace Orcs_Plus
                 if (!location.settlement.subs.Any(sub => sub is Sub_Shipwreck shipwreck && !shipwreck.isReinforced()))
                 {
                     Console.WriteLine("Orcs Plus: Great Construction (shipyard) invalid because there is no shipwreck present");
+                    valid = false;
+                }
+            }
+            else if (specialism == 6)
+            {
+                if (!orcSociety.canGoUnderground())
+                {
+                    Console.WriteLine("Orcs Plus: Great Construction (mines) invalid because the orcs do not know of the underground");
+                    valid = false;
+                }
+                else if (location.hex.z != 1 && !location.properties.Any(pr => pr is Pr_TunnelsAbove) && !location.getNeighbours().Any(n => n.hex.z == 1))
+                {
+                    Console.WriteLine("Orcs Plus: Great Construction (mines) invalid because there is no connection to the underground");
                     valid = false;
                 }
             }
@@ -273,6 +294,10 @@ namespace Orcs_Plus
                 {
                     specialism = 4;
                 }
+            }
+            else if (specialism == 6)
+            {
+                orcSociety.canGoUndergroundFlag = true;
             }
 
             orcCamp.specialism = specialism;

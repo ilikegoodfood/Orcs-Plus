@@ -71,6 +71,8 @@ namespace Orcs_Plus
                     return map.world.textureStore.unit_orc;
                 case Soc_Elven _:
                     return map.world.textureStore.unit_elfArmy;
+                case Soc_Dwarves _:
+                    return map.world.textureStore.unit_dwarfArmy;
                 case Society society:
                     if (society.isOphanimControlled)
                     {

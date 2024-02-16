@@ -94,6 +94,13 @@ namespace Orcs_Plus
                         clearTarget();
                     }
                 }
+                else if (specialism == 6)
+                {
+                    if (target.location.hex.z != 1 && !target.location.properties.Any(pr => pr is Pr_TunnelsAbove) && !target.location.getNeighbours().Any(n => n.hex.z == 1))
+                    {
+                        clearTarget();
+                    }
+                }
             }
 
             double utility = 0.0;
@@ -154,6 +161,10 @@ namespace Orcs_Plus
                 else if (specialism == 5)
                 {
                     utility += getShipyardUtility(target, reasons);
+                }
+                else if (specialism == 6)
+                {
+                    utility += getMinesUtility(target, reasons);
                 }
 
                 utility += getNeighbourCampUtility(target, reasons);
@@ -252,6 +263,29 @@ namespace Orcs_Plus
                             testReasonMsgs = new List<ReasonMsg>();
                         }
                     }
+
+                    if (orcSociety.canGoUnderground())
+                    {
+                        Pr_TunnelsAbove tunnelsAbove = (Pr_TunnelsAbove)camp.location.properties.FirstOrDefault(pr => pr is Pr_TunnelsAbove);
+                        if (camp.location.hex.z == 1 || tunnelsAbove != null || camp.location.getNeighbours().Any(n => n.hex.z == 1))
+                        {
+                            testSpecialism = 6;
+                            testUtility = getMinesUtility(camp, testReasonMsgs);
+                            testUtility += getNeighbourCampUtility(camp, testReasonMsgs);
+
+                            if (testUtility > targetUtility)
+                            {
+                                targetCamp = camp;
+                                targetSpecialism = testSpecialism;
+                                targetReasonMsgs = testReasonMsgs;
+                                targetUtility = testUtility;
+                            }
+
+                            testSpecialism = 0;
+                            testUtility = 0.0;
+                            testReasonMsgs = new List<ReasonMsg>();
+                        }
+                    }
                 }
 
                 if (targetCamp != null && targetSpecialism > 0)
@@ -265,7 +299,7 @@ namespace Orcs_Plus
             }
 
             val = -1000.0;
-            reasons?.Add(new ReasonMsg("No valid target", val));
+            reasons?.Add(new ReasonMsg("No desire to specialise camps", val));
             utility += val;
             return utility;
         }
@@ -407,6 +441,24 @@ namespace Orcs_Plus
         {
             double utility = 90.0;
             reasonMsgs?.Add(new ReasonMsg("Base", 90.0));
+
+            return utility;
+        }
+
+        public double getMinesUtility(Set_OrcCamp camp, List<ReasonMsg> reasonMsgs)
+        {
+            double utility = -1000.0;
+            if (!orcSociety.canGoUnderground())
+            {
+                reasonMsgs?.Add(new ReasonMsg("Orcs are not aware of the underground", utility));
+                return utility;
+            }
+
+            int mineCount = orcCulture.specializedCamps.FindAll(c => c.specialism == 6).Count;
+            utility = 80.0 - (10.0 * mineCount);
+
+            reasonMsgs?.Add(new ReasonMsg("Base", 80.0));
+            reasonMsgs?.Add(new ReasonMsg("Existing mines", -10.0 * mineCount));
 
             return utility;
         }
