@@ -188,12 +188,6 @@ namespace Orcs_Plus
 
             foreach (Unit u in map.units)
             {
-                // Fix Orc Elders portraits.
-                if (u is UAEN_OrcElder elder && (elder.foreground == null || elder.foregroundAlt == null))
-                {
-                    elder.setPortraitForeground();
-                }
-
                 // Add Gift Gold Ritual to existing Warlords.
                 if (u is UAE_Warlord)
                 {
