@@ -19,9 +19,7 @@ namespace Orcs_Plus
 
         public Rt_H_Orcs_SpreadCurseBrokenSpirit rt_spreadCurseBroken = null;
 
-        public Sprite foreground = null;
-
-        public Sprite foregroundAlt = null;
+        public bool male = false;
 
         public UAEN_OrcElder(Location loc, HolyOrder sg)
             : base(loc, sg)
@@ -38,6 +36,11 @@ namespace Orcs_Plus
             rt_giftGold = new Rt_H_Orcs_GiftGold(loc);
             rituals.Add(rt_giftGold);
 
+            if (sg.genderExclusive == 1 || (sg.genderExclusive == 0 && person.index % 2 == 1))
+            {
+                male = true;
+            }
+
             if (sg is HolyOrder_Orcs orcCulture)
             {
                 if (orcCulture.tenet_god is H_Orcs_GlorySeeker)
@@ -51,8 +54,6 @@ namespace Orcs_Plus
                     rituals.Add(rt_spreadCurseBroken);
                 }
             }
-
-            setPortraitForeground();
         }
 
         public UAEN_OrcElder(Location loc, HolyOrder sg, Person p)
@@ -70,6 +71,11 @@ namespace Orcs_Plus
             rt_giftGold = new Rt_H_Orcs_GiftGold(loc);
             rituals.Add(rt_giftGold);
 
+            if (sg.genderExclusive == 1 || (sg.genderExclusive == 0 && person.index % 2 == 1))
+            {
+                male = true;
+            }
+
             if (sg is HolyOrder_Orcs orcCulture)
             {
                 if (orcCulture.tenet_god is H_Orcs_GlorySeeker)
@@ -81,42 +87,6 @@ namespace Orcs_Plus
                 {
                     rt_spreadCurseBroken = new Rt_H_Orcs_SpreadCurseBrokenSpirit(loc);
                     rituals.Add(rt_spreadCurseBroken);
-                }
-            }
-
-            setPortraitForeground();
-        }
-
-        public void setPortraitForeground()
-        {
-            HolyOrder_Orcs orcCulture = society as HolyOrder_Orcs;
-            if (orcCulture == null)
-            {
-                foreground = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
-                foregroundAlt = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
-            }
-
-            if (orcCulture.genderExclusive == -1)
-            {
-                foreground = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
-                foregroundAlt = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
-            }
-            else if (orcCulture.genderExclusive == 1)
-            {
-                foreground = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
-                foregroundAlt = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
-            }
-            else
-            {
-                if (person.index % 2 == 0)
-                {
-                    foreground = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
-                    foregroundAlt = EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
-                }
-                else
-                {
-                    foreground = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
-                    foregroundAlt = EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
                 }
             }
         }
@@ -871,12 +841,22 @@ namespace Orcs_Plus
 
         public override Sprite getPortraitForeground()
         {
-            return foreground;
+            if (male)
+            {
+                return EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
+            }
+
+            return EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
         }
 
         public override Sprite getPortraitForegroundAlt()
         {
-            return foregroundAlt;
+            if (male)
+            {
+                EventManager.getImg("OrcsPlus.Foreground_OrcElder.png");
+            }
+
+            return EventManager.getImg("OrcsPlus.Foreground_OrcElder_F.png");
         }
 
         public override void spendSkillPoint()
