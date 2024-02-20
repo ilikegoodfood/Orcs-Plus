@@ -2061,7 +2061,7 @@ namespace Orcs_Plus
 
                         culture.cachedGone = true;
 
-                        if (!orcCulture.ophanim_PerfectSociety && culture.ophanim_PerfectSociety)
+                        if (culture.ophanim_PerfectSociety)
                         {
                             orcCulture.ophanim_PerfectSociety = true;
                         }
