@@ -40,6 +40,11 @@ namespace Orcs_Plus
             }
         }
 
+        public override bool onPathfinding_AllowMultiLayerPathfinding(Unit u)
+        {
+            return u.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety.canGoUnderground();
+        }
+
         public override void onPlayerOpensReligionUI(HolyOrder order)
         {
             ModCore.Get().powers.updateOrcPowers(order.map);
