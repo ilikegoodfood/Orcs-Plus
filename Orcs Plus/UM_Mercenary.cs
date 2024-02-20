@@ -121,7 +121,7 @@ namespace Orcs_Plus
                         disband(map, "Contract Ended");
                         return;
                     }
-                    
+
                     task = new CommunityLib.Task_GoToWilderness(true);
                     return;
                 }

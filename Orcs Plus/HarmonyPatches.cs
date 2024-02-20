@@ -1249,7 +1249,7 @@ namespace Orcs_Plus
             List<SettlementHuman> humanSettlements = new List<SettlementHuman>();
             foreach (Location neighbour in ch.location.getNeighbours())
             {
-                if (neighbour.settlement is SettlementHuman setHuman && !(neighbour.settlement is Set_City) && !(neighbour.settlement is Set_ElvenCity) && ModCore.Get().isHostileAlignment(orcSociety, target.location))
+                if (neighbour.settlement is SettlementHuman setHuman && !(neighbour.settlement is Set_City) && !(neighbour.settlement is Set_ElvenCity) && ModCore.Get().isHostileAlignment(orcSociety, neighbour))
                 {
                     if (!neighbour.properties.Any(pr => pr is Pr_OrcEncroachment))
                     {
@@ -2012,7 +2012,7 @@ namespace Orcs_Plus
 
                         culture.cachedGone = true;
 
-                        if (!orcCulture.ophanim_PerfectSociety && culture.ophanim_PerfectSociety)
+                        if (culture.ophanim_PerfectSociety)
                         {
                             orcCulture.ophanim_PerfectSociety = true;
                         }
