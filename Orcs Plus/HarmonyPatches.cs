@@ -1291,7 +1291,7 @@ namespace Orcs_Plus
                     continue;
                 }
 
-                if (neighbour.settlement is SettlementHuman setHuman && !(neighbour.settlement is Set_City) && !(neighbour.settlement is Set_ElvenCity) && ModCore.Get().isHostileAlignment(orcSociety, target.location))
+                if (neighbour.settlement is SettlementHuman setHuman && !(neighbour.settlement is Set_City) && !(neighbour.settlement is Set_ElvenCity) && ModCore.Get().isHostileAlignment(orcSociety, neighbour))
                 {
                     if (!neighbour.properties.Any(pr => pr is Pr_OrcEncroachment))
                     {
@@ -2044,6 +2044,11 @@ namespace Orcs_Plus
                     if (orcs != null)
                     {
                         ModCore.Get().data.orcSGCultureMap.TryGetValue(orcs, out culture);
+
+                        if (orcs.canGoUnderground())
+                        {
+                            orcSociety.canGoUndergroundFlag = true;
+                        }
                     }
 
                     if (culture != null)

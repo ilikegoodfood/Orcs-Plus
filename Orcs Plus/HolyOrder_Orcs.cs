@@ -885,7 +885,7 @@ namespace Orcs_Plus
                     if (loc.settlement is Set_OrcCamp camp)
                     {
                         chunkCamps.Add(camp);
-                        if (camp.specialism != 0 && camp.specialism != 4 && camp.specialism != 5)
+                        if (camp.specialism == 1 && camp.specialism == 2 && camp.specialism == 3)
                         {
                             chunkSpecialisedCamps.Add(camp);
                             if (camp.specialism == 1)
@@ -906,35 +906,26 @@ namespace Orcs_Plus
                     {
                         chunkCapital = chunkCamps[0];
                     }
+                    else if (chunkFortresses.Count > 0)
+                    {
+                        chunkCapital = chunkFortresses[0];
+                        if (chunkFortresses.Count > 1)
+                        {
+                            chunkCapital = chunkFortresses[Eleven.random.Next(chunkFortresses.Count)];
+                        }
+                    }
+                    else if (chunkSpecialisedCamps.Count > 0)
+                    {
+                        chunkCapital = chunkSpecialisedCamps[0];
+                        if (chunkSpecialisedCamps.Count > 1)
+                        {
+                            chunkCapital = chunkSpecialisedCamps[Eleven.random.Next(chunkSpecialisedCamps.Count)];
+                        }
+                    }
 
                     if (chunkCapital == null)
                     {
-                        if (chunkFortresses.Count > 0)
-                        {
-                            chunkCapital = chunkFortresses[0];
-
-                            if (chunkFortresses.Count > 1)
-                            {
-                                chunkCapital = chunkFortresses[Eleven.random.Next(chunkFortresses.Count)];
-                            }
-                        }
-
-                        if (chunkCapital == null)
-                        {
-                            if (chunkSpecialisedCamps.Count > 0)
-                            {
-                                chunkCapital = chunkSpecialisedCamps[0];
-                                if (chunkSpecialisedCamps.Count > 1)
-                                {
-                                    chunkCapital = chunkSpecialisedCamps[Eleven.random.Next(chunkSpecialisedCamps.Count)];
-                                }
-                            }
-
-                            if (chunkCapital == null)
-                            {
-                                chunkCapital = chunkCamps[Eleven.random.Next(chunkCamps.Count)];
-                            }
-                        }
+                        chunkCapital = chunkCamps[Eleven.random.Next(chunkCamps.Count)];
                     }
 
                     if (chunkCapital == null)
@@ -958,8 +949,7 @@ namespace Orcs_Plus
 
                 if (targetCapitalCount > chunkCapitals.Count)
                 {
-                    int i = 3;
-                    while (i > 0)
+                    for (int i = 3; i > 0; i--)
                     {
                         for (int j = targetCapitalCount - chunkCapitals.Count; j > 0; j--)
                         {
@@ -971,31 +961,22 @@ namespace Orcs_Plus
                             if (availableChunkFortresses.Count > 0)
                             {
                                 newRebelCapital = availableChunkFortresses[0];
-
                                 if (availableChunkFortresses.Count > 1)
                                 {
                                     newRebelCapital = availableChunkFortresses[Eleven.random.Next(availableChunkFortresses.Count)];
                                 }
                             }
-
-                            if (newRebelCapital == null)
+                            else if (availableSpecialisedCamps.Count > 0)
                             {
-                                if (availableSpecialisedCamps.Count > 0)
+                                newRebelCapital = availableSpecialisedCamps[0];
+                                if (availableSpecialisedCamps.Count > 1)
                                 {
-                                    newRebelCapital = availableSpecialisedCamps[0];
-                                    if (availableSpecialisedCamps.Count > 1)
-                                    {
-                                        newRebelCapital = availableSpecialisedCamps[Eleven.random.Next(availableSpecialisedCamps.Count)];
-                                    }
+                                    newRebelCapital = availableSpecialisedCamps[Eleven.random.Next(availableSpecialisedCamps.Count)];
                                 }
-
-                                if (newRebelCapital == null)
-                                {
-                                    if (availableChunkCamps.Count > 0)
-                                    {
-                                        newRebelCapital = availableChunkCamps[Eleven.random.Next(availableChunkCamps.Count)];
-                                    }
-                                }
+                            }
+                            else if (availableChunkCamps.Count > 0)
+                            {
+                                newRebelCapital = availableChunkCamps[Eleven.random.Next(availableChunkCamps.Count)];
                             }
 
                             if (newRebelCapital != null)
@@ -1008,8 +989,6 @@ namespace Orcs_Plus
                         {
                             break;
                         }
-
-                        i--;
                     }
                 }
 
@@ -1112,6 +1091,11 @@ namespace Orcs_Plus
 
                 rebelData.Add(rebelCapital, new Tuple<SG_Orc, HolyOrder_Orcs>(rebelSociety, rebelCulture));
 
+                if (orcSociety.canGoUnderground())
+                {
+                    rebelSociety.canGoUndergroundFlag = true;
+                }
+
                 foreach (HolyTenet tenet in rebelCulture.tenets)
                 {
                     HolyTenet matching = tenets.FirstOrDefault(t => t.GetType() == tenet.GetType() || tenet.GetType().IsSubclassOf(t.GetType()));
@@ -1119,6 +1103,11 @@ namespace Orcs_Plus
                     {
                         tenet.status = matching.status;
                     }
+                }
+
+                if (ophanim_PerfectSociety)
+                {
+                    rebelCulture.ophanim_PerfectSociety = true;
                 }
 
                 rebelCapital.location.soc = rebelSociety;

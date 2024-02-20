@@ -124,7 +124,12 @@ namespace Orcs_Plus
                         return;
                     }
 
-                    task = new CommunityLib.Task_GoToWilderness(true);
+                    int layer = 0;
+                    if (map.awarenessOfUnderground >= 100.0 || source.getCapitalHex().z == 1)
+                    {
+                        layer = -1;
+                    }
+                    task = new CommunityLib.Task_GoToWilderness(false, layer);
                     return;
                 }
 
