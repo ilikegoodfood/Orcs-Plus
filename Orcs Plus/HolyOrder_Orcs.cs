@@ -1121,6 +1121,11 @@ namespace Orcs_Plus
                     }
                 }
 
+                if (ophanim_PerfectSociety)
+                {
+                    rebelCulture.ophanim_PerfectSociety = true;
+                }
+
                 rebelCapital.location.soc = rebelSociety;
                 if (rebelCapital.specialism != 1 && rebelCapital.specialism != 2 && rebelCapital.specialism != 3)
                 {
