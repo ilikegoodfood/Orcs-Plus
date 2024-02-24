@@ -2191,18 +2191,42 @@ namespace Orcs_Plus
                 {
                     if (influencedOrcCulture_Direct != null)
                     {
-                        TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Awakening killed orc agent", Get().data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                        ModCore.Get().TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("She Who Will Feast's awakening destroyed orc agent", ModCore.Get().data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                     }
 
                     foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
                     {
-                        TryAddInfluenceGain(orcs, new ReasonMsg("Awakening killed enemy agent", Get().data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                        ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("She Who Will Feast's awakening destroyed enemy ageny", ModCore.Get().data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                     }
 
                     foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
                     {
-                        TryAddInfluenceGain(orcs, new ReasonMsg("Awakening killed trespassing agent", Get().data.influenceGain[ModData.influenceGainAction.AgentKill]), true);
+                        ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("She Who Will Feast's awakening destroyed trespassing agent", ModCore.Get().data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                     }
+                }
+            }
+            else if (v == "Devoured by their god")
+            {
+                if (influencedOrcCulture_Direct != null)
+                {
+                    ModCore.Get().TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("The Evil Beneath devoured orc agent", ModCore.Get().data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                }
+            }
+            else if (v == "Dragged underwater by Tentacles")
+            {
+                if (influencedOrcCulture_Direct != null)
+                {
+                    ModCore.Get().TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("The Evil Beneath destroyed orc agent", ModCore.Get().data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                {
+                    ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("The Evil Beneath destroyed enemy agent", ModCore.Get().data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                {
+                    ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("The Evil Beneath destroyed trespassing agent", ModCore.Get().data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                 }
             }
             else if (v == "Killed by Ophanim's Smite")

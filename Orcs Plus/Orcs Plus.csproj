@@ -74,6 +74,7 @@
     <Compile Include="Ch_Orcs_LootRemains.cs" />
     <Compile Include="Ch_Orcs_RecruitCorsair.cs" />
     <Compile Include="H_Orcs_Fleshweaving.cs" />
+    <Compile Include="H_Orcs_SecretsOfDestruction.cs" />
     <Compile Include="Mg_Orcs_ReviveImmortal.cs" />
     <Compile Include="Curse_BrokenSpirit.cs" />
     <Compile Include="Curse_EGlory.cs" />
@@ -110,6 +111,7 @@
     <Compile Include="PowersFromTenets.cs" />
     <Compile Include="PrWM_CagedManticore.cs" />
     <Compile Include="Pr_Ophanim_Perfection.cs" />
+    <Compile Include="Pr_Orcs_ExplosivesStockpile.cs" />
     <Compile Include="Pr_Orcs_GreatConstruction.cs" />
     <Compile Include="Pr_Orcs_ImmortalRemains.cs" />
     <Compile Include="Pr_Orcs_SacrificialSite.cs" />

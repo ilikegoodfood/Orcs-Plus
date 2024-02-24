@@ -249,7 +249,7 @@ namespace Orcs_Plus
 
                 foreach (UM enemy in enemies)
                 {
-                    if (enemy.isCommandable())
+                    if (enemy.isCommandable() || enemy is UM_MonsterHeart || enemy is UM_Tentacle)
                     {
                         influenceElder = true;
                     }
@@ -393,18 +393,35 @@ namespace Orcs_Plus
                 {
                     if (influencedOrcCulture_Direct != null)
                     {
-                        ModCore.Get().TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Awakening destroyed orc army", ModCore.Get().data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                        ModCore.Get().TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("She Who Will Feast's awakening destroyed orc army", ModCore.Get().data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                     }
 
                     foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
                     {
-                        ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("Awakening destroyed enemy army", ModCore.Get().data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                        ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("She Who Will Feast's awakening destroyed enemy army", ModCore.Get().data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                     }
 
                     foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
                     {
-                        ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("Awakening destroyed trespassing army", ModCore.Get().data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                        ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("She Who Will Feast's awakening destroyed trespassing army", ModCore.Get().data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                     }
+                }
+            }
+            else if (v == "Dragged underwater by Tentacles")
+            {
+                if (influencedOrcCulture_Direct != null)
+                {
+                    ModCore.Get().TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("The Evil Beneath destroyed orc army", ModCore.Get().data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                {
+                    ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("The Evil Beneath destroyed enemy army", ModCore.Get().data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                {
+                    ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("The Evil Beneath destroyed trespassing army", ModCore.Get().data.influenceGain[ModData.influenceGainAction.ArmyKill]), true);
                 }
             }
             else if (v == "Smashed by a Flesh Tentacle")
@@ -463,29 +480,71 @@ namespace Orcs_Plus
                 Property.addToProperty("Militray Action", Property.standardProperties.DEATH, 2.0, set.location);
             }
 
-            if (ModCore.Get().data.godTenetTypes.TryGetValue(map.overmind.god.GetType(), out Type tenetType) && tenetType != null && tenetType == typeof(H_Orcs_HarbingersMadness))
+            if (um.society is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null)
             {
-                if (um.society is SG_Orc orcSociety2 && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety2, out HolyOrder_Orcs orcCulture2) && orcCulture2 != null && orcCulture2.tenet_god is H_Orcs_HarbingersMadness harbringers && harbringers.status < -1)
+                if (orcCulture2.tenet_god is H_Orcs_HarbingersMadness harbringers)
                 {
-                    if (um.location.settlement is SettlementHuman settlementHuman && settlementHuman.ruler != null)
+                    if (harbringers.status < -1)
                     {
-                        settlementHuman.ruler.sanity -= 1;
-
-                        if (settlementHuman.ruler.sanity < 1.0)
+                        if (um.location.settlement is SettlementHuman settlementHuman && settlementHuman.ruler != null)
                         {
-                            settlementHuman.ruler.goInsane(-1);
+                            settlementHuman.ruler.sanity -= 1;
+
+                            if (settlementHuman.ruler.sanity < 1.0)
+                            {
+                                settlementHuman.ruler.goInsane(-1);
+                            }
+                        }
+
+                        foreach (Unit unit in map.units)
+                        {
+                            if (unit.homeLocation == um.location.index && unit is UA agent && !agent.isCommandable() && agent.person != null)
+                            {
+                                agent.person.sanity -= 1;
+
+                                if (agent.person.sanity < 1.0)
+                                {
+                                    agent.person.goInsane(-1);
+                                }
+                            }
                         }
                     }
-
-                    foreach (Unit unit in map.units)
+                }
+                else if (orcCulture2.tenet_god is H_Orcs_SecretsOfDestruction secrets)
+                {
+                    if (secrets.status < 0)
                     {
-                        if (unit.homeLocation == um.location.index && unit is UA agent && !agent.isCommandable() && (agent.person.species is Species_Human || agent.person.species is Species_Elf))
+                        if (set != null && set.defences > 0.0)
                         {
-                            agent.person.sanity -= 1;
+                            double explosivesCost = 10.0;
 
-                            if (agent.person.sanity < 1.0)
+                            Pr_Orcs_ExplosivesStockpile explosives = (Pr_Orcs_ExplosivesStockpile)map.locations[um.homeLocation].properties.FirstOrDefault(pr => pr is Pr_Orcs_ExplosivesStockpile);
+                            if (um is UM_OrcRaiders && (explosives == null || explosives.charge < explosivesCost))
                             {
-                                agent.person.goInsane(-1);
+                                foreach (Location location in map.locations)
+                                {
+                                    if (location.soc == orcSociety)
+                                    {
+                                        explosives = (Pr_Orcs_ExplosivesStockpile)location.properties.FirstOrDefault(pr => pr is Pr_Orcs_ExplosivesStockpile && pr.charge >=  explosivesCost);
+                                        if (explosives != null)
+                                        {
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (explosives != null && explosives.charge >= explosivesCost)
+                            {
+                                explosives.influences.Add(new ReasonMsg("Shipped to the siege of " + set.getName(), -explosivesCost));
+
+                                set.defences -= 20.0;
+                                if (set.defences < 0.0)
+                                {
+                                    set.defences = 0.0;
+                                }
+
+                                Property.addToPropertySingleShot("Area devestated by explosions", Property.standardProperties.DEVASTATION, 20.0, um.location);
                             }
                         }
                     }
@@ -653,42 +712,149 @@ namespace Orcs_Plus
 
         public override void onArmyBattleCycle_StartOfProcess(BattleArmy battle)
         {
-            List<UM> armies = new List<UM>();
-            armies.AddRange(battle.attackers);
-            armies.AddRange(battle.defenders);
-
-            foreach (UM army in armies)
+            bool explode = false;
+            foreach (UM army in battle.attackers.ToList())
             {
-                if (army.homeLocation >= 0 && army.homeLocation < map.locations.Count)
+                if (army.homeLocation < 0 || army.homeLocation >= map.locations.Count)
                 {
-                    Location home = map.locations[army.homeLocation];
-                    if (home != null && home.settlement is SettlementHuman settlementHuman && settlementHuman.ruler != null)
+                    continue;
+                }
+
+                checkArmyDesertion(battle, army);
+
+                if (!explode)
+                {
+                    explode = checkUseExplosives(battle, army);
+                }
+            }
+
+            if (explode && battle.defenders.Count > 0)
+            {
+                Property.addToPropertySingleShot("Area devestated by explosions", Property.standardProperties.DEVASTATION, 20.0, battle.defenders[0].location);
+
+                battle.messages.Add("All defending armies have suffered 4 damage from explosive bombardment.");
+                foreach (UM army in battle.defenders.ToList())
+                {
+                    army.hp -= 4;
+                    if (army.hp <= 0)
                     {
-                        if (settlementHuman.ruler.house.curses.Any(curse => curse is Curse_BrokenSpirit))
+                        battle.messages.Add(army.getName() + " was destroyed by explosive bombardment.");
+                        battle.defenders.Remove(army);
+                        army.task = null;
+                        army.die(map, "Destroyed in battle");
+                    }
+                }
+            }
+
+            explode = false;
+            foreach (UM army in battle.defenders.ToList())
+            {
+                if (army.homeLocation < 0 || army.homeLocation >= map.locations.Count)
+                {
+                    continue;
+                }
+
+                checkArmyDesertion(battle, army);
+
+                if (!explode)
+                {
+                    explode = checkUseExplosives(battle, army);
+                }
+            }
+
+            if (explode && battle.attackers.Count > 0)
+            {
+                Property.addToPropertySingleShot("Area devestated by explosions", Property.standardProperties.DEVASTATION, 20.0, battle.attackers[0].location);
+
+                battle.messages.Add("All attacking armies have suffered 4 damage from explosive bombardment.");
+                foreach (UM army in battle.attackers.ToList())
+                {
+                    army.hp -= 4;
+                    if (army.hp <= 0)
+                    {
+                        battle.messages.Add(army.getName() + " was destroyed by explosive bombardment.");
+                        battle.attackers.Remove(army);
+                        army.task = null;
+                        army.die(map, "Destroyed in battle");
+                    }
+                }
+            }
+        }
+
+        public void checkArmyDesertion(BattleArmy battle, UM army)
+        {
+            Location home = map.locations[army.homeLocation];
+            if (home != null && home.settlement is SettlementHuman settlementHuman && settlementHuman.ruler != null)
+            {
+                if (settlementHuman.ruler.house.curses.Any(curse => curse is Curse_BrokenSpirit))
+                {
+                    army.hp -= 2;
+                    if (army.hp > 0)
+                    {
+                        battle.messages.Add(army.getName() + " has suffered desertion (2 damage).");
+                    }
+                    else
+                    {
+                        battle.messages.Add(army.getName() + " deserts battle.");
+                        if (battle.attackers.Contains(army))
                         {
-                            army.hp -= 2;
-                            if (army.hp > 0)
+                            battle.attackers.Remove(army);
+                        }
+                        else if (battle.defenders.Contains(army))
+                        {
+                            battle.defenders.Remove(army);
+                        }
+                        army.task = null;
+                        army.disband(map, "Desertion");
+                    }
+                }
+            }
+        }
+
+        public bool checkUseExplosives(BattleArmy battle, UM army)
+        {
+            SG_Orc orcSociety = army.society as SG_Orc;
+            HolyOrder_Orcs orcCulture = army.society as HolyOrder_Orcs;
+
+            double explosivesCost = 10.0;
+
+            if (orcSociety != null)
+            {
+                ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+            }
+
+            if (orcCulture != null)
+            {
+                if (orcCulture.tenet_god is H_Orcs_SecretsOfDestruction secret)
+                {
+                    if (secret.status < -1)
+                    {
+                        Pr_Orcs_ExplosivesStockpile explosives = (Pr_Orcs_ExplosivesStockpile)map.locations[army.homeLocation].properties.FirstOrDefault(pr => pr is Pr_Orcs_ExplosivesStockpile);
+                        if (army is UM_OrcRaiders && (explosives == null || explosives.charge < explosivesCost))
+                        {
+                            foreach (Location location in map.locations)
                             {
-                                battle.messages.Add(army.getName() + " has suffered desertion (2 damage).");
-                            }
-                            else
-                            {
-                                battle.messages.Add(army.getName() + " deserts battle.");
-                                if (battle.attackers.Contains(army))
+                                if (location.soc == orcSociety)
                                 {
-                                    battle.attackers.Remove(army);
+                                    explosives = (Pr_Orcs_ExplosivesStockpile)location.properties.FirstOrDefault(pr => pr is Pr_Orcs_ExplosivesStockpile && pr.charge >= explosivesCost);
+                                    if (explosives != null)
+                                    {
+                                        break;
+                                    }
                                 }
-                                else if (battle.defenders.Contains(army))
-                                {
-                                    battle.defenders.Remove(army);
-                                }
-                                army.task = null;
-                                army.disband(map, "Desertion");
                             }
+                        }
+
+                        if (explosives != null && explosives.charge >= explosivesCost)
+                        {
+                            explosives.influences.Add(new ReasonMsg("Shipped to a battle at " + army.location.getName(), -explosivesCost));
+                            return true;
                         }
                     }
                 }
             }
+
+            return false;
         }
 
         public override int onArmyBattleCycle_DamageCalculated(BattleArmy battle, int dmg, UM unit, UM target)
@@ -1125,7 +1291,7 @@ namespace Orcs_Plus
 
             if (uKiller != null && v == "Razed by " + uKiller.getName())
             {
-                if (uKiller.isCommandable())
+                if (uKiller.isCommandable() || uKiller is UM_MonsterHeart || uKiller is UM_Tentacle)
                 {
                     if (influencedOrcCulture_Direct != null)
                     {
@@ -1257,18 +1423,35 @@ namespace Orcs_Plus
                 {
                     if (influencedOrcCulture_Direct != null)
                     {
-                        ModCore.Get().TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("Awakening destroyed orc camp", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                        ModCore.Get().TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("She Who Will Feast'a awakening destroyed orc camp", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                     }
 
                     foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
                     {
-                        ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("Awakening destroyed enemy settlement", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                        ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("She Who Will Feast's awakening destroyed enemy settlement", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                     }
 
                     foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
                     {
-                        ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("Awakening destroyed encroaching settlement", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                        ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("Ahe Who Will Feats's awakening destroyed encroaching settlement", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                     }
+                }
+            }
+            else if (v == "Consumed by Kishi's tide")
+            {
+                if (influencedOrcCulture_Direct != null)
+                {
+                    ModCore.Get().TryAddInfluenceGain(influencedOrcCulture_Direct, new ReasonMsg("The Evil Beneath destroyed orc camp", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RecieveGift]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Warring)
+                {
+                    ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("The Evil Beneath destroyed enemy settlement", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
+                }
+
+                foreach (HolyOrder_Orcs orcs in influencedOrcCultures_Regional)
+                {
+                    ModCore.Get().TryAddInfluenceGain(orcs, new ReasonMsg("The Evil Beneath destroyed encroaching settlement", ModCore.Get().data.influenceGain[ModData.influenceGainAction.RazeLocation]), true);
                 }
             }
             else if (v == "Consumed by Kishi's tide")

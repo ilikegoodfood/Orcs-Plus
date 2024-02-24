@@ -2446,6 +2446,21 @@ namespace Orcs_Plus
                         mineIncome = (int)Math.Ceiling(mineIncome * 1.4);
                     }
                 }
+                else if (orcCulture.tenet_god is H_Orcs_SecretsOfDestruction secrets)
+                {
+                    if (secrets.status < 0)
+                    {
+                        if (__instance.specialism == 1 || __instance.specialism == 2 || __instance.specialism == 3 || __instance.specialism == 5)
+                        {
+                            Pr_Orcs_ExplosivesStockpile stockpile = (Pr_Orcs_ExplosivesStockpile)__instance.location.properties.FirstOrDefault(pr => pr is Pr_Orcs_ExplosivesStockpile);
+                            if (stockpile == null)
+                            {
+                                stockpile = new Pr_Orcs_ExplosivesStockpile(__instance.location);
+                                __instance.location.properties.Add(stockpile);
+                            }
+                        }
+                    }
+                }
             }
 
             if (__instance.specialism == 0)

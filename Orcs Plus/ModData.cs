@@ -126,7 +126,8 @@ namespace Orcs_Plus
                     { typeof(God_Ophanim), typeof(H_Orcs_Perfection) },
                     { typeof(God_Mammon), typeof(H_Orcs_MammonClient) },
                     { typeof(God_Cards), typeof(H_Orcs_Lucky) },
-                    { typeof(God_Eternity), typeof(H_Orcs_GlorySeeker) }
+                    { typeof(God_Eternity), typeof(H_Orcs_GlorySeeker) },
+                    { typeof(God_Underground), typeof(H_Orcs_SecretsOfDestruction) }
                 };
             }
         }

@@ -125,25 +125,6 @@ namespace Orcs_Plus
                 utility += val;
             }
 
-            double targetUtility = 0.0;
-            Set_OrcCamp targetCamp = null;
-            int targetSpecialism = 0;
-            List<ReasonMsg> targetReasonMsgs = null;
-
-            int testSpecialism = 0;
-            double testUtility = 0.0;
-            List<ReasonMsg> testReasonMsgs = null;
-
-            if (reasons != null)
-            {
-                targetReasonMsgs = new List<ReasonMsg>();
-                testReasonMsgs = new List<ReasonMsg>();
-            }
-
-            int targetFortressCount = (int)Math.Ceiling((orcCulture.camps.Count - orcCulture.specializedCamps.Count) / 4.0);
-            int fortressCount = orcCulture.specializedCamps.FindAll(c => c.specialism == 1).Count;
-            bool needFortress = fortressCount < targetFortressCount;
-
             if (target != null)
             {
                 if (specialism == 1)
@@ -173,6 +154,25 @@ namespace Orcs_Plus
             }
             else
             {
+                double targetUtility = 0.0;
+                Set_OrcCamp targetCamp = null;
+                int targetSpecialism = 0;
+                List<ReasonMsg> targetReasonMsgs = null;
+
+                int testSpecialism = 0;
+                double testUtility = 0.0;
+                List<ReasonMsg> testReasonMsgs = null;
+
+                if (reasons != null)
+                {
+                    targetReasonMsgs = new List<ReasonMsg>();
+                    testReasonMsgs = new List<ReasonMsg>();
+                }
+
+                int targetFortressCount = (int)Math.Ceiling((orcCulture.camps.Count - orcCulture.specializedCamps.Count) / 4.0);
+                int fortressCount = orcCulture.specializedCamps.FindAll(c => c.specialism == 1).Count;
+                bool needFortress = fortressCount < targetFortressCount;
+
                 foreach (Set_OrcCamp camp in orcCulture.camps)
                 {
                     if (camp.specialism != 0)
@@ -341,7 +341,7 @@ namespace Orcs_Plus
             }
 
             double val = 0.0;
-            if (neighbouringCamps > 0)
+            if (neighbouringCamps > 0 && specialism != 6)
             {
                 val = campUtilValue * neighbouringCamps;
                 reasonMsgs?.Add(new ReasonMsg("Neighbouring orc camps", val));
@@ -455,7 +455,7 @@ namespace Orcs_Plus
             }
 
             int mineCount = orcCulture.specializedCamps.FindAll(c => c.specialism == 6).Count;
-            utility = 80.0 - (10.0 * mineCount);
+            utility = 40.0 - (10.0 * mineCount);
 
             reasonMsgs?.Add(new ReasonMsg("Base", 80.0));
             reasonMsgs?.Add(new ReasonMsg("Existing mines", -10.0 * mineCount));
