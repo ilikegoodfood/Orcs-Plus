@@ -2456,6 +2456,7 @@ namespace Orcs_Plus
                             if (stockpile == null)
                             {
                                 stockpile = new Pr_Orcs_ExplosivesStockpile(__instance.location);
+                                stockpile.charge = 0.0;
                                 __instance.location.properties.Add(stockpile);
                             }
                         }
