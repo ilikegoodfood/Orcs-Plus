@@ -118,6 +118,26 @@ namespace Orcs_Plus
             return result;
         }
 
+        private bool delegate_ValidFor_Underground(AgentAI.ChallengeData challengeData, UA ua)
+        {
+            if (ua.society is SG_Orc orcs)
+            {
+                if (challengeData.location.hex.z == 1 && orcs.canGoUnderground())
+                {
+                    return true;
+                }
+            }
+            else if (ua.society is HolyOrder_Orcs orcCulture)
+            {
+                if (challengeData.location.hex.z == 1 && orcCulture.orcSociety != null && orcCulture.orcSociety.canGoUnderground())
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         // Orc Upstart
         private void populateOrcUpstarts()
         {
@@ -337,6 +357,11 @@ namespace Orcs_Plus
 
             comLibAI.RegisterAgentType(typeof(UAEN_OrcElder), new AgentAI.ControlParameters(true));
             comLibAI.AddChallengesToAgentType(typeof(UAEN_OrcElder), aiChallenges_Elder);
+
+            if (comLibAI.TryGetAgentType(typeof(UAEN_OrcElder), out AgentAI.AIData aiData) && aiData != null)
+            {
+                aiData.aiChallenges_UniversalDelegates_ValidFor.Add(delegate_ValidFor_Underground);
+            }
         }
 
         private bool delegate_ValidFor_OwnCulture(AgentAI.ChallengeData challengeData, UA ua)
@@ -740,6 +765,11 @@ namespace Orcs_Plus
 
             comLibAI.RegisterAgentType(typeof(UAEN_OrcShaman), new AgentAI.ControlParameters(true));
             comLibAI.AddChallengesToAgentType(typeof(UAEN_OrcShaman), aiChallenges_Shaman);
+
+            if (comLibAI.TryGetAgentType(typeof(UAEN_OrcShaman), out AgentAI.AIData aiData) && aiData != null)
+            {
+                aiData.aiChallenges_UniversalDelegates_ValidFor.Add(delegate_ValidFor_Underground);
+            }
         }
 
         private bool delegate_ValidFor_SecretsOfDeath(AgentAI.ChallengeData challengeData, UA ua)

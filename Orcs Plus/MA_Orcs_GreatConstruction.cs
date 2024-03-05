@@ -238,7 +238,7 @@ namespace Orcs_Plus
                     }
 
                     Sub_Shipwreck wreck = (Sub_Shipwreck)camp.subs.FirstOrDefault(sub => sub is Sub_Shipwreck);
-                    if (camp.location.isCoastal && camp.location.getNeighbours().Any(l => l.isOcean) && wreck != null && !wreck.isReinforced())
+                    if (camp.location.isCoastal && wreck != null && !wreck.isReinforced() && camp.location.getNeighbours().Any(l => l.isOcean))
                     {
                         double baseCost = 2 * map.param.ch_orc_buildFortressCostPerNeighbour;
                         int specilisedNeighbourCount = camp.location.getNeighbours().FindAll(l => l.settlement is Set_OrcCamp camp2 && camp2.specialism > 0).Count;
@@ -457,7 +457,7 @@ namespace Orcs_Plus
             int mineCount = orcCulture.specializedCamps.FindAll(c => c.specialism == 6).Count;
             utility = 40.0 - (10.0 * mineCount);
 
-            reasonMsgs?.Add(new ReasonMsg("Base", 80.0));
+            reasonMsgs?.Add(new ReasonMsg("Base", 40.0));
             reasonMsgs?.Add(new ReasonMsg("Existing mines", -10.0 * mineCount));
 
             return utility;
