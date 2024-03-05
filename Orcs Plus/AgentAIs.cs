@@ -122,20 +122,20 @@ namespace Orcs_Plus
         {
             if (ua.society is SG_Orc orcs)
             {
-                if (challengeData.location.hex.z == 1 && orcs.canGoUnderground())
+                if (challengeData.location.hex.z == 1 && !orcs.canGoUnderground())
                 {
-                    return true;
+                    return false;
                 }
             }
             else if (ua.society is HolyOrder_Orcs orcCulture)
             {
-                if (challengeData.location.hex.z == 1 && orcCulture.orcSociety != null && orcCulture.orcSociety.canGoUnderground())
+                if (challengeData.location.hex.z == 1 && orcCulture.orcSociety != null && !orcCulture.orcSociety.canGoUnderground())
                 {
-                    return true;
+                    return false;
                 }
             }
 
-            return false;
+            return true;
         }
 
         // Orc Upstart
