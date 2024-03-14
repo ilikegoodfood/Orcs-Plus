@@ -1403,7 +1403,14 @@ namespace Orcs_Plus
 
                     if (Get().data.isPlayerTurn)
                     {
+                        bool playerCanInfluenceFlag = orcCulture.influenceElder >= orcCulture.influenceElderReq;
+
                         orcCulture.influenceElder += (int)Math.Floor(msg.value);
+
+                        if (!playerCanInfluenceFlag && orcCulture.influenceElder >= orcCulture.influenceElderReq)
+                        {
+                            orcCulture.map.addUnifiedMessage(this, null, "Can Influence Holy Order", "You have enough influence to change the tenets of " + orcCulture.getName() + ", via the holy order screen", UnifiedMessage.messageType.CAN_INFLUENCE_ORDER);
+                        }
                     }
 
                     return true;

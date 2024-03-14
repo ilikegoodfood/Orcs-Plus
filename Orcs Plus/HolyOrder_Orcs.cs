@@ -140,7 +140,6 @@ namespace Orcs_Plus
                 /*divinity = new DivineEntity(map, this);
                 divinity.name = "Ancestors of the " + orcSociety.getName();
                 divinity.desire = new D_Orc(map, divinity);*/
-
             }
 
             // Set map colour, favouring redish colours.
@@ -656,6 +655,8 @@ namespace Orcs_Plus
 
         public new void receiveFunding(Person other, int delta)
         {
+            bool playerCanInfluenceFlag = influenceElder >= influenceElderReq;
+
             if (seat != null)
             {
                 Pr_OrcPlunder capitalPlunder = seat.settlement.location.properties.OfType<Pr_OrcPlunder>().FirstOrDefault();
@@ -691,7 +692,13 @@ namespace Orcs_Plus
                 }
 
                 targetPlunder.addGold(delta);
-                updateData();
+            }
+
+            updateData();
+
+            if (!playerCanInfluenceFlag && influenceElder >= influenceElderReq)
+            {
+                map.addUnifiedMessage(this, null, "Can Influence Holy Order", "You have enough influence to change the tenets of " + getName() + ", via the holy order screen", UnifiedMessage.messageType.CAN_INFLUENCE_ORDER);
             }
         }
 

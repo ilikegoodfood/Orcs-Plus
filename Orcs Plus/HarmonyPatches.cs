@@ -575,7 +575,7 @@ namespace Orcs_Plus
         {
             SG_Orc orcSociety = ch.location.soc as SG_Orc;
 
-            if (ch.location.settlement != null && ch.location.settlement.subs.Count > 0)
+            if (ch.location != null && ch.location.settlement != null)
             {
                 Sub_OrcWaystation waystation = (Sub_OrcWaystation)ch.location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation w && w.getChallenges().Contains(ch));
                 if (waystation != null)
@@ -584,19 +584,22 @@ namespace Orcs_Plus
                 }
             }
 
-            foreach (Location neighbour in ch.location.getNeighbours())
+            if (orcSociety != null)
             {
-                if (neighbour.hex.z == 1 && ch.location.hex.z != 1 && !orcSociety.canGoUnderground())
+                foreach (Location neighbour in ch.location.getNeighbours())
                 {
-                    continue;
-                }
-
-                if (neighbour.soc != null && neighbour.settlement is SettlementHuman && ModCore.Get().isHostileAlignment(orcSociety, neighbour))
-                {
-                    Pr_Devastation devastation = ch.location.properties.OfType<Pr_Devastation>().FirstOrDefault();
-                    if (devastation == null || devastation.charge < 150)
+                    if (neighbour.hex.z == 1 && ch.location.hex.z != 1 && !orcSociety.canGoUnderground())
                     {
-                        return true;
+                        continue;
+                    }
+
+                    if (neighbour.soc != null && neighbour.settlement is SettlementHuman && ModCore.Get().isHostileAlignment(orcSociety, neighbour))
+                    {
+                        Pr_Devastation devastation = ch.location.properties.OfType<Pr_Devastation>().FirstOrDefault();
+                        if (devastation == null || devastation.charge < 150)
+                        {
+                            return true;
+                        }
                     }
                 }
             }
