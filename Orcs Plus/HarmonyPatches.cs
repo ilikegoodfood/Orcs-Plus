@@ -551,9 +551,14 @@ namespace Orcs_Plus
 
         private static bool Ch_OrcRaiding_valid_TranspilerBody(Ch_OrcRaiding ch)
         {
+            if (ch == null || ch.location == null)
+            {
+                return false;
+            }
+
             SG_Orc orcSociety = ch.location.soc as SG_Orc;
 
-            if (ch.location.settlement != null && ch.location.settlement.subs.Count > 0)
+            if (ch.location.settlement != null)
             {
                 Sub_OrcWaystation waystation = (Sub_OrcWaystation)ch.location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation w && w.getChallenges().Contains(ch));
                 if (waystation != null)
@@ -562,14 +567,17 @@ namespace Orcs_Plus
                 }
             }
 
-            foreach (Location neighbour in ch.location.getNeighbours())
+            if (orcSociety != null)
             {
-                if (neighbour.soc != null && neighbour.settlement is SettlementHuman && ModCore.Get().isHostileAlignment(orcSociety, neighbour))
+                foreach (Location neighbour in ch.location.getNeighbours())
                 {
-                    Pr_Devastation devastation = ch.location.properties.OfType<Pr_Devastation>().FirstOrDefault();
-                    if (devastation == null || devastation.charge < 150)
+                    if (neighbour.soc != null && neighbour.settlement is SettlementHuman && ModCore.Get().isHostileAlignment(orcSociety, neighbour))
                     {
-                        return true;
+                        Pr_Devastation devastation = ch.location.properties.OfType<Pr_Devastation>().FirstOrDefault();
+                        if (devastation == null || devastation.charge < 150)
+                        {
+                            return true;
+                        }
                     }
                 }
             }
