@@ -1354,34 +1354,41 @@ namespace Orcs_Plus
 
                 if (Get().data.isPlayerTurn)
                 {
+                    bool playerCanInfluenceFlag = orcCulture.influenceElder >= orcCulture.influenceElderReq;
+
                     orcCulture.influenceElder += (int)Math.Floor(msg.value);
 
-                    if (orcCulture.influenceElder > orcCulture.influenceElderReq)
+                    if (orcCulture.influenceElder >= orcCulture.influenceElderReq)
                     {
                         orcCulture.influenceElder = orcCulture.influenceElderReq;
+
+                        if (!playerCanInfluenceFlag)
+                        {
+                            orcCulture.map.addUnifiedMessage(orcCulture, null, "Can Influence Holy Order", "You have enough influence to change the tenets of " + orcCulture.getName() + ", via the holy order screen", UnifiedMessage.messageType.CAN_INFLUENCE_ORDER);
+                        }
                     }
                     else if (orcCulture.influenceElder < 0)
                     {
                         orcCulture.influenceElder = 0;
                     }
                 }
-
-                return true;
             }
-
-            AddInfluenceGainHuman(orcCulture, msg);
-
-            if (Get().data.isPlayerTurn)
+            else
             {
-                orcCulture.influenceHuman += (int)Math.Floor(msg.value);
+                AddInfluenceGainHuman(orcCulture, msg);
 
-                if (orcCulture.influenceHuman > orcCulture.influenceHumanReq)
+                if (Get().data.isPlayerTurn)
                 {
-                    orcCulture.influenceHuman = orcCulture.influenceHumanReq;
-                }
-                else if (orcCulture.influenceHuman < 0)
-                {
-                    orcCulture.influenceHuman = 0;
+                    orcCulture.influenceHuman += (int)Math.Floor(msg.value);
+
+                    if (orcCulture.influenceHuman > orcCulture.influenceHumanReq)
+                    {
+                        orcCulture.influenceHuman = orcCulture.influenceHumanReq;
+                    }
+                    else if (orcCulture.influenceHuman < 0)
+                    {
+                        orcCulture.influenceHuman = 0;
+                    }
                 }
             }
 
@@ -1397,33 +1404,7 @@ namespace Orcs_Plus
 
             if (Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
             {
-                if (isElder)
-                {
-                    AddInfluenceGainElder(orcCulture, msg);
-
-                    if (Get().data.isPlayerTurn)
-                    {
-                        bool playerCanInfluenceFlag = orcCulture.influenceElder >= orcCulture.influenceElderReq;
-
-                        orcCulture.influenceElder += (int)Math.Floor(msg.value);
-
-                        if (!playerCanInfluenceFlag && orcCulture.influenceElder >= orcCulture.influenceElderReq)
-                        {
-                            orcCulture.map.addUnifiedMessage(this, null, "Can Influence Holy Order", "You have enough influence to change the tenets of " + orcCulture.getName() + ", via the holy order screen", UnifiedMessage.messageType.CAN_INFLUENCE_ORDER);
-                        }
-                    }
-
-                    return true;
-                }
-
-                AddInfluenceGainHuman(orcCulture, msg);
-
-                if (Get().data.isPlayerTurn)
-                {
-                    orcCulture.influenceHuman += (int)Math.Floor(msg.value);
-                }
-
-                return true;
+                return TryAddInfluenceGain(orcCulture, msg, isElder);
             }
 
             return false;
@@ -1437,19 +1418,12 @@ namespace Orcs_Plus
                 Get().data.influenceGainElder.Add(orcCulture, influenceGain);
             }
 
-            bool flag = false;
-
-            foreach (ReasonMsg gainMsg in influenceGain)
+            ReasonMsg gainMsg = influenceGain.FirstOrDefault(m => m.msg == msg.msg);
+            if (gainMsg != null)
             {
-                if (gainMsg.msg == msg.msg)
-                {
-                    gainMsg.value += msg.value;
-                    flag = true;
-                    break;
-                }
+                gainMsg.value += msg.value;
             }
-
-            if (!flag)
+            else
             {
                 influenceGain.Add(msg);
             }
