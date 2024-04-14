@@ -573,9 +573,14 @@ namespace Orcs_Plus
 
         private static bool Ch_OrcRaiding_valid_TranspilerBody(Ch_OrcRaiding ch)
         {
+            if (ch == null || ch.location == null)
+            {
+                return false;
+            }
+
             SG_Orc orcSociety = ch.location.soc as SG_Orc;
 
-            if (ch.location != null && ch.location.settlement != null)
+            if (ch.location.settlement != null)
             {
                 Sub_OrcWaystation waystation = (Sub_OrcWaystation)ch.location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation w && w.getChallenges().Contains(ch));
                 if (waystation != null)
