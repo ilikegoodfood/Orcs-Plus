@@ -40,7 +40,7 @@ namespace Orcs_Plus
             }
         }
 
-        public override bool onPathfinding_AllowMultiLayerPathfinding(Unit u)
+        public override bool onPathfinding_AllowSecondPass(Location locA, Location locB, Unit u, List<Func<Location[], Location, Unit, Location, Location, bool>> pathfindingDelegates)
         {
             return u.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety.canGoUnderground();
         }
