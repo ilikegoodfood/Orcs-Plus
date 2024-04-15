@@ -1,7 +1,6 @@
 ﻿using Assets.Code;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -42,7 +41,26 @@ namespace Orcs_Plus
 
         public override bool onPathfinding_AllowSecondPass(Location locA, Location locB, Unit u, List<Func<Location[], Location, Unit, Location, Location, bool>> pathfindingDelegates)
         {
-            return u.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety.canGoUnderground();
+            bool result = u.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety.canGoUnderground();
+
+            if (result)
+            {
+                pathfindingDelegates.Remove(CommunityLib.Pathfinding.delegate_LAYERBOUND);
+            }
+
+            return result;
+        }
+
+        public override bool onPathfinding_AllowSecondPass(Location loc, SocialGroup sg, Unit u, List<Func<Location[], Location, Unit, Location, Location, bool>> pathfindingDelegates)
+        {
+            bool result = u.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety.canGoUnderground();
+
+            if (result)
+            {
+                pathfindingDelegates.Remove(CommunityLib.Pathfinding.delegate_LAYERBOUND);
+            }
+
+            return result;
         }
 
         public override void onPlayerOpensReligionUI(HolyOrder order)
@@ -76,31 +94,6 @@ namespace Orcs_Plus
 
             return dmg;
         }
-
-        /*public override bool interceptUnitDeath(Unit u, string v, Person kiler = null)
-        {
-            if (u.person != null)
-            {
-                //Console.WriteLine("OrcsPlus: Intercept unit death with person");
-                for (int i = 0; i < u.person.items.Length; i++)
-                {
-                    if (u.person.items[i] is I_BloodGourd)
-                    {
-                        //Console.WriteLine("OrcsPlus: Person has Blood Gourd (Item slot " + (i + 1).ToString() + ")");
-
-                        u.person.map.addUnifiedMessage(u.person, null, "Survived Death", "In a last, desperate attempt to stave off death " + u.person.getName() + " devours the entire blood gourd that they carried with them. Its healing abilities were said to be able to heal any wound, cure any poison, and the stories were right. " + u.person.getName() + " makes a full recovery.", "Survived Death");
-                        u.person.items[i] = null;
-
-                        u.hp = u.maxHp;
-                        u.person.isDead = false;
-
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }*/
 
         public override void onUnitDeath_StartOfProcess(Unit u, string v, Person killer)
         {
