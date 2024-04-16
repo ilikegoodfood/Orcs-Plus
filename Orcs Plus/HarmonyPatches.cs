@@ -1990,90 +1990,102 @@ namespace Orcs_Plus
             }
 
             int locationCount = 0;
+            int waystationCount = 0;
             int unitCount = 0;
             int acolyteCount = 0;
 
             for (int i = 0; i < ua.person.items.Length; i++)
             {
-                if (ua.person.items[i] is I_HordeBanner banner && banner.orcs != orcSociety)
+                if (!(ua.person.items[i] is I_HordeBanner banner) || banner.orcs == orcSociety)
                 {
-                    SG_Orc orcs = banner.orcs;
-                    HolyOrder_Orcs culture = null;
-
-                    if (orcs != null)
-                    {
-                        ModCore.Get().data.orcSGCultureMap.TryGetValue(orcs, out culture);
-                    }
-
-                    if (culture != null)
-                    {
-                        if (culture.seat != null)
-                        {
-                            if (orcCulture != null)
-                            {
-                                culture.seat.settlement.subs.Add(new Sub_OrcTemple(culture.seat.settlement, orcCulture));
-                            }
-
-                            culture.seat.settlement.subs.Remove(culture.seat);
-                            culture.seat = null;
-                        }
-
-                        culture.cachedGone = true;
-
-                        if (culture.ophanim_PerfectSociety)
-                        {
-                            orcCulture.ophanim_PerfectSociety = true;
-                        }
-                    }
-
-                    foreach (Location loc in challenge.map.locations)
-                    {
-                        if (loc.soc == orcs)
-                        {
-                            locationCount++;
-                            loc.soc = challenge.caster.orcs;
-                        }
-                    }
-
-                    foreach (Unit unit in challenge.map.units)
-                    {
-                        if (orcs != null && unit.society == orcs)
-                        {
-                            unitCount++;
-                            unit.society = orcSociety;
-
-                            if (unit is UAEN_OrcUpstart)
-                            {
-                                foreach (Item item in unit.person.items)
-                                {
-                                    if (item is I_HordeBanner banner2 && banner2.orcs == orcs)
-                                    {
-                                        banner2.orcs = orcSociety;
-                                    }
-                                }
-                            }
-                        }
-
-                        if (culture != null && unit.society == culture)
-                        {
-                            if (orcCulture == null)
-                            {
-                                if (unit.task is Task_PerformChallenge task && task.challenge.claimedBy == unit)
-                                {
-                                    task.challenge.claimedBy = null;
-                                }
-                                unit.die(challenge.map, "Slaughtered during the unification of the hordes", null);
-                            }
-                            else
-                            {
-                                acolyteCount++;
-                                unit.society = orcCulture;
-                            }
-                        }
-                    }
-
-                    banner.orcs = orcSociety;
+                    continue;
                 }
+
+                SG_Orc orcs = banner.orcs;
+                HolyOrder_Orcs culture = null;
+
+                if (culture != null)
+                {
+                    if (culture.seat != null)
+                    {
+                        if (orcCulture != null)
+                        {
+                            culture.seat.settlement.subs.Add(new Sub_OrcTemple(culture.seat.settlement, orcCulture));
+                        }
+
+                        culture.seat.settlement.subs.Remove(culture.seat);
+                        culture.seat = null;
+                    }
+
+                    culture.cachedGone = true;
+
+                    if (culture.ophanim_PerfectSociety)
+                    {
+                        orcCulture.ophanim_PerfectSociety = true;
+                    }
+                }
+
+                foreach (Location loc in challenge.map.locations)
+                {
+                    if (loc.soc == orcs)
+                    {
+                        locationCount++;
+                        loc.soc = orcSociety;
+                    }
+
+                    if (loc.settlement != null)
+                    {
+                        foreach (Subsettlement sub in loc.settlement.subs)
+                        {
+                            if (!(sub is Sub_OrcWaystation waystation) || waystation.orcSociety != orcs)
+                            {
+                                continue;
+                            }
+
+                            waystation.orcSociety = orcSociety;
+                            waystationCount++;
+                        }
+                    }
+                }
+
+                foreach (Unit unit in challenge.map.units)
+                {
+                    if (orcs != null && unit.society == orcs)
+                    {
+                        unitCount++;
+                        unit.society = orcSociety;
+
+                        if (unit is UAEN_OrcUpstart)
+                        {
+                            foreach (Item item in unit.person.items)
+                            {
+                                if (item is I_HordeBanner banner2 && banner2.orcs == orcs)
+                                {
+                                    banner2.orcs = orcSociety;
+                                }
+                            }
+                        }
+                    }
+
+                    if (culture != null && unit.society == culture)
+                    {
+                        if (orcCulture == null)
+                        {
+                            if (unit.task is Task_PerformChallenge task && task.challenge.claimedBy == unit)
+                            {
+                                task.challenge.claimedBy = null;
+                            }
+                            unit.die(challenge.map, "Slaughtered during the unification of the hordes", null);
+                        }
+                        else
+                        {
+                            acolyteCount++;
+                            unit.society = orcCulture;
+                        }
+                    }
+                }
+
+                banner.orcs = orcSociety;
             }
 
             orcCulture.orcSociety = orcSociety;
@@ -2085,14 +2097,28 @@ namespace Orcs_Plus
                     challenge.msgString,
                     "\n",
                     locationCount.ToString(),
-                    " locations and ",
+                    " locations, ",
+                    waystationCount.ToString(),
+                    " waystations, and",
                     unitCount.ToString(),
                     " units have joined ",
                     orcSociety.getName()
                 });
 
-            ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Integrated " + locationCount + " settlements", (ModCore.Get().data.influenceGain[ModData.influenceGainAction.Expand] * locationCount)), true);
-            ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Integrated " + unitCount + " agents", (ModCore.Get().data.influenceGain[ModData.influenceGainAction.AgentKill] * unitCount)), true);
+            if (locationCount > 0)
+            {
+                ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Integrated " + locationCount + " settlements", (ModCore.Get().data.influenceGain[ModData.influenceGainAction.Expand] * locationCount)), true);
+            }
+
+            if (waystationCount > 0)
+            {
+                ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Integrated " + waystationCount + " waystations", ModCore.Get().data.influenceGain[ModData.influenceGainAction.BuildWaystation] * waystationCount), true);
+            }
+
+            if (unitCount > 0)
+            {
+                ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Integrated " + unitCount + " agents", (ModCore.Get().data.influenceGain[ModData.influenceGainAction.AgentKill] * unitCount)), true);
+            }
 
             if (orcCulture != null)
             {
@@ -2104,7 +2130,10 @@ namespace Orcs_Plus
                         " acolytes have joined ",
                         orcCulture.getName()
                 });
-                ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Integrated " + acolyteCount + " elders", (ModCore.Get().data.influenceGain[ModData.influenceGainAction.AgentKill] * acolyteCount)), true);
+                if (acolyteCount > 0)
+                {
+                    ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Integrated " + acolyteCount + " elders", (ModCore.Get().data.influenceGain[ModData.influenceGainAction.AgentKill] * acolyteCount)), true);
+                }
             }
 
             challenge.msgString = string.Concat(new string[]
