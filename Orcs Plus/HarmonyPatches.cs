@@ -2033,17 +2033,37 @@ namespace Orcs_Plus
                         loc.soc = orcSociety;
                     }
 
-                    if (loc.settlement != null)
+                    if (loc.settlement != null && loc.settlement.subs.Count > 0)
                     {
-                        foreach (Subsettlement sub in loc.settlement.subs)
+                        bool duplicate = false;
+                        List<Subsettlement> mutableSubs = loc.settlement.subs.ToList();
+
+                        foreach (Subsettlement sub in mutableSubs)
                         {
-                            if (!(sub is Sub_OrcWaystation waystation) || waystation.orcSociety != orcs)
+                            if (!(sub is Sub_OrcWaystation waystation))
                             {
                                 continue;
                             }
 
-                            waystation.orcSociety = orcSociety;
-                            waystationCount++;
+                            if (waystation.orcSociety == orcSociety)
+                            {
+                                duplicate = true;
+                                continue;
+                            }
+
+                            if (waystation.orcSociety == orcs)
+                            {
+                                if (duplicate)
+                                {
+                                    loc.settlement.subs.Remove(sub);
+                                }
+                                else
+                                {
+                                    waystation.orcSociety = orcSociety;
+                                    waystationCount++;
+                                    duplicate = true;
+                                }
+                            }
                         }
                     }
                 }
