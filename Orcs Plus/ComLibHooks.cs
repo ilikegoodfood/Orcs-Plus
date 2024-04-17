@@ -1752,21 +1752,15 @@ namespace Orcs_Plus
                 //Console.WriteLine("OrcsPlus: Finished processing orcSociety");
 
                 // Add Great Contruction action to orc societies
-                bool present = false;
-                foreach (MonsterAction action in orcCulture.monsterActions)
+                MA_Orcs_GreatConstruction gConstruction = (MA_Orcs_GreatConstruction)orcCulture.monsterActions.FirstOrDefault(ma => ma is MA_Orcs_GreatConstruction);
+                if (gConstruction == null)
                 {
-                    if (action is MA_Orcs_GreatConstruction gConstruction)
-                    {
-                        present = true;
-                        actions.Add(gConstruction);
-                        break;
-                    }
-                }
-
-                if (!present)
-                {
-                    MA_Orcs_GreatConstruction gConstruction = new MA_Orcs_GreatConstruction(orcSociety);
+                    gConstruction = new MA_Orcs_GreatConstruction(orcSociety);
                     orcCulture.monsterActions.Add(gConstruction);
+                    actions.Add(gConstruction);
+                }
+                else if (!actions.Contains(gConstruction))
+                {
                     actions.Add(gConstruction);
                 }
 
@@ -1777,43 +1771,31 @@ namespace Orcs_Plus
                     {
                         if (neighbour is Society society && !(society is HolyOrder) && orcSociety.getRel(society).state != DipRel.dipState.war && society.capital != -1)
                         {
-                            present = false;
-                            foreach(MonsterAction action in orcCulture.monsterActions)
+                            MA_Orc_HireMercenaries hireMercs = (MA_Orc_HireMercenaries)orcCulture.monsterActions.FirstOrDefault(ma => ma is MA_Orc_HireMercenaries hire && hire.target == society);
+                            if (hireMercs == null)
                             {
-                                if (action is MA_Orc_HireMercenaries hire && hire.target == society)
-                                {
-                                    present = true;
-                                    actions.Add(action);
-                                    break;
-                                }
+                                hireMercs = new MA_Orc_HireMercenaries(orcSociety, society);
+                                orcCulture.monsterActions.Add(hireMercs);
+                                actions.Add(hireMercs);
                             }
-
-                            if (!present)
+                            else if (!actions.Contains(hireMercs))
                             {
-                                MonsterAction action = new MA_Orc_HireMercenaries(orcSociety, society);
-                                orcCulture.monsterActions.Add(action);
-                                actions.Add(action);
+                                actions.Add(hireMercs);
                             }
                         }
 
                         if (neighbour is SG_Orc orcs && orcSociety.getRel(orcs).state != DipRel.dipState.war && orcs.capital != -1)
                         {
-                            present = false;
-                            foreach (MonsterAction action in orcCulture.monsterActions)
+                            MA_Orc_HireMercenaries hireMercs = (MA_Orc_HireMercenaries)orcCulture.monsterActions.FirstOrDefault(ma => ma is MA_Orc_HireMercenaries hire && hire.target == orcs);
+                            if (hireMercs == null)
                             {
-                                if (action is MA_Orc_HireMercenaries hire && hire.target == orcs)
-                                {
-                                    present = true;
-                                    actions.Add(action);
-                                    break;
-                                }
+                                hireMercs = new MA_Orc_HireMercenaries(orcSociety, orcs);
+                                orcCulture.monsterActions.Add(hireMercs);
+                                actions.Add(hireMercs);
                             }
-
-                            if (!present)
+                            else if (!actions.Contains(hireMercs))
                             {
-                                MonsterAction action = new MA_Orc_HireMercenaries(orcSociety, orcs);
-                                orcCulture.monsterActions.Add(action);
-                                actions.Add(action);
+                                actions.Add(hireMercs);
                             }
                         }
                     }
