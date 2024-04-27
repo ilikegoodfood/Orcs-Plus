@@ -1235,7 +1235,7 @@ namespace Orcs_Plus
                     continue;
                 }
 
-                if (neighbour.settlement is SettlementHuman && !(neighbour.settlement is Set_City) && !(neighbour.settlement is Set_ElvenCity) && ModCore.Get().isHostileAlignment(orcSociety, neighbour))
+                if (neighbour.settlement is SettlementHuman && !(neighbour.settlement is Set_City) && !(neighbour.settlement is Set_ElvenCity) && !(neighbour.settlement is Set_DwarvenCity) && ModCore.Get().isHostileAlignment(orcSociety, neighbour))
                 {
                     if (!neighbour.properties.Any(pr => pr is Pr_OrcEncroachment))
                     {
@@ -1299,7 +1299,7 @@ namespace Orcs_Plus
                     continue;
                 }
 
-                if (neighbour.settlement is SettlementHuman setHuman && !(neighbour.settlement is Set_City) && !(neighbour.settlement is Set_ElvenCity) && ModCore.Get().isHostileAlignment(orcSociety, neighbour))
+                if (neighbour.settlement is SettlementHuman setHuman && !(neighbour.settlement is Set_City) && !(neighbour.settlement is Set_ElvenCity) && !(neighbour.settlement is Set_DwarvenCity) && ModCore.Get().isHostileAlignment(orcSociety, neighbour))
                 {
                     if (!neighbour.properties.Any(pr => pr is Pr_OrcEncroachment))
                     {
