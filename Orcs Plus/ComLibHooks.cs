@@ -1663,19 +1663,6 @@ namespace Orcs_Plus
                 tasks.Add(task_RazeOutpost);
             }
 
-            if (um is UM_OrcRaiders orcRaiders)
-            {
-                Rt_Orcs_BuildCamp challenge = (Rt_Orcs_BuildCamp)orcRaiders.rituals.FirstOrDefault(c => c is Rt_Orcs_BuildCamp);
-
-                if (challenge != null)
-                {
-                    TaskData task_Orcs_BuildCamp = new TaskData
-                    {
-                        challenge = challenge
-                    };
-                }
-            }
-
             return tasks;
         }
 
