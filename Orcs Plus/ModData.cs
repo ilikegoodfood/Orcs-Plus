@@ -208,6 +208,30 @@ namespace Orcs_Plus
         public void onTurnEnd(Map map)
         {
             //Console.WriteLine("OrcsPlus: running data.onTurnEnd");
+            if (map.acceleratedTime != acceleratedTime)
+            {
+                acceleratedTime = map.acceleratedTime;
+
+                if (acceleratedTime)
+                {
+                    brokenMakerSleeping = true;
+                    ModCore.Get().onBrokenMakerSleep_StartOfSleep(map);
+                }
+            }
+
+            if (brokenMakerSleeping)
+            {
+                sleepDuration--;
+                ModCore.Get().onBrokenMakerSleep_TurnTick(map);
+
+                if (sleepDuration == 0)
+                {
+                    brokenMakerSleeping = false;
+                    ModCore.Get().onBrokenMakerSleep_EndOfSleep(map);
+                    sleepDuration = 50;
+                }
+            }
+
             isPlayerTurn = false;
 
             influenceGainElder.Clear();

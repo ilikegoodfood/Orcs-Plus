@@ -1,5 +1,4 @@
 ﻿using Assets.Code;
-using CommunityLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -122,16 +121,16 @@ namespace Orcs_Plus
                     escort.hp = escort.maxHp;
                     escort.task = new Task_EscortUA(ua);
 
-                    ua.task = new Task_AttackUnitWithCustomEscort(ua, other, escort);
+                    ua.task = new CommunityLib.Task_AttackUnitWithCustomEscort(ua, other, escort);
                 }
                 else
                 {
                     while (unit.movesTaken < unit.getMaxMoves())
                     {
-                        Location[] pathTo = ModCore.GetComLib().pathfinding.getPathTo(unit.location, target.location, unit, !unit.society.isAtWar());
+                        Location[] pathTo = CommunityLib.Pathfinding.getPathTo(unit.location, target.location, unit, !unit.society.isAtWar());
                         if (pathTo == null)
                         {
-                            pathTo = ModCore.GetComLib().pathfinding.getPathTo(unit.location, target.location, unit);
+                            pathTo = CommunityLib.Pathfinding.getPathTo(unit.location, target.location, unit);
                         }
 
                         if (pathTo == null || pathTo.Length < 2)

@@ -39,19 +39,7 @@ namespace Orcs_Plus
             }
         }
 
-        public override bool onPathfinding_AllowSecondPass(Location locA, Location locB, Unit u, List<Func<Location[], Location, Unit, Location, Location, bool>> pathfindingDelegates)
-        {
-            bool result = u.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety.canGoUnderground();
-
-            if (result)
-            {
-                pathfindingDelegates.Remove(CommunityLib.Pathfinding.delegate_LAYERBOUND);
-            }
-
-            return result;
-        }
-
-        public override bool onPathfinding_AllowSecondPass(Location loc, SocialGroup sg, Unit u, List<Func<Location[], Location, Unit, Location, Location, bool>> pathfindingDelegates)
+        public override bool onPathfinding_AllowSecondPass(Location loc, Unit u, List<int> expectedMapLayers, List<Func<Location[], Location, Unit, List<int>, double>> pathfindingDelegates)
         {
             bool result = u.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety.canGoUnderground();
 

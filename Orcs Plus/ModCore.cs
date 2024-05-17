@@ -831,29 +831,6 @@ namespace Orcs_Plus
                 return;
             }
 
-            if (map.acceleratedTime != Get().data.acceleratedTime)
-            {
-                Get().data.acceleratedTime = map.acceleratedTime;
-                Get().data.brokenMakerSleeping = true;
-                if (Get().data.acceleratedTime)
-                {
-                    onBrokenMakerSleep_StartOfSleep(map);
-                }
-            }
-
-            if (Get().data.brokenMakerSleeping)
-            {
-                Get().data.sleepDuration--;
-                onBrokenMakerSleep_TurnTick(map);
-
-                if (Get().data.sleepDuration == 0)
-                {
-                    Get().data.brokenMakerSleeping = false;
-                    onBrokenMakerSleep_EndOfSleep(map);
-                    Get().data.sleepDuration = 50;
-                }
-            }
-
             Get().data.onTurnEnd(map);
         }
 
