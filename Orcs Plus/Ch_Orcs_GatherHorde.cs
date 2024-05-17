@@ -1,5 +1,4 @@
 ﻿using Assets.Code;
-using CommunityLib;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -47,7 +46,7 @@ namespace Orcs_Plus
                 {
                     if (map.locations[army.homeLocation].settlement.infiltration == 1.0 && !(army.task is Task_InBattle))
                     {
-                        Location[] path = ModCore.GetComLib().pathfinding.getPathTo(army.location, location, army);
+                        Location[] path = CommunityLib.Pathfinding.getPathTo(army.location, location, army);
                         if (path != null)
                         {
                             int duration = ModCore.GetComLib().getTravelTimeTo(army, location);
