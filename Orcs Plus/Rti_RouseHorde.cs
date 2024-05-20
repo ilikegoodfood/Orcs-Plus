@@ -40,7 +40,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Raise an orc rabble from the population of this camp, destroying it. The rabble will have hp equal to the orcish industry in the camp, and will disperse over time.";
+            return "Raise an orc rabble from the population of this camp, destroying it. The rabble will have hp equal to the orcish industry in the camp, and will disperse over time. The menace gained scales based on the amount of orcish industry present (20 at 100 charge).";
         }
 
         public override string getCastFlavour()
