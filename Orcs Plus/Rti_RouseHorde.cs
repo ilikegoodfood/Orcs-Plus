@@ -12,6 +12,8 @@ namespace Orcs_Plus
     {
         public Item banner;
 
+        public int baseArmyHP = -1;
+
         public Rti_RouseHorde (Location loc, Item banner)
             : base(loc)
         {
@@ -82,7 +84,12 @@ namespace Orcs_Plus
 
         public override int getCompletionMenace()
         {
-            return 25;
+            if (baseArmyHP == -1)
+            {
+                return 20;
+            }
+
+            return (int)Math.Ceiling(20 * (baseArmyHP / 100.0));
         }
 
         public override int getCompletionProfile()
@@ -136,6 +143,7 @@ namespace Orcs_Plus
                 if (industry != null)
                 {
                     double initHp = industry.charge;
+                    baseArmyHP = (int)Math.Ceiling(initHp);
 
                     Pr_Ophanim_Perfection perfection = (Pr_Ophanim_Perfection)u.location.properties.FirstOrDefault(pr => pr is Pr_Ophanim_Perfection);
                     if (perfection != null)

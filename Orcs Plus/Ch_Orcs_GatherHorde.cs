@@ -80,12 +80,12 @@ namespace Orcs_Plus
 
         public override int getCompletionMenace()
         {
-            return 30;
+            return 2;
         }
 
         public override int getCompletionProfile()
         {
-            return 15;
+            return 5;
         }
 
         public override double getProgressPerTurnInner(UA unit, List<ReasonMsg> msgs)
