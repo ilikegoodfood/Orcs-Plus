@@ -102,9 +102,17 @@ namespace Orcs_Plus
                     }
                 }
 
-                if (ua.isCommandable() && location.settlement is Set_OrcCamp && location.settlement.infiltration == 1.0)
+                if (ua.isCommandable())
                 {
-                    result = true;
+                    if (ua is UAE_Shaman)
+                    {
+                        return true;
+                    }
+
+                    if (location.settlement is Set_OrcCamp && location.settlement.infiltration == 1.0)
+                    {
+                        result = true;
+                    }
                 }
             }
 

@@ -69,6 +69,11 @@ namespace Orcs_Plus
         {
             double utility = 0.0;
 
+            if (ua.person == null)
+            {
+                return utility;
+            }
+
             double val = 0.2 * immortalRemains.person.getGold();
             if (val > 0.0)
             {
@@ -86,7 +91,16 @@ namespace Orcs_Plus
             }
             if (val > 0.0)
             {
-                val *= 25;
+                int freeItemSlots = 0;
+                for (int i = 0; i < ua.person.items.Count(); i++)
+                {
+                    if (ua.person.items[i] == null)
+                    {
+                        freeItemSlots++;
+                    }
+                }
+
+                val = Math.Min(val, freeItemSlots) * 25;
                 msgs?.Add(new ReasonMsg("Items on remains", val));
                 utility += val;
             }
