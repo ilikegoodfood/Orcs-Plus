@@ -51,6 +51,20 @@ namespace Orcs_Plus
             return result;
         }
 
+        public override void onGetTradeRouteEndpoints(Map map, List<Location> endpoints)
+        {
+            if (map.overmind.god is God_Mammon)
+            {
+                foreach (SocialGroup sg in map.socialGroups)
+                {
+                    if (sg is HolyOrder_Orcs orcCulture && !orcCulture.isGone() && orcCulture.capital != -1 && orcCulture.tenet_god is H_Orcs_MammonClient && orcCulture.tenet_god.status < -1)
+                    {
+                        endpoints.Add(map.locations[orcCulture.capital]);
+                    }
+                }
+            }
+        }
+
         public override void onPlayerOpensReligionUI(HolyOrder order)
         {
             ModCore.Get().powers.updateOrcPowers(order.map);
