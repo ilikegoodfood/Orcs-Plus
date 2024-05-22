@@ -72,7 +72,7 @@ namespace Orcs_Plus
             val = unit.getStatIntrigue();
             if (val > 0)
             {
-                msgs?.Add(new ReasonMsg("Stat: Intruige", val));
+                msgs?.Add(new ReasonMsg("Stat: Intrigue", val));
                 result += val;
             }
 
