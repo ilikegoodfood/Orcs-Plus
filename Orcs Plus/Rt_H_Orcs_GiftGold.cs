@@ -30,12 +30,12 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "The elder gives a handsom gift of " + bribeCost + " gold to a human noble in hopes of improving relations. Reduces society menace by " + bribeEffect + ".";
+            return "The elder gives a handsome gift of " + bribeCost + " gold to a human noble in hopes of improving relations. Reduces society menace by " + bribeEffect + ". The gift is more effective if the ruler likes orcs.";
         }
 
         public override string getCastFlavour()
         {
-            return "Weary of war and violence, wise to their consecuences, and all to aware of the frailty of orc might, the elder approaches the human nobility with deference and an offering few could ignore.";
+            return "Weary of war and violence, wise to their consequences, and all to aware of the frailty of orc might, the elder approaches the human nobility with deference and an offering few could ignore.";
         }
 
         public override string getRestriction()
