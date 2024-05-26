@@ -2178,7 +2178,7 @@ namespace Orcs_Plus
                     locationCount.ToString(),
                     " locations, ",
                     waystationCount.ToString(),
-                    " waystations, and",
+                    " waystations, and ",
                     unitCount.ToString(),
                     " units have joined ",
                     orcSociety.getName()
@@ -2199,7 +2199,7 @@ namespace Orcs_Plus
                 ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Integrated " + unitCount + " agents", (ModCore.Get().data.influenceGain[ModData.influenceGainAction.AgentKill] * unitCount)), true);
             }
 
-            if (orcCulture != null)
+            if (orcCulture != null && acolyteCount > 0)
             {
                 challenge.msgString = string.Concat(new string[]
                 {
