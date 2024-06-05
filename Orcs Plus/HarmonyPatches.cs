@@ -3356,7 +3356,7 @@ namespace Orcs_Plus
                 {
                     if (targetIndex == 1)
                     {
-                        if (instructionList[i].opcode == OpCodes.Brfalse_S && instructionList[i + 1].opcode == OpCodes.Nop && instructionList[i + 2].opcode == OpCodes.Ldarg_0)
+                        if (instructionList[i].opcode == OpCodes.Brfalse_S && instructionList[i+1].opcode == OpCodes.Nop && instructionList[i+2].opcode == OpCodes.Ldarg_0)
                         {
                             targetIndex = 0;
 
@@ -3383,11 +3383,24 @@ namespace Orcs_Plus
         {
             if (result)
             {
-                SG_Orc orcSociety = u.society as SG_Orc;
-                HolyOrder_Orcs orcCulture = u.society as HolyOrder_Orcs;
+                SG_Orc orcSociety;
+                HolyOrder_Orcs orcCulture;
+
+                if (u is UM_Mercenary mercenary)
+                {
+                    //Console.WriteLine("Orcs_Plus: UM is Mercenary Company");
+                    orcSociety = mercenary.source as SG_Orc;
+                    orcCulture = mercenary.source as HolyOrder_Orcs;
+                }
+                else
+                {
+                    orcSociety = u.society as SG_Orc;
+                    orcCulture = u.society as HolyOrder_Orcs;
+                }
 
                 if (orcSociety != null)
                 {
+                    //Console.WriteLine("Orcs_Plus: UM is orc army");
                     ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
                 }
 
