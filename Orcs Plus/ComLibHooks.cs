@@ -98,30 +98,30 @@ namespace Orcs_Plus
             //Console.WriteLine("Orcs_Plus: Unit is not Person");
 
             // Orc Logic
-            SG_Orc orcSociety = u.society as SG_Orc;
-            HolyOrder_Orcs orcCulture = u.society as HolyOrder_Orcs;
+            SG_Orc orcSociety;
+            HolyOrder_Orcs orcCulture;
+
+            if (u is UM_Mercenary mercenary)
+            {
+                //Console.WriteLine("Orcs_Plus: UM is Mercenary Company");
+                orcSociety = mercenary.source as SG_Orc;
+                orcCulture = mercenary.source as HolyOrder_Orcs;
+            }
+            else
+            {
+                orcSociety = u.society as SG_Orc;
+                orcCulture = u.society as HolyOrder_Orcs;
+            }
 
             if (orcSociety != null)
             {
+                //Console.WriteLine("Orcs_Plus: UM is orc army");
                 ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
             }
 
             if (u is UM um)
             {
                 //Console.WriteLine("Orcs_Plus: Unit is UM");
-                if (um is UM_Mercenary mercenary)
-                {
-                    //Console.WriteLine("Orcs_Plus: UM is Mercenary Company");
-                    orcSociety = mercenary.source as SG_Orc;
-                    orcCulture = mercenary.source as HolyOrder_Orcs;
-                }
-
-                if (orcSociety != null)
-                {
-                    //Console.WriteLine("Orcs_Plus: UM is orc army");
-                    ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
-                }
-
                 if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < -1)
                 {
                     //Console.WriteLine("Orcs_Plus: UM is subject to Insectile Symbiosis");
@@ -580,16 +580,24 @@ namespace Orcs_Plus
 
         public override void onRazeLocation_EndOfProcess(UM um)
         {
-            SG_Orc orcSociety = um.society as SG_Orc;
-            HolyOrder_Orcs orcCulture = null;
+            SG_Orc orcSociety;
+            HolyOrder_Orcs orcCulture;
 
             if (um is UM_Mercenary mercenary)
             {
+                //Console.WriteLine("Orcs_Plus: UM is Mercenary Company");
                 orcSociety = mercenary.source as SG_Orc;
+                orcCulture = mercenary.source as HolyOrder_Orcs;
+            }
+            else
+            {
+                orcSociety = um.society as SG_Orc;
+                orcCulture = um.society as HolyOrder_Orcs;
             }
 
             if (orcSociety != null)
             {
+                //Console.WriteLine("Orcs_Plus: UM is orc army");
                 ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
             }
 
@@ -612,7 +620,6 @@ namespace Orcs_Plus
                         if (refugees.Count > 0)
                         {
                             bool isHive = false;
-
                             foreach (Location loc in um.map.locations)
                             {
                                 if (loc.settlement != null && (loc.settlement.GetType() == hiveType || loc.settlement.GetType().IsSubclassOf(hiveType)))
@@ -692,7 +699,28 @@ namespace Orcs_Plus
 
         public int SWWF_boostArmyDamage(BattleArmy battle, int dmg, UM unit)
         {
-            if (unit.society is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            SG_Orc orcSociety;
+            HolyOrder_Orcs orcCulture;
+
+            if (unit is UM_Mercenary mercenary)
+            {
+                //Console.WriteLine("Orcs_Plus: UM is Mercenary Company");
+                orcSociety = mercenary.source as SG_Orc;
+                orcCulture = mercenary.source as HolyOrder_Orcs;
+            }
+            else
+            {
+                orcSociety = unit.society as SG_Orc;
+                orcCulture = unit.society as HolyOrder_Orcs;
+            }
+
+            if (orcSociety != null)
+            {
+                //Console.WriteLine("Orcs_Plus: UM is orc army");
+                ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+            }
+
+            if (orcCulture != null && orcCulture != null)
             {
                 if (orcCulture.tenet_god is H_Orcs_ShadowWarriors shadowWariors && shadowWariors.status < 0)
                 {
@@ -729,41 +757,59 @@ namespace Orcs_Plus
 
         public int SWWF_mitigateArmyDamage(BattleArmy battle, int dmg, UM target)
         {
-            if (target.society is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+            SG_Orc orcSociety;
+            HolyOrder_Orcs orcCulture;
+
+            if (target is UM_Mercenary mercenary)
             {
-                if (orcCulture.tenet_god is H_Orcs_ShadowWarriors shadowWariors && shadowWariors.status < -1)
+                //Console.WriteLine("Orcs_Plus: UM is Mercenary Company");
+                orcSociety = mercenary.source as SG_Orc;
+                orcCulture = mercenary.source as HolyOrder_Orcs;
+            }
+            else
+            {
+                orcSociety = target.society as SG_Orc;
+                orcCulture = target.society as HolyOrder_Orcs;
+            }
+
+            if (orcSociety != null)
+            {
+                //Console.WriteLine("Orcs_Plus: UM is orc army");
+                ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+            }
+
+            if (orcCulture != null && orcCulture.tenet_god is H_Orcs_ShadowWarriors shadowWariors && shadowWariors.status < -1)
+            {
+                if (target.homeLocation != -1)
                 {
-                    if (target.homeLocation != -1)
+                    Location home = map.locations[target.homeLocation];
+                    double shadow = home.getShadow();
+
+                    int bonus = 0;
+                    if (shadow >= 0.5)
                     {
-                        Location home = map.locations[target.homeLocation];
-                        double shadow = home.getShadow();
+                        bonus += 1;
+                    }
+                    if (shadow >= 1.0)
+                    {
+                        bonus += 1;
+                    }
+                    if (Eleven.random.NextDouble() <= shadow)
+                    {
+                        bonus += 1;
+                    }
 
-                        int bonus = 0;
-                        if (shadow >= 0.5)
+                    if (bonus > 0)
+                    {
+                        if (dmg - bonus <= 1)
                         {
-                            bonus += 1;
+                            battle.messages.Add("Elder Influence allowed " + target.getName() + " to almost entirely shrug off the attack (home location shadow at " + Math.Floor(shadow * 100) + "%)");
                         }
-                        if (shadow >= 1.0)
+                        else
                         {
-                            bonus += 1;
+                            battle.messages.Add("Elder Influence allowed " + target.getName() + " to shrug off " + bonus + " damage (home location shadow at " + Math.Floor(shadow * 100) + "%)");
                         }
-                        if (Eleven.random.NextDouble() <= shadow)
-                        {
-                            bonus += 1;
-                        }
-
-                        if (bonus > 0)
-                        {
-                            if (dmg - bonus <= 1)
-                            {
-                                battle.messages.Add("Elder Influence allowed " + target.getName() + " to almost entirely shrug off the attack (home location shadow at " + Math.Floor(shadow * 100) + "%)");
-                            }
-                            else
-                            {
-                                battle.messages.Add("Elder Influence allowed " + target.getName() + " to shrug off " + bonus + " damage (home location shadow at " + Math.Floor(shadow * 100) + "%)");
-                            }
-                            dmg = Math.Max(1, dmg - bonus);
-                        }
+                        dmg = Math.Max(1, dmg - bonus);
                     }
                 }
             }
@@ -773,26 +819,41 @@ namespace Orcs_Plus
 
         public override int onUnitReceivesArmyBattleDamage(BattleArmy battle, UM u, int dmg)
         {
-            if (u is UM_OrcArmy || u is UM_OrcRaiders)
+            SG_Orc orcSociety;
+            HolyOrder_Orcs orcCulture;
+
+            if (u is UM_Mercenary mercenary)
             {
-                if (u.society is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
+                //Console.WriteLine("Orcs_Plus: UM is Mercenary Company");
+                orcSociety = mercenary.source as SG_Orc;
+                orcCulture = mercenary.source as HolyOrder_Orcs;
+            }
+            else
+            {
+                orcSociety = u.society as SG_Orc;
+                orcCulture = u.society as HolyOrder_Orcs;
+            }
+
+            if (orcSociety != null)
+            {
+                //Console.WriteLine("Orcs_Plus: UM is orc army");
+                ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+            }
+
+            if (orcCulture != null && orcCulture.tenet_god is H_Orcs_DeathMastery deathMastery && deathMastery.status < 0)
+            {
+                if (battle.attackers.Contains(u))
                 {
-                    if (orcCulture.tenet_god is H_Orcs_DeathMastery deathMastery && deathMastery.status < 0)
+                    if (!armyBattle_AttackerOrcHPDict.ContainsKey(u))
                     {
-                        if (battle.attackers.Contains(u))
-                        {
-                            if (!armyBattle_AttackerOrcHPDict.ContainsKey(u))
-                            {
-                                armyBattle_AttackerOrcHPDict.Add(u, u.hp);
-                            }
-                        }
-                        else
-                        {
-                            if (!armyBattle_DefenderOrcHPDict.ContainsKey(u))
-                            {
-                                armyBattle_DefenderOrcHPDict.Add(u, u.hp);
-                            }
-                        }
+                        armyBattle_AttackerOrcHPDict.Add(u, u.hp);
+                    }
+                }
+                else
+                {
+                    if (!armyBattle_DefenderOrcHPDict.ContainsKey(u))
+                    {
+                        armyBattle_DefenderOrcHPDict.Add(u, u.hp);
                     }
                 }
             }
@@ -820,7 +881,28 @@ namespace Orcs_Plus
 
                 if (pair.Key.hp < pair.Value)
                 {
-                    if (pair.Key.society is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_DeathMastery deathMastery && deathMastery.status < 0)
+                    SG_Orc orcSociety;
+                    HolyOrder_Orcs orcCulture;
+
+                    if (pair.Key is UM_Mercenary mercenary)
+                    {
+                        //Console.WriteLine("Orcs_Plus: UM is Mercenary Company");
+                        orcSociety = mercenary.source as SG_Orc;
+                        orcCulture = mercenary.source as HolyOrder_Orcs;
+                    }
+                    else
+                    {
+                        orcSociety = pair.Key.society as SG_Orc;
+                        orcCulture = pair.Key.society as HolyOrder_Orcs;
+                    }
+
+                    if (orcSociety != null)
+                    {
+                        //Console.WriteLine("Orcs_Plus: UM is orc army");
+                        ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+                    }
+
+                    if (orcCulture != null && orcCulture.tenet_god is H_Orcs_DeathMastery deathMastery && deathMastery.status < 0)
                     {
                         double hpConversion = deathMastery.status < -1 ? 1.5 * (pair.Value - pair.Key.hp) : 1 * (pair.Value - pair.Key.hp);
                         int deathHP = (int)Math.Floor(hpConversion);
@@ -846,7 +928,28 @@ namespace Orcs_Plus
 
                 if (pair.Key.hp < pair.Value)
                 {
-                    if (pair.Key.society is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_DeathMastery deathMastery && deathMastery.status < 0)
+                    SG_Orc orcSociety;
+                    HolyOrder_Orcs orcCulture;
+
+                    if (pair.Key is UM_Mercenary mercenary)
+                    {
+                        //Console.WriteLine("Orcs_Plus: UM is Mercenary Company");
+                        orcSociety = mercenary.source as SG_Orc;
+                        orcCulture = mercenary.source as HolyOrder_Orcs;
+                    }
+                    else
+                    {
+                        orcSociety = pair.Key.society as SG_Orc;
+                        orcCulture = pair.Key.society as HolyOrder_Orcs;
+                    }
+
+                    if (orcSociety != null)
+                    {
+                        //Console.WriteLine("Orcs_Plus: UM is orc army");
+                        ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+                    }
+
+                    if (orcCulture != null && orcCulture.tenet_god is H_Orcs_DeathMastery deathMastery && deathMastery.status < 0)
                     {
                         double hpConversion = deathMastery.status < -1 ? 0.75 * (pair.Value - pair.Key.hp) : 0.5 * (pair.Value - pair.Key.hp);
                         int deathHP = (int)Math.Floor(hpConversion);
@@ -868,13 +971,26 @@ namespace Orcs_Plus
                 if (attackerDeadHP > 0)
                 {
                     UM_UntamedDead dead = null;
-                    if (battle != null)
+                    foreach (Unit u in location.units)
                     {
-                        dead = (UM_UntamedDead)location.units.FirstOrDefault(u => !u.isDead && u is UM_UntamedDead d && d.master == null && d.task is Task_InBattle bTask && bTask.battle.attackers.Contains(u));
-                    }
-                    else
-                    {
-                        dead = (UM_UntamedDead)location.units.FirstOrDefault(u => !u.isDead && u is UM_UntamedDead d && d.master == null);
+                        if (u is UM_UntamedDead untamedDead && untamedDead.master == null)
+                        {
+                            if (dead == null)
+                            {
+                                dead = untamedDead;
+
+                                if (battle == null)
+                                {
+                                    break;
+                                }
+                            }
+
+                            if (untamedDead.task is Task_InBattle bTask && bTask.battle.attackers.Contains(u))
+                            {
+                                dead = untamedDead;
+                                break;
+                            }
+                        }
                     }
 
                     if (dead == null)
@@ -901,13 +1017,26 @@ namespace Orcs_Plus
                 if (defenderDeadHP > 0)
                 {
                     UM_UntamedDead dead = null;
-                    if (battle != null)
+                    foreach (Unit u in location.units)
                     {
-                        dead = (UM_UntamedDead)location.units.FirstOrDefault(u => u is UM_UntamedDead d && d.master == null && d.task is Task_InBattle bTask && bTask.battle.defenders.Contains(u));
-                    }
-                    else
-                    {
-                        dead = (UM_UntamedDead)location.units.FirstOrDefault(u => u is UM_UntamedDead d && d.master == null);
+                        if (u is UM_UntamedDead untamedDead && untamedDead.master == null)
+                        {
+                            if (dead == null)
+                            {
+                                dead = untamedDead;
+
+                                if (battle == null)
+                                {
+                                    break;
+                                }
+                            }
+
+                            if (untamedDead.task is Task_InBattle bTask && bTask.battle.attackers.Contains(u))
+                            {
+                                dead = untamedDead;
+                                break;
+                            }
+                        }
                     }
 
                     if (dead == null)
