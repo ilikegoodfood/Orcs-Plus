@@ -41,14 +41,14 @@ namespace Orcs_Plus
 
         public override bool onPathfinding_AllowSecondPass(Location loc, Unit u, List<int> expectedMapLayers, List<Func<Location[], Location, Unit, List<int>, double>> pathfindingDelegates)
         {
-            bool result = u.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety.canGoUnderground();
-
-            if (result)
+            if (u.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety.canGoUnderground())
             {
                 pathfindingDelegates.Remove(CommunityLib.Pathfinding.delegate_LAYERBOUND);
+
+                return true;
             }
 
-            return result;
+            return false;
         }
 
         public override void onGetTradeRouteEndpoints(Map map, List<Location> endpoints)
