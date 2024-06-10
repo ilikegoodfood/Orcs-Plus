@@ -41,7 +41,7 @@ namespace Orcs_Plus
 
         public override bool onPathfinding_AllowSecondPass(Location loc, Unit u, List<int> expectedMapLayers, List<Func<Location[], Location, Unit, List<int>, double>> pathfindingDelegates)
         {
-            if (u.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety.canGoUnderground())
+            if (u != null && u.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety.canGoUnderground())
             {
                 pathfindingDelegates.Remove(CommunityLib.Pathfinding.delegate_LAYERBOUND);
 
