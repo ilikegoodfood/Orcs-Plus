@@ -44,7 +44,17 @@ namespace Orcs_Plus
             }
 
             u.person.gainItem(onSale, false);
+            string oldItemName = onSale.getName();
             restock();
+            msgString = "As soon as the " + oldItemName + " had been sold, the merchants begin offering ";
+            if ("aeiouAEIOU".IndexOf(onSale.getName().First()) >= 0)
+            {
+                msgString += "an " + onSale.getName();
+            }
+            else
+            {
+                msgString += "a " + onSale.getName();
+            }
         }
 
         new public void restock()
