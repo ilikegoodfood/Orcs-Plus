@@ -127,7 +127,7 @@ namespace Orcs_Plus
                 return false;
             }
 
-            return false;
+            return true;
         }
 
         private static void Patching_Escamrak()
