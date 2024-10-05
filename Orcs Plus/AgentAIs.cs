@@ -904,6 +904,10 @@ namespace Orcs_Plus
                     }
                 }
                 utility += val;
+
+                val = 10;
+                reasonMsgs?.Add(new ReasonMsg("Superior Undead", val));
+                utility += val;
             }
 
             return utility;

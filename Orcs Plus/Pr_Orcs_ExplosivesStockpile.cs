@@ -37,7 +37,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "A heavily guarded warehouse stands removed from the rest of the camp, surrounded by it's own small wall and trenches. Within, barrels of explosive black powder line the walls in shelves that climb all the way to the rafters.";
+            return "A heavily guarded warehouse stands removed from the rest of the camp, surrounded by its own small wall and trenches. Within, barrels of explosive black powder line the walls in shelves that climb all the way to the rafters. Whenever the local orc horde is off fighting, carts regularly take explosives for use on the front.";
         }
 
         public override Sprite getSprite(World world)
