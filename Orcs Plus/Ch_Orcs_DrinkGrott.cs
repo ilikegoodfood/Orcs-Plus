@@ -137,20 +137,19 @@ namespace Orcs_Plus
                     return true;
                 }
 
-                if (!ua.isCommandable() && !ua.society.isDark() && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcScoiety, out HolyOrder_Orcs orcCulture2) && orcCulture2.tenet_intolerance.status > 0)
+                if (ua.isCommandable())
                 {
-                    return true;
-                }
-            }
+                    if (ua is UAEN_OrcShaman || ua is UAE_Buccaneer)
+                    {
+                        return true;
+                    }
 
-            if (ua.isCommandable())
-            {
-                if (ua is UAEN_OrcShaman)
-                {
-                    return true;
+                    if (location.settlement is Set_OrcCamp && location.settlement.infiltration == 1.0)
+                    {
+                        return true;
+                    }
                 }
-                
-                if (location.settlement is Set_OrcCamp && location.settlement.infiltration == 1.0)
+                else if (!ua.society.isDark() && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcScoiety, out HolyOrder_Orcs orcCulture2) && orcCulture2.tenet_intolerance.status > 0)
                 {
                     return true;
                 }

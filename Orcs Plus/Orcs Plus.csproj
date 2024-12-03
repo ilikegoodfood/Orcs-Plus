@@ -124,6 +124,7 @@
     <Compile Include="P_Vinerva_Health.cs" />
     <Compile Include="P_Vinerva_Life.cs" />
     <Compile Include="P_Vinerva_Thorns.cs" />
+    <Compile Include="Rti_ChangeHorde.cs" />
     <Compile Include="Rti_DrinkGrott.cs" />
     <Compile Include="Ch_Orcs_RefillDrinkingHorns.cs" />
     <Compile Include="Rti_EatBloodGourd.cs" />

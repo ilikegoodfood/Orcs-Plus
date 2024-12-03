@@ -43,7 +43,9 @@ namespace Orcs_Plus
             BuildWaystation,
             BloodMoney,
             BuildTemple,
-            BuildMines
+            BuildMines,
+            WarlordLeave,
+            WarlordJoin
         }
 
         public Dictionary<influenceGainAction, int> influenceGain;
@@ -95,7 +97,9 @@ namespace Orcs_Plus
                 { influenceGainAction.RecieveGift, 20 },
                 { influenceGainAction.BuildWaystation, 30 },
                 { influenceGainAction.BloodMoney, 30 },
-                { influenceGainAction.BuildTemple, 40 }
+                { influenceGainAction.BuildTemple, 40 },
+                { influenceGainAction.WarlordLeave, -60 },
+                { influenceGainAction.WarlordJoin, 40 }
             };
 
             menaceGain = new Dictionary<menaceGainAction, int>
