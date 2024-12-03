@@ -121,8 +121,10 @@ namespace Orcs_Plus
         // Orc Upstart
         private void populateOrcUpstarts()
         {
-            if (comLibAI.ContainsAgentType(typeof(UAEN_OrcUpstart)))
+            if (comLibAI.TryGetAgentType(typeof(UAEN_OrcUpstart), out CommunityLib.AgentAI.AIData aiData))
             {
+                aiData.controlParameters.canAttack = true;
+
                 aiChallenges_Upstart = new List<AIChallenge>
                 {
                     new AIChallenge(typeof(Rti_RecruitWarband), 0.0),
@@ -292,6 +294,12 @@ namespace Orcs_Plus
 
         private void populateOrcElders()
         {
+            AgentAI.ControlParameters controlParams = new AgentAI.ControlParameters(true)
+            {
+                canAttack = true,
+                canDisrupt = true
+            };
+
             aiChallenges_Elder = new List<AIChallenge>
             {
                 new AIChallenge(typeof(Ch_Rest_InOrcCamp), 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.HealOrc, AIChallenge.ChallengeTags.Rest }),
@@ -335,7 +343,7 @@ namespace Orcs_Plus
 
             aiChallenges_Elder[10].delegates_Utility.Add(delegate_Utility_Organise);
 
-            comLibAI.RegisterAgentType(typeof(UAEN_OrcElder), new AgentAI.ControlParameters(true));
+            comLibAI.RegisterAgentType(typeof(UAEN_OrcElder), controlParams);
             comLibAI.AddChallengesToAgentType(typeof(UAEN_OrcElder), aiChallenges_Elder);
         }
 

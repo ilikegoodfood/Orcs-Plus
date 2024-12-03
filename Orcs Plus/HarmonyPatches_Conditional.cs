@@ -19,6 +19,8 @@ namespace Orcs_Plus
             string harmonyID = "ILikeGoodFood.SOFG.OrcsPlus_Conditional";
             harmony = new Harmony(harmonyID);
 
+            Harmony.DEBUG = false;
+
             if (Harmony.HasAnyPatches(harmonyID))
             {
                 harmony.UnpatchAll(harmonyID);
