@@ -3557,7 +3557,7 @@ namespace Orcs_Plus
 
                             yield return new CodeInstruction(OpCodes.Ldarg_0);
                             yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
-                            yield return new CodeInstruction(OpCodes.Stloc_S, 17);
+                            yield return new CodeInstruction(OpCodes.Stloc_S, 15);
                         }
                     }
                 }
