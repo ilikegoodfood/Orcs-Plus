@@ -2235,15 +2235,6 @@ namespace Orcs_Plus
                     return;
                 }
 
-                if (ModCore.Get().data.tryGetModIntegrationData("LivingWilds", out ModIntegrationData intDataLW) && intDataLW.typeDict.TryGetValue("WolfRun", out Type wolfRunType))
-                {
-                    if (l2.settlement.GetType() == wolfRunType)
-                    {
-                        __result = true;
-                        return;
-                    }
-                }
-
                 if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModIntegrationData intDataEscam) && intDataEscam.typeDict.TryGetValue("LivingTerrainSettlement", out Type livingTerrainSettlementType) && intDataEscam.fieldInfoDict.TryGetValue("LivingTerrainSettlement_TypeOfTerrain", out FieldInfo FI_TypeOfTerrain))
                 {
                     if (ModCore.Get().data.orcSGCultureMap.TryGetValue(__instance, out HolyOrder_Orcs orcCulture) && orcCulture.tenet_god is H_Orcs_Fleshweaving fleshweaving && fleshweaving.status < -1)
