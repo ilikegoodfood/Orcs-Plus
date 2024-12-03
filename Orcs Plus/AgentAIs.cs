@@ -122,16 +122,28 @@ namespace Orcs_Plus
         {
             if (ua.society is SG_Orc orcs)
             {
-                if (challengeData.location.hex.z == 1 && !orcs.canGoUnderground())
+                if (!orcs.canGoUnderground())
                 {
-                    return false;
+                    if (challengeData.location.hex.z == 0 || challengeData.location.hex.z == 1)
+                    {
+                        if (!CommunityLib.HarmonyPatches.OrcMapLayers(orcs).Item2.Contains(challengeData.location.hex.z))
+                        {
+                            return false;
+                        }
+                    }
                 }
             }
             else if (ua.society is HolyOrder_Orcs orcCulture)
             {
-                if (challengeData.location.hex.z == 1 && orcCulture.orcSociety != null && !orcCulture.orcSociety.canGoUnderground())
+                if (!orcCulture.orcSociety.canGoUnderground())
                 {
-                    return false;
+                    if (challengeData.location.hex.z == 0 || challengeData.location.hex.z == 1)
+                    {
+                        if (!CommunityLib.HarmonyPatches.OrcMapLayers(orcCulture.orcSociety).Item2.Contains(challengeData.location.hex.z))
+                        {
+                            return false;
+                        }
+                    }
                 }
             }
 

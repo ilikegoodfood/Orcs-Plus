@@ -137,9 +137,12 @@ namespace Orcs_Plus
         {
             foreach (Location neighbour in location.getNeighbours())
             {
-                if (neighbour.hex.z == 1 && location.hex.z != 1 && !orcSociety.canGoUnderground())
+                if (!orcSociety.canGoUnderground())
                 {
-                    continue;
+                    if ((location.hex.z == 0 && neighbour.hex.z == 1) || (location.hex.z == 1 && neighbour.hex.z == 0))
+                    {
+                        continue;
+                    }
                 }
 
                 if (neighbour.properties.Any(pr => pr is Pr_HumanOutpost))
@@ -198,9 +201,12 @@ namespace Orcs_Plus
 
             foreach (Location neighbour in location.getNeighbours())
             {
-                if (neighbour.hex.z == 1 && location.hex.z != 1 && !orcSociety.canGoUnderground())
+                if (!orcSociety.canGoUnderground())
                 {
-                    continue;
+                    if ((location.hex.z == 0 && neighbour.hex.z == 1) || (location.hex.z == 1 && neighbour.hex.z == 0))
+                    {
+                        continue;
+                    }
                 }
 
                 Pr_HumanOutpost outpost = (Pr_HumanOutpost)neighbour.properties.FirstOrDefault(pr => pr is Pr_HumanOutpost);

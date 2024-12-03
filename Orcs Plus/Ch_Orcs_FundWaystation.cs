@@ -178,9 +178,12 @@ namespace Orcs_Plus
                             continue;
                         }
 
-                        if (neighbour.hex.z == 1 && !orcSociety.canGoUnderground())
+                        if (!orcSociety.canGoUnderground())
                         {
-                            continue;
+                            if ((location.hex.z == 0 && neighbour.hex.z == 1) || (location.hex.z == 1 && neighbour.hex.z == 0))
+                            {
+                                continue;
+                            }
                         }
 
                         if (ModCore.Get().data.getSettlementTypesForWaystation().TryGetValue(neighbour.settlement.GetType(), out HashSet<Type> blacklist) && !neighbour.settlement.subs.Any(sub => (sub is Sub_OrcWaystation way && way.orcSociety == orcSociety) || blacklist.Contains(sub.GetType())))
@@ -256,9 +259,12 @@ namespace Orcs_Plus
                             continue;
                         }
 
-                        if (neighbour.hex.z == 1 && !orcSociety.canGoUnderground())
+                        if (!orcSociety.canGoUnderground())
                         {
-                            continue;
+                            if ((location.hex.z == 0 && neighbour.hex.z == 1) || (location.hex.z == 1 && neighbour.hex.z == 0))
+                            {
+                                continue;
+                            }
                         }
 
                         if (ModCore.Get().data.getSettlementTypesForWaystation().TryGetValue(neighbour.settlement.GetType(), out HashSet<Type> blacklist) && !neighbour.settlement.subs.Any(sub => (sub is Sub_OrcWaystation way && way.orcSociety == orcSociety) || blacklist.Contains(sub.GetType())))

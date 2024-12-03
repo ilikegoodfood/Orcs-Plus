@@ -593,9 +593,12 @@ namespace Orcs_Plus
             {
                 foreach (Location neighbour in ch.location.getNeighbours())
                 {
-                    if (neighbour.hex.z == 1 && ch.location.hex.z != 1 && !orcSociety.canGoUnderground())
+                    if (!orcSociety.canGoUnderground())
                     {
-                        continue;
+                        if ((ch.location.hex.z == 0 && neighbour.hex.z == 1) || (ch.location.hex.z == 1 && neighbour.hex.z == 0))
+                        {
+                            continue;
+                        }
                     }
 
                     if (neighbour.soc != null && neighbour.settlement is SettlementHuman && ModCore.Get().isHostileAlignment(orcSociety, neighbour))
@@ -658,9 +661,12 @@ namespace Orcs_Plus
             //Console.WriteLine("OrcsPlus: Finding target location.");
             foreach (Location neighbour in location.getNeighbours())
             {
-                if (neighbour.hex.z == 1 && ch.location.hex.z != 1 && !orcSociety.canGoUnderground())
+                if (!orcSociety.canGoUnderground())
                 {
-                    continue;
+                    if ((ch.location.hex.z == 0 && neighbour.hex.z == 1) || (ch.location.hex.z == 1 && neighbour.hex.z == 0))
+                    {
+                        continue;
+                    }
                 }
 
                 if (neighbour.soc != null && neighbour.settlement is SettlementHuman settlementHuman && ModCore.Get().isHostileAlignment(orcSociety, neighbour))
@@ -1231,9 +1237,12 @@ namespace Orcs_Plus
 
             foreach (Location neighbour in ch.location.getNeighbours())
             {
-                if (neighbour.hex.z == 1 && ch.location.hex.z != 1 && !orcSociety.canGoUnderground())
+                if (!orcSociety.canGoUnderground())
                 {
-                    continue;
+                    if ((ch.location.hex.z == 0 && neighbour.hex.z == 1) || (ch.location.hex.z == 1 && neighbour.hex.z == 0))
+                    {
+                        continue;
+                    }
                 }
 
                 if (neighbour.settlement is SettlementHuman && !(neighbour.settlement is Set_City) && !(neighbour.settlement is Set_ElvenCity) && !(neighbour.settlement is Set_DwarvenCity) && ModCore.Get().isHostileAlignment(orcSociety, neighbour))
@@ -1295,9 +1304,12 @@ namespace Orcs_Plus
             List<SettlementHuman> humanSettlements = new List<SettlementHuman>();
             foreach (Location neighbour in ch.location.getNeighbours())
             {
-                if (neighbour.hex.z == 1 && ch.location.hex.z != 1 && !orcSociety.canGoUnderground())
+                if (!orcSociety.canGoUnderground())
                 {
-                    continue;
+                    if ((ch.location.hex.z == 0 && neighbour.hex.z == 1) || (ch.location.hex.z == 1 && neighbour.hex.z == 0))
+                    {
+                        continue;
+                    }
                 }
 
                 if (neighbour.settlement is SettlementHuman setHuman && !(neighbour.settlement is Set_City) && !(neighbour.settlement is Set_ElvenCity) && !(neighbour.settlement is Set_DwarvenCity) && ModCore.Get().isHostileAlignment(orcSociety, neighbour))
@@ -1340,11 +1352,6 @@ namespace Orcs_Plus
                     return;
                 }
 
-                if (ua.location.hex.z == 1 && !orcSociety.canGoUnderground())
-                {
-                    return;
-                }
-
                 if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModIntegrationData intDataEscam) && intDataEscam.typeDict.TryGetValue("LivingTerrainSettlement", out Type livingTerrainSettlementType) && intDataEscam.fieldInfoDict.TryGetValue("LivingTerrainSettlement_TypeOfTerrain", out FieldInfo FI_TypeOfTerrain))
                 {
                     if (ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture.tenet_god is H_Orcs_Fleshweaving fleshweaving && fleshweaving.status < -1)
@@ -1361,9 +1368,24 @@ namespace Orcs_Plus
                             {
                                 foreach (Location location in ua.map.locations)
                                 {
-                                    if (location.soc == orcSociety && location.settlement is Set_OrcCamp camp && camp.specialism == 5)
+                                    if (!orcSociety.canGoUnderground() && (ua.location.hex.z == 0 || ua.location.hex.z == 1))
                                     {
-                                        valid = true;
+                                        if (location.hex.z != ua.location.hex.z)
+                                        {
+                                            continue;
+                                        }
+
+                                        if (location.soc == orcSociety && location.settlement is Set_OrcCamp camp && camp.specialism == 5)
+                                        {
+                                            valid = true;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (location.soc == orcSociety && location.settlement is Set_OrcCamp camp && camp.specialism == 5)
+                                        {
+                                            valid = true;
+                                        }
                                     }
                                 }
                             }
@@ -2277,7 +2299,51 @@ namespace Orcs_Plus
 
         private static void SG_Orc_canSettle_Postfix(ref bool __result, SG_Orc __instance, Location l2)
         {
-            if (!__result && l2.settlement != null)
+            if (__result)
+            {
+                if (!l2.getNeighbours().Any(l => (l.soc == __instance && l.settlement is Set_OrcCamp) || (l.settlement != null && l.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == __instance))))
+                {
+                    if (!l2.isCoastal)
+                    {
+                        __result = false;
+                        return;
+                    }
+                    else
+                    {
+                        if (!__instance.canGoUnderground())
+                        {
+                            if (l2.hex.z == 0 || l2.hex.z == 1)
+                            {
+                                foreach (Location location in l2.map.locations)
+                                {
+                                    if (location.hex.z != l2.hex.z)
+                                    {
+                                        continue;
+                                    }
+
+                                    if (location.soc == __instance && location.settlement is Set_OrcCamp camp && camp.specialism == 5)
+                                    {
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            foreach (Location location in l2.map.locations)
+                            {
+                                if (location.soc == __instance && location.settlement is Set_OrcCamp camp && camp.specialism == 5)
+                                {
+                                    return;
+                                }
+                            }
+                        }
+                        __result = false;
+                        return;
+                    }
+                }
+            }
+            else if (l2.settlement != null)
             {
                 if (l2.isOcean || l2.hex.getHabilitability() < l2.map.opt_orcHabMult * l2.map.param.orc_habRequirement)
                 {
@@ -2287,15 +2353,6 @@ namespace Orcs_Plus
                 if (!l2.getNeighbours().Any(l => (l.soc == __instance && l.settlement is Set_OrcCamp) || (l.settlement != null && l.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == __instance))))
                 {
                     return;
-                }
-
-                if (ModCore.Get().data.tryGetModIntegrationData("LivingWilds", out ModIntegrationData intDataLW) && intDataLW.typeDict.TryGetValue("WolfRun", out Type wolfRunType))
-                {
-                    if (l2.settlement.GetType() == wolfRunType)
-                    {
-                        __result = true;
-                        return;
-                    }
                 }
 
                 if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModIntegrationData intDataEscam) && intDataEscam.typeDict.TryGetValue("LivingTerrainSettlement", out Type livingTerrainSettlementType) && intDataEscam.fieldInfoDict.TryGetValue("LivingTerrainSettlement_TypeOfTerrain", out FieldInfo FI_TypeOfTerrain))
