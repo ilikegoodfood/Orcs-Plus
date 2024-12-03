@@ -3493,14 +3493,13 @@ namespace Orcs_Plus
                     }
                     else if (targetIndex == 2)
                     {
-                        if (instructionList[i].opcode == OpCodes.Brfalse_S)
+                        if (instructionList[i].opcode == OpCodes.Ldloc_S)
                         {
                             targetIndex = 0;
 
                             yield return new CodeInstruction(OpCodes.Ldarg_0);
                             yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
-                            yield return new CodeInstruction(OpCodes.Stloc_S, 12);
-                            yield return new CodeInstruction(OpCodes.Ldloc_S, 12);
+                            yield return new CodeInstruction(OpCodes.Stloc_S, 17);
                         }
                     }
                 }
@@ -3517,7 +3516,7 @@ namespace Orcs_Plus
 
         private static bool Rt_Orcs_ClaimTerritory_validFor_TranspilerBody_TranspilerBody(bool result, UA ua)
         {
-            if (ua.location.getNeighbours().Any(n => n.settlement != null && n.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == ua.society)))
+            if (ua.location.getNeighbours().Any(n => n.soc == ua.society && n.settlement != null && (n.settlement is Set_OrcCamp || (n.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == ua.society)))))
             {
                 result = true;
             }
