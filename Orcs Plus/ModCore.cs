@@ -1764,7 +1764,7 @@ namespace Orcs_Plus
                         //Console.WriteLine("Orcs_Plus: Killer gained blood fued by killing orc elder");
                         pKiller.receiveTrait(new T_BloodFeud(orcSociety));
 
-                        person.map.addUnifiedMessage(uaPerson, pKiller.unit ?? pKiller as object, "Blood Feud", pKiller.getName() + " has become the target of a blood fued by killing an orc elder of the " + uaPerson.society.getName() + ". They must now spend the rest of their days looking over their shoulder for the sudden the appearance of an avenging orc upstart.", "Orc Blood Feud");
+                        person.map.addUnifiedMessage(uaPerson, pKiller.unit ?? pKiller as object, "Blood Feud", pKiller.getName() + " has become the target of a blood fued by killing an orc elder of the " + uaPerson.society.getName() + ". They must now spend the rest of their days looking over their shoulder for the sudden appearance of an avenging orc upstart.", "Orc Blood Feud");
                     }
 
                     if (pKiller.items.Any(i => i is I_IdolOfMadness))

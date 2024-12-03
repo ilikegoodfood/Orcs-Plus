@@ -1050,6 +1050,7 @@ namespace Orcs_Plus
         {
             __instance.rituals.Add(new Rti_RecruitWarband(l, __instance));
             __instance.rituals.Add(new Rti_RouseHorde(l, __instance));
+            __instance.rituals.Add(new Rti_ChangeHorde(l, __instance));
         }
 
         // Patches for Challenges in I_HordeBanner
