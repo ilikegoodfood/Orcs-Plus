@@ -118,6 +118,11 @@ namespace Orcs_Plus
 
         public override Sprite getSprite()
         {
+            if (banner != null)
+            {
+                return banner.map.world.textureStore.flagSigils[banner.orcs.flagSigil];
+            }
+
             return map.world.iconStore.i_orcishBanner;
         }
 

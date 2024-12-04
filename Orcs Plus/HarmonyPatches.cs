@@ -3,7 +3,6 @@ using Assets.Code.Modding;
 using CommunityLib;
 using HarmonyLib;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -3386,6 +3385,7 @@ namespace Orcs_Plus
                         {
                             targetIndex = 0;
 
+                            yield return new CodeInstruction(OpCodes.Ldloc_S, 12);
                             yield return new CodeInstruction(OpCodes.Ldarg_0);
                             yield return new CodeInstruction(OpCodes.Call, MI_TranspilerBody);
                             yield return new CodeInstruction(OpCodes.Stloc_S, 12);
