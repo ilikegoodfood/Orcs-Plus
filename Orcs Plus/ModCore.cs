@@ -227,21 +227,11 @@ namespace Orcs_Plus
                         break;
                     case "ShadowsInsectGod.Code":
                         Console.WriteLine("OrcsPlus: Cordyceps is Enabled");
-                        ModIntegrationData intDataCord = new ModIntegrationData(kernel.GetType().Assembly, kernel);
+                        ModIntegrationData intDataCord = new ModIntegrationData(kernel);
                         Get().data.addModIntegrationData("Cordyceps", intDataCord);
 
                         if (Get().data.tryGetModIntegrationData("Cordyceps", out intDataCord))
                         {
-                            Type kernelType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.ModCore", false);
-                            if (kernelType != null )
-                            {
-                                intDataCord.typeDict.Add("Kernel", kernelType);
-                            }
-                            else
-                            {
-                                Console.WriteLine("OrcsPlus: Failed to get Cordyceps kernel Type (ShadowsInsectGod.Code.ModCore)");
-                            }
-
                             Type godType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.God_Insect", false);
                             if (godType != null)
                             {
@@ -338,7 +328,7 @@ namespace Orcs_Plus
                         break;
                     case "CovenExpansion":
                         Console.WriteLine("OrcsPlus: Covens, Curses, and Curios is Enabled");
-                        ModIntegrationData intDataCCC = new ModIntegrationData(kernel.GetType().Assembly, kernel);
+                        ModIntegrationData intDataCCC = new ModIntegrationData(kernel);
                         Get().data.addModIntegrationData("CovensCursesCurios", intDataCCC);
 
                         if (Get().data.tryGetModIntegrationData("CovensCursesCurios", out intDataCCC))
@@ -376,7 +366,7 @@ namespace Orcs_Plus
                         break;
                     case "God_Love":
                         Console.WriteLine("OrcsPlus: Chandalor is Enabled");
-                        ModIntegrationData intDataChand = new ModIntegrationData(kernel.GetType().Assembly, kernel);
+                        ModIntegrationData intDataChand = new ModIntegrationData(kernel);
                         Get().data.addModIntegrationData("Chandalor", intDataChand);
 
                         if (Get().data.tryGetModIntegrationData("Chandalor", out intDataChand))
@@ -395,16 +385,13 @@ namespace Orcs_Plus
                         break;
                     case "God_Flesh":
                         Console.WriteLine("OrcsPlus: Escamrak is Enabled");
-                        ModIntegrationData intDataEscam = new ModIntegrationData(kernel.GetType().Assembly, kernel);
+                        ModIntegrationData intDataEscam = new ModIntegrationData(kernel);
                         Get().data.addModIntegrationData("Escamrak", intDataEscam);
 
                         if (Get().data.tryGetModIntegrationData("Escamrak", out intDataEscam))
                         {
-                            Type kernelType = intDataEscam.assembly.GetType("God_Flesh.FleshGod_Kernal", false);
-                            if (kernelType != null)
+                            if (intDataEscam.typeDict.TryGetValue("Kernel", out Type kernelType))
                             {
-                                intDataEscam.typeDict.Add("Kernel", kernelType);
-
                                 FieldInfo FI_fleshSociety = kernelType.GetField("Society_LivingSettlements");
                                 if (FI_fleshSociety != null)
                                 {
@@ -594,7 +581,7 @@ namespace Orcs_Plus
                         break;
                     case "LivingCharacter":
                         Console.WriteLine("OrcsPlus: Living Characters is Enabled");
-                        ModIntegrationData intDataLC = new ModIntegrationData(kernel.GetType().Assembly, kernel);
+                        ModIntegrationData intDataLC = new ModIntegrationData(kernel);
                         Get().data.addModIntegrationData("LivingCharacters", intDataLC);
 
                         if (Get().data.tryGetModIntegrationData("LivingCharacters", out intDataLC))
@@ -612,7 +599,7 @@ namespace Orcs_Plus
                         break;
                     case "LivingWilds":
                         Console.WriteLine("OrcsPlus: Living Wilds is Enabled");
-                        ModIntegrationData intDataLW = new ModIntegrationData(kernel.GetType().Assembly, kernel);
+                        ModIntegrationData intDataLW = new ModIntegrationData(kernel);
                         Get().data.addModIntegrationData("LivingWilds", intDataLW);
 
                         if (Get().data.tryGetModIntegrationData("LivingWilds", out intDataLW))
@@ -652,7 +639,7 @@ namespace Orcs_Plus
                         break;
                     case "ShadowsBloodshedGod":
                         Console.WriteLine("OrcsPlus: Kishi is Enabled");
-                        ModIntegrationData intDataKishi = new ModIntegrationData(kernel.GetType().Assembly, kernel);
+                        ModIntegrationData intDataKishi = new ModIntegrationData(kernel);
                         Get().data.addModIntegrationData("Kishi", intDataKishi);
 
                         if (Get().data.tryGetModIntegrationData("Kishi", out intDataKishi))
@@ -692,7 +679,7 @@ namespace Orcs_Plus
                         break;
                     case "ShadowsLib":
                         Console.WriteLine("OrcsPlus: Ixthus is Enabled");
-                        ModIntegrationData intDataIx = new ModIntegrationData(kernel.GetType().Assembly, kernel);
+                        ModIntegrationData intDataIx = new ModIntegrationData(kernel);
                         Get().data.addModIntegrationData("Ixthus", intDataIx);
 
                         if (Get().data.tryGetModIntegrationData("Ixthus", out intDataIx))
@@ -722,16 +709,13 @@ namespace Orcs_Plus
                         break;
                     case "Wonderblunder_DeepOnes":
                         Console.WriteLine("OrcsPlus: DeepOnesPlus is Enabled");
-                        ModIntegrationData intDataDOPlus = new ModIntegrationData(kernel.GetType().Assembly, kernel);
+                        ModIntegrationData intDataDOPlus = new ModIntegrationData(kernel);
                         Get().data.addModIntegrationData("DeepOnesPlus", intDataDOPlus);
 
                         if (Get().data.tryGetModIntegrationData("DeepOnesPlus", out intDataDOPlus))
                         {
-                            Type kernelType = intDataDOPlus.assembly.GetType("Wonderblunder_DeepOnes.Modcore", false);
-                            if (kernelType != null)
+                            if (intDataDOPlus.typeDict.TryGetValue("Kernel", out Type kernelType))
                             {
-                                intDataDOPlus.typeDict.Add("Kernel", kernelType);
-
                                 MethodInfo getAbyssalItem = AccessTools.Method(kernelType, "getItemFromAbyssalPool", new Type[] { typeof(Map), typeof(UA) });
                                 if (getAbyssalItem != null)
                                 {
