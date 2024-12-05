@@ -50,11 +50,11 @@ namespace Orcs_Plus
         public List<MonsterAction> monsterActions = new List<MonsterAction>();
 
         public HolyOrder_Orcs(Map m, Location l, SG_Orc o)
-            : base(m, l)
+            : base(m, o.map.locations[(o.capital != -1 ? o.capital : l.index)])
         {
             //Console.WriteLine("OrcsPlus: HolyOrder_Orcs Ctor");
             orcSociety = o;
-            capital = l.index;
+            capital = o.capital;
             if (!ModCore.Get().data.orcSGCultureMap.ContainsKey(orcSociety))
             {
                 ModCore.Get().data.orcSGCultureMap.Add(orcSociety, this);
@@ -98,7 +98,7 @@ namespace Orcs_Plus
             // establishInitialProphecy();
 
             // Remove half of non-structural tenets at Random for reduced tenets option.
-            // Orcs do not have enough tenets, or tenet variety, fo this to be viable at this time.
+            // Orcs do not have enough tenets, or tenet variety, for this to be viable at this time.
             /*if (map.opt_holyOrderSubsetting)
             {
                 List<HolyTenet> tenets_NonStructural = new List<HolyTenet>();
@@ -137,14 +137,13 @@ namespace Orcs_Plus
             if (map.opt_divineEntities)
             {
                 divinity = null;
-                /*divinity = new DivineEntity(map, this);
-                divinity.name = "Ancestors of the " + orcSociety.getName();
-                divinity.desire = new D_Orc(map, divinity);*/
             }
 
             // Set map colour, favouring redish colours.
             color = new Color(Math.Min(o.color.r * (1 + ((Eleven.random.Next(11) + 10) / 100)), 1f), Math.Min(o.color.g * (1 + ((Eleven.random.Next(11) + 10) / 100)), 1f), Math.Min(o.color.b * (1 + ((Eleven.random.Next(11) + 10) / 100)), 1f));
             color2 = new Color(Math.Min(o.color2.r * (1 + ((Eleven.random.Next(11) + 10) / 100)), 1f), Math.Min(o.color2.g * (1 + ((Eleven.random.Next(11) + 10) / 100)), 1f), Math.Min(o.color2.b * (1 + ((Eleven.random.Next(11) + 10) / 100)), 1f));
+
+            updateSeat();
         }
 
         public override bool checkIsGone()
@@ -323,53 +322,85 @@ namespace Orcs_Plus
             }
         }
 
-        public void CreateSeat()
+        public bool validateCapital()
         {
-            //Console.WriteLine("OrcsPlus: Create HolOrder_Orcs Seat");
-            if (seat == null)
+            capital = orcSociety.capital;
+            if (orcSociety.capital != -1 && (orcSociety.map.locations[orcSociety.capital].soc != orcSociety || !(orcSociety.map.locations[orcSociety.capital].settlement is Set_OrcCamp)))
             {
-                Set_OrcCamp capitalCamp = map.locations[capital].settlement as Set_OrcCamp;
-                if (capitalCamp == null || !(capitalCamp is Set_OrcCamp) || capitalCamp.location.soc != orcSociety)
+                orcSociety.capital = -1;
+                capital = -1;
+            }
+
+            if (orcSociety.capital == -1 && camps.Count > 0)
+            {
+                int index;
+                if (camps.Count > 1)
                 {
-                    //Console.WriteLine("OrcsPlus: Choosing seat of orc culture.");
-                    if (temples.Count > 0)
-                    {
-                        capitalCamp = temples[0].settlement as Set_OrcCamp;
-                        if (temples.Count > 1)
-                        {
-                            capitalCamp = temples[Eleven.random.Next(temples.Count)].settlement as Set_OrcCamp;
-                        }
-                    }
-                    else if (specializedCamps.Count > 0)
-                    {
-                        capitalCamp = specializedCamps[0];
-                        capital = capitalCamp.location.index;
-
-                        if (specializedCamps.Count > 1)
-                        {
-                            capitalCamp = specializedCamps[Eleven.random.Next(specializedCamps.Count())];
-                            capital = capitalCamp.location.index;
-                        }
-                    }
-                    else if (camps.Count > 0)
-                    {
-                        capitalCamp = camps[0];
-                        capital = capitalCamp.location.index;
-
-                        if (camps.Count > 1)
-                        {
-                            capitalCamp = camps[Eleven.random.Next(camps.Count())];
-                            capital = capitalCamp.location.index;
-                        }
-                    }
+                    index = camps[Eleven.random.Next(camps.Count)].location.index;
+                    orcSociety.capital = index;
+                    capital = index;
+                    return true;
                 }
 
+                index = camps[0].location.index;
+                orcSociety.capital = index;
+                capital = index;
+                return true;
+            }
+
+            return false;
+        }
+
+        public void updateSeat()
+        {
+            capital = orcSociety.capital;
+            if (capital == -1)
+            {
+                return;
+            }
+
+            if (seat == null || seat.settlement == null || seat.settlement.location.settlement != seat.settlement || !seat.settlement.subs.Contains(seat))
+            {
+                Set_OrcCamp capitalCamp = map.locations[capital].settlement as Set_OrcCamp;
                 if (capitalCamp != null)
                 {
-                    Sub_OrcTemple temple = capitalCamp.subs.OfType<Sub_OrcTemple>().FirstOrDefault();
+                    Sub_OrcTemple temple = (Sub_OrcTemple)capitalCamp.subs.FirstOrDefault(sub => sub is Sub_OrcTemple);
                     if (temple != null)
                     {
                         capitalCamp.subs.Remove(temple);
+                        temples.Remove(temple);
+                    }
+
+                    seat = new Sub_OrcCultureCapital(capitalCamp, this);
+                    capitalCamp.subs.Add(seat);
+                    temples.Add(seat);
+                }
+
+                return;
+            }
+            
+            if (seat != null && seat.settlement.location.index != capital)
+            {
+                Set_OrcCamp seatCamp = seat.settlement as Set_OrcCamp;
+
+                temples.Remove(seat);
+                seat = null;
+
+                if (seatCamp != null)
+                {
+                    Sub_OrcTemple temple = new Sub_OrcTemple(seatCamp, this);
+                    seatCamp.subs.Add(temple);
+                    temples.Add(temple);
+                }
+
+                Set_OrcCamp capitalCamp = map.locations[capital].settlement as Set_OrcCamp;
+                if (capitalCamp != null)
+                {
+                    Sub_OrcTemple temple = (Sub_OrcTemple)capitalCamp.subs.FirstOrDefault(sub => sub is Sub_OrcTemple);
+                    if (temple != null)
+                    {
+                        capitalCamp.subs.Remove(temple);
+                        temples.Remove(temple);
                     }
 
                     seat = new Sub_OrcCultureCapital(capitalCamp, this);
@@ -419,13 +450,10 @@ namespace Orcs_Plus
 
         public override void turnTick()
         {
+            capital = orcSociety.capital;
             updateData();
-
-            if (seat == null || seat.settlement == null || seat.settlement.location == null || seat.settlement.location.settlement != seat.settlement || !seat.settlement.subs.Contains(seat))
-            {
-                seat = null;
-                CreateSeat();
-            }
+            validateCapital();
+            updateSeat();
 
             manageMonsterActions();
             manageShamans();
@@ -562,6 +590,7 @@ namespace Orcs_Plus
 
         new public void createAcolyte()
         {
+            capital = orcSociety.capital;
             Location location = null;
             List<Settlement> spawnLocations = new List<Settlement>();
             spawnLocations?.AddRange(camps);
@@ -573,22 +602,21 @@ namespace Orcs_Plus
                 location = spawnLocations[Eleven.random.Next(spawnLocations.Count)].location;
             }
 
-            if (location == null)
+            if (location == null && capital != -1)
             {
-                if (seat != null)
-                {
-                    location = map.locations[capital];
-                }
+                location = map.locations[capital];
             }
 
-            if (location != null)
+            if (location == null)
             {
-                UAEN_OrcElder item = new UAEN_OrcElder(location, this, new Person(this, houseOrc));
-                location.units.Add(item);
-                map.units.Add(item);
-                acolytes.Add(item);
-                nAcolytes++;
+                return;
             }
+
+            UAEN_OrcElder item = new UAEN_OrcElder(location, this, new Person(this, houseOrc));
+            location.units.Add(item);
+            map.units.Add(item);
+            acolytes.Add(item);
+            nAcolytes++;
         }
 
         public void manageShamans()
@@ -622,21 +650,18 @@ namespace Orcs_Plus
             }
         }
 
-        public void createShaman(Set_OrcCamp mageCamp)
+        public void createShaman(Set_OrcCamp homeCamp)
         {
-            Location location = mageCamp.location;
-
-            if (location != null)
-            {
-                UAEN_OrcShaman shaman = new UAEN_OrcShaman(location, orcSociety, new Person(map.soc_neutral, map.soc_neutral.houseOrc));
-                location.units.Add(shaman);
-                map.units.Add(shaman);
-                agents.Add(shaman);
-            }
+            capital = orcSociety.capital;
+            UAEN_OrcShaman shaman = new UAEN_OrcShaman(homeCamp.location, orcSociety, new Person(map.soc_neutral, map.soc_neutral.houseOrc));
+            homeCamp.location.units.Add(shaman);
+            map.units.Add(shaman);
+            agents.Add(shaman);
         }
 
         public void manageMonsterActions()
         {
+            capital = orcSociety.capital;
             List<MonsterAction> actionsToRemove = new List<MonsterAction>();
 
             foreach(MonsterAction action in monsterActions)
@@ -655,11 +680,12 @@ namespace Orcs_Plus
 
         public new void receiveFunding(Person other, int delta)
         {
+            capital = orcSociety.capital;
             bool playerCanInfluenceFlag = influenceElder >= influenceElderReq;
 
-            if (seat != null)
+            if (capital != -1)
             {
-                Pr_OrcPlunder capitalPlunder = seat.settlement.location.properties.OfType<Pr_OrcPlunder>().FirstOrDefault();
+                Pr_OrcPlunder capitalPlunder = (Pr_OrcPlunder)map.locations[capital].properties.FirstOrDefault(pr => pr is Pr_OrcPlunder);
 
                 if (capitalPlunder == null)
                 {
@@ -683,7 +709,7 @@ namespace Orcs_Plus
                 }
 
                 Set_OrcCamp targetCamp = allCamps[Eleven.random.Next(allCamps.Count)];
-                Pr_OrcPlunder targetPlunder = targetCamp.location.properties.OfType<Pr_OrcPlunder>().FirstOrDefault();
+                Pr_OrcPlunder targetPlunder = (Pr_OrcPlunder)targetCamp.location.properties.FirstOrDefault(pr => pr is Pr_OrcPlunder);
                 
                 if (targetPlunder == null)
                 {
@@ -704,6 +730,7 @@ namespace Orcs_Plus
 
         public bool spendGold(double gold)
         {
+            capital = orcSociety.capital;
             updateData();
 
             if (gold > plunderValue)
@@ -713,16 +740,16 @@ namespace Orcs_Plus
 
             while (gold > 0 && plunderValue > 0)
             {
-                int index = Eleven.random.Next(plunder.Count);
+                Pr_OrcPlunder targetPlunder = plunder[Eleven.random.Next(plunder.Count)];
 
-                int pGold = (int)Math.Floor(Math.Min(gold, plunder[index].getGold()));
-                plunder[index].addGold(-pGold);
-                if (plunder[index].getGold() <= 0)
+                int pGold = (int)Math.Floor(Math.Min(gold, targetPlunder.getGold()));
+                targetPlunder.addGold(-pGold);
+                if (targetPlunder.getGold() <= 0)
                 {
                     bool isEmpty = true;
-                    foreach (Item item in plunder[index].items)
+                    foreach (Item item in targetPlunder.items)
                     {
-                        if (plunder[index] != null)
+                        if (item != null)
                         {
                             isEmpty = false;
                             break;
@@ -731,8 +758,8 @@ namespace Orcs_Plus
 
                     if (isEmpty)
                     {
-                        plunder[index].location.properties.Remove(plunder[index]);
-                        plunder.Remove(plunder[index]);
+                        targetPlunder.location.properties.Remove(targetPlunder);
+                        plunder.Remove(targetPlunder);
                     }
                 }
 
@@ -815,12 +842,14 @@ namespace Orcs_Plus
         public override void triggerCivilWar()
         {
             // Ensure all data is up to date.
+            capital = orcSociety.capital;
             updateData();
+            validateCapital();
 
             if (seat == null || seat.settlement == null || seat.settlement.location == null || seat.settlement.location.settlement != seat.settlement || !seat.settlement.subs.Contains(seat))
             {
                 seat = null;
-                CreateSeat();
+                updateSeat();
             }
 
             Location hordeCapital = map.locations[capital];
