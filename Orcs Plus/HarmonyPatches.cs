@@ -2041,8 +2041,8 @@ namespace Orcs_Plus
                     if (loc.settlement != null && loc.settlement.subs.Count > 0)
                     {
                         bool duplicate = false;
-                        List<Subsettlement> mutableSubs = loc.settlement.subs.ToList();
 
+                        List<Subsettlement> mutableSubs = loc.settlement.subs.ToList();
                         foreach (Subsettlement sub in mutableSubs)
                         {
                             if (!(sub is Sub_OrcWaystation waystation))
