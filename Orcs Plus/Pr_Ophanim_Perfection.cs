@@ -78,7 +78,7 @@ namespace Orcs_Plus
                     {
                         threshold = perfection.thresholdMajor;
 
-                        if (charge > 299.0)
+                        if (charge > 299.5)
                         {
                             orcCulture.ophanim_PerfectSociety = true;
                         }

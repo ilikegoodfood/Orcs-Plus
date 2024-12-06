@@ -48,7 +48,7 @@ namespace Orcs_Plus
             harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_ClaimTerritory), nameof(Rt_Orcs_ClaimTerritory.getDesc)), postfix: new HarmonyMethod(patchType, nameof(Rt_Orcs_ClaimTerritory_getDesc_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_ClaimTerritory), nameof(Rt_Orcs_ClaimTerritory.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Rt_Orcs_ClaimTerritory_validFor_Postfix)));
             harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_ClaimTerritory), nameof(Rt_Orcs_ClaimTerritory.complete), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Rt_Orcs_ClaimTerritory_complete_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_RecruitRaiders), nameof(Rt_Orcs_RecruitRaiders.complete), new Type[] { typeof(UA) }), prefix: new HarmonyMethod(patchType, nameof(Rt_Orcs_RecruitRaiders_complete_Prefix)));
+            harmony.Patch(original: AccessTools.Method(typeof(Rt_Orcs_RaidingParty), nameof(Rt_Orcs_RaidingParty.complete), new Type[] { typeof(UA) }), prefix: new HarmonyMethod(patchType, nameof(Rt_Orcs_RaidingParty_complete_Prefix)));
             harmony.Patch(original: AccessTools.Method(typeof(Rt_Orc_ReceiveFunding), nameof(Rt_Orc_ReceiveFunding.buildPositiveTags), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(postfix_AppendTag_Orc)));
 
             // Patches for Challenges in orc camps
@@ -1342,7 +1342,7 @@ namespace Orcs_Plus
             }
         }
 
-        public static bool Rt_Orcs_RecruitRaiders_complete_Prefix(UA u)
+        public static bool Rt_Orcs_RaidingParty_complete_Prefix(UA u)
         {
             SG_Orc orcSociety = u.society as SG_Orc;
             if (orcSociety != null && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_Perfection perfection && perfection.status < -1 && orcCulture.ophanim_PerfectSociety)
@@ -1350,7 +1350,7 @@ namespace Orcs_Plus
                 Pr_Ophanim_Perfection perfectionLocal = u.location.properties.OfType<Pr_Ophanim_Perfection>().FirstOrDefault();
                 if (perfectionLocal != null && perfectionLocal.charge >= 300.0)
                 {
-                    UM_PerfectRaiders raiders = new UM_PerfectRaiders(u.location, u.society);
+                    UM_PerfectRaiders raiders = new UM_PerfectRaiders(u.location, u.location.soc as SG_Orc);
                     raiders.subsumedUnit = u;
                     u.person.unit = raiders;
                     u.isDead = true;
@@ -2793,7 +2793,7 @@ namespace Orcs_Plus
                 return;
             }
 
-            Pr_HumanOutpost outpost = um.location.properties.OfType<Pr_HumanOutpost>().FirstOrDefault();
+            Pr_HumanOutpost outpost = (Pr_HumanOutpost)um.location.properties.FirstOrDefault(pr => pr is Pr_HumanOutpost);
             if (outpost != null && outpost.parent != null && um.society.getRel(outpost.parent).state == DipRel.dipState.war)
             {
                 um.task = new Task_RazeOutpost();
@@ -2931,7 +2931,7 @@ namespace Orcs_Plus
                     {
                         if (loc.soc == null)
                         {
-                            Pr_HumanOutpost targetOutpost = loc.properties.OfType<Pr_HumanOutpost>().FirstOrDefault();
+                            Pr_HumanOutpost targetOutpost = (Pr_HumanOutpost)loc.properties.FirstOrDefault(pr => pr is Pr_HumanOutpost);
                             if (targetOutpost != null && loc.settlement == null && targetOutpost.parent != null && targetOutpost.parent != um.society && um.society.getRel(targetOutpost.parent).state == DipRel.dipState.war)
                             {
                                 int dist = um.map.getStepDist(um.location, loc);
@@ -2949,7 +2949,7 @@ namespace Orcs_Plus
                         }
                         else if (loc.soc != um.society && um.society.getRel(loc.soc).state == DipRel.dipState.war)
                         {
-                            if (loc.settlement != null && !(loc.settlement is Set_TombOfGods) && !(loc.settlement is Set_CityRuins))
+                            if (loc.settlement is SettlementHuman || loc.settlement is Set_OrcCamp)
                             {
                                 int dist = um.map.getStepDist(um.location, loc);
                                 if (steps == -1 || dist <= steps)
@@ -3007,7 +3007,7 @@ namespace Orcs_Plus
         {
             if (__instance.homeLocation != -1 && __instance.map.locations[__instance.homeLocation].settlement is Set_OrcCamp && __instance.map.locations[__instance.homeLocation].soc == __instance.society)
             {
-                Pr_Ophanim_Perfection perfection = __instance.map.locations[__instance.homeLocation].properties.OfType<Pr_Ophanim_Perfection>().FirstOrDefault();
+                Pr_Ophanim_Perfection perfection = (Pr_Ophanim_Perfection)__instance.map.locations[__instance.homeLocation].properties.FirstOrDefault(pr => pr is Pr_Ophanim_Perfection);
                 if (perfection != null)
                 {
                     __instance.maxHp = (int)Math.Ceiling(__instance.maxHp * (1 + (perfection.charge / 1200)));
