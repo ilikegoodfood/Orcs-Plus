@@ -37,18 +37,18 @@ namespace Orcs_Plus
 
             HarmonyPatches.PatchingInit();
 
-            data = new ModData();
+            Get().data = new ModData();
         }
 
         public override void onStartGamePresssed(Map map, List<God> gods)
         {
-            data.clean();
+             Get().data.clean();
         }
 
         public override void beforeMapGen(Map map)
         {
-            data.isClean = false;
-            comLibHooks = new ComLibHooks(map);
+            Get().data.isClean = false;
+            Get().comLibHooks = new ComLibHooks(map);
 
             getModKernels(map);
             if (comLib == null)
