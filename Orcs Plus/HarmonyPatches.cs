@@ -1412,25 +1412,29 @@ namespace Orcs_Plus
 
         public static bool Rt_Orcs_RaidingParty_complete_Prefix(UA u)
         {
-            SG_Orc orcSociety = u.society as SG_Orc;
+            SG_Orc orcSociety = u.location.soc as SG_Orc;
             if (orcSociety != null && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null && orcCulture.tenet_god is H_Orcs_Perfection perfection && perfection.status < -1 && orcCulture.ophanim_PerfectSociety)
             {
-                Pr_Ophanim_Perfection perfectionLocal = u.location.properties.OfType<Pr_Ophanim_Perfection>().FirstOrDefault();
-                if (perfectionLocal != null && perfectionLocal.charge >= 300.0)
+                Pr_Ophanim_Perfection perfectionLocal = (Pr_Ophanim_Perfection)u.location.properties.FirstOrDefault(pr => pr is Pr_Ophanim_Perfection);
+                if (perfectionLocal != null && perfectionLocal.charge > 299.0)
                 {
-                    UM_PerfectRaiders raiders = new UM_PerfectRaiders(u.location, u.location.soc as SG_Orc);
+                    UM_PerfectRaiders raiders = new UM_PerfectRaiders(u.location, orcSociety);
                     raiders.subsumedUnit = u;
-                    u.person.unit = raiders;
+                    raiders.person = u.person;
+                    raiders.person.unit = raiders;
                     u.isDead = true;
-                    GraphicalMap.selectedUnit = raiders;
                     u.map.units.Remove(u);
                     u.location.units.Remove(u);
 
-                    u.map.units.Add(raiders);
+                    raiders.map.units.Add(raiders);
                     raiders.location.units.Add(raiders);
-                    raiders.person = u.person;
                     raiders.assignMaxHP();
                     raiders.hp = Math.Max(1, raiders.maxHp / 3);
+
+                    if (GraphicalMap.selectedUnit == u)
+                    {
+                        GraphicalMap.selectedUnit = raiders;
+                    }
                     u.map.world.ui.checkData();
 
                     return true;
