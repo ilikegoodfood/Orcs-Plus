@@ -1437,11 +1437,11 @@ namespace Orcs_Plus
                     }
                     u.map.world.ui.checkData();
 
-                    return true;
+                    return false;
                 }
             }
 
-            return false;
+            return true;
         }
 
         // Patches for Orc Upstart

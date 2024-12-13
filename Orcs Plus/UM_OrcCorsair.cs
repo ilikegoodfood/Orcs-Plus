@@ -294,10 +294,10 @@ namespace Orcs_Plus
                                     //Console.WriteLine("OrcsPlus: loc alignment is valid");
                                     if (checkPath(loc, out _))
                                     {
-                                        Pr_Devastation devastation = loc.properties.OfType<Pr_Devastation>().FirstOrDefault();
+                                        Pr_Devastation devastation = (Pr_Devastation)loc.properties.FirstOrDefault(pr => pr is Pr_Devastation);
                                         if (devastation == null || devastation.charge < 150)
                                         {
-                                            if ((pillageLocations.Count == 0 || score <= settlementHuman.prosperity))
+                                            if (pillageLocations.Count == 0 || score <= settlementHuman.prosperity)
                                             {
                                                 if (score < settlementHuman.prosperity)
                                                 {
