@@ -376,7 +376,7 @@ namespace Orcs_Plus
                                 utility += val;
                             }
 
-                            if (target.task is Task_PerformChallenge tPerformChallenge && (target.location.soc == orcSociety || target.location.soc == orcCulture) && !(tPerformChallenge.challenge is Ch_LayLow || tPerformChallenge.challenge is Ch_LayLowWilderness))
+                            if (target.task is Task_PerformChallenge tPerformChallenge && (target.location.soc == orcSociety || target.location.soc == orcCulture) && !(tPerformChallenge.challenge is Ch_LayLow || tPerformChallenge.challenge is Ch_LayLowWilderness ||  tPerformChallenge.challenge is Ch_Rest || tPerformChallenge.challenge is Ch_Rest_InOrcCamp))
                             {
                                 val = -50.0;
                                 foreach (Unit unit in target.location.units)
