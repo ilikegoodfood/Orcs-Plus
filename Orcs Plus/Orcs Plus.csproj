@@ -41,6 +41,7 @@
     <Reference Include="CommunityLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>D:\Program Files (x86)\Steam\steamapps\common\Shadows of Forbidden Gods\data\optionalData\CommunityLib\v2.0\CommunityLib.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

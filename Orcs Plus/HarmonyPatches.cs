@@ -166,8 +166,11 @@ namespace Orcs_Plus
             // Patches for Ch_LearnSecret
             harmony.Patch(original: AccessTools.Method(typeof(Ch_LearnSecret), nameof(Ch_LearnSecret.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_LearnSecret_validFor_Postfix)));
 
-            // Patches for RT_StudyDeath
+            // Patches for Rt_StudyDeath
             harmony.Patch(original: AccessTools.Method(typeof(Rt_StudyDeath), nameof(Rt_StudyDeath.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Rt_StudyDeath_Postfix)));
+
+            // Patches for Task_CaptureLocation
+            harmony.Patch(original: AccessTools.Method(typeof(Task_CaptureLocation), nameof(Task_CaptureLocation.turnTick), new Type[] { typeof(Unit) }), postfix: new HarmonyMethod(patchType, nameof(Task_CaptureLocation_turnTick_Postfix)));
 
             // Patches for P_Opha_Crusade
             harmony.Patch(original: AccessTools.Method(typeof(P_Opha_Crusade), nameof(P_Opha_Crusade.getDesc), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(P_Opha_Crusade_getDesc_Postfix)));
@@ -3347,6 +3350,24 @@ namespace Orcs_Plus
             }
 
             return __result;
+        }
+
+        // Patches for Task_CaptureLocation
+        private static void Task_CaptureLocation_turnTick_Postfix(Unit unit)
+        {
+            if (unit.task == null)
+            {
+                if (unit.location.settlement != null && unit.location.settlement.defences <= 0.0)
+                {
+                    foreach(Subsettlement sub in unit.location.settlement.subs.ToList())
+                    {
+                        if (sub is Sub_OrcWaystation waystation && unit.society.getRel(waystation.orcSociety).state == DipRel.dipState.war)
+                        {
+                            unit.location.settlement.subs.Remove(waystation);
+                        }
+                    }
+                }
+            }
         }
 
         // Patches for P_Opha_Crusade
