@@ -1517,6 +1517,11 @@ namespace Orcs_Plus
 
         public override bool interceptDeath(Person person, string v, object killer)
         {
+            if (person.unit is UM_OrcRaiders raiders && raiders.subsumedUnit != null && v != "Gone")
+            {
+                return true;
+            }
+
             //Console.WriteLine("OrcsPlus: intercepting person death (ModKernel.interceptDeath)");
             for (int i = 0; i < person.items.Length; i++)
             {
@@ -2380,11 +2385,16 @@ namespace Orcs_Plus
                 Unit sub = raiders.subsumedUnit;
                 unit.map.units.Add(sub);
                 sub.isDead = false;
+
+                sub.person = raiders.person;
+                sub.person.isDead = false;
+                sub.person.unit = sub;
+
                 sub.location = raiders.location;
                 raiders.location.units.Add(sub);
-                sub.person = raiders.person;
+                
                 sub.addMenace(raiders.menace);
-                sub.person.unit = sub;
+                
                 sub.hp = 1;
             }
 
