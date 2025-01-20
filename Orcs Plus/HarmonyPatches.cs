@@ -2848,7 +2848,7 @@ namespace Orcs_Plus
                                             __instance.getName(),
                                             " has inflicted 1 HP damage and thus killed ",
                                             agent.getName(),
-                                            ", as they attempt to perform this challenge.\\n\\nWhile an orc army is at rest, they patrol constantly, attacking any outsiders operating in their home camp, unless they are tolerant towards them, or, in the case of dark agents, including player controlled agents, the army's home camp is >50% shadow. (You CANNOT see this on the map by the red spikes on the army icon when the agent is selected). Note: 100% infiltration will allow your agents to continue to operate normally"
+                                            ", as they attempt to perform this challenge.\n\nWhile an orc army is at rest, they patrol constantly, attacking any outsiders operating in their home camp, unless they are tolerant towards them, or, in the case of dark agents, including player controlled agents, the army's home camp is >50% shadow. (You CANNOT see this on the map by the red spikes on the army icon when the agent is selected). Note: 100% infiltration will allow your agents to continue to operate normally"
                                             }), UnifiedMessage.messageType.ARMY_BLOCKS, false);
                                         }
                                         agent.die(__instance.map, "Killed by " + __instance.getName(), __instance.person);
