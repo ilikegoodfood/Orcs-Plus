@@ -27,7 +27,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return $"Sever all ties with you current Orc Horde and become a member of the {banner.orcs.getName()}. You current horde is unlikle yot appreciate this action.";
+            return $"Sever all ties with you current Orc Horde and become a member of the {banner.orcs.getName()}. You current horde is unlikley to appreciate this action.";
         }
 
         public override string getCastFlavour()
