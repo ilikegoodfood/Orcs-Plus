@@ -175,21 +175,28 @@ namespace Orcs_Plus
                     {
                         if (!neighbour.isOcean && neighbour.settlement != null && neighbour.hex.getHabilitability() >= map.opt_orcHabMult * map.param.orc_habRequirement)
                         {
-                            if (ModCore.Get().data.getSettlementTypesForWaystation().TryGetValue(neighbour.settlement.GetType(), out HashSet<Type> blacklist) && !neighbour.settlement.subs.Any(sub => (sub is Sub_OrcWaystation way && way.orcSociety == orcSociety) || blacklist.Contains(sub.GetType())))
-                            {
-                                return true;
-                            }
+                            continue;
+                        }
 
-                            if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModIntegrationData intDataEscam) && intDataEscam.typeDict.TryGetValue("LivingTerrainSettlement", out Type livingTerrainSettlementType) && intDataEscam.fieldInfoDict.TryGetValue("LivingTerrainSettlement_TypeOfTerrain", out FieldInfo FI_TypeOfTerrain))
+                        if (CommunityLib.ModCore.Get().checkIsNaturalWonder(neighbour))
+                        {
+                            return true;
+                        }
+
+                        if (ModCore.Get().data.getSettlementTypesForWaystation().TryGetValue(neighbour.settlement.GetType(), out HashSet<Type> blacklist) && !neighbour.settlement.subs.Any(sub => (sub is Sub_OrcWaystation way && way.orcSociety == orcSociety) || blacklist.Contains(sub.GetType())))
+                        {
+                            return true;
+                        }
+
+                        if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModIntegrationData intDataEscam) && intDataEscam.typeDict.TryGetValue("LivingTerrainSettlement", out Type livingTerrainSettlementType) && intDataEscam.fieldInfoDict.TryGetValue("LivingTerrainSettlement_TypeOfTerrain", out FieldInfo FI_TypeOfTerrain))
+                        {
+                            if (ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture.tenet_god is H_Orcs_Fleshweaving fleshweaving && fleshweaving.status < -1)
                             {
-                                if (ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture.tenet_god is H_Orcs_Fleshweaving fleshweaving && fleshweaving.status < -1)
+                                if (neighbour.settlement.GetType() == livingTerrainSettlementType && (int)FI_TypeOfTerrain.GetValue(neighbour.settlement) > 0)
                                 {
-                                    if (neighbour.settlement.GetType() == livingTerrainSettlementType && (int)FI_TypeOfTerrain.GetValue(neighbour.settlement) > 0)
+                                    if (neighbour.hex.getHabilitability() >= neighbour.map.opt_orcHabMult * neighbour.map.param.orc_habRequirement)
                                     {
-                                        if (neighbour.hex.getHabilitability() >= neighbour.map.opt_orcHabMult * neighbour.map.param.orc_habRequirement)
-                                        {
-                                            return true;
-                                        }
+                                        return true;
                                     }
                                 }
                             }
