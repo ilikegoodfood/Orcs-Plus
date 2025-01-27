@@ -31,7 +31,7 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Builds a great hall in this orc camp, which acts as a cultural hub. A local orc champion will pledge themselves to your service if you, and you will gain " + ModCore.Get().data.influenceGain[ModData.influenceGainAction.BuildTemple] + " influence over the orc culture, by building this great hall.";
+            return $"Builds a great hall in this orc camp, which acts as a cultural hub. An Orc Champion (5 HP, 5 Defence, 6 Attack, 3 Cost) will pledge themselves to your service if you build the great hall. You will also gain {ModCore.Get().data.influenceGain[ModData.influenceGainAction.BuildTemple]} influence over the orc culture.";
         }
 
         public override string getRestriction()
