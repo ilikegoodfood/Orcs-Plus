@@ -186,6 +186,11 @@ namespace Orcs_Plus
                             }
                         }
 
+                        if (CommunityLib.ModCore.Get().checkIsNaturalWonder(neighbour))
+                        {
+                            return true;
+                        }
+
                         if (ModCore.Get().data.getSettlementTypesForWaystation().TryGetValue(neighbour.settlement.GetType(), out HashSet<Type> blacklist) && !neighbour.settlement.subs.Any(sub => (sub is Sub_OrcWaystation way && way.orcSociety == orcSociety) || blacklist.Contains(sub.GetType())))
                         {
                             return true;
