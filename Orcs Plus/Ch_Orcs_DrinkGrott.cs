@@ -27,12 +27,12 @@ namespace Orcs_Plus
 
         public override string getDesc()
         {
-            return "Drinking grott temporarily boosts an agents might and command stats by 1, but if the agent is not an orc, they suffer " + damage + " damage when drinking it. If the agent has a drinking horn, completing this challenge also fills it.";
+            return "Drinking grott temporarily boosts an agent's might and command stats by 1, but if the agent is not an orc, they suffer " + damage + " damage when drinking it. If the agent has a drinking horn, completing this challenge also fills it.";
         }
 
         public override string getCastFlavour()
         {
-            return "Grott is a thick orc beverage that is served scalding hot from a fire. It's taste is reportedly foul beyond measure, but it is said to fortify the body of those who drink it. The drinking of Grott has become a right of passage for young orc warriors.";
+            return "Grott is a thick orc beverage that is served scalding hot from a fire. Its taste is reportedly foul beyond measure, but it is said to fortify the body of those who drink it. The drinking of Grott has become a right of passage for young orc warriors.";
         }
 
         public override string getRestriction()
@@ -179,7 +179,7 @@ namespace Orcs_Plus
                 }
             }
 
-            msgString = u.getName() + " feels envigortated after their drink. The Grott is hot and tasty.";
+            msgString = u.getName() + " feels envigorated after their drink. The Grott is hot and tasty.";
 
             if (u.person.species != map.species_orc)
             {
