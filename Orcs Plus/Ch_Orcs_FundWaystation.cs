@@ -173,12 +173,12 @@ namespace Orcs_Plus
                 {
                     foreach (Location neighbour in location.getNeighbours())
                     {
-                        if (!neighbour.isOcean && neighbour.settlement != null && neighbour.hex.getHabilitability() >= map.opt_orcHabMult * map.param.orc_habRequirement)
+                        if (neighbour.isOcean || neighbour.settlement == null || neighbour.hex.getHabilitability() < map.opt_orcHabMult * map.param.orc_habRequirement)
                         {
                             continue;
                         }
 
-                        if (CommunityLib.ModCore.Get().checkIsNaturalWonder(neighbour))
+                        if (ModCore.GetComLib().checkIsNaturalWonder(neighbour))
                         {
                             return true;
                         }
@@ -194,10 +194,7 @@ namespace Orcs_Plus
                             {
                                 if (neighbour.settlement.GetType() == livingTerrainSettlementType && (int)FI_TypeOfTerrain.GetValue(neighbour.settlement) > 0)
                                 {
-                                    if (neighbour.hex.getHabilitability() >= neighbour.map.opt_orcHabMult * neighbour.map.param.orc_habRequirement)
-                                    {
-                                        return true;
-                                    }
+                                    return true;
                                 }
                             }
                         }
