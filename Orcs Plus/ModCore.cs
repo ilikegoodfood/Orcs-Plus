@@ -432,6 +432,7 @@ namespace Orcs_Plus
                             if (livingTerrainType != null)
                             {
                                 intDataEscam.typeDict.Add("LivingTerrain", livingTerrainType);
+                                Get().data.tryAddSettlementTypeForWaystation(livingTerrainType);
 
                                 MethodInfo livingTerrain_turnTick = livingTerrainType.GetMethod("turnTick", Type.EmptyTypes);
                                 if (livingTerrain_turnTick != null)
