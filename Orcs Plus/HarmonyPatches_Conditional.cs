@@ -33,16 +33,22 @@ namespace Orcs_Plus
 
         private static void Patching_CovensCursesCurios()
         {
-            if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCC) && intDataCCC.typeDict.TryGetValue("Banner", out Type T_I_BarbDominion))
-            {
-                harmony.Patch(original: AccessTools.Constructor(T_I_BarbDominion, new Type[] { typeof(Map) }), postfix: new HarmonyMethod(patchType, nameof(I_BarbDominion_ctor_Postfix)));
-                harmony.Patch(original: AccessTools.Method(typeof(Ch_Subjugate_Orcs), nameof(Ch_Subjugate_Orcs.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Subjugate_Orcs_validFor_Postfix)));
-            }
+            ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCC);
+            ModCore.Get().data.tryGetModIntegrationData("CovensCursesCuriosRecast", out ModIntegrationData intDataCCCR);
 
-            if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCuriosRecast", out ModIntegrationData intDataCCCR) && intDataCCC.typeDict.TryGetValue("Banner", out Type T_I_BarbDominion2))
+            if (intDataCCC != null || intDataCCCR != null)
             {
-                harmony.Patch(original: AccessTools.Constructor(T_I_BarbDominion2, new Type[] { typeof(Map) }), postfix: new HarmonyMethod(patchType, nameof(I_BarbDominion_ctor_Postfix)));
                 harmony.Patch(original: AccessTools.Method(typeof(Ch_Subjugate_Orcs), nameof(Ch_Subjugate_Orcs.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Subjugate_Orcs_validFor_Postfix)));
+
+                if (intDataCCC != null && intDataCCC.typeDict.TryGetValue("Banner", out Type T_I_BarbDominion))
+                {
+                    harmony.Patch(original: AccessTools.Constructor(T_I_BarbDominion, new Type[] { typeof(Map) }), postfix: new HarmonyMethod(patchType, nameof(I_BarbDominion_ctor_Postfix)));
+                }
+
+                if (intDataCCCR != null && intDataCCCR.typeDict.TryGetValue("Banner", out Type T_I_BarbDominion2))
+                {
+                    harmony.Patch(original: AccessTools.Constructor(T_I_BarbDominion2, new Type[] { typeof(Map) }), postfix: new HarmonyMethod(patchType, nameof(I_BarbDominion_ctor_Postfix)));
+                }
             }
 
             // Template Patch
