@@ -87,6 +87,24 @@ namespace Orcs_Plus
                 }
             }
 
+            if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCuriosRecast", out ModIntegrationData intDataCCCR))
+            {
+                if (intDataCCCR.typeDict.TryGetValue("CallHordes", out Type callHordesType))
+                {
+                    AIChallenge CCC_CallHordes = new AIChallenge(callHordesType, 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden });
+                    ModCore.Get().comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcUpstart), CCC_CallHordes);
+                    CCC_CallHordes = new AIChallenge(callHordesType, 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden });
+                    ModCore.Get().comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcElder), CCC_CallHordes);
+                    CCC_CallHordes = new AIChallenge(callHordesType, 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden });
+                    ModCore.Get().comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcShaman), CCC_CallHordes);
+                }
+
+                if (intDataCCCR.typeDict.TryGetValue("StudyCurseweaving", out Type studyMagicType))
+                {
+                    ModCore.Get().comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcShaman), new AIChallenge(studyMagicType, 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden }));
+                }
+            }
+
             if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModIntegrationData intDataEscam))
             {
                 if (intDataEscam.typeDict.TryGetValue("StudyFleshcrafting", out Type studyMagicType))

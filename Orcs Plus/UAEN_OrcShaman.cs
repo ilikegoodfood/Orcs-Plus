@@ -94,10 +94,14 @@ namespace Orcs_Plus
 
             if (orcSociety != null && !orcSociety.isGone() && orcCulture != null)
             {
-                Type dominionBanner = null;
-                if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCC))
+                List<Type> dominionBannerTypes = new List<Type>();
+                if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCC) && intDataCCC.typeDict.TryGetValue("Banner", out Type dominionBanner))
                 {
-                    intDataCCC.typeDict.TryGetValue("Banner", out dominionBanner);
+                    dominionBannerTypes.Add(dominionBanner);
+                }
+                if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCCR) && intDataCCCR.typeDict.TryGetValue("Banner", out Type dominionBanner2))
+                {
+                    dominionBannerTypes.Add(dominionBanner2);
                 }
 
                 foreach (Unit unit in map.units)
@@ -121,7 +125,7 @@ namespace Orcs_Plus
                         {
                             units.Add(unit);
                         }
-                        else if (dominionBanner != null && agent.person.items.Any(i => i != null && (i.GetType() == dominionBanner || i.GetType().IsSubclassOf(dominionBanner))))
+                        else if (dominionBannerTypes.Count > 0 && agent.person.items.Any(i => i != null && dominionBannerTypes.Any(t => i.GetType() == t || i.GetType().IsSubclassOf(t))))
                         {
                             units.Add(unit);
                         }
@@ -253,26 +257,31 @@ namespace Orcs_Plus
 
                         if (otherIsTarget)
                         {
-                            Type dominionBanner = null;
-                            if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCC))
+                            List<Type> dominionBannerTypes = new List<Type>();
+                            if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCC) && intDataCCC.typeDict.TryGetValue("Banner", out Type dominionBanner))
                             {
-                                intDataCCC.typeDict.TryGetValue("Banner", out dominionBanner);
+                                dominionBannerTypes.Add(dominionBanner);
+                            }
+                            if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCCR) && intDataCCCR.typeDict.TryGetValue("Banner", out Type dominionBanner2))
+                            {
+                                dominionBannerTypes.Add(dominionBanner2);
                             }
 
                             foreach (Item item in target.person.items)
                             {
                                 if (item != null)
                                 {
-                                    if (dominionBanner != null && (item.GetType() == dominionBanner || item.GetType().IsSubclassOf(dominionBanner)))
+                                    I_HordeBanner banner = item as I_HordeBanner;
+                                    if (banner?.orcs == orcSociety && (target.society == null || society.getRel(target.society).state != DipRel.dipState.war) && (feud == null))
                                     {
                                         reasons?.Add(new ReasonMsg("Orcs will not disrupt banner bearer", -10000.0));
                                         utility -= 10000.0;
                                         return utility;
                                     }
-                                    else
+
+                                    foreach (Type dominionBannerType in dominionBannerTypes)
                                     {
-                                        I_HordeBanner banner = item as I_HordeBanner;
-                                        if (banner?.orcs == orcSociety && (target.society == null || society.getRel(target.society).state != DipRel.dipState.war) && (feud == null))
+                                        if (item.GetType() == dominionBannerType || item.GetType().IsSubclassOf(dominionBannerType))
                                         {
                                             reasons?.Add(new ReasonMsg("Orcs will not disrupt banner bearer", -10000.0));
                                             utility -= 10000.0;
@@ -512,26 +521,31 @@ namespace Orcs_Plus
 
                             if (otherIsTarget)
                             {
-                                Type dominionBanner = null;
-                                if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCC))
+                                List<Type> dominionBannerTypes = new List<Type>();
+                                if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCC) && intDataCCC.typeDict.TryGetValue("Banner", out Type dominionBanner))
                                 {
-                                    intDataCCC.typeDict.TryGetValue("Banner", out dominionBanner);
+                                    dominionBannerTypes.Add(dominionBanner);
+                                }
+                                if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCCR) && intDataCCCR.typeDict.TryGetValue("Banner", out Type dominionBanner2))
+                                {
+                                    dominionBannerTypes.Add(dominionBanner2);
                                 }
 
                                 foreach (Item item in target.person.items)
                                 {
                                     if (item != null)
                                     {
-                                        if (dominionBanner != null && (item.GetType() == dominionBanner || item.GetType().IsSubclassOf(dominionBanner)))
+                                        I_HordeBanner banner = item as I_HordeBanner;
+                                        if (banner?.orcs == orcSociety && (target.society == null || society.getRel(target.society).state != DipRel.dipState.war) && (feud == null))
                                         {
                                             reasons?.Add(new ReasonMsg("Orcs will not attack banner bearer", -10000.0));
                                             utility -= 10000.0;
                                             return utility;
                                         }
-                                        else
+
+                                        foreach (Type dominionBannerType in dominionBannerTypes)
                                         {
-                                            I_HordeBanner banner = item as I_HordeBanner;
-                                            if (banner?.orcs == orcSociety && (target.society == null || society.getRel(target.society).state != DipRel.dipState.war) && (feud == null))
+                                            if (item.GetType() == dominionBannerType || item.GetType().IsSubclassOf(dominionBannerType))
                                             {
                                                 reasons?.Add(new ReasonMsg("Orcs will not attack banner bearer", -10000.0));
                                                 utility -= 10000.0;

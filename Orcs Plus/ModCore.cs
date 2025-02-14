@@ -323,6 +323,44 @@ namespace Orcs_Plus
                             }
                         }
                         break;
+                    case "CovenExpansionRecast":
+                        Console.WriteLine("OrcsPlus: Covens, Curses, and Curios Recast is Enabled");
+                        ModIntegrationData intDataCCCR = new ModIntegrationData(kernel);
+                        Get().data.addModIntegrationData("CovensCursesCuriosRecast", intDataCCCR);
+
+                        if (Get().data.tryGetModIntegrationData("CovensCursesCuriosRecast", out intDataCCCR))
+                        {
+                            Type dominionBannerType = intDataCCCR.assembly.GetType("CovenExpansionRecast.I_DominionBanner", false);
+                            if (dominionBannerType != null)
+                            {
+                                intDataCCCR.typeDict.Add("Banner", dominionBannerType);
+                            }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Dominion Banner item Type (CovenExpansionRecast.I_DominionBanner)");
+                            }
+
+                            Type callHordesType = intDataCCCR.assembly.GetType("CovenExpansionRecast.Rti_CallHordes", false);
+                            if (callHordesType != null)
+                            {
+                                intDataCCCR.typeDict.Add("CallHordes", callHordesType);
+                            }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Call Hordes ritual Type (CovenExpansionRecast.Rti_CallHordes)");
+                            }
+
+                            Type studyMagicType = intDataCCCR.assembly.GetType("CovenExpansionRecast.Rt_StudyCurseweaving", false);
+                            if (studyMagicType != null)
+                            {
+                                intDataCCCR.typeDict.Add("StudyCurseweaving", studyMagicType);
+                            }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Study Curseweaving ritual Type (CovenExpansionRecast.Rt_StudyCurseweaving)");
+                            }
+                        }
+                        break;
                     case "God_Love":
                         Console.WriteLine("OrcsPlus: Chandalor is Enabled");
                         ModIntegrationData intDataChand = new ModIntegrationData(kernel);
