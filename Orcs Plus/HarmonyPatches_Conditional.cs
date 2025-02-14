@@ -39,6 +39,12 @@ namespace Orcs_Plus
                 harmony.Patch(original: AccessTools.Method(typeof(Ch_Subjugate_Orcs), nameof(Ch_Subjugate_Orcs.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Subjugate_Orcs_validFor_Postfix)));
             }
 
+            if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCuriosRecast", out ModIntegrationData intDataCCCR) && intDataCCC.typeDict.TryGetValue("Banner", out Type T_I_BarbDominion2))
+            {
+                harmony.Patch(original: AccessTools.Constructor(T_I_BarbDominion2, new Type[] { typeof(Map) }), postfix: new HarmonyMethod(patchType, nameof(I_BarbDominion_ctor_Postfix)));
+                harmony.Patch(original: AccessTools.Method(typeof(Ch_Subjugate_Orcs), nameof(Ch_Subjugate_Orcs.validFor), new Type[] { typeof(UA) }), postfix: new HarmonyMethod(patchType, nameof(Ch_Subjugate_Orcs_validFor_Postfix)));
+            }
+
             // Template Patch
             // harmony.Patch(original: AccessTools.Method(typeof(), nameof(), new Type[] { typeof() }), postfix: new HarmonyMethod(patchType, nameof()));
         }
@@ -53,11 +59,21 @@ namespace Orcs_Plus
         {
             if (!result)
             {
-                if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCC) && intDataCCC.typeDict.TryGetValue("Banner", out Type T_I_BarbDominion))
+                List<Type> dominionBannerTypes = new List<Type>();
+                if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCC) && intDataCCC.typeDict.TryGetValue("Banner", out Type dominionBanner))
                 {
-                    foreach (Item item in ua.person.items)
+                    dominionBannerTypes.Add(dominionBanner);
+                }
+                if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCCR) && intDataCCCR.typeDict.TryGetValue("Banner", out Type dominionBanner2))
+                {
+                    dominionBannerTypes.Add(dominionBanner2);
+                }
+
+                foreach (Item item in ua.person.items)
+                {
+                    if (item != null)
                     {
-                        if (item != null && item.GetType() == T_I_BarbDominion)
+                        if (dominionBannerTypes.Any(t => item.GetType() == t || item.GetType().IsSubclassOf(t)))
                         {
                             result = true;
                             break;

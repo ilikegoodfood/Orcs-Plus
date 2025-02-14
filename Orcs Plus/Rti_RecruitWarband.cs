@@ -17,13 +17,17 @@ namespace Orcs_Plus
         public Rti_RecruitWarband (Location loc, Item banner)
             : base (loc)
         {
-            Type dominionBannerType = null;
-            if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCC))
+            List<Type> dominionBannerTypes = new List<Type>();
+            if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCC) && intDataCCC.typeDict.TryGetValue("Banner", out Type dominionBanner))
             {
-                intDataCCC.typeDict.TryGetValue("Banner", out dominionBannerType);
+                dominionBannerTypes.Add(dominionBanner);
+            }
+            if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCCR) && intDataCCCR.typeDict.TryGetValue("Banner", out Type dominionBanner2))
+            {
+                dominionBannerTypes.Add(dominionBanner2);
             }
 
-            if ((banner is I_HordeBanner) || (dominionBannerType != null && (banner.GetType() == dominionBannerType || banner.GetType().IsSubclassOf(dominionBannerType))))
+            if ((banner is I_HordeBanner) || dominionBannerTypes.Any(t => t != null && (banner.GetType() == t || banner.GetType().IsSubclassOf(t))))
             {
                 this.banner = banner;
             }
