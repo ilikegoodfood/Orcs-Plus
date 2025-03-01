@@ -443,7 +443,7 @@ namespace Orcs_Plus
                                 Tags.CRUEL,
                                 Tags.DANGER
                             }, new int[0], reasons);
-                            utility += person.getTagUtility(target.getPositiveTags(), target.getNegativeTags(), reasons);
+                            utility += person.getTagUtility(target.getNegativeTags(), target.getPositiveTags(), reasons);
 
                             if (target.person != null && (person.hates.Contains(target.person.index + 10000) || person.extremeHates.Contains(target.person.index + 10000)))
                             {
@@ -698,7 +698,7 @@ namespace Orcs_Plus
                                         Tags.CRUEL,
                                         Tags.DANGER
                                     }, new int[0], reasons);
-                                    utility += person.getTagUtility(target.getPositiveTags(), target.getNegativeTags(), reasons);
+                                    utility += person.getTagUtility(target.getNegativeTags(), target.getPositiveTags(), reasons);
 
                                     if (ModCore.GetComLib().checkIsVampire(target))
                                     {
