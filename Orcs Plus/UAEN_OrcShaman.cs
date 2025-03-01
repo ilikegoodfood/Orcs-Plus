@@ -333,7 +333,7 @@ namespace Orcs_Plus
                                     Tags.CRUEL,
                                     Tags.DANGER
                                 }, new int[0], reasons);
-                                utility += person.getTagUtility(target.getPositiveTags(), target.getNegativeTags(), reasons);
+                                utility += person.getTagUtility(target.getNegativeTags(), target.getPositiveTags(), reasons);
 
                                 if (target.task is Task_PerformChallenge tChallenge2 && tChallenge2.challenge.isChannelled())
                                 {
@@ -609,7 +609,7 @@ namespace Orcs_Plus
                                         Tags.CRUEL,
                                         Tags.DANGER
                                     }, new int[0], reasons);
-                                    utility += person.getTagUtility(target.getPositiveTags(), target.getNegativeTags(), reasons);
+                                    utility += person.getTagUtility(target.getNegativeTags(), target.getPositiveTags(), reasons);
 
                                     if (target.task is Task_PerformChallenge tChallenge2 && tChallenge2.challenge.isChannelled())
                                     {

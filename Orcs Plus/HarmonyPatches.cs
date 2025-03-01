@@ -1779,7 +1779,7 @@ namespace Orcs_Plus
                                 if (item != null)
                                 {
                                     I_HordeBanner banner = item as I_HordeBanner;
-                                    if (banner?.orcs == orcSociety && (target.society == null || ua.society.getRel(target.society).state != DipRel.dipState.war) && (feud == null))
+                                    if (banner?.orcs == orcSociety && (target.society == null || ua.society.getRel(target.society).state != DipRel.dipState.war) && feud == null)
                                     {
                                         reasonMsgs?.Add(new ReasonMsg("Orcs will not attack banner bearer", -10000.0));
                                         utility -= 10000.0;
@@ -1843,7 +1843,7 @@ namespace Orcs_Plus
                                     Tags.CRUEL,
                                     Tags.DANGER
                                 }, new int[0], reasonMsgs);
-                                utility += ua.person.getTagUtility(target.getPositiveTags(), target.getNegativeTags(), reasonMsgs);
+                                utility += ua.person.getTagUtility(target.getNegativeTags(), target.getPositiveTags(), reasonMsgs);
 
                                 if (orcCulture.tenet_god is H_Orcs_GlorySeeker glory2 && glory2.status < 0)
                                 {
@@ -1917,7 +1917,7 @@ namespace Orcs_Plus
                             }
                             else
                             {
-                                if (target.society != null && orcSociety.getRel(target.society).state == DipRel.dipState.war)
+                                if (target.society != null  && target.society != ua.society && orcSociety.getRel(target.society).state == DipRel.dipState.war)
                                 {
                                     reasonMsgs?.Add(new ReasonMsg("Tresspassing in territory of " + target.location.soc.getName(), -10000.0));
                                     utility -= 10000.0;
@@ -1946,7 +1946,6 @@ namespace Orcs_Plus
                     reasonMsgs?.Add(new ReasonMsg("Target is not Agent", -10000.0));
                     utility -= 10000.0;
                 }
-
             }
             else
             {
