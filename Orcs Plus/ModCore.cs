@@ -1183,6 +1183,11 @@ namespace Orcs_Plus
 
         public override double sovereignAI(Map map, AN actionNational, Person ruler, List<ReasonMsg> reasons, double initialUtility)
         {
+            if (ruler == null)
+            {
+                return initialUtility;
+            }
+
             if (ruler.house.curses.Any(curse => curse is Curse_BrokenSpirit))
             {
                 if (actionNational is AN_DeclareWar || actionNational is AN_WarCrusade || actionNational is AN_WarOnThreat || actionNational is AN_RazeSubsettlement || actionNational is AN_FormAlliance)
