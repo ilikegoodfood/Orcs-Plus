@@ -31,6 +31,12 @@ namespace Orcs_Plus
 
         public static CommunityLib.ModCore GetComLib() => comLib;
 
+        public static bool opt_dynamicElderCount = true;
+
+        public static int opt_elderCount = 5;
+
+        public static int opt_spiritCallerRespawnChance = 5;
+
         public override void onModsInitiallyLoaded()
         {
             core = this;
@@ -101,6 +107,29 @@ namespace Orcs_Plus
             }*/
         }
 
+        public override void receiveModConfigOpts_int(string optName, int value)
+        {
+            switch(optName)
+            {
+                case "Orc Elder Limit":
+                    opt_elderCount = value;
+                    break;
+                case "Orc Spirit Caller Respawn Chance":
+                    opt_spiritCallerRespawnChance = value;
+                    break;
+            }
+        }
+
+        public override void receiveModConfigOpts_bool(string optName, bool value)
+        {
+            switch (optName)
+            {
+                case "Dynamic Orc Elder Limit":
+                    opt_dynamicElderCount = value;
+                    break;
+            }
+        }
+
         public override void afterMapGenAfterHistorical(Map map)
         {
             if (Get().data.tryGetModIntegrationData("Ixthus", out ModIntegrationData intDataIx) && intDataIx.typeDict.TryGetValue("Tenet", out Type tenetType))
@@ -163,6 +192,13 @@ namespace Orcs_Plus
                         bloodMoney.invalidSpecialisms = new int[3] { 0, 4, 6 };
                     }
                 }
+            }
+
+            if (opt_elderCount == 0)
+            {
+                opt_elderCount = 5;
+                opt_dynamicElderCount = true;
+                opt_spiritCallerRespawnChance = 25;
             }
         }
 

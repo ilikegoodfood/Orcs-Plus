@@ -199,6 +199,18 @@ namespace Orcs_Plus
             return tags;
         }
 
+        public int GetMaxAcolytes()
+        {
+            int result = ModCore.opt_elderCount;
+
+            if (ModCore.opt_dynamicElderCount)
+            {
+                result = Math.Min(camps.Count, result);
+            }
+
+            return result;
+        }
+
         new public void humanAIExpenditure()
         {
             HolyTenet holyTenet = null;
@@ -477,14 +489,14 @@ namespace Orcs_Plus
                 settlementCount = camps.Count;
             }
 
-            if (acolyteCount < map.param.holy_maxAcolytes && acolyteSpawnCounter == 0)
+            if (acolyteCount < GetMaxAcolytes() && acolyteSpawnCounter == 0)
             {
                 costAcolyte = 15 + Math.Max(Eleven.random.Next(11), Eleven.random.Next(11));
             }
             costPreach = (int)(10.0 * Math.Pow(Math.Max(0, settlementCount - 5), 0.75));
             costTemple = 50 * (templeCount + 1);
 
-            if (acolyteCount < map.param.holy_maxAcolytes)
+            if (acolyteCount < GetMaxAcolytes())
             {
                 acolyteSpawnCounter++;
                 if (acolyteSpawnCounter >= getAcolyteCost())
@@ -621,6 +633,11 @@ namespace Orcs_Plus
 
         public void manageShamans()
         {
+            if (ModCore.opt_spiritCallerRespawnChance == 0)
+            {
+                return;
+            }
+
             if (specializedCamps.Count > 0)
             {
                 List<Set_OrcCamp> mageCamps = specializedCamps.FindAll(camp => camp.specialism == 2);
@@ -641,7 +658,7 @@ namespace Orcs_Plus
 
                     foreach (Set_OrcCamp mageCamp in mageCamps)
                     {
-                        if (Eleven.random.Next(4) == 0)
+                        if (Eleven.random.Next(100) < ModCore.opt_spiritCallerRespawnChance)
                         {
                             createShaman(mageCamp);
                         }
