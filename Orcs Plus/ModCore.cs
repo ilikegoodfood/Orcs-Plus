@@ -31,6 +31,12 @@ namespace Orcs_Plus
 
         public static CommunityLib.ModCore GetComLib() => comLib;
 
+        public static bool opt_dynamicElderCount = true;
+
+        public static int opt_elderCount = 5;
+
+        public static int opt_spiritCallerRespawnChance = 5;
+
         public override void onModsInitiallyLoaded()
         {
             core = this;
@@ -99,6 +105,29 @@ namespace Orcs_Plus
                     bool result = (bool)registerInfo.Invoke(kernel, parameters);
                 }
             }*/
+        }
+
+        public override void receiveModConfigOpts_int(string optName, int value)
+        {
+            switch(optName)
+            {
+                case "Orc Elder Limit":
+                    opt_elderCount = value;
+                    break;
+                case "Orc Spirit Caller Respawn Chance":
+                    opt_spiritCallerRespawnChance = value;
+                    break;
+            }
+        }
+
+        public override void receiveModConfigOpts_bool(string optName, bool value)
+        {
+            switch (optName)
+            {
+                case "Dynamic Orc Elder Limit":
+                    opt_dynamicElderCount = value;
+                    break;
+            }
         }
 
         public override void afterMapGenAfterHistorical(Map map)
@@ -204,6 +233,13 @@ namespace Orcs_Plus
                         u.rituals.Remove(giftGold);
                     }
                 }
+            }
+
+            if (opt_elderCount == 0)
+            {
+                opt_elderCount = 5;
+                opt_dynamicElderCount = true;
+                opt_spiritCallerRespawnChance = 25;
             }
         }
 
