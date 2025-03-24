@@ -213,7 +213,6 @@ namespace Orcs_Plus
                     case "CommunityLib":
                         comLib = kernel as CommunityLib.ModCore;
                         comLibHooks = new ComLibHooks(map);
-                        comLib.RegisterHooks(comLibHooks);
                         comLibAI = comLib.GetAgentAI();
 
                         comLib.forceShipwrecks();

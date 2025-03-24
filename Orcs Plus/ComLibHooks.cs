@@ -1,4 +1,5 @@
 ﻿using Assets.Code;
+using CommunityLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,18 +9,50 @@ using UnityEngine;
 
 namespace Orcs_Plus
 {
-    public class ComLibHooks : CommunityLib.Hooks
+    public class ComLibHooks
     {
         private Dictionary<UM, int> armyBattle_AttackerOrcHPDict = new Dictionary<UM, int>();
         private Dictionary<UM, int> armyBattle_DefenderOrcHPDict = new Dictionary<UM, int>();
+        private Map map;
 
         public ComLibHooks(Map map)
-            : base(map)
         {
+            HooksDelegateRegistry registry = ModCore.GetComLib().HookRegistry;
 
+            registry.RegisterHook_onGraphicalUnitUpdated(onGraphicalUnitUpdated);
+            registry.RegisterHook_onPathfinding_AllowSecondPass(onPathfinding_AllowSecondPass);
+            registry.RegisterHook_onGetTradeRouteEndpoints(onGetTradeRouteEndpoints);
+            registry.RegisterHook_onPlayerOpensReligionUI(onPlayerOpensReligionUI);
+            registry.RegisterHook_onPlayerInfluenceTenet(onPlayerInfluenceTenet);
+            registry.RegisterHook_onAgentBattle_ReinforceFromEscort(onAgentBattle_ReinforceFromEscort);
+            registry.RegisterHook_onAgentBattle_ReceiveDamage(onAgentBattle_ReceiveDamage);
+            registry.RegisterHook_onUnitDeath_StartOfProcess(onUnitDeath_StartOfProcess);
+            registry.RegisterHook_onRazeLocation_StartOfProcess(onRazeLocation_StartOfProcess);
+            registry.RegisterHook_onRazeLocation_EndOfProcess(onRazeLocation_EndOfProcess);
+            registry.RegisterHook_onSettlementCalculatesShadowGain(onSettlementComputesShadowGain);
+            registry.RegisterHook_onBrokenMakerSleeps_StartOfProcess(ModCore.Get().onBrokenMakerSleep_StartOfSleep);
+            registry.RegisterHook_onBrokenMakerSleeps_TurnTick(ModCore.Get().onBrokenMakerSleep_TurnTick);
+            registry.RegisterHook_onBrokenMakerSleeps_EndOfProcess(ModCore.Get().onBrokenMakerSleep_EndOfSleep);
+            registry.RegisterHook_onArmyBattleCycle_StartOfProcess(onArmyBattleCycle_StartOfProcess);
+            registry.RegisterHook_onArmyBattleCycle_DamageCalculated(onArmyBattleCycle_DamageCalculated);
+            registry.RegisterHook_onUnitReceivesArmyBattleDamage(onUnitReceivesArmyBattleDamage);
+            registry.RegisterHook_onArmyBattleCycle_EndOfProcess(onArmyBattleCycle_EndOfProcess);
+            registry.RegisterHook_onPopupHolyOrder_DisplayInfluenceHuman(onPopupHolyOrder_DisplayInfluenceHuman);
+            registry.RegisterHook_onPopupHolyOrder_DisplayInfluenceElder(onPopupHolyOrder_DisplayInfluenceElder);
+            registry.RegisterHook_onPopupHolyOrder_DisplayBudget(onPopupHolyOrder_DisplayBudget);
+            registry.RegisterHook_onPopupHolyOrder_DisplayStats(onPopupHolyOrder_DisplayStats);
+            registry.RegisterHook_onSettlementFallIntoRuin_StartOfProcess(onSettlementFallIntoRuin_StartOfProcess);
+            registry.RegisterHook_interceptAgentAI(interceptAgentAI);
+            registry.RegisterHook_onAgentAI_EndOfProcess(onAgentAI_EndOfProcess);
+            registry.RegisterHook_onLocationViewFaithButton_GetHolyOrder(onLocationViewFaithButton_GetHolyOrder);
+            registry.RegisterHook_onUIScroll_Unit_populateUM(onUIScroll_Unit_populateUM);
+            registry.RegisterHook_interceptReplaceItem(interceptReplaceItem);
+            registry.RegisterHook_populatingMonsterActions(populatingMonsterActions);
+            registry.RegisterHook_onActionTakingMonsterAIDecision(onActionTakingMonsterAIDecision);
+            registry.RegisterHook_onBrokenMakerPowerCreatesAgent_ProcessCurse(onBrokenMakerPowerCreatesAgent_ProcessCurse);
         }
 
-        public override void onGraphicalUnitUpdated(GraphicalUnit graphicalUnit)
+        public void onGraphicalUnitUpdated(GraphicalUnit graphicalUnit)
         {
             if (graphicalUnit.unit is UAEN_OrcElder elder)
             {
@@ -39,11 +72,11 @@ namespace Orcs_Plus
             }
         }
 
-        public override bool onPathfinding_AllowSecondPass(Location loc, Unit u, List<int> expectedMapLayers, List<Func<Location[], Location, Unit, List<int>, double>> pathfindingDelegates)
+        public bool onPathfinding_AllowSecondPass(Location loc, Unit u, List<int> expectedMapLayers, List<Func<Location[], Location, Unit, List<int>, double>> pathfindingDelegates)
         {
             if (u != null && u.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety.canGoUnderground())
             {
-                pathfindingDelegates.Remove(CommunityLib.Pathfinding.delegate_LAYERBOUND);
+                pathfindingDelegates.Remove(Pathfinding.delegate_LAYERBOUND);
 
                 return true;
             }
@@ -51,7 +84,7 @@ namespace Orcs_Plus
             return false;
         }
 
-        public override void onGetTradeRouteEndpoints(Map map, List<Location> endpoints)
+        public void onGetTradeRouteEndpoints(Map map, List<Location> endpoints)
         {
             if (map.overmind.god is God_Mammon)
             {
@@ -65,17 +98,17 @@ namespace Orcs_Plus
             }
         }
 
-        public override void onPlayerOpensReligionUI(HolyOrder order)
+        public void onPlayerOpensReligionUI(HolyOrder order)
         {
             ModCore.Get().powers.updateOrcPowers(order.map);
         }
 
-        public override void onPlayerInfluenceTenet(HolyOrder order, HolyTenet tenet)
+        public void onPlayerInfluenceTenet(HolyOrder order, HolyTenet tenet)
         {
             ModCore.Get().powers.updateOrcPowers(order.map);
         }
 
-        public override Minion onAgentBattle_ReinforceFromEscort(UA ua, UM escort)
+        public Minion onAgentBattle_ReinforceFromEscort(UA ua, UM escort)
         {
             if (escort is UM_VengenceHorde)
             {
@@ -85,7 +118,7 @@ namespace Orcs_Plus
             return null;
         }
 
-        public override int onAgentBattle_ReceiveDamage(PopupBattleAgent popup, BattleAgents battle, UA defender, Minion minion, int dmg, int row)
+        public int onAgentBattle_ReceiveDamage(PopupBattleAgent popup, BattleAgents battle, UA defender, Minion minion, int dmg, int row)
         {
             //Console.WriteLine("OrcsPlus: ReceiveDamage hook called");
 
@@ -97,7 +130,7 @@ namespace Orcs_Plus
             return dmg;
         }
 
-        public override void onUnitDeath_StartOfProcess(Unit u, string v, Person killer)
+        public void onUnitDeath_StartOfProcess(Unit u, string v, Person killer)
         {
             //Console.WriteLine("Orcs_Plus: Unit died");
 
@@ -456,7 +489,7 @@ namespace Orcs_Plus
             }
         }
 
-        public override void onRazeLocation_StartOfProcess(UM um)
+        public void onRazeLocation_StartOfProcess(UM um)
         {
             Settlement set = um.location.settlement;
 
@@ -648,7 +681,7 @@ namespace Orcs_Plus
             }
         }
 
-        public override void onRazeLocation_EndOfProcess(UM um)
+        public void onRazeLocation_EndOfProcess(UM um)
         {
             SG_Orc orcSociety;
             HolyOrder_Orcs orcCulture;
@@ -712,7 +745,44 @@ namespace Orcs_Plus
             }
         }
 
-        public override void onArmyBattleCycle_StartOfProcess(BattleArmy battle)
+        public double onSettlementComputesShadowGain(Settlement set, List<ReasonMsg> msgs, double shadowGain)
+        {
+            if (ModCore.Get().data.orcFestivalShadowGain_Dark.TryGetValue(set, out Pair < double, double> shadowDelta))
+            {
+                if (shadowDelta.Item1 != 0.0)
+                {
+                    msgs?.Add(new ReasonMsg("Holy: Dark Festival - Generated Shadow", shadowDelta.Item1));
+                    shadowGain += shadowDelta.Item1;
+                }
+                if (shadowDelta.Item2 != 0.0)
+                {
+                    msgs?.Add(new ReasonMsg("Holy: Dark Festival - Shadow Movement", shadowDelta.Item2));
+                    shadowGain += shadowDelta.Item2;
+                }
+
+                ModCore.Get().data.orcFestivalShadowGain_Dark.Remove(set);
+            }
+
+            if (ModCore.Get().data.orcFestivalShadowGain_Light.TryGetValue(set, out shadowDelta))
+            {
+                if (shadowDelta.Item2 != 0.0)
+                {
+                    msgs?.Add(new ReasonMsg("Holy: Cleansing Festival - Shadow Movement", shadowDelta.Item2));
+                    shadowGain += shadowDelta.Item2;
+                }
+                if (shadowDelta.Item1 != 0.0)
+                {
+                    msgs?.Add(new ReasonMsg("Holy: Cleansing Festival - Purged Shadow", shadowDelta.Item1));
+                    shadowGain += shadowDelta.Item1;
+                }
+
+                ModCore.Get().data.orcFestivalShadowGain_Light.Remove(set);
+            }
+
+            return shadowGain;
+        }
+
+        public void onArmyBattleCycle_StartOfProcess(BattleArmy battle)
         {
             bool explode = false;
             foreach (UM army in battle.attackers.ToList())
@@ -871,7 +941,7 @@ namespace Orcs_Plus
             return false;
         }
 
-        public override int onArmyBattleCycle_DamageCalculated(BattleArmy battle, int dmg, UM unit, UM target)
+        public int onArmyBattleCycle_DamageCalculated(BattleArmy battle, int dmg, UM unit, UM target)
         {
             if (unit is UM_OrcArmy || unit is UM_OrcRaiders)
             {
@@ -1006,7 +1076,7 @@ namespace Orcs_Plus
             return dmg;
         }
 
-        public override int onUnitReceivesArmyBattleDamage(BattleArmy battle, UM u, int dmg)
+        public int onUnitReceivesArmyBattleDamage(BattleArmy battle, UM u, int dmg)
         {
             SG_Orc orcSociety;
             HolyOrder_Orcs orcCulture;
@@ -1050,7 +1120,7 @@ namespace Orcs_Plus
             return dmg;
         }
 
-        public override void onArmyBattleCycle_EndOfProcess(BattleArmy battle)
+        public void onArmyBattleCycle_EndOfProcess(BattleArmy battle)
         {
             manageUndead_Ixthus(battle);
         }
@@ -1254,7 +1324,7 @@ namespace Orcs_Plus
             armyBattle_DefenderOrcHPDict.Clear();
         }
 
-        public override string onPopupHolyOrder_DisplayInfluenceElder(HolyOrder order, string s, int infGain)
+        public string onPopupHolyOrder_DisplayInfluenceElder(HolyOrder order, string s, int infGain)
         {
             if (order is HolyOrder_Orcs)
             {
@@ -1265,7 +1335,7 @@ namespace Orcs_Plus
             return s;
         }
 
-        public override string onPopupHolyOrder_DisplayInfluenceHuman(HolyOrder order, string s, int infGain)
+        public string onPopupHolyOrder_DisplayInfluenceHuman(HolyOrder order, string s, int infGain)
         {
             if (order is HolyOrder_Orcs)
             {
@@ -1276,7 +1346,7 @@ namespace Orcs_Plus
             return s;
         }
 
-        public override void onPopupHolyOrder_DisplayBudget(HolyOrder order, List<ReasonMsg> msgs)
+        public void onPopupHolyOrder_DisplayBudget(HolyOrder order, List<ReasonMsg> msgs)
         {
             HolyOrder_Orcs orcCulture = order as HolyOrder_Orcs;
 
@@ -1313,7 +1383,7 @@ namespace Orcs_Plus
             }
         }
 
-        public override void onPopupHolyOrder_DisplayStats(HolyOrder order, List<ReasonMsg> msgs)
+        public void onPopupHolyOrder_DisplayStats(HolyOrder order, List<ReasonMsg> msgs)
         {
             HolyOrder_Orcs orcCulture = order as HolyOrder_Orcs;
 
@@ -1347,7 +1417,7 @@ namespace Orcs_Plus
             }
         }
 
-        public override void onSettlementFallIntoRuin_StartOfProcess(Settlement set, string v, object killer = null)
+        public void onSettlementFallIntoRuin_StartOfProcess(Settlement set, string v, object killer = null)
         {
             onSettlementFallIntoRuin_InfluenceGain(set, v, killer);
 
@@ -1650,7 +1720,7 @@ namespace Orcs_Plus
             }
         }
 
-        public override bool interceptAgentAI(UA ua, CommunityLib.AgentAI.AIData aiData, List<CommunityLib.AgentAI.ChallengeData> validChallengeData, List<CommunityLib.AgentAI.TaskData> taskData, List<Unit> visibleUnits)
+        public bool interceptAgentAI(UA ua, AgentAI.AIData aiData, List<AgentAI.ChallengeData> validChallengeData, List<AgentAI.TaskData> taskData, List<Unit> visibleUnits)
         {
             switch(ua)
             {
@@ -1675,7 +1745,7 @@ namespace Orcs_Plus
             return false;
         }
 
-        public override void onAgentAI_EndOfProcess(UA ua, CommunityLib.AgentAI.AIData aiData, List<CommunityLib.AgentAI.ChallengeData> validChallengeData, List<CommunityLib.AgentAI.TaskData> validTaskData, List<Unit> visibleUnits)
+        public void onAgentAI_EndOfProcess(UA ua, AgentAI.AIData aiData, List<AgentAI.ChallengeData> validChallengeData, List<AgentAI.TaskData> validTaskData, List<Unit> visibleUnits)
         {
             if (ua is UAEN_OrcUpstart || ua is UAEN_OrcElder || ua is UAEN_OrcShaman)
             {
@@ -1777,7 +1847,7 @@ namespace Orcs_Plus
             }
         }
 
-        public override HolyOrder onLocationViewFaithButton_GetHolyOrder(Location loc)
+        public HolyOrder onLocationViewFaithButton_GetHolyOrder(Location loc)
         {
             if (loc.settlement is Set_OrcCamp && loc.soc is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
             {
@@ -1787,16 +1857,17 @@ namespace Orcs_Plus
             return null;
         }
 
-        public override List<TaskData> onUIScroll_Unit_populateUM(UM um)
+        public List<Hooks.TaskUIData> onUIScroll_Unit_populateUM(UM um)
         {
-            List<TaskData> tasks = new List<TaskData>();
+            List<Hooks.TaskUIData> tasks = new List<Hooks.TaskUIData>();
 
             if (um.location.properties.Any(pr => pr is Pr_HumanOutpost))
             {
-                TaskData task_RazeOutpost = new TaskData
+                Hooks.TaskUIData task_RazeOutpost = new Hooks.TaskUIData
                 {
                     onClick = UMTaskDelegates.onClick_RazeOutpost,
                     title = "Raze Outpost at " + um.location.getName(),
+                    description = "This army is razing an outpost at this location, preventing positive growth and causing negative growth equal to 10 times the army's hp (" + um.hp * -10 + ").",
                     icon = um.map.world.iconStore.raze,
                     menaceGain = um.map.param.um_menaceGainFromRaze,
                     backColor = new Color(0.8f, 0f, 0f),
@@ -1809,21 +1880,7 @@ namespace Orcs_Plus
             return tasks;
         }
 
-        public override bool interceptChallengePopout(UM um, TaskData taskData, ref TaskData_Popout popoutData)
-        {
-            if (um != null && taskData.title == "Raze Outpost at " + um.location.getName())
-            {
-                popoutData.description = "This army is razing an outpost at this location, preventing positive growth and causing negative growth equal to 10 times the army's hp (" + um.hp * -10 + ").";
-                popoutData.menaceGain = um.map.param.um_menaceGainFromRaze;
-                popoutData.backColor = new Color(0.6f, 0.0f, 0.0f);
-
-                return true;
-            }
-
-            return false;
-        }
-
-        public override bool interceptReplaceItem(Person person, Item item, Item newItem, bool obligateHold)
+        public bool interceptReplaceItem(Person person, Item item, Item newItem, bool obligateHold)
         {
             if (person.unit is UAEN_OrcUpstart upstart && item is I_HordeBanner banner && banner.orcs == upstart.society)
             {
@@ -1833,7 +1890,7 @@ namespace Orcs_Plus
             return false;
         }
 
-        public override void populatingMonsterActions(SG_ActionTakingMonster atMonster, List<MonsterAction> actions)
+        public void populatingMonsterActions(SG_ActionTakingMonster atMonster, List<MonsterAction> actions)
         {
             //Console.WriteLine("OrcsPlus: populatingMonsterActions");
             if (atMonster is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture) && orcCulture != null)
@@ -1933,7 +1990,7 @@ namespace Orcs_Plus
             }
         }
 
-        public override void onActionTakingMonsterAIDecision(SG_ActionTakingMonster monster)
+        public void onActionTakingMonsterAIDecision(SG_ActionTakingMonster monster)
         {
             if (monster.actionUnderway is MA_Orcs_GreatConstruction gConstruction && gConstruction.specialism == 3)
             {
@@ -1947,7 +2004,7 @@ namespace Orcs_Plus
             }
         }
 
-        public override string onBrokenMakerPowerCreatesAgent_ProcessCurse(Curse curse, Person person, Location location, string text)
+        public string onBrokenMakerPowerCreatesAgent_ProcessCurse(Curse curse, Person person, Location location, string text)
         {
             if (curse is Curse_EGlory)
             {

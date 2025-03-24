@@ -1,4 +1,5 @@
 ﻿using Assets.Code;
+using CommunityLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -139,11 +140,19 @@ namespace Orcs_Plus
             ua.addProfile(1);
             ua.addMenace(2);
 
-            double deltaShadow = shadowPush * getProgressPerTurnInner(ua, null);
+            double deltaShadow = this.shadowPush * getProgressPerTurnInner(ua, null);
+            double deltaGen = shadowGen * getProgressPerTurnInner(ua, null);
 
             if (location.settlement.shadow < 1.0)
             {
-                location.settlement.shadow += shadowGen * getProgressPerTurnInner(ua, null);
+                if (ModCore.Get().data.orcFestivalShadowGain_Dark.ContainsKey(location.settlement))
+                {
+                    ModCore.Get().data.orcFestivalShadowGain_Dark[location.settlement].Item1 += deltaGen;
+                }
+                else
+                {
+                    ModCore.Get().data.orcFestivalShadowGain_Dark.Add(location.settlement, new Pair<double, double>(deltaGen, 0.0));
+                }
             }
 
             foreach (Unit unit in location.units)
@@ -177,17 +186,20 @@ namespace Orcs_Plus
                 orcSociety.menace += 0.5;
             }
 
+            double pushedShadow = 0.0;
             foreach (Location neighbour in location.getNeighbours())
             {
                 if (location.getShadow() > neighbour.getShadow())
                 {
                     if (neighbour.settlement != null)
                     {
-                        neighbour.settlement.shadow += deltaShadow;
-
-                        if (neighbour.settlement.shadow > 1.0)
+                        if (ModCore.Get().data.orcFestivalShadowGain_Dark.ContainsKey(neighbour.settlement))
                         {
-                            neighbour.settlement.shadow = 1.0;
+                            ModCore.Get().data.orcFestivalShadowGain_Dark[neighbour.settlement].Item2 += deltaShadow;
+                        }
+                        else
+                        {
+                            ModCore.Get().data.orcFestivalShadowGain_Dark.Add(neighbour.settlement, new Pair<double, double>(0.0, deltaShadow));
                         }
                     }
                     else
@@ -200,7 +212,11 @@ namespace Orcs_Plus
                         }
                     }
 
-                    location.settlement.shadow -= deltaShadow;
+                    pushedShadow += deltaShadow;
+                    if (pushedShadow >= location.settlement.shadow)
+                    {
+                        break;
+                    }
                 }
 
                 foreach (Unit unit in location.units)
@@ -208,17 +224,22 @@ namespace Orcs_Plus
                     if (unit is UA agent)
                     {
                         agent.person.shadow += deltaShadow;
+
+                        if (agent.person.shadow > 1.0)
+                        {
+                            agent.person.shadow = 1.0;
+                        }
                     }
                 }
+            }
 
-                if (location.settlement.shadow > 1.0)
-                {
-                    location.settlement.shadow = 1.0;
-                }
-                else if (location.settlement.shadow < 0.0)
-                {
-                    location.settlement.shadow = 0.0;
-                }
+            if (ModCore.Get().data.orcFestivalShadowGain_Dark.ContainsKey(location.settlement))
+            {
+                ModCore.Get().data.orcFestivalShadowGain_Dark[location.settlement].Item2 -= pushedShadow;
+            }
+            else
+            {
+                ModCore.Get().data.orcFestivalShadowGain_Dark.Add(location.settlement, new Pair<double, double>(0.0, -pushedShadow));
             }
         }
 

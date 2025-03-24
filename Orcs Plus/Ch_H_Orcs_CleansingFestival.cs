@@ -1,4 +1,5 @@
 ﻿using Assets.Code;
+using CommunityLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -137,11 +138,13 @@ namespace Orcs_Plus
                 {
                     if (neighbour.settlement != null && neighbour.settlement.shadow > 0.0)
                     {
-                        neighbour.settlement.shadow -= deltaShadow;
-
-                        if (neighbour.settlement.shadow < 0.0)
+                        if (ModCore.Get().data.orcFestivalShadowGain_Light.ContainsKey(neighbour.settlement))
                         {
-                            neighbour.settlement.shadow = 0.0;
+                            ModCore.Get().data.orcFestivalShadowGain_Light[neighbour.settlement].Item2 -= deltaShadow;
+                        }
+                        else
+                        {
+                            ModCore.Get().data.orcFestivalShadowGain_Light.Add(neighbour.settlement, new Pair<double, double>(0.0, -deltaShadow));
                         }
                     }
                     else if (neighbour.hex.purity < 1.0f)
@@ -154,7 +157,14 @@ namespace Orcs_Plus
                         }
                     }
 
-                    location.settlement.shadow += deltaShadow;
+                    if (ModCore.Get().data.orcFestivalShadowGain_Light.ContainsKey(location.settlement))
+                    {
+                        ModCore.Get().data.orcFestivalShadowGain_Light[location.settlement].Item2 += deltaShadow;
+                    }
+                    else
+                    {
+                        ModCore.Get().data.orcFestivalShadowGain_Light.Add(location.settlement, new Pair<double, double>(0.0, deltaShadow));
+                    }
                 }
 
                 foreach (Unit unit in neighbour.units)
@@ -171,11 +181,13 @@ namespace Orcs_Plus
                 }
             }
 
-            location.settlement.shadow -= deltaPurge;
-
-            if (location.settlement.shadow < 0.0)
+            if (ModCore.Get().data.orcFestivalShadowGain_Light.ContainsKey(location.settlement))
             {
-                location.settlement.shadow = 0.0;
+                ModCore.Get().data.orcFestivalShadowGain_Light[location.settlement].Item1 -= deltaPurge;
+            }
+            else
+            {
+                ModCore.Get().data.orcFestivalShadowGain_Light.Add(location.settlement, new Pair<double, double> (-deltaPurge, 0.0));
             }
 
             foreach (Unit unit in location.units)
