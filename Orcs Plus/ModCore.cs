@@ -241,6 +241,15 @@ namespace Orcs_Plus
                 opt_dynamicElderCount = true;
                 opt_spiritCallerRespawnChance = 25;
             }
+
+            if (data.orcFestivalShadowGain_Dark == null)
+            {
+                data.orcFestivalShadowGain_Dark = new Dictionary<Settlement, Pair<double, double>>();
+            }
+            if (data.orcFestivalShadowGain_Light == null)
+            {
+                data.orcFestivalShadowGain_Light = new Dictionary<Settlement, Pair<double, double>>();
+            }
         }
 
         private void getModKernels(Map map)
