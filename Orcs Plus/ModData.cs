@@ -18,6 +18,9 @@ namespace Orcs_Plus
 
         public Dictionary<HolyOrder_Orcs, List<ReasonMsg>> influenceGainHuman;
 
+        public Dictionary<Settlement, Pair<double, double>> orcFestivalShadowGain_Dark;
+        public Dictionary<Settlement, Pair<double, double>> orcFestivalShadowGain_Light;
+
         private Dictionary<string, ModIntegrationData> modIntegrationData;
 
         public Dictionary<Type, Type> godTenetTypes;
@@ -58,14 +61,6 @@ namespace Orcs_Plus
         public Dictionary<menaceGainAction, int> menaceGain;
 
         public Dictionary<int, float> orcGeoMageHabitabilityBonus;
-
-        public bool acceleratedTime = false;
-
-        public bool brokenMakerSleeping = false;
-
-        public int sleepDuration;
-
-        public int sleepDurationBase() => 50;
 
         public Dictionary<string, string> perfectHordeNameDict;
 
@@ -109,13 +104,13 @@ namespace Orcs_Plus
             orcSGCultureMap = new Dictionary<SG_Orc, HolyOrder_Orcs>();
 
             influenceGainElder = new Dictionary<HolyOrder_Orcs, List<ReasonMsg>>();
-
             influenceGainHuman = new Dictionary<HolyOrder_Orcs, List<ReasonMsg>>();
+
+            orcFestivalShadowGain_Dark = new Dictionary<Settlement, Pair<double, double>>();
+            orcFestivalShadowGain_Light = new Dictionary<Settlement, Pair<double, double>>();
 
             initialiseGodSpecificTenets();
             initialiseSettlementTypesForWaystations();
-
-            sleepDuration = sleepDurationBase();
         }
 
         private void initialiseGodSpecificTenets()
@@ -165,14 +160,13 @@ namespace Orcs_Plus
             orcSGCultureMap.Clear();
             influenceGainElder.Clear();
             influenceGainHuman.Clear();
+            orcFestivalShadowGain_Dark.Clear();
+            orcFestivalShadowGain_Light.Clear();
 
             initialiseGodSpecificTenets();
             initialiseSettlementTypesForWaystations();
 
             isPlayerTurn = false;
-            acceleratedTime = false;
-            brokenMakerSleeping = false;
-            sleepDuration = sleepDurationBase();
 
             isClean = true;
         }
@@ -216,6 +210,32 @@ namespace Orcs_Plus
             influenceGainHuman.Clear();
 
             manageGeoMages(map);
+
+            List<Settlement> festivalKeysToRemove = new List<Settlement>();
+            foreach (Settlement key in orcFestivalShadowGain_Dark.Keys)
+            {
+                if (key.location.settlement != key)
+                {
+                    festivalKeysToRemove.Add(key);
+                }
+            }
+            foreach (Settlement key in festivalKeysToRemove)
+            {
+                orcFestivalShadowGain_Dark.Remove(key);
+            }
+
+            festivalKeysToRemove.Clear();
+            foreach (Settlement key in orcFestivalShadowGain_Light.Keys)
+            {
+                if (key.location.settlement != key)
+                {
+                    festivalKeysToRemove.Add(key);
+                }
+            }
+            foreach (Settlement key in festivalKeysToRemove)
+            {
+                orcFestivalShadowGain_Light.Remove(key);
+            }
         }
 
         public void manageGeoMages(Map map)
