@@ -54,7 +54,6 @@ namespace Orcs_Plus
         public override void beforeMapGen(Map map)
         {
             Get().data.isClean = false;
-            Get().comLibHooks = new ComLibHooks(map);
 
             getModKernels(map);
             if (comLib == null)
