@@ -18,6 +18,7 @@ namespace Orcs_Plus
 
         public ComLibHooks(Map map)
         {
+            this.map = map;
             HooksDelegateRegistry registry = ModCore.GetComLib().HookRegistry;
 
             registry.RegisterHook_onGraphicalUnitUpdated(onGraphicalUnitUpdated);
@@ -713,42 +714,58 @@ namespace Orcs_Plus
 
         public void onArmyBattleCycle_StartOfProcess(BattleArmy battle)
         {
-            List<UM> armies = new List<UM>();
-            armies.AddRange(battle.attackers);
-            armies.AddRange(battle.defenders);
-
-            foreach (UM army in armies)
+            foreach (UM army in battle.attackers.ToList())
             {
-                if (army.homeLocation >= 0 && army.homeLocation < map.locations.Count)
+                if (army == null || army.homeLocation < 0 || army.homeLocation >= map.locations.Count)
                 {
-                    Location home = map.locations[army.homeLocation];
-                    if (home != null && home.settlement is SettlementHuman settlementHuman && settlementHuman.ruler != null)
+                    continue;
+                }
+
+                checkArmyDesertion(battle, army);
+            }
+
+            foreach (UM army in battle.defenders.ToList())
+            {
+                if (army == null || army.homeLocation < 0 || army.homeLocation >= map.locations.Count)
+                {
+                    continue;
+                }
+
+                checkArmyDesertion(battle, army);
+            }
+        }
+
+        public bool checkArmyDesertion(BattleArmy battle, UM army)
+        {
+            Location home = map.locations[army.homeLocation];
+            if (home != null && home.settlement is SettlementHuman settlementHuman && settlementHuman.ruler != null)
+            {
+                if (settlementHuman.ruler.house.curses.Any(curse => curse is Curse_BrokenSpirit))
+                {
+                    army.hp -= 2;
+                    if (army.hp > 0)
                     {
-                        if (settlementHuman.ruler.house.curses.Any(curse => curse is Curse_BrokenSpirit))
+                        battle.messages.Add(army.getName() + " has suffered desertion (2 damage).");
+                    }
+                    else
+                    {
+                        battle.messages.Add(army.getName() + " deserts battle.");
+                        if (battle.attackers.Contains(army))
                         {
-                            army.hp -= 2;
-                            if (army.hp > 0)
-                            {
-                                battle.messages.Add(army.getName() + " has suffered desertion (2 damage).");
-                            }
-                            else
-                            {
-                                battle.messages.Add(army.getName() + " deserts battle.");
-                                if (battle.attackers.Contains(army))
-                                {
-                                    battle.attackers.Remove(army);
-                                }
-                                else if (battle.defenders.Contains(army))
-                                {
-                                    battle.defenders.Remove(army);
-                                }
-                                army.task = null;
-                                army.disband(map, "Desertion");
-                            }
+                            battle.attackers.Remove(army);
                         }
+                        else if (battle.defenders.Contains(army))
+                        {
+                            battle.defenders.Remove(army);
+                        }
+                        army.task = null;
+                        army.disband(map, "Desertion");
+                        return true;
                     }
                 }
             }
+
+            return false;
         }
 
         public int onArmyBattleCycle_DamageCalculated(BattleArmy battle, int dmg, UM unit, UM target)
