@@ -17,6 +17,7 @@ namespace Orcs_Plus
 
         public ComLibHooks(Map map)
         {
+            this.map = map;
             HooksDelegateRegistry registry = ModCore.GetComLib().HookRegistry;
 
             registry.RegisterHook_onGraphicalUnitUpdated(onGraphicalUnitUpdated);
@@ -787,16 +788,19 @@ namespace Orcs_Plus
             bool explode = false;
             foreach (UM army in battle.attackers.ToList())
             {
-                if (army.homeLocation < 0 || army.homeLocation >= map.locations.Count)
+                if (army == null || army.homeLocation < 0 || army.homeLocation >= map.locations.Count)
                 {
                     continue;
                 }
 
-                checkArmyDesertion(battle, army);
-
-                if (!explode)
+                if (checkArmyDesertion(battle, army))
                 {
-                    explode = checkUseExplosives(battle, army);
+                    continue;
+                }
+
+                if (!explode && checkUseExplosives(battle, army))
+                {
+                    explode = true;
                 }
             }
 
@@ -807,6 +811,11 @@ namespace Orcs_Plus
                 battle.messages.Add("All defending armies have suffered 4 damage from explosive bombardment.");
                 foreach (UM army in battle.defenders.ToList())
                 {
+                    if (army == null)
+                    {
+                        continue;
+                    }
+
                     army.hp -= 4;
                     if (army.hp <= 0)
                     {
@@ -821,16 +830,19 @@ namespace Orcs_Plus
             explode = false;
             foreach (UM army in battle.defenders.ToList())
             {
-                if (army.homeLocation < 0 || army.homeLocation >= map.locations.Count)
+                if (army == null || army.homeLocation < 0 || army.homeLocation >= map.locations.Count)
                 {
                     continue;
                 }
 
-                checkArmyDesertion(battle, army);
-
-                if (!explode)
+                if (checkArmyDesertion(battle, army))
                 {
-                    explode = checkUseExplosives(battle, army);
+                    continue;
+                }
+
+                if (!explode && checkUseExplosives(battle, army))
+                {
+                    explode = true;
                 }
             }
 
@@ -841,6 +853,11 @@ namespace Orcs_Plus
                 battle.messages.Add("All attacking armies have suffered 4 damage from explosive bombardment.");
                 foreach (UM army in battle.attackers.ToList())
                 {
+                    if (army == null)
+                    {
+                        continue;
+                    }
+
                     army.hp -= 4;
                     if (army.hp <= 0)
                     {
@@ -853,7 +870,7 @@ namespace Orcs_Plus
             }
         }
 
-        public void checkArmyDesertion(BattleArmy battle, UM army)
+        public bool checkArmyDesertion(BattleArmy battle, UM army)
         {
             Location home = map.locations[army.homeLocation];
             if (home != null && home.settlement is SettlementHuman settlementHuman && settlementHuman.ruler != null)
@@ -878,9 +895,12 @@ namespace Orcs_Plus
                         }
                         army.task = null;
                         army.disband(map, "Desertion");
+                        return true;
                     }
                 }
             }
+
+            return false;
         }
 
         public bool checkUseExplosives(BattleArmy battle, UM army)
@@ -916,7 +936,7 @@ namespace Orcs_Plus
                         Pr_Orcs_ExplosivesStockpile explosives = (Pr_Orcs_ExplosivesStockpile)map.locations[army.homeLocation].properties.FirstOrDefault(pr => pr is Pr_Orcs_ExplosivesStockpile);
                         if (army is UM_OrcRaiders && (explosives == null || explosives.charge < explosivesCost))
                         {
-                            foreach (Location location in map.locations)
+                            foreach (Location location in orcSociety.lastTurnLocs)
                             {
                                 if (location.soc == orcSociety)
                                 {
