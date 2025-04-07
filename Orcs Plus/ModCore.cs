@@ -968,11 +968,7 @@ namespace Orcs_Plus
         {
             foreach (Unit unit in map.units)
             {
-                if (unit is UM_RavenousDead || unit is UM_UntamedDead)
-                {
-                    unit.addMenace(3.0);
-                }
-                else if (unit is UAEN_OrcUpstart upstart)
+                if (unit is UAEN_OrcUpstart upstart)
                 {
                     for (int i = 0; i < upstart.minions.Length; i++)
                     {
@@ -984,9 +980,7 @@ namespace Orcs_Plus
                 }
             }
 
-            Dictionary<SG_Orc, HolyOrder_Orcs> mutableSGCultureMap = new Dictionary<SG_Orc, HolyOrder_Orcs>();
-            mutableSGCultureMap.AddRange(Get().data.orcSGCultureMap);
-            foreach (KeyValuePair<SG_Orc, HolyOrder_Orcs> pair in mutableSGCultureMap)
+            foreach (KeyValuePair<SG_Orc, HolyOrder_Orcs> pair in Get().data.orcSGCultureMap.ToList())
             {
                 if (!pair.Key.isGone())
                 {
