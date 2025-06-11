@@ -443,6 +443,26 @@ namespace Orcs_Plus
                             {
                                 Console.WriteLine("OrcsPlus: Failed to get Study Curseweaving ritual Type (CovenExpansionRecast.Rt_StudyCurseweaving)");
                             }
+
+                            Type buySoulstoneType = intDataCCCR.assembly.GetType("CovenExpansionRecast.Ch_BuySoulstone", false);
+                            if (buySoulstoneType != null)
+                            {
+                                intDataCCCR.typeDict.Add("BuySoulstone", buySoulstoneType);
+                            }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Buy Soulstone challenge Type (CovenExpansionRecast.Ch_BuySoulstone)");
+                            }
+
+                            Type buyCraftListType = intDataCCCR.assembly.GetType("CovenExpansionRecast.Ch_BuyCraftList", false);
+                            if (buyCraftListType != null)
+                            {
+                                intDataCCCR.typeDict.Add("BuyCraftList", buyCraftListType);
+                            }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Buy Craft List challenge Type (CovenExpansionRecast.Ch_BuyCraftList)");
+                            }
                         }
                         break;
                     case "God_Love":
