@@ -103,6 +103,17 @@ namespace Orcs_Plus
                 {
                     ModCore.Get().comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcShaman), new AIChallenge(studyMagicType, 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden }));
                 }
+
+                if (intDataCCCR.typeDict.TryGetValue("BuySoulstone", out Type buySoulstoneType) && buySoulstoneType != null)
+                {
+                    comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcUpstart), new AIChallenge(buySoulstoneType, 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden }, false, true));
+                    comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcElder), new AIChallenge(buySoulstoneType, 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden }, false, true));
+                }
+                if (intDataCCCR.typeDict.TryGetValue("BuyCraftList", out Type buyCraftListType) && buySoulstoneType != null)
+                {
+                    comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcUpstart), new AIChallenge(buyCraftListType, 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden }, false, true));
+                    comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcElder), new AIChallenge(buyCraftListType, 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden }, false, true));
+                }
             }
 
             if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModIntegrationData intDataEscam))
@@ -168,18 +179,6 @@ namespace Orcs_Plus
                 aiChallenges_Upstart[8].delegates_ValidFor.Add(delegate_ValidFor_ReclaimHordeBanner);
 
                 comLibAI.AddChallengesToAgentType(typeof(UAEN_OrcUpstart), aiChallenges_Upstart);
-
-                if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCuriosRecast", out ModIntegrationData intDataCCCR) && intDataCCCR != null)
-                {
-                    if (intDataCCCR.typeDict.TryGetValue("BuySoulstone", out Type buySoulstoneType) && buySoulstoneType != null)
-                    {
-                        comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcUpstart), new AIChallenge(buySoulstoneType, 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden }, false, true));
-                    }
-                    if (intDataCCCR.typeDict.TryGetValue("BuyCraftList", out Type buyCraftListType) && buySoulstoneType != null)
-                    {
-                        comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcUpstart), new AIChallenge(buyCraftListType, 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden }, false, true));
-                    }
-                }
 
                 AIChallenge raiding = comLibAI.GetAIChallengeFromAgentType(typeof(UAEN_OrcUpstart), typeof(Ch_OrcRaiding));
                 if (raiding != null)
@@ -375,18 +374,6 @@ namespace Orcs_Plus
 
             comLibAI.RegisterAgentType(typeof(UAEN_OrcElder), controlParams);
             comLibAI.AddChallengesToAgentType(typeof(UAEN_OrcElder), aiChallenges_Elder);
-
-            if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCuriosRecast", out ModIntegrationData intDataCCCR) && intDataCCCR != null)
-            {
-                if (intDataCCCR.typeDict.TryGetValue("BuySoulstone", out Type buySoulstoneType) && buySoulstoneType != null)
-                {
-                    comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcElder), new AIChallenge(buySoulstoneType, 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden }, false, true));
-                }
-                if (intDataCCCR.typeDict.TryGetValue("BuyCraftList", out Type buyCraftListType) && buySoulstoneType != null)
-                {
-                    comLibAI.AddChallengeToAgentType(typeof(UAEN_OrcElder), new AIChallenge(buyCraftListType, 0.0, new List<AIChallenge.ChallengeTags> { AIChallenge.ChallengeTags.Forbidden }, false, true));
-                }
-            }
         }
 
         private bool delegate_ValidFor_OwnCulture(AgentAI.ChallengeData challengeData, UA ua)
