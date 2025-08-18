@@ -833,6 +833,25 @@ namespace Orcs_Plus
                             }
                         }
                         break;
+                    case "ShadowsOutsiderGod":
+                        Console.WriteLine("OrcsPlus: OutOfGods is Enabled");
+                        ModIntegrationData intDataOoGs = new ModIntegrationData(kernel);
+                        Get().data.addModIntegrationData("OutOfGods", intDataOoGs);
+
+                        if (Get().data.tryGetModIntegrationData("OutOfGods", out intDataOoGs))
+                        {
+                            Type boreholeType = intDataOoGs.assembly.GetType("ShadowsOutsiderGod.Rti_Borehole", false);
+                            if (boreholeType != null)
+                            {
+                                intDataOoGs.typeDict.Add("Borehole", boreholeType);
+                                I_ShamanStaff.geomancyTypes.Add(boreholeType);
+                            }
+                            else
+                            {
+                                Console.WriteLine("OrcsPlus: Failed to get Borehole geomancy ritual type (ShadowsOutsiderGod.Rti_Borehole)");
+                            }
+                        }
+                        break;
                     default:
                         break;
                 }

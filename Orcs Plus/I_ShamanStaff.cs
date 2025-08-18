@@ -18,7 +18,9 @@ namespace Orcs_Plus
                 typeof(Mg_DeathOfTheSun),
                 typeof(Mg_G_Nurture),
                 typeof(Mg_G_BountifulHarvest),
-                typeof(Mg_N_GeomanticSupport)
+                typeof(Mg_N_GeomanticSupport),
+                typeof(Mg_AraneFortress),
+                typeof(Mg_AssaultChanneller)
             };
 
         public bool doublesHeld = false;
