@@ -446,6 +446,7 @@ namespace Orcs_Plus
 
                             CodeInstruction code = new CodeInstruction(OpCodes.Ldarg_0);
                             code.labels.AddRange(instructionList[i].labels);
+                            instructionList[i].labels.Clear();
                             yield return code;
                             yield return new CodeInstruction(OpCodes.Ldarg_1);
                             yield return new CodeInstruction(OpCodes.Ldloc_0);
@@ -490,6 +491,14 @@ namespace Orcs_Plus
                 foreach(Sub_OrcWaystation waystation in waystations)
                 {
                     location.settlement.subs.Remove(waystation);
+                }
+            }
+
+            for (int i = location.properties.Count - 1; i >= 0; i--)
+            {
+                if (location.properties[i] is Pr_HumanOutpost outpost)
+                {
+                    location.properties.RemoveAt(i);
                 }
             }
         }
@@ -1341,6 +1350,14 @@ namespace Orcs_Plus
                 foreach (Sub_OrcWaystation waystation in waystations)
                 {
                     camp.subs.Remove(waystation);
+                }
+            }
+
+            for (int i = u.location.properties.Count - 1; i >= 0; i--)
+            {
+                if (u.location.properties[i] is Pr_HumanOutpost outpost)
+                {
+                    u.location.properties.RemoveAt(i);
                 }
             }
         }
