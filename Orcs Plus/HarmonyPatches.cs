@@ -439,7 +439,7 @@ namespace Orcs_Plus
                     }
                     else if (targetIndex == 2)
                     {
-                        if (instructionList[i].opcode == OpCodes.Brfalse_S && instructionList[i + 1].opcode == OpCodes.Nop && instructionList[i + 2].opcode == OpCodes.Nop)
+                        if (instructionList[i].opcode == OpCodes.Brfalse_S && instructionList[i+1].opcode == OpCodes.Nop && instructionList[i+2].opcode == OpCodes.Nop)
                         {
                             targetIndex++;
                             nullSettlementLabel = (Label)instructionList[i].operand;
@@ -510,14 +510,6 @@ namespace Orcs_Plus
                 foreach(Sub_OrcWaystation waystation in waystations)
                 {
                     location.settlement.subs.Remove(waystation);
-                }
-            }
-
-            for (int i = location.properties.Count - 1; i >= 0; i--)
-            {
-                if (location.properties[i] is Pr_HumanOutpost outpost)
-                {
-                    location.properties.RemoveAt(i);
                 }
             }
         }
@@ -1418,14 +1410,6 @@ namespace Orcs_Plus
                 foreach (Sub_OrcWaystation waystation in waystations)
                 {
                     camp.subs.Remove(waystation);
-                }
-            }
-
-            for (int i = u.location.properties.Count - 1; i >= 0; i--)
-            {
-                if (u.location.properties[i] is Pr_HumanOutpost outpost)
-                {
-                    u.location.properties.RemoveAt(i);
                 }
             }
         }
