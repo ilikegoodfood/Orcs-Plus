@@ -462,6 +462,48 @@ namespace Orcs_Plus
 
         public override void turnTick()
         {
+            // SocialGroup.turnTick duplication
+            menace *= map.param.socialGroup_menaceDecay;
+            computeMilitary();
+            data_nMajorsLastTurn = 0;
+            lastTurnLocsAsInts.Clear();
+            foreach (Location location in map.locations)
+            {
+                if (location.soc == this)
+                {
+                    lastTurnLocsAsInts.Add(location.index);
+                    if (location.isMajor)
+                    {
+                        data_nMajorsLastTurn++;
+                    }
+                }
+            }
+
+            foreach (SocialGroup socialGroup in map.socialGroups)
+            {
+                bool flag2 = socialGroup.isGone();
+                if (!flag2)
+                {
+                    bool flag3 = socialGroup.index > index;
+                    if (flag3)
+                    {
+                        getRel(socialGroup);
+                    }
+                }
+            }
+
+            // Society.turnTick duplication
+            debug();
+            processKillOrders();
+            assignCapital();
+            populateActions();
+            processActions();
+            checkAssertions();
+            processDiplomacy();
+            checkTerrainLosses();
+            log();
+
+            // Specific Holy Order implementation
             capital = orcSociety.capital;
             updateData();
             validateCapital();

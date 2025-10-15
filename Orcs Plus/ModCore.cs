@@ -827,37 +827,37 @@ namespace Orcs_Plus
                 properties.Add(
                     "DRINK_GROTT_HORN",
                     new EventRuntime.TypedProperty<string>(delegate (EventContext c, string _)
+                    {
+                        if (c.unit != null && c.unit.person != null)
                         {
-                            if (c.unit != null && c.unit.person != null)
+                            I_DrinkingHorn horn = (I_DrinkingHorn)c.unit.person.items.FirstOrDefault(i => i is I_DrinkingHorn h && h.full);
+                            if (horn != null)
                             {
-                                I_DrinkingHorn horn = (I_DrinkingHorn)c.unit.person.items.FirstOrDefault(i => i is I_DrinkingHorn h && h.full);
-                                if (horn != null)
-                                {
-                                    horn.full = false;
+                                horn.full = false;
 
-                                    T_Grott grott = (T_Grott)c.person.traits.FirstOrDefault(t => t is T_Grott);
-                                    if (grott != null)
-                                    {
-                                        grott.duration = c.map.param.ch_primalWatersDur;
-                                    }
-                                    else
-                                    {
-                                        c.person.receiveTrait(new T_Grott(c.map.param.ch_primalWatersDur));
-                                    }
-                                }
-                                
-                                if (c.unit.person.species != c.map.species_orc)
+                                T_Grott grott = (T_Grott)c.person.traits.FirstOrDefault(t => t is T_Grott);
+                                if (grott != null)
                                 {
-                                    c.unit.hp -= 2;
-                                    if (c.unit.hp <= 0)
-                                    {
-                                        c.unit.die(c.unit.map, "Killed by an event outcome", null);
-                                        c.map.addUnifiedMessage(c.unit, null, c.unit.getName() + " dies", c.unit.getName() + " has been killed", UnifiedMessage.messageType.AGENT_DIES, true);
-                                    }
+                                    grott.duration = c.map.param.ch_primalWatersDur;
+                                }
+                                else
+                                {
+                                    c.person.receiveTrait(new T_Grott(c.map.param.ch_primalWatersDur));
                                 }
                             }
-                        })
-                    );
+                                
+                            if (c.unit.person.species != c.map.species_orc)
+                            {
+                                c.unit.hp -= 2;
+                                if (c.unit.hp <= 0)
+                                {
+                                    c.unit.die(c.unit.map, "Killed by an event outcome", null);
+                                    c.map.addUnifiedMessage(c.unit, null, c.unit.getName() + " dies", c.unit.getName() + " has been killed", UnifiedMessage.messageType.AGENT_DIES, true);
+                                }
+                            }
+                        }
+                    })
+                );
             }
 
             if (!properties.ContainsKey("DRINK_GROTT"))
@@ -889,7 +889,7 @@ namespace Orcs_Plus
                             }
                         }
                     })
-                    );
+                );
             }
 
             if (!properties.ContainsKey("GAIN_GROTT"))
@@ -911,7 +911,7 @@ namespace Orcs_Plus
                             }
                         }
                     })
-                    );
+                );
             }
         }
 
