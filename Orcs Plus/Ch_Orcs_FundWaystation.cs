@@ -163,14 +163,15 @@ namespace Orcs_Plus
 
             if (location.settlement != null)
             {
-                Sub_OrcWaystation waystaion = (Sub_OrcWaystation)location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation way && way.getChallenges().Contains(this));
-                if (waystaion != null)
+                Sub_OrcWaystation waystation = (Sub_OrcWaystation)location.settlement.subs.FirstOrDefault(sub => sub is Sub_OrcWaystation way && way.getChallenges().Contains(this));
+                if (waystation != null)
                 {
-                    orcSociety = waystaion.orcSociety;
+                    orcSociety = waystation.orcSociety;
                 }
 
-                if (orcSociety != null && ((location.soc == orcSociety && location.settlement is Set_OrcCamp) || waystaion != null))
+                if (orcSociety != null && ((location.soc == orcSociety && location.settlement is Set_OrcCamp) || waystation != null))
                 {
+                    Dictionary<Type, HashSet<Type>> typesForWaystations = ModCore.Get().data.getSettlementTypesForWaystation();
                     foreach (Location neighbour in location.getNeighbours())
                     {
                         if (neighbour.isOcean || neighbour.settlement == null || neighbour.hex.getHabilitability() < map.opt_orcHabMult * map.param.orc_habRequirement)
@@ -178,12 +179,23 @@ namespace Orcs_Plus
                             continue;
                         }
 
-                        if (ModCore.GetComLib().checkIsNaturalWonder(neighbour))
+                        if (neighbour.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == orcSociety))
                         {
+                            continue;
+                        }
+
+                        HashSet < Type > blacklist;
+                        if (CommunityLib.ModCore.Get().checkIsNaturalWonder(neighbour))
+                        {
+                            if (typesForWaystations.TryGetValue(neighbour.settlement.GetType(), out blacklist) && neighbour.settlement.subs.Any(sub => blacklist.Contains(sub.GetType())))
+                            {
+                                continue;
+                            }
+
                             return true;
                         }
 
-                        if (ModCore.Get().data.getSettlementTypesForWaystation().TryGetValue(neighbour.settlement.GetType(), out HashSet<Type> blacklist) && !neighbour.settlement.subs.Any(sub => (sub is Sub_OrcWaystation way && way.orcSociety == orcSociety) || blacklist.Contains(sub.GetType())))
+                        if (typesForWaystations.TryGetValue(neighbour.settlement.GetType(), out blacklist) && !neighbour.settlement.subs.Any(sub => blacklist.Contains(sub.GetType())))
                         {
                             if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModIntegrationData intDataEscam) && intDataEscam.typeDict.TryGetValue("LivingTerrainSettlement", out Type livingTerrainSettlementType) && neighbour.settlement.GetType() == livingTerrainSettlementType)
                             {
@@ -248,7 +260,7 @@ namespace Orcs_Plus
                 if (orcSociety != null && (u.isCommandable() && infiltrated) || (u is UAEN_OrcElder elder && (elder.society as HolyOrder_Orcs)?.orcSociety == orcSociety))
                 {
                     List<Settlement> settlements = new List<Settlement>();
-
+                    Dictionary<Type, HashSet<Type>> typesForWaystations = ModCore.Get().data.getSettlementTypesForWaystation();
                     foreach (Location neighbour in location.getNeighbours())
                     {
                         if (neighbour.isOcean || neighbour.settlement == null || neighbour.hex.getHabilitability() < map.opt_orcHabMult * map.param.orc_habRequirement)
@@ -256,7 +268,23 @@ namespace Orcs_Plus
                             continue;
                         }
 
-                        if (ModCore.Get().data.getSettlementTypesForWaystation().TryGetValue(neighbour.settlement.GetType(), out HashSet<Type> blacklist) && !neighbour.settlement.subs.Any(sub => (sub is Sub_OrcWaystation way && way.orcSociety == orcSociety) || blacklist.Contains(sub.GetType())))
+                        if (neighbour.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == orcSociety))
+                        {
+                            continue;
+                        }
+
+                        HashSet<Type> blacklist;
+                        if (CommunityLib.ModCore.Get().checkIsNaturalWonder(neighbour))
+                        {
+                            if (typesForWaystations.TryGetValue(neighbour.settlement.GetType(), out blacklist) && neighbour.settlement.subs.Any(sub => blacklist.Contains(sub.GetType())))
+                            {
+                                continue;
+                            }
+
+                            settlements.Add(neighbour.settlement);
+                        }
+
+                        if (typesForWaystations.TryGetValue(neighbour.settlement.GetType(), out blacklist) && !neighbour.settlement.subs.Any(sub => blacklist.Contains(sub.GetType())))
                         {
                             if (ModCore.Get().data.tryGetModIntegrationData("Escamrak", out ModIntegrationData intDataEscam) && intDataEscam.typeDict.TryGetValue("LivingTerrainSettlement", out Type livingTerrainSettlementType) && neighbour.settlement.GetType() == livingTerrainSettlementType)
                             {
@@ -272,14 +300,17 @@ namespace Orcs_Plus
                             }
 
                             settlements.Add(neighbour.settlement);
-                            continue;
                         }
                     }
 
                     if (settlements.Count > 0)
                     {
-                        Settlement targetSettlement = settlements[0];
-                        if (settlements.Count > 1)
+                        Settlement targetSettlement = null;
+                        if (settlements.Count == 1)
+                        {
+                            targetSettlement = settlements[0];
+                        }
+                        else
                         {
                             targetSettlement = settlements[Eleven.random.Next(settlements.Count)];
                         }
