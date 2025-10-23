@@ -47,7 +47,7 @@ namespace Orcs_Plus
 
         public override void onStartGamePresssed(Map map, List<God> gods)
         {
-             Get().data.clean();
+            Get().data.clean();
         }
 
         public override void beforeMapGen(Map map)

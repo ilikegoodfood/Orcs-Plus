@@ -175,6 +175,7 @@ namespace Orcs_Plus
 
         public void afterLoading()
         {
+            isClean = false;
             modIntegrationData = new Dictionary<string, ModIntegrationData>();
 
             initialiseSettlementTypesForWaystations();
