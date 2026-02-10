@@ -73,7 +73,7 @@ namespace Orcs_Plus
             }
         }
 
-        public bool onPathfinding_AllowSecondPass(Location loc, Unit u, List<int> expectedMapLayers, List<Func<Location[], Location, Unit, List<int>, double>> pathfindingDelegates)
+        public bool onPathfinding_AllowSecondPass(Location locA, Location LocB, Unit u, List<int> expectedMapLayers, List<Func<Location[], Location, Unit, List<int>, double>> pathfindingDelegates, List<Func<Location[], Location, Unit, List<int>, List<Location>>> getNeighbourDelegates)
         {
             if (u != null && u.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety.canGoUnderground())
             {
