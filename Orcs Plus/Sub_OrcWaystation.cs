@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Orcs_Plus
@@ -18,7 +16,11 @@ namespace Orcs_Plus
             :base(settlement)
         {
             this.orcSociety = orcSociety;
-            settlement.location.soc = orcSociety;
+            if (settlement.location.soc == null && !orcSociety.isAtWar())
+            {
+                settlement.location.soc = orcSociety;
+            }
+            
             challenges.Add(new Ch_Orcs_Expand(settlement, orcSociety));
             challenges.Add(new Ch_OrcRaiding(settlement));
             challenges.Add(new Ch_Orcs_RaidOutpost(settlement.location, orcSociety));
@@ -66,22 +68,33 @@ namespace Orcs_Plus
 
             settlement = settlement.location.settlement;
 
-            if (!ModCore.Get().data.getSettlementTypesForWaystation().TryGetValue(settlement.GetType(), out HashSet<Type> blacklist) || settlement.subs.Any(sub => blacklist.Contains(sub.GetType())))
+            if (CommunityLib.ModCore.Get().checkIsNaturalWonder(settlement.location))
             {
-                settlement.subs.Remove(this);
-                return;
+                if (ModCore.Get().data.getSettlementTypesForWaystation().TryGetValue(settlement.GetType(), out HashSet<Type> blacklistWonder) && settlement.subs.Any(sub => blacklistWonder.Contains(sub.GetType())))
+                {
+                    settlement.subs.Remove(this);
+                    return;
+                }
             }
-
-            if (!settlement.location.getNeighbours().Any(n => n.soc == orcSociety || (n.settlement != null && n.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == orcSociety))))
+            else
             {
-                settlement.subs.Remove(this);
-                return;
-            }
+                if (!ModCore.Get().data.getSettlementTypesForWaystation().TryGetValue(settlement.GetType(), out HashSet<Type> blacklist) || settlement.subs.Any(sub => blacklist.Contains(sub.GetType())))
+                {
+                    settlement.subs.Remove(this);
+                    return;
+                }
 
-            if (orcSociety == null || orcSociety.isGone())
-            {
-                settlement.subs.Remove(this);
-                return;
+                if (!settlement.location.getNeighbours().Any(n => n.soc == orcSociety || (n.settlement != null && n.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == orcSociety))))
+                {
+                    settlement.subs.Remove(this);
+                    return;
+                }
+
+                if (orcSociety == null || orcSociety.isGone())
+                {
+                    settlement.subs.Remove(this);
+                    return;
+                }
             }
 
             if (settlement.location.soc == null && !orcSociety.isAtWar())
