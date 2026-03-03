@@ -1,9 +1,4 @@
 ﻿using Assets.Code;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Orcs_Plus
@@ -29,7 +24,7 @@ namespace Orcs_Plus
             this.orcCulture = orcCulture;
             other = trader;
             gold = 0;
-            delta = other.gold;
+            delta = 0;
         }
 
         public void addItemToSet(Item item)
@@ -47,6 +42,7 @@ namespace Orcs_Plus
         public void addGold(int delta)
         {
             gold += delta;
+            this.delta += delta;
         }
 
         public double getGold()
@@ -106,7 +102,6 @@ namespace Orcs_Plus
 
         public void endTrading()
         {
-            delta -= other.gold;
             if (delta > 0)
             {
                 orcCulture.receiveFunding(other, delta);
