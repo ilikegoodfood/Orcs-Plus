@@ -114,7 +114,6 @@ namespace Orcs_Plus
 
             // Patches for UA
             harmony.Patch(original: AccessTools.Method(typeof(UA), nameof(UA.getAttackUtility), new Type[] { typeof(Unit), typeof(List<ReasonMsg>), typeof(bool) }), postfix: new HarmonyMethod(patchType, nameof(UA_getAttackUtility_Postfix)));
-            harmony.Patch(original: AccessTools.Method(typeof(UA), nameof(UA.getVisibleUnits), Type.EmptyTypes), postfix: new HarmonyMethod(patchType, nameof(UA_getVisibleUnits_Postfix)));
 
             // Patches for SocialGroup
             harmony.Patch(original: AccessTools.Method(typeof(SocialGroup), nameof(SocialGroup.checkIsGone), new Type[] { }), postfix: new HarmonyMethod(patchType, nameof(SocialGroup_checkIsGone_Postfix)));
@@ -1721,7 +1720,7 @@ namespace Orcs_Plus
 
                                     foreach (Type dominionBannerType in dominionBannerTypes)
                                     {
-                                        if (item.GetType() == dominionBannerType || item.GetType().IsSubclassOf(dominionBannerType))
+                                        if (dominionBannerType.IsAssignableFrom(item.GetType()))
                                         {
                                             reasonMsgs?.Add(new ReasonMsg("Orcs will not attack banner bearer", -10000.0));
                                             utility -= 10000.0;
@@ -1895,108 +1894,6 @@ namespace Orcs_Plus
             }
 
             return utility;
-        }
-
-        private static List<Unit> UA_getVisibleUnits_Postfix(List<Unit> units, UA __instance)
-        {
-            if (__instance is UAEN_OrcUpstart)
-            {
-                return UAEN_Orc_getVisibleUnits(units, __instance);
-            }
-
-            return units;
-        }
-
-        private static List<Unit> UAEN_Orc_getVisibleUnits(List<Unit> units, UA ua)
-        {
-            if (units == null)
-            {
-                units = new List<Unit>();
-            }
-
-            SG_Orc orcSociety = ua.society as SG_Orc;
-            HolyOrder_Orcs orcCulture = ua.society as HolyOrder_Orcs;
-
-            if (orcSociety != null)
-            {
-                ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
-            }
-            else if (orcCulture != null)
-            {
-                orcSociety = orcCulture.orcSociety;
-            }
-
-
-            if (orcSociety != null && !orcSociety.isGone() && orcCulture != null)
-            {
-                List<Type> dominionBannerTypes = new List<Type>();
-                if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCC) && intDataCCC.typeDict.TryGetValue("Banner", out Type dominionBanner))
-                {
-                    dominionBannerTypes.Add(dominionBanner);
-                }
-                if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCCR) && intDataCCCR.typeDict.TryGetValue("Banner", out Type dominionBanner2))
-                {
-                    dominionBannerTypes.Add(dominionBanner2);
-                }
-
-                foreach (Unit unit in ua.map.units)
-                {
-                    if (unit == ua)
-                    {
-                        continue;
-                    }
-
-                    if (unit is UA agent)
-                    {
-                        if (agent.society != null && (agent.society == orcSociety || (orcCulture != null && agent.society == orcCulture)))
-                        {
-                            units.Add(unit);
-                        }
-                        else if (agent.person.traits.Any(t => t is T_BloodFeud f && f.orcSociety == orcSociety))
-                        {
-                            units.Add(unit);
-                        }
-                        else if (agent.person.items.Any(i => i is I_HordeBanner banner && banner.orcs == orcSociety))
-                        {
-                            units.Add(unit);
-                        }
-                        else if (dominionBannerTypes.Count > 0 && agent.person.items.Any(i => i != null && dominionBannerTypes.Any(t => i.GetType() == t || i.GetType().IsSubclassOf(t))))
-                        {
-                            units.Add(unit);
-                        }
-                        else if (agent.homeLocation != -1 && (ua.map.locations[agent.homeLocation].soc == orcSociety || (orcCulture != null && ua.map.locations[agent.homeLocation].soc == orcCulture)) && !(agent.task is Task_InHiding))
-                        {
-                            units.Add(unit);
-                        }
-                        else if (agent.location.soc != null && (agent.location.soc == orcSociety || (orcCulture != null && agent.location.soc == orcCulture)) && !(agent.task is Task_InHiding))
-                        {
-                            units.Add(unit);
-                        }
-                        else if (agent.location.settlement != null && agent.location.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == orcSociety))
-                        {
-                            units.Add(unit);
-                        }
-                        else if (agent.society != null && (agent.society.getRel(orcSociety).state == DipRel.dipState.war || (orcCulture != null && agent.society.getRel(orcCulture).state == DipRel.dipState.war)) && !(agent.task is Task_InHiding))
-                        {
-                            units.Add(unit);
-                        }
-                        else if (agent.task is Task_PerformChallenge performChallenge && performChallenge.challenge.isChannelled() && ua.map.getStepDist(ua.location, agent.location) <= 10)
-                        {
-                            units.Add(unit);
-                        }
-                        else if (agent.task is Task_GoToPerformChallenge goPerformChallenge && !(goPerformChallenge.challenge is Ritual) && (goPerformChallenge.challenge.location.soc == orcSociety || goPerformChallenge.challenge.location.soc == orcCulture))
-                        {
-                            units.Add(unit);
-                        }
-                        else if (agent.task is Task_AttackUnit attack && attack.target is UA && (attack.target.society == orcSociety || attack.target.society == orcCulture || (orcCulture.tenet_intolerance.status < 0 && attack.target.isCommandable())))
-                        {
-                            units.Add(unit);
-                        }
-                    }
-                }
-            }
-
-            return units;
         }
 
         private static void Rti_Orc_UniteTheHordes_complete_TranspilerBody(Rti_Orc_UniteTheHordes challenge, UA ua)
