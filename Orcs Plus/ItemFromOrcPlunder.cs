@@ -23,7 +23,7 @@ namespace Orcs_Plus
             this.map = map;
             this.plunder = plunder;
             other = trader;
-            delta = plunder.gold;
+            delta = 0;
         }
 
         public void addItemToSet(Item item)
@@ -41,6 +41,7 @@ namespace Orcs_Plus
         public void addGold(int delta)
         {
             plunder.gold += delta;
+            this.delta += delta;
         }
 
         public double getGold()
@@ -100,8 +101,6 @@ namespace Orcs_Plus
 
         public void endTrading()
         {
-            delta -= plunder.gold;
-
             if (other != null && other.unit != null && other.unit.society != null && plunder.location.soc is SG_Orc orcSociety && ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out HolyOrder_Orcs orcCulture))
             {
                 if (delta > 0)
