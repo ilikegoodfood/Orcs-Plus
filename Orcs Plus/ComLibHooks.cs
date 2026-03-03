@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using UnityEngine;
 
 namespace Orcs_Plus
@@ -38,6 +37,7 @@ namespace Orcs_Plus
             registry.RegisterHook_onArmyBattleCycle_DamageCalculated(onArmyBattleCycle_DamageCalculated);
             registry.RegisterHook_onUnitReceivesArmyBattleDamage(onUnitReceivesArmyBattleDamage);
             registry.RegisterHook_onArmyBattleCycle_EndOfProcess(onArmyBattleCycle_EndOfProcess);
+            registry.RegisterHook_interceptGetVisibleUnits(interceptGetVisibleUnits);
             registry.RegisterHook_onPopupHolyOrder_DisplayInfluenceHuman(onPopupHolyOrder_DisplayInfluenceHuman);
             registry.RegisterHook_onPopupHolyOrder_DisplayInfluenceElder(onPopupHolyOrder_DisplayInfluenceElder);
             registry.RegisterHook_onPopupHolyOrder_DisplayBudget(onPopupHolyOrder_DisplayBudget);
@@ -1143,6 +1143,98 @@ namespace Orcs_Plus
         public void onArmyBattleCycle_EndOfProcess(BattleArmy battle)
         {
             manageUndead_Ixthus(battle);
+        }
+
+        private bool interceptGetVisibleUnits(UA ua, List<Unit> visibleUnits)
+        {
+            if (ua is UAEN_OrcUpstart upstart)
+            {
+                SG_Orc orcSociety = ua.society as SG_Orc;
+                HolyOrder_Orcs orcCulture = ua.society as HolyOrder_Orcs;
+
+                if (orcSociety != null)
+                {
+                    ModCore.Get().data.orcSGCultureMap.TryGetValue(orcSociety, out orcCulture);
+                }
+                else if (orcCulture != null)
+                {
+                    orcSociety = orcCulture.orcSociety;
+                }
+
+
+                if (orcSociety != null && !orcSociety.isGone() && orcCulture != null)
+                {
+                    List<Type> dominionBannerTypes = new List<Type>();
+                    if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCC) && intDataCCC.typeDict.TryGetValue("Banner", out Type dominionBanner))
+                    {
+                        dominionBannerTypes.Add(dominionBanner);
+                    }
+                    if (ModCore.Get().data.tryGetModIntegrationData("CovensCursesCurios", out ModIntegrationData intDataCCCR) && intDataCCCR.typeDict.TryGetValue("Banner", out Type dominionBanner2))
+                    {
+                        dominionBannerTypes.Add(dominionBanner2);
+                    }
+
+                    foreach (Unit unit in ua.map.units)
+                    {
+                        if (unit == ua)
+                        {
+                            continue;
+                        }
+
+                        if (unit is UA agent)
+                        {
+                            if (agent.society != null && (agent.society == orcSociety || (orcCulture != null && agent.society == orcCulture)))
+                            {
+                                visibleUnits.Add(unit);
+                            }
+                            else if (agent.person.traits.Any(t => t is T_BloodFeud f && f.orcSociety == orcSociety))
+                            {
+                                visibleUnits.Add(unit);
+                            }
+                            else if (agent.person.items.Any(i => i is I_HordeBanner banner && banner.orcs == orcSociety))
+                            {
+                                visibleUnits.Add(unit);
+                            }
+                            else if (dominionBannerTypes.Count > 0 && agent.person.items.Any(i => i != null && dominionBannerTypes.Any(t => i.GetType() == t || i.GetType().IsSubclassOf(t))))
+                            {
+                                visibleUnits.Add(unit);
+                            }
+                            else if (agent.homeLocation != -1 && (ua.map.locations[agent.homeLocation].soc == orcSociety || (orcCulture != null && ua.map.locations[agent.homeLocation].soc == orcCulture)) && !(agent.task is Task_InHiding))
+                            {
+                                visibleUnits.Add(unit);
+                            }
+                            else if (agent.location.soc != null && (agent.location.soc == orcSociety || (orcCulture != null && agent.location.soc == orcCulture)) && !(agent.task is Task_InHiding))
+                            {
+                                visibleUnits.Add(unit);
+                            }
+                            else if (agent.location.settlement != null && agent.location.settlement.subs.Any(sub => sub is Sub_OrcWaystation way && way.orcSociety == orcSociety))
+                            {
+                                visibleUnits.Add(unit);
+                            }
+                            else if (agent.society != null && (agent.society.getRel(orcSociety).state == DipRel.dipState.war || (orcCulture != null && agent.society.getRel(orcCulture).state == DipRel.dipState.war)) && !(agent.task is Task_InHiding))
+                            {
+                                visibleUnits.Add(unit);
+                            }
+                            else if (agent.task is Task_PerformChallenge performChallenge && performChallenge.challenge.isChannelled() && ua.map.getStepDist(ua.location, agent.location) <= 10)
+                            {
+                                visibleUnits.Add(unit);
+                            }
+                            else if (agent.task is Task_GoToPerformChallenge goPerformChallenge && !(goPerformChallenge.challenge is Ritual) && (goPerformChallenge.challenge.location.soc == orcSociety || goPerformChallenge.challenge.location.soc == orcCulture))
+                            {
+                                visibleUnits.Add(unit);
+                            }
+                            else if (agent.task is Task_AttackUnit attack && attack.target is UA && (attack.target.society == orcSociety || attack.target.society == orcCulture || (orcCulture.tenet_intolerance.status < 0 && attack.target.isCommandable())))
+                            {
+                                visibleUnits.Add(unit);
+                            }
+                        }
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
         }
 
         private void manageUndead_Ixthus(BattleArmy battle = null)
