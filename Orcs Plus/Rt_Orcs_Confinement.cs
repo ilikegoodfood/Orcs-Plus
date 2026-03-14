@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Orcs_Plus
@@ -78,18 +76,29 @@ namespace Orcs_Plus
             return false;
         }
 
+        public override void onBegin(Unit unit)
+        {
+            ModCore.GetComLib().ResetTrackedPerTurnChallengeProgress(this, unit);
+        }
+
         public override void turnTick(UA ua)
         {
             bool profile = ua.inner_profile > ua.inner_profileMin;
             bool menace = ua.inner_menace > ua.inner_menaceMin;
-            double progress = getProgressPerTurn(ua, null);
+
+            double progressMade = CommunityLib.ModCore.Get().CalculateScaledProgressPerTurn(this, ua, false, true);
+            if (progressMade <= 0.0)
+            {
+                return;
+            }
+
             if (profile)
             {
-                ua.addProfile(Math.Min(-map.param.ch_layLoweReductionPerTurnNonhuman * progress, ua.inner_profile - ua.inner_profileMin));
+                ua.addProfile(Math.Min(-map.param.ch_layLoweReductionPerTurnNonhuman * progressMade, ua.inner_profile - ua.inner_profileMin));
             }
             if (menace)
             {
-                ua.addMenace(Math.Min(-map.param.ch_layLoweReductionPerTurnNonhuman * progress, ua.inner_menace - ua.inner_menaceMin));
+                ua.addMenace(Math.Min(-map.param.ch_layLoweReductionPerTurnNonhuman * progressMade, ua.inner_menace - ua.inner_menaceMin));
             }
 
             if (!profile && !menace)
@@ -99,19 +108,19 @@ namespace Orcs_Plus
 
             if (ua.hp < ua.maxHp)
             {
-                ua.hp += Math.Min(ua.maxHp, (int)Math.Floor(1 * progress));
+                ua.hp += Math.Min(ua.maxHp, (int)Math.Floor(1 * progressMade));
             }
 
             if (ua.challengesSinceRest > 0)
             {
-                ua.challengesSinceRest -= Math.Max(0, (int)Math.Floor(1 * progress));
+                ua.challengesSinceRest -= Math.Max(0, (int)Math.Floor(1 * progressMade));
             }
 
             foreach (Minion minion in ua.minions)
             {
                 if (minion != null && minion.hp < minion.getMaxHP() && minion.getTags().FirstOrDefault(i => i == Tags.UNDEAD) == 0)
                 {
-                    minion.hp += Math.Min(minion.getMaxHP(), (int)Math.Floor(1 * progress));
+                    minion.hp += Math.Min(minion.getMaxHP(), (int)Math.Floor(1 * progressMade));
                 }
             }
         }

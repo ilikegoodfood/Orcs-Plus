@@ -135,13 +135,24 @@ namespace Orcs_Plus
             return ua is UAEN_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety == location.soc;
         }
 
+        public override void onBegin(Unit unit)
+        {
+            ModCore.GetComLib().ResetTrackedPerTurnChallengeProgress(this, unit);
+        }
+
         public override void turnTick(UA ua)
         {
             ua.addProfile(1);
             ua.addMenace(2);
 
-            double deltaShadow = this.shadowPush * getProgressPerTurnInner(ua, null);
-            double deltaGen = shadowGen * getProgressPerTurnInner(ua, null);
+            double progressMade = CommunityLib.ModCore.Get().CalculateScaledProgressPerTurn(this, ua, false, true);
+            if (progressMade <= 0.0)
+            {
+                return;
+            }
+
+            double deltaShadow = this.shadowPush * progressMade;
+            double deltaGen = shadowGen * progressMade;
 
             if (location.settlement.shadow < 1.0)
             {
