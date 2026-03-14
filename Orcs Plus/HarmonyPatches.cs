@@ -2818,9 +2818,11 @@ namespace Orcs_Plus
                 List<Location> targetLocations = new List<Location>();
                 Location targetLocation = null;
 
+                ModCore.Get().data.tryGetModIntegrationData("Cordyceps", out ModIntegrationData intDataCord);
+
                 if (orcCulture != null && orcCulture.tenet_god is H_Orcs_InsectileSymbiosis symbiosis && symbiosis.status < 0)
                 {
-                    if (ModCore.Get().data.tryGetModIntegrationData("Cordyceps", out ModIntegrationData intDataCord) && intDataCord.typeDict.TryGetValue("God", out Type cordycepsType))
+                    if (intDataCord != null && intDataCord.typeDict.TryGetValue("God", out Type cordycepsType))
                     {
                         if (um.map.overmind.god.GetType() == cordycepsType || um.map.overmind.god.GetType().IsSubclassOf(cordycepsType))
                         {
@@ -2865,20 +2867,27 @@ namespace Orcs_Plus
                                 }
                             }
                         }
-                        else if (loc.soc != um.society && um.society.getRel(loc.soc).state == DipRel.dipState.war)
+                        else if (loc.settlement != null)
                         {
-                            if (loc.settlement is SettlementHuman || loc.settlement is Set_OrcCamp)
+                            if (loc.soc != um.society && um.society.getRel(loc.soc).state == DipRel.dipState.war)
                             {
-                                int dist = um.map.getStepDist(um.location, loc);
-                                if (steps == -1 || dist <= steps)
+                                if (loc.settlement is SettlementHuman || loc.settlement is Set_OrcCamp)
                                 {
-                                    if (dist < steps)
+                                    int dist = um.map.getStepDist(um.location, loc);
+                                    if (steps == -1 || dist <= steps)
                                     {
-                                        targetLocations.Clear();
-                                    }
+                                        if (dist < steps)
+                                        {
+                                            targetLocations.Clear();
+                                        }
 
+                                        targetLocations.Add(loc);
+                                        steps = dist;
+                                    }
+                                }
+                                else if (intDataCord != null && intDataCord.typeDict.TryGetValue("Hive", out Type hiveType) && hiveType != null && hiveType.IsAssignableFrom(loc.settlement.GetType()))
+                                {
                                     targetLocations.Add(loc);
-                                    steps = dist;
                                 }
                             }
                         }
