@@ -37,7 +37,7 @@ namespace Orcs_Plus
 
         public override challengeStat getChallengeType()
         {
-            return challengeStat.OTHER;
+            return challengeStat.LORE;
         }
 
         public override int isGoodTernary()
@@ -95,9 +95,18 @@ namespace Orcs_Plus
 
         public override double getProgressPerTurnInner(UA unit, List<ReasonMsg> msgs)
         {
-            double val = 1.0;
-            msgs?.Add(new ReasonMsg("Base", val));
-            
+            double val = unit.getStatLore();
+
+            if (val < 1)
+            {
+                msgs?.Add(new ReasonMsg("Base", 1.0));
+                val = 1.0;
+            }
+            else
+            {
+                msgs?.Add(new ReasonMsg("Stat: Lore", val));
+            }
+
             return val;
         }
 
@@ -111,14 +120,24 @@ namespace Orcs_Plus
 
         public override double getComplexity()
         {
-            return 10.0;
+            return 40.0;
+        }
+
+        public override void onBegin(Unit unit)
+        {
+            ModCore.GetComLib().ResetTrackedPerTurnChallengeProgress(this, unit);
         }
 
         public override void turnTick(UA ua)
         {
             ua.addProfile(1);
             ua.addMenace(2);
-            
+
+            double progressMade = CommunityLib.ModCore.Get().CalculateScaledProgressPerTurn(this, ua, false, true);
+            if (progressMade <= 0.0)
+            {
+                return;
+            }
 
             SG_Orc orcSociety = ua.society as SG_Orc;
             HolyOrder_Orcs orcCulture = ua.society as HolyOrder_Orcs;
@@ -138,7 +157,7 @@ namespace Orcs_Plus
             Pr_Vinerva_Life life = location.properties.OfType<Pr_Vinerva_Life>().FirstOrDefault();
             if (life != null)
             {
-                life.influences.Add(new ReasonMsg("Tended by " + ua.getName(), 25.0));
+                life.influences.Add(new ReasonMsg("Tended by " + ua.getName(), 6.25 * progressMade));
 
                 if (life.charge >= 300.0)
                 {

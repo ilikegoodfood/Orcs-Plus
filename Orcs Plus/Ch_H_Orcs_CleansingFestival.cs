@@ -124,13 +124,24 @@ namespace Orcs_Plus
             return ua is UAEN_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety == location.soc;
         }
 
+        public override void onBegin(Unit unit)
+        {
+            ModCore.GetComLib().ResetTrackedPerTurnChallengeProgress(this, unit);
+        }
+
         public override void turnTick(UA ua)
         {
             ua.addProfile(1);
             ua.addMenace(-4);
 
-            double deltaShadow = shadowPull * getProgressPerTurnInner(ua, null);
-            double deltaPurge = shadowPurge * getProgressPerTurnInner(ua, null);
+            double progressMade = CommunityLib.ModCore.Get().CalculateScaledProgressPerTurn(this, ua, false, true);
+            if (progressMade <= 0.0)
+            {
+                return;
+            }
+
+            double deltaShadow = shadowPull * progressMade;
+            double deltaPurge = shadowPurge * progressMade;
 
             foreach (Location neighbour in location.getNeighbours())
             {
@@ -194,7 +205,7 @@ namespace Orcs_Plus
             {
                 if (unit is UA agent && !agent.isCommandable() && agent.person.shadow > 0.0)
                 {
-                    agent.person.shadow -= shadowPull * getProgressPerTurnInner(ua, null);
+                    agent.person.shadow -= deltaShadow;
 
                     if (agent.person.shadow < 0.0)
                     {
@@ -209,7 +220,7 @@ namespace Orcs_Plus
                 {
                     if (unit.homeLocation == location.index && unit is UA agent && !agent.isCommandable() && agent.person.shadow > 0.0)
                     {
-                        agent.person.shadow -= shadowPull * getProgressPerTurnInner(ua, null);
+                        agent.person.shadow -= deltaShadow;
 
                         if (agent.person.shadow < 0.0)
                         {

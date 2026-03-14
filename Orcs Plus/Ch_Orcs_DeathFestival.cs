@@ -116,13 +116,24 @@ namespace Orcs_Plus
             return ua is UAEN_OrcShaman;
         }
 
+        public override void onBegin(Unit unit)
+        {
+            ModCore.GetComLib().ResetTrackedPerTurnChallengeProgress(this, unit);
+        }
+
         public override void turnTick(UA ua)
         {
             ua.addProfile(1);
             ua.addMenace(2);
 
-            Property.addToProperty(getName(), Property.standardProperties.DEATH, deathRate * getProgressPerTurnInner(ua, null), location);
-            Property.addToProperty(getName(), Property.standardProperties.DEVASTATION, devastationRate * getProgressPerTurnInner(ua, null), location);
+            double progressMade = CommunityLib.ModCore.Get().CalculateScaledProgressPerTurn(this, ua, false, true);
+            if (progressMade <= 0.0)
+            {
+                return;
+            }
+
+            Property.addToProperty(getName(), Property.standardProperties.DEATH, deathRate * progressMade, location);
+            Property.addToProperty(getName(), Property.standardProperties.DEVASTATION, devastationRate * progressMade, location);
 
             Pr_Orcs_SacrificialSite site = ua.location.properties.OfType<Pr_Orcs_SacrificialSite>().FirstOrDefault();
             if (site != null)

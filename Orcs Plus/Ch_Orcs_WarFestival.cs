@@ -125,6 +125,11 @@ namespace Orcs_Plus
             return ua is UAEN_OrcShaman shaman && shaman.society is SG_Orc orcSociety && orcSociety == location.soc;
         }
 
+        public override void onBegin(Unit unit)
+        {
+            ModCore.GetComLib().ResetTrackedPerTurnChallengeProgress(this, unit);
+        }
+
         public override void turnTick(UA ua)
         {
             ua.addProfile(0.5);
@@ -137,7 +142,14 @@ namespace Orcs_Plus
 
             Pr_OrcishIndustry industry = location.properties.OfType<Pr_OrcishIndustry>().FirstOrDefault();
             double deltaIndustry = 0;
-            double val = industryConsumption * getProgressPerTurnInner(ua, null);
+
+            double progressMade = CommunityLib.ModCore.Get().CalculateScaledProgressPerTurn(this, ua, false, true);
+            if (progressMade <= 0.0)
+            {
+                return;
+            }
+
+            double val = industryConsumption * progressMade;
 
             if (industry != null && industry.charge > industryMin)
             {
@@ -160,7 +172,7 @@ namespace Orcs_Plus
                     Pr_OrcishIndustry industry2 = neighbour.properties.OfType<Pr_OrcishIndustry>().FirstOrDefault();
                     if (industry2 != null && industry2.charge > industryMin)
                     {
-                        val = industryConsumption * getProgressPerTurnInner(ua, null);
+                        val = industryConsumption * progressMade;
                         if (industry2.charge - val <= industryMin)
                         {
                             val = industry2.charge - industryMin;

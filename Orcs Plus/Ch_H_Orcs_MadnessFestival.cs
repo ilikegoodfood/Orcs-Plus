@@ -128,6 +128,7 @@ namespace Orcs_Plus
 
         public override void onBegin(Unit unit)
         {
+            ModCore.GetComLib().ResetTrackedPerTurnChallengeProgress(this, unit);
             madnessInflicted = 0.0;
         }
 
@@ -136,7 +137,13 @@ namespace Orcs_Plus
             ua.addProfile(1);
             ua.addMenace(2);
 
-            madnessInflicted += madnessRate * getProgressPerTurnInner(ua, null);
+            double progressMade = CommunityLib.ModCore.Get().CalculateScaledProgressPerTurn(this, ua, false, true);
+            if (progressMade <= 0.0)
+            {
+                return;
+            }
+
+            madnessInflicted += madnessRate * progressMade;
 
             if (madnessInflicted >= 1.0)
             {

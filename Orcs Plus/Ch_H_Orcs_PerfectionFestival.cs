@@ -161,10 +161,21 @@ namespace Orcs_Plus
             return ua is UAEN_OrcElder elder && elder.society is HolyOrder_Orcs orcCulture && orcCulture.orcSociety == location.soc;
         }
 
+        public override void onBegin(Unit unit)
+        {
+            ModCore.GetComLib().ResetTrackedPerTurnChallengeProgress(this, unit);
+        }
+
         public override void turnTick(UA ua)
         {
             ua.addProfile(2);
             ua.addMenace(4);
+
+            double progressMade = CommunityLib.ModCore.Get().CalculateScaledProgressPerTurn(this, ua, false, true);
+            if (progressMade <= 0.0)
+            {
+                return;
+            }
 
             Pr_Ophanim_Perfection perfection = location.properties.OfType<Pr_Ophanim_Perfection>().FirstOrDefault();
             if (perfection == null)
@@ -173,14 +184,14 @@ namespace Orcs_Plus
                 location.properties.Add(perfection);
             }
 
-            perfection.influences.Add(new ReasonMsg("Festival of Perfection", perfectionRate * getProgressPerTurnInner(ua, null)));
+            perfection.influences.Add(new ReasonMsg("Festival of Perfection", perfectionRate * progressMade));
 
             if (location.soc is SG_Orc orcSociety)
             {
                 orcSociety.menace += 0.5;
             }
 
-            ModCore.Get().TryAddInfluenceGain(location.soc as SG_Orc, new ReasonMsg(getName(), (ModCore.Get().data.influenceGain[ModData.influenceGainAction.RecieveGift] / 20) * getProgressPerTurnInner(ua, null)), true);
+            ModCore.Get().TryAddInfluenceGain(location.soc as SG_Orc, new ReasonMsg(getName(), (ModCore.Get().data.influenceGain[ModData.influenceGainAction.RecieveGift] / 20) * progressMade), true);
         }
 
         public override int[] buildPositiveTags()
