@@ -315,6 +315,16 @@ namespace Orcs_Plus
                                 Console.WriteLine("OrcsPlus: Failed to get Hive settlement Type (ShadowsInsectGod.Code.Set_Hive)");
                             }
 
+                            Type larvalType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.Pr_LarvalMass", false);
+                            if (larvalType != null)
+                            {
+                                intDataCord.typeDict.Add("LarvalMass", larvalType);
+                            }
+                            else
+                            {
+                                Console.WriteLine("CommunityLib: Failed to get Larval mass property Type (ShadowsInsectGod.Code.Pr_LarvalMass)");
+                            }
+
                             Type swarmType = intDataCord.assembly.GetType("ShadowsInsectGod.Code.SG_Swarm", false);
                             if (swarmType != null)
                             {
