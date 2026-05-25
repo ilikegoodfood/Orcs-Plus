@@ -107,23 +107,22 @@ namespace Orcs_Plus
                 {
                     if (other.unit.isCommandable())
                     {
-                        ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Took gold from plunder", -delta / 2), true);
+                        ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", delta / 2), true);
                     }
                     else if (!other.unit.society.isDark())
                     {
-                        ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Took gold from plunder", -delta / 2));
+                        ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", delta / 2));
                     }
                 }
-
-                if (delta < 0)
+                else if (delta < 0)
                 {
                     if (other.unit.isCommandable())
                     {
-                        ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", -delta / 2), true);
+                        ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Took gold from plunder", delta / 2), true);
                     }
                     else if (!other.unit.society.isDark())
                     {
-                        ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Gifted Gold", -delta / 2));
+                        ModCore.Get().TryAddInfluenceGain(orcCulture, new ReasonMsg("Took gold from plunder", delta / 2));
                     }
                 }
             }
